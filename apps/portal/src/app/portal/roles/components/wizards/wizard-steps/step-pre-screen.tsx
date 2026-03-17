@@ -239,9 +239,12 @@ export function StepPreScreen({ formData, onChange }: StepPreScreenProps) {
 
             <div className="space-y-4">
                 {formData.pre_screen_questions.length === 0 ? (
-                    <p className="text-base-content/40 text-sm font-semibold py-10 text-center border-2 border-dashed border-base-300">
-                        No screening questions yet. Add a question to filter candidates before they apply.
-                    </p>
+                    <div className="text-center py-10 border-2 border-dashed border-info/20 bg-info/5">
+                        <i className="fa-duotone fa-regular fa-clipboard-question text-2xl text-info/40 mb-2" />
+                        <p className="text-base-content/40 text-sm font-semibold">
+                            No screening questions yet. Add a question to filter candidates before they apply.
+                        </p>
+                    </div>
                 ) : (
                     formData.pre_screen_questions.map((question, idx) => (
                         <PreScreenQuestionCard

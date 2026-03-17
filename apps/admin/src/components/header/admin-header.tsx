@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { UserButton } from '@clerk/nextjs';
 import { ThemeToggle } from '@splits-network/basel-ui';
 import { Breadcrumbs } from './breadcrumbs';
@@ -34,6 +35,15 @@ export function AdminHeader({ onMobileMenuToggle }: AdminHeaderProps) {
             <div className="flex-1 min-w-0">
                 <Breadcrumbs />
             </div>
+
+            {/* Support chat */}
+            <Link
+                href="/secure/support-chat"
+                className="btn btn-ghost btn-sm btn-square"
+                title="Support Chat"
+            >
+                <i className="fa-duotone fa-regular fa-headset text-base-content/60" />
+            </Link>
 
             {/* Theme toggle */}
             <ThemeToggle size="sm" />

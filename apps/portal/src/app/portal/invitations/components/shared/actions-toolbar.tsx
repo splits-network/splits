@@ -63,13 +63,13 @@ export default function ActionsToolbar({
             });
 
             onRefresh?.();
-            toast.success("Invitation resent successfully");
+            toast.success("Invitation resent.");
         } catch (err: any) {
             console.error("Failed to resend invitation:", err);
             toast.error(
                 err.response?.data?.error ||
                     err.message ||
-                    "Failed to resend invitation",
+                    "Invitation couldn't be resent. Try again.",
             );
         } finally {
             setResending(false);
@@ -90,7 +90,7 @@ export default function ActionsToolbar({
             });
 
             onRefresh?.();
-            toast.success("Invitation cancelled");
+            toast.success("Invitation cancelled.");
         } catch (err: any) {
             console.error("Failed to cancel invitation:", err);
             toast.error(

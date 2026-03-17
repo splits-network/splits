@@ -32,10 +32,11 @@ export function StepRequirements({ formData, onChange }: StepRequirementsProps) 
             </div>
 
             {/* Mandatory */}
-            <div>
+            <div className="border-l-4 border-primary pl-4">
                 <div className="flex justify-between items-center mb-3">
                     <div>
-                        <h4 className="font-black text-sm uppercase tracking-wider">
+                        <h4 className="font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-shield-check text-primary" />
                             Mandatory Requirements
                         </h4>
                         <span className="text-sm text-base-content/50 font-semibold">
@@ -44,12 +45,12 @@ export function StepRequirements({ formData, onChange }: StepRequirementsProps) 
                     </div>
                     <button type="button" className="btn btn-primary btn-sm" onClick={addMandatory}>
                         <i className="fa-duotone fa-regular fa-plus mr-1" />
-                        Add Requirement
+                        Add
                     </button>
                 </div>
                 <div className="space-y-2">
                     {formData.mandatory_requirements.length === 0 ? (
-                        <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-base-300">
+                        <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-primary/20 bg-primary/5">
                             No requirements added. Use Add to create must-have criteria.
                         </p>
                     ) : (
@@ -71,24 +72,25 @@ export function StepRequirements({ formData, onChange }: StepRequirementsProps) 
             </div>
 
             {/* Preferred */}
-            <div>
+            <div className="border-l-4 border-secondary pl-4">
                 <div className="flex justify-between items-center mb-3">
                     <div>
-                        <h4 className="font-black text-sm uppercase tracking-wider">
+                        <h4 className="font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                            <i className="fa-duotone fa-regular fa-star text-secondary" />
                             Preferred Requirements
                         </h4>
                         <span className="text-sm text-base-content/50 font-semibold">
                             Nice-to-have qualifications
                         </span>
                     </div>
-                    <button type="button" className="btn btn-primary btn-sm" onClick={addPreferred}>
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={addPreferred}>
                         <i className="fa-duotone fa-regular fa-plus mr-1" />
-                        Add Requirement
+                        Add
                     </button>
                 </div>
                 <div className="space-y-2">
                     {formData.preferred_requirements.length === 0 ? (
-                        <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-base-300">
+                        <p className="text-base-content/40 text-sm font-semibold py-6 text-center border-2 border-dashed border-secondary/20 bg-secondary/5">
                             No preferred requirements. Use Add to list nice-to-have qualifications.
                         </p>
                     ) : (

@@ -73,7 +73,7 @@ async function main() {
                 placement_id: placement.id,
                 previous_status: placement.state,
                 new_status: 'completed',
-                changed_by: 'system',
+                changed_by: '00000000-0000-0000-0000-000000000000',
             });
 
             completed++;

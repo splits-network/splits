@@ -19,6 +19,7 @@ type AdminRealtimeConfig = {
 type ExtendedSocket = WebSocket & {
     isAlive: boolean;
     lastPong: number;
+    adminClerkUserId?: string;
 };
 
 const logger = createLogger({ serviceName: 'admin-gateway' });
@@ -95,6 +96,8 @@ function startHeartbeat(wss: WebSocketServer): NodeJS.Timeout {
 
 // ── Main setup ──
 
+const SUPPORT_PRESENCE_TTL_SECONDS = 90;
+
 export function setupRealtimeServer(
     server: http.Server,
     config: AdminRealtimeConfig,
@@ -152,6 +155,8 @@ export function setupRealtimeServer(
                 return;
             }
 
+            socket.adminClerkUserId = auth.clerkUserId;
+
             socket.send(JSON.stringify({
                 type: 'hello',
                 serverTime: new Date().toISOString(),
@@ -178,12 +183,42 @@ export function setupRealtimeServer(
                             await subscribeChannel(prefixed, socket, redisSub);
                         }
                     }
+
+                    // Support presence ping — refreshes admin's support presence TTL
+                    if (parsed.type === 'support.presence.ping' && socket.adminClerkUserId) {
+                        await redis.setex(
+                            `presence:support-admin:${socket.adminClerkUserId}`,
+                            SUPPORT_PRESENCE_TTL_SECONDS,
+                            JSON.stringify({ status: 'online', lastSeenAt: new Date().toISOString() }),
+                        );
+                        // Notify visitors that admin is online
+                        await redis.publish('support:admin-presence', JSON.stringify({
+                            type: 'admin.presence',
+                            eventVersion: 1,
+                            serverTime: new Date().toISOString(),
+                            data: { online: true },
+                        }));
+                    }
                 } catch (err) {
                     logger.warn({ err }, 'Failed to handle admin realtime message');
                 }
             });
 
             socket.on('close', async () => {
+                // Clean up support admin presence on disconnect
+                if (socket.adminClerkUserId) {
+                    await redis.del(`presence:support-admin:${socket.adminClerkUserId}`);
+                    // Check if any other admins are still online
+                    const remainingKeys = await redis.keys('presence:support-admin:*');
+                    if (remainingKeys.length === 0) {
+                        await redis.publish('support:admin-presence', JSON.stringify({
+                            type: 'admin.presence',
+                            eventVersion: 1,
+                            serverTime: new Date().toISOString(),
+                            data: { online: false },
+                        }));
+                    }
+                }
                 await unsubscribeSocket(socket, redisSub);
             });
         } catch (error) {

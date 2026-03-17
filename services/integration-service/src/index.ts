@@ -13,6 +13,7 @@ import { getCryptoService } from "@splits-network/shared-config/src/crypto";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import {
     EventPublisher,
     OutboxPublisher,
@@ -145,6 +146,13 @@ async function main() {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         rabbitMqUrl: rabbitConfig.url,
+        eventPublisher: outboxPublisher,
+        logger,
+        crypto,
+    });
+
+    registerV3Routes(app, {
+        supabase: supabaseClient,
         eventPublisher: outboxPublisher,
         logger,
         crypto,

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Splits Network — ShakeUp Giveaway</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #f59e0b;
+    --gold-light: #fbbf24;
+    --bg: #09090b;
+    --surface: #18181b;
+    --text: #fafafa;
+    --text-dim: #a1a1aa;
+    --electric: #6366f1;
+    --electric-glow: rgba(99, 102, 241, 0.5);
+    --hot: #ef4444;
+    --teal: #14b8a6;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    width: 1080px;
+    height: 1920px;
+  }
+
+  .flash {
+    position: fixed; inset: 0; background: white; z-index: 99990;
+    opacity: 0; pointer-events: none;
+  }
+  .flash.bang { animation: flashBang 0.2s ease-out; }
+  @keyframes flashBang { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+  .progress-bar {
+    position: fixed; bottom: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--electric), var(--gold));
+    z-index: 99999; transition: width 0.3s;
+  }
+
+  .scene {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; z-index: 10;
+    padding: 60px;
+  }
+  .scene.active { opacity: 1; pointer-events: auto; }
+
+  /* Shared text animations */
+  .slam {
+    opacity: 0;
+    transform: scale(4) rotate(-5deg);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .slam.in { opacity: 1; transform: scale(1) rotate(0); }
+
+  .slide-up {
+    opacity: 0;
+    transform: translateY(80px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .slide-up.in { opacity: 1; transform: translateY(0); }
+
+  .slide-left {
+    opacity: 0;
+    transform: translateX(200px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .slide-left.in { opacity: 1; transform: translateX(0); }
+
+  .fade-in {
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .fade-in.in { opacity: 1; }
+
+  .shake {
+    animation: shakeIt 0.5s ease-in-out;
+  }
+  @keyframes shakeIt {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    10% { transform: translateX(-12px) rotate(-1deg); }
+    20% { transform: translateX(12px) rotate(1deg); }
+    30% { transform: translateX(-10px) rotate(-1deg); }
+    40% { transform: translateX(10px) rotate(1deg); }
+    50% { transform: translateX(-6px) rotate(0); }
+    60% { transform: translateX(6px) rotate(0); }
+    70% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+    90% { transform: translateX(-1px); }
+  }
+
+  /* ===== Scene 1: Attention grab ===== */
+  .attention-text {
+    font-size: 130px;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.95;
+    text-align: center;
+  }
+
+  /* ===== Scene 2: Free callout ===== */
+  .free-tag {
+    font-size: 200px;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 80px rgba(245,158,11,0.4);
+    letter-spacing: -0.04em;
+  }
+  .months-tag {
+    font-size: 100px;
+    font-weight: 900;
+    color: var(--text);
+    margin-top: -20px;
+  }
+  .plan-tag {
+    font-size: 60px;
+    font-weight: 700;
+    color: var(--electric);
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+  .value-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-top: 30px;
+    text-decoration: line-through;
+    text-decoration-color: var(--hot);
+    text-decoration-thickness: 4px;
+  }
+  .value-actual {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-top: 10px;
+  }
+
+  /* ===== Scene: What you get ===== */
+  .perk-item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 32px;
+    font-weight: 700;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    width: 100%;
+    max-width: 900px;
+  }
+  .perk-item .check {
+    width: 52px;
+    height: 52px;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    color: var(--bg);
+    font-weight: 900;
+  }
+  .perk-item .perk-label span {
+    color: var(--gold);
+  }
+
+  /* ===== Scene: Steps ===== */
+  .step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 40px;
+  }
+  .step-num {
+    width: 80px;
+    height: 80px;
+    background: var(--electric);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .step-content h3 {
+    font-size: 36px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+  .step-content p {
+    font-size: 24px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .step-content .highlight-url {
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+  .step-content .highlight-email {
+    color: var(--electric);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  /* ===== Scene: Urgency ===== */
+  .urgency-line {
+    font-size: 52px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .urgency-sub {
+    font-size: 30px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.5;
+  }
+
+  /* ===== Scene: CTA finale ===== */
+  .cta-logo {
+    font-size: 72px;
+    font-weight: 900;
+    margin-bottom: 30px;
+  }
+  .cta-logo .gold { color: var(--gold); }
+  .cta-email-box {
+    background: var(--surface);
+    border: 3px solid var(--electric);
+    padding: 35px 60px;
+    text-align: center;
+    margin: 30px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-email-label {
+    font-size: 22px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+  .cta-email-addr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--electric);
+  }
+  .cta-bottom-text {
+    font-size: 28px;
+    color: var(--text-dim);
+    margin-top: 30px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .cta-bottom-text strong {
+    color: var(--gold);
+    font-weight: 900;
+  }
+
+  /* Floating elements */
+  .float-emoji {
+    position: fixed; font-size: 50px; pointer-events: none; z-index: 9990;
+    animation: floatUp 2.5s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(-500px) rotate(720deg) scale(0); }
+  }
+
+  .explosion-particle {
+    position: fixed; width: 6px; height: 6px; pointer-events: none; z-index: 9999;
+    animation: explode 0.8s ease-out forwards;
+  }
+  @keyframes explode {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+  }
+
+  /* Pulsing glow behind key scenes */
+  .glow-bg {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    filter: blur(150px);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  .glow-bg.on { opacity: 0.3; }
+  .glow-gold { background: var(--gold); top: 30%; left: 50%; transform: translate(-50%, -50%); }
+  .glow-electric { background: var(--electric); top: 60%; left: 50%; transform: translate(-50%, -50%); }
+
+  /* Stripe accents */
+  .stripe-accent {
+    position: fixed;
+    height: 6px;
+    background: var(--gold);
+    z-index: 5;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .stripe-accent.on {
+    opacity: 1;
+  }
+
+  /* Ticker tape */
+  .ticker {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 200%;
+    display: flex;
+    gap: 40px;
+    z-index: 8;
+    animation: tickerScroll 8s linear infinite;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .ticker.on { opacity: 0.15; }
+  .ticker span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+  @keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+</style>
+</head>
+<body>
+
+<div class="flash" id="flash"></div>
+<div class="progress-bar" id="progress" style="width: 0%"></div>
+<div class="glow-bg glow-gold" id="glowGold"></div>
+<div class="glow-bg glow-electric" id="glowElectric"></div>
+
+<div class="stripe-accent" id="stripe1" style="top: 200px; left: -100%; width: 150%;"></div>
+<div class="stripe-accent" id="stripe2" style="top: 1700px; right: -100%; width: 150%; background: var(--electric);"></div>
+
+<div class="ticker" id="ticker">
+  <span>6 months free</span><span>partner plan</span><span>ShakeUp@Splits.Network</span>
+  <span>$1,494 value</span><span>limited spots</span><span>qualifying recruiters</span>
+  <span>6 months free</span><span>partner plan</span><span>ShakeUp@Splits.Network</span>
+  <span>$1,494 value</span><span>limited spots</span><span>qualifying recruiters</span>
+  <span>6 months free</span><span>partner plan</span><span>ShakeUp@Splits.Network</span>
+  <span>$1,494 value</span><span>limited spots</span><span>qualifying recruiters</span>
+</div>
+
+<!-- ===== SCENES ===== -->
+
+<!-- 1: Hook - stop scroll -->
+<div class="scene" id="scene-hook">
+  <div>
+    <div class="attention-text slam" id="hook1" style="color:var(--hot);">STOP.</div>
+    <div class="attention-text slam" id="hook2" style="margin-top:30px;">THIS IS</div>
+    <div class="attention-text slam" id="hook3" style="color:var(--gold); margin-top:10px;">NOT A DRILL.</div>
+  </div>
+</div>
+
+<!-- 2: The offer -->
+<div class="scene" id="scene-offer">
+  <div style="text-align:center;">
+    <div class="free-tag slam" id="offer1">FREE</div>
+    <div class="months-tag slam" id="offer2">6 MONTHS</div>
+    <div class="plan-tag slide-up" id="offer3">PARTNER PLAN</div>
+    <div class="value-tag slide-up" id="offer4">$249/mo &times; 6 = $1,494</div>
+    <div class="value-actual slam" id="offer5">$0</div>
+  </div>
+</div>
+
+<!-- 3: Who is this for -->
+<div class="scene" id="scene-who">
+  <div style="text-align:center; width:100%;">
+    <div class="attention-text slide-up" id="who1" style="font-size:80px; margin-bottom:50px;">FOR <span style="color:var(--electric);">RECRUITERS</span><br>WHO ARE<br><span style="color:var(--gold);">READY TO LEVEL UP.</span></div>
+    <div class="slide-up" id="who2" style="font-size:30px; color:var(--text-dim); line-height:1.6; max-width:800px; margin:0 auto;">
+      Whether you're independent, part of a firm, or just getting started &mdash; if you're serious about recruiting, this is for you.
+    </div>
+  </div>
+</div>
+
+<!-- 4: What you get -->
+<div class="scene" id="scene-perks">
+  <div style="text-align:center; margin-bottom:40px;">
+    <div style="font-size:50px; font-weight:900;">What You Get</div>
+    <div style="font-size:26px; color:var(--text-dim); margin-top:10px;">6 months of our top-tier plan. Everything unlocked.</div>
+  </div>
+  <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+    <div class="perk-item slide-left" id="perk1">
+      <div class="check">&#x2713;</div>
+      <div class="perk-label"><span>Maximum payout bonuses</span> on every placement</div>
+    </div>
+    <div class="perk-item slide-left" id="perk2">
+      <div class="check">&#x2713;</div>
+      <div class="perk-label"><span>Priority &amp; exclusive early</span> role access</div>
+    </div>
+    <div class="perk-item slide-left" id="perk3">
+      <div class="check">&#x2713;</div>
+      <div class="perk-label"><span>AI Match Scoring</span> &amp; <span>AI Call Summaries</span></div>
+    </div>
+    <div class="perk-item slide-left" id="perk4">
+      <div class="check">&#x2713;</div>
+      <div class="perk-label"><span>Unlimited</span> candidates, roles &amp; messaging</div>
+    </div>
+    <div class="perk-item slide-left" id="perk5">
+      <div class="check">&#x2713;</div>
+      <div class="perk-label"><span>Firm &amp; team management</span> tools</div>
+    </div>
+    <div class="perk-item slide-left" id="perk6">
+      <div class="check">&#x2713;</div>
+      <div class="perk-label"><span>Dedicated account manager</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5: How to qualify -->
+<div class="scene" id="scene-steps">
+  <div style="text-align:center; margin-bottom:50px;">
+    <div style="font-size:50px; font-weight:900;">How to <span style="color:var(--gold);">Qualify</span></div>
+    <div style="font-size:26px; color:var(--text-dim); margin-top:10px;">Two steps. That's it.</div>
+  </div>
+  <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+    <div class="step-row slide-up" id="step1">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Create Your Profile</h3>
+        <p>Sign up and build your recruiter profile at <span class="highlight-url">splits.network</span></p>
+      </div>
+    </div>
+    <div class="step-row slide-up" id="step2">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Email Us</h3>
+        <p>Send an email to <span class="highlight-email">ShakeUp@Splits.Network</span> and tell us why you're ready</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-up" id="step3" style="margin-top:30px; font-size:26px; color:var(--text-dim); text-align:center; max-width:800px; line-height:1.5;">
+    We review every submission. Qualifying recruiters get <strong style="color:var(--gold);">6 months of Partner</strong> completely free.
+  </div>
+</div>
+
+<!-- 6: Urgency -->
+<div class="scene" id="scene-urgency">
+  <div>
+    <div class="urgency-line slam" id="urg1" style="color:var(--hot);">LIMITED SPOTS.</div>
+    <div class="urgency-line slam" id="urg2" style="margin-top:30px;">DON'T SIT<br>ON THIS.</div>
+    <div class="urgency-sub fade-in" id="urg3">
+      This is a real opportunity to access<br>
+      <strong style="color:var(--gold); font-size:36px;">$1,494 in tools</strong><br>
+      for free. Don't let it pass.
+    </div>
+  </div>
+</div>
+
+<!-- 7: CTA -->
+<div class="scene" id="scene-cta">
+  <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+    <div class="cta-logo slide-up" id="cta1">splits<span class="gold">.network</span></div>
+    <div class="slide-up" id="cta2" style="font-size:56px; font-weight:900; text-align:center; margin-bottom:20px;">
+      6 Months Free.<br><span style="color:var(--gold);">Partner Plan.</span>
+    </div>
+    <div class="slide-up" id="cta3" style="font-size:30px; color:var(--text-dim); text-align:center; margin-bottom:40px;">
+      Create your profile. Email us. It's that simple.
+    </div>
+    <div class="cta-email-box slide-up" id="cta4">
+      <div class="cta-email-label">Email to qualify</div>
+      <div class="cta-email-addr">ShakeUp@Splits.Network</div>
+    </div>
+    <div class="cta-bottom-text fade-in" id="cta5">
+      Sign up at <strong>splits.network</strong><br>
+      then email <strong style="color:var(--electric);">ShakeUp@Splits.Network</strong>
+    </div>
+  </div>
+</div>
+
+<script>
+const W = 1080, H = 1920;
+const $ = id => document.getElementById(id);
+
+let currentScene = null;
+function showScene(id) {
+  if (currentScene) currentScene.classList.remove('active');
+  const s = $(id);
+  s.classList.add('active');
+  currentScene = s;
+}
+
+function flash() {
+  const f = $('flash');
+  f.classList.remove('bang');
+  void f.offsetWidth;
+  f.classList.add('bang');
+}
+
+function explosion(x, y, count = 30) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'explosion-particle';
+    const angle = (Math.PI * 2 * i) / count;
+    const dist = 150 + Math.random() * 300;
+    const hue = 30 + Math.random() * 30; // gold-ish
+    p.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(angle)*dist}px;--dy:${Math.sin(angle)*dist}px;background:hsl(${hue},90%,55%);`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+}
+
+function explosionPurple(x, y, count = 30) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'explosion-particle';
+    const angle = (Math.PI * 2 * i) / count;
+    const dist = 150 + Math.random() * 300;
+    p.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(angle)*dist}px;--dy:${Math.sin(angle)*dist}px;background:hsl(${240+Math.random()*30},80%,60%);`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+}
+
+function spawnEmoji(emoji, x, y) {
+  const el = document.createElement('div');
+  el.className = 'float-emoji';
+  el.textContent = emoji;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+
+function setProgress(pct) { $('progress').style.width = pct + '%'; }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function anim(id) { $(id).classList.add('in'); }
+
+async function runShow() {
+  window.__showStarted = true;
+
+  // ===== HOOK =====
+  setProgress(0);
+  showScene('scene-hook');
+  await sleep(400);
+  anim('hook1');
+  flash();
+  await sleep(600);
+  anim('hook2');
+  await sleep(500);
+  anim('hook3');
+  flash();
+  explosion(W/2, H*0.45, 30);
+  await sleep(800);
+  // shake the whole scene
+  currentScene.classList.add('shake');
+  await sleep(500);
+  currentScene.classList.remove('shake');
+  await sleep(1200);
+
+  // ===== THE OFFER =====
+  setProgress(14);
+  flash();
+  showScene('scene-offer');
+  $('glowGold').classList.add('on');
+  await sleep(300);
+  anim('offer1');
+  flash();
+  explosion(W/2, H*0.35, 40);
+  await sleep(600);
+  anim('offer2');
+  await sleep(500);
+  anim('offer3');
+  await sleep(700);
+  anim('offer4');
+  await sleep(800);
+  anim('offer5');
+  flash();
+  explosion(W/2, H*0.65, 35);
+  for (let i = 0; i < 20; i++) {
+    spawnEmoji(['\u{1F4B0}','\u{1FA99}','\u{1F389}','\u2728','\u{1F525}'][Math.floor(Math.random()*5)],
+      Math.random() * W, Math.random() * H * 0.8);
+  }
+  await sleep(2500);
+  $('glowGold').classList.remove('on');
+
+  // ===== WHO IS THIS FOR =====
+  setProgress(28);
+  flash();
+  showScene('scene-who');
+  $('glowElectric').classList.add('on');
+  await sleep(400);
+  anim('who1');
+  await sleep(1200);
+  anim('who2');
+  await sleep(2500);
+  $('glowElectric').classList.remove('on');
+
+  // ===== WHAT YOU GET =====
+  setProgress(42);
+  flash();
+  showScene('scene-perks');
+  $('ticker').classList.add('on');
+  await sleep(600);
+  for (let i = 1; i <= 6; i++) {
+    anim('perk' + i);
+    await sleep(700);
+  }
+  await sleep(2000);
+
+  // ===== HOW TO QUALIFY =====
+  setProgress(60);
+  flash();
+  showScene('scene-steps');
+  $('stripe1').classList.add('on');
+  $('stripe2').classList.add('on');
+  await sleep(500);
+  anim('step1');
+  await sleep(1200);
+  anim('step2');
+  explosionPurple(W*0.15, H*0.55, 20);
+  await sleep(1200);
+  anim('step3');
+  await sleep(2500);
+  $('stripe1').classList.remove('on');
+  $('stripe2').classList.remove('on');
+
+  // ===== URGENCY =====
+  setProgress(78);
+  flash();
+  showScene('scene-urgency');
+  await sleep(300);
+  anim('urg1');
+  flash();
+  currentScene.classList.add('shake');
+  await sleep(500);
+  currentScene.classList.remove('shake');
+  anim('urg2');
+  await sleep(1000);
+  anim('urg3');
+  await sleep(2500);
+
+  // ===== CTA FINALE =====
+  setProgress(100);
+  flash();
+  flash();
+  showScene('scene-cta');
+  $('glowGold').classList.add('on');
+  $('glowElectric').classList.add('on');
+  $('ticker').classList.add('on');
+  await sleep(400);
+  anim('cta1');
+  await sleep(600);
+  anim('cta2');
+  explosion(W/2, H*0.35, 40);
+  await sleep(800);
+  anim('cta3');
+  await sleep(600);
+  anim('cta4');
+  explosionPurple(W/2, H*0.6, 30);
+  await sleep(1000);
+  anim('cta5');
+
+  // Emoji celebration
+  const emojiIv = setInterval(() => {
+    spawnEmoji(['\u{1F4B0}','\u2728','\u{1F525}','\u{1F389}','\u{1FA99}','\u26A1'][Math.floor(Math.random()*6)],
+      Math.random() * W, H);
+  }, 250);
+
+  const expIv = setInterval(() => {
+    explosion(Math.random() * W, Math.random() * H, 6);
+  }, 1500);
+
+  await sleep(6000);
+  clearInterval(emojiIv);
+  clearInterval(expIv);
+
+  window.__showDone = true;
+}
+
+// Auto-start
+setTimeout(() => runShow(), 500);
+</script>
+</body>
+</html>

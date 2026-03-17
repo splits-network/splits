@@ -8,6 +8,7 @@ import type {
     MatchStatus,
     MatchFactors,
 } from "@splits-network/shared-types";
+import type { BaselSemanticColor, BaselSortOption } from "@splits-network/basel-ui";
 
 export type { EnrichedMatch, MatchTier, MatchStatus, MatchFactors };
 
@@ -17,7 +18,69 @@ export interface MatchFilters {
     match_tier?: MatchTier;
     status?: MatchStatus;
     min_score?: number;
+    salary_overlap?: string;
+    location_compatible?: string;
+    employment_type_match?: string;
+    job_level_match?: string;
+    availability_compatible?: string;
+    invite_status?: string;
 }
+
+export const MATCH_TIER_LABELS: Record<string, string> = {
+    standard: "Standard",
+    true: "True Score",
+};
+
+export const MATCH_STATUS_LABELS: Record<string, string> = {
+    active: "Active",
+    dismissed: "Dismissed",
+    applied: "Applied",
+};
+
+export const MATCH_SCORE_LABELS: Record<string, string> = {
+    "40": "40+ Worth Reviewing",
+    "55": "55+ Promising",
+    "70": "70+ Strong",
+    "85": "85+ Excellent",
+};
+
+export const SALARY_OVERLAP_LABELS: Record<string, string> = {
+    yes: "Salary Aligned",
+    no: "Salary Mismatch",
+};
+
+export const LOCATION_COMPATIBLE_LABELS: Record<string, string> = {
+    yes: "Location Compatible",
+    no: "Location Mismatch",
+};
+
+export const EMPLOYMENT_TYPE_MATCH_LABELS: Record<string, string> = {
+    yes: "Type Match",
+    no: "Type Mismatch",
+};
+
+export const JOB_LEVEL_MATCH_LABELS: Record<string, string> = {
+    yes: "Level Match",
+    no: "Level Mismatch",
+};
+
+export const AVAILABILITY_COMPATIBLE_LABELS: Record<string, string> = {
+    yes: "Available",
+    no: "Unavailable",
+};
+
+export const INVITE_STATUS_LABELS: Record<string, string> = {
+    sent: "Invited",
+    denied: "Denied",
+    applied: "Applied",
+    not_invited: "Not Invited",
+};
+
+export const MATCH_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "overall_score", label: "Match Score" },
+    { value: "created_at", label: "Date Created" },
+    { value: "generated_at", label: "Generated Date" },
+];
 
 /* ── Display helpers ── */
 
@@ -72,16 +135,16 @@ export function timeAgoMatch(date: string | null | undefined): string {
 
 /* ── Status color helper ── */
 
-export function matchStatusColor(status?: string): string {
+export function matchStatusBadgeColor(status?: string): BaselSemanticColor {
     switch (status) {
         case "active":
-            return "bg-success/15 text-success";
+            return "success";
         case "dismissed":
-            return "bg-error/15 text-error";
+            return "error";
         case "applied":
-            return "bg-info/15 text-info";
+            return "info";
         default:
-            return "bg-base-content/15 text-base-content/50";
+            return "neutral";
     }
 }
 
@@ -92,15 +155,8 @@ export function formatMatchStatus(status?: string): string {
 
 /* ── Tier badge helper ── */
 
-export function tierBadgeClass(tier: MatchTier): string {
-    switch (tier) {
-        case "true":
-            return "bg-primary/15 text-primary";
-        case "standard":
-            return "bg-base-content/10 text-base-content/60";
-        default:
-            return "bg-base-content/10 text-base-content/60";
-    }
+export function tierBadgeColor(tier: MatchTier): BaselSemanticColor {
+    return tier === "true" ? "primary" : "neutral";
 }
 
 export function tierLabel(tier: MatchTier): string {

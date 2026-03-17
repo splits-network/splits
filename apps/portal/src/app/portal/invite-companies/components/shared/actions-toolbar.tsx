@@ -55,9 +55,9 @@ export default function InvitationActionsToolbar({
     const handleCopyCode = useCallback(async () => {
         try {
             await navigator.clipboard.writeText(invitation.invite_code);
-            toast.success("Invite code copied to clipboard");
+            toast.info("Code copied to clipboard.");
         } catch {
-            toast.error("Failed to copy code");
+            toast.error("Couldn't copy to clipboard. Try selecting the text manually.");
         }
     }, [invitation.invite_code, toast]);
 
@@ -65,9 +65,9 @@ export default function InvitationActionsToolbar({
         const link = getInviteLink(invitation);
         try {
             await navigator.clipboard.writeText(link);
-            toast.success("Invite link copied to clipboard");
+            toast.info("Link copied to clipboard.");
         } catch {
-            toast.error("Failed to copy link");
+            toast.error("Couldn't copy to clipboard. Try selecting the text manually.");
         }
     }, [invitation, toast]);
 
@@ -89,9 +89,9 @@ export default function InvitationActionsToolbar({
             const message = `${shareData.text}\n\n${link}`;
             try {
                 await navigator.clipboard.writeText(message);
-                toast.success("Invitation message copied to clipboard");
+                toast.info("Message copied to clipboard.");
             } catch {
-                toast.error("Failed to copy message");
+                toast.error("Couldn't copy to clipboard. Try selecting the text manually.");
             }
         }
     }, [invitation, toast]);
@@ -103,11 +103,11 @@ export default function InvitationActionsToolbar({
             if (!token) return;
             const client = createAuthenticatedClient(token);
             await client.post(`/company-invitations/${invitation.id}/resend`);
-            toast.success("Invitation email resent");
+            toast.success("Invitation resent.");
         } catch (e: any) {
             toast.error(
                 e?.response?.data?.error?.message ||
-                    "Failed to resend invitation",
+                    "Invitation couldn't be resent. Try again.",
             );
         } finally {
             setResending(false);
@@ -127,12 +127,12 @@ export default function InvitationActionsToolbar({
             if (!token) return;
             const client = createAuthenticatedClient(token);
             await client.patch(`/company-invitations/${invitation.id}/revoke`);
-            toast.success("Invitation revoked");
+            toast.success("Invitation revoked.");
             refresh();
         } catch (e: any) {
             toast.error(
                 e?.response?.data?.error?.message ||
-                    "Failed to revoke invitation",
+                    "Invitation couldn't be revoked. Try again.",
             );
         } finally {
             setRevoking(false);

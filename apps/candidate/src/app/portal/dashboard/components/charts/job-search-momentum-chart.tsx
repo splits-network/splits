@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors, BaselTooltip } from "@/components/basel/charts";
+import { GaugeChart } from "@splits-network/shared-charts";
 
 interface JobSearchMomentumChartProps {
     recentActivityCount: number;
@@ -18,7 +17,6 @@ interface Segment {
     score: number;
     max: 25;
     icon: string;
-    colorKey: "primary" | "success" | "accent" | "secondary";
 }
 
 function calculateActivityScore(recentApps: number): number {
@@ -45,7 +43,6 @@ function calculateEngagementScore(recruiters: number): number {
     return 25;
 }
 
-// Static Tailwind classes for legend (build-time safe)
 const SEGMENT_TEXT_COLORS = [
     "text-primary",
     "text-success",
@@ -72,8 +69,6 @@ export default function JobSearchMomentumChart({
     activeRecruiters,
     loading,
 }: JobSearchMomentumChartProps) {
-    const colors = useBaselChartColors();
-
     const segments: Segment[] = useMemo(
         () => [
             {
@@ -81,36 +76,27 @@ export default function JobSearchMomentumChart({
                 score: calculateActivityScore(recentActivityCount),
                 max: 25,
                 icon: "fa-bolt",
-                colorKey: "primary",
             },
             {
                 label: "Advancement",
                 score: calculateAdvancementScore(responseRate),
                 max: 25,
                 icon: "fa-arrow-trend-up",
-                colorKey: "success",
             },
             {
                 label: "Profile",
                 score: calculateProfileScore(profileCompletion),
                 max: 25,
                 icon: "fa-user-check",
-                colorKey: "accent",
             },
             {
                 label: "Engagement",
                 score: calculateEngagementScore(activeRecruiters),
                 max: 25,
                 icon: "fa-handshake",
-                colorKey: "secondary",
             },
         ],
-        [
-            recentActivityCount,
-            responseRate,
-            profileCompletion,
-            activeRecruiters,
-        ],
+        [recentActivityCount, responseRate, profileCompletion, activeRecruiters],
     );
 
     const totalScore = useMemo(
@@ -118,87 +104,28 @@ export default function JobSearchMomentumChart({
         [segments],
     );
 
-    const chartData = useMemo(
-        () =>
-            segments.map((s) => ({
-                name: s.label,
-                value: s.score,
-                color: colors[s.colorKey],
-            })),
-        [segments, colors],
-    );
-
     if (loading) {
-        return (
-            <div className="bg-base-200 p-8 h-full">
-                <ChartLoadingState height={280} />
-            </div>
-        );
+        return <ChartLoadingState height={280} />;
     }
 
     const hasAnyData = totalScore > 0;
 
     return (
-        <div className="bg-base-200 p-8 h-full flex flex-col">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-primary/10 flex items-center justify-center">
-                    <i className="fa-duotone fa-regular fa-gauge-high text-primary" />
-                </div>
-                <div>
-                    <h3 className="text-lg font-bold text-base-content">
-                        Job Search Momentum
-                    </h3>
-                    <p className="text-sm text-base-content/50">
-                        Your search health score
-                    </p>
-                </div>
-            </div>
-
+        <div className="flex flex-col h-full">
             {hasAnyData ? (
                 <>
-                    {/* Chart with center score */}
-                    <div className="relative h-[160px] flex-shrink-0">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={chartData}
-                                    dataKey="value"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={70}
-                                    innerRadius={50}
-                                    strokeWidth={1}
-                                    stroke={colors.base100}
-                                    cornerRadius={0}
-                                >
-                                    {chartData.map((entry, i) => (
-                                        <Cell key={i} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    content={
-                                        <BaselTooltip
-                                            formatter={(value, name) =>
-                                                `${value}/25`
-                                            }
-                                        />
-                                    }
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <div className="text-3xl font-black text-base-content">
-                                {totalScore}
-                            </div>
-                            <div className="text-sm text-base-content/40 font-bold uppercase tracking-widest">
-                                / 100
-                            </div>
-                        </div>
+                    {/* Gauge chart showing overall score */}
+                    <div className="flex-shrink-0">
+                        <GaugeChart
+                            value={totalScore}
+                            max={100}
+                            label="Momentum"
+                            height={160}
+                        />
                     </div>
 
                     {/* Legend with mini progress bars */}
-                    <div className="mt-4 space-y-2.5 flex-1">
+                    <div className="mt-2 space-y-2.5 flex-1">
                         {segments.map((seg, idx) => (
                             <div
                                 key={seg.label}
@@ -212,7 +139,7 @@ export default function JobSearchMomentumChart({
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between text-xs">
+                                    <div className="flex items-center justify-between text-sm">
                                         <span className="text-base-content/60 font-semibold uppercase tracking-wider">
                                             {seg.label}
                                         </span>
@@ -243,7 +170,7 @@ export default function JobSearchMomentumChart({
                     <p className="text-sm font-semibold text-base-content/60">
                         Start your momentum
                     </p>
-                    <p className="text-xs text-base-content/40 mt-1">
+                    <p className="text-sm text-base-content/40 mt-1">
                         Apply to jobs to build your search score
                     </p>
                 </div>

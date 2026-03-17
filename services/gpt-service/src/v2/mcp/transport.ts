@@ -18,13 +18,32 @@ import { extractMcpAuth, McpAuthError } from './auth';
  * Creates a new StreamableHTTPServerTransport + McpServer per session.
  * Stateful mode: server generates session IDs, requests are validated.
  */
+// Session idle timeout: 30 minutes
+const SESSION_TTL_MS = 30 * 60 * 1000;
+// Cleanup sweep interval: every 5 minutes
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+
 export function registerMcpRoutes(app: FastifyInstance, deps: McpServerDeps) {
-    // Map of sessionId → { transport, setAuth }
+    // Map of sessionId → { transport, setAuth, lastActivity }
     const sessions = new Map<string, {
         transport: StreamableHTTPServerTransport;
         setAuth: (auth: any) => void;
         server: ReturnType<typeof createMcpServer>['server'];
+        lastActivity: number;
     }>();
+
+    // Periodic cleanup of idle sessions
+    const cleanupInterval = setInterval(() => {
+        const now = Date.now();
+        for (const [id, session] of sessions) {
+            if (now - session.lastActivity > SESSION_TTL_MS) {
+                deps.logger.info({ sessionId: id }, 'MCP session expired (idle timeout)');
+                session.transport.close?.();
+                sessions.delete(id);
+            }
+        }
+    }, CLEANUP_INTERVAL_MS);
+    cleanupInterval.unref();
 
     /**
      * POST /api/v2/mcp — Main MCP message endpoint
@@ -44,10 +63,19 @@ export function registerMcpRoutes(app: FastifyInstance, deps: McpServerDeps) {
                 // Existing session
                 const session = sessions.get(sessionId)!;
                 session.setAuth(auth);
+                session.lastActivity = Date.now();
 
                 // Hijack and delegate to MCP transport
                 reply.hijack();
-                await session.transport.handleRequest(request.raw, reply.raw, request.body);
+                try {
+                    await session.transport.handleRequest(request.raw, reply.raw, request.body);
+                } catch (transportErr) {
+                    deps.logger.error({ error: transportErr, sessionId }, 'MCP transport error (existing session)');
+                    if (!reply.raw.writableEnded) {
+                        reply.raw.statusCode = 500;
+                        reply.raw.end(JSON.stringify({ error: 'internal_error' }));
+                    }
+                }
                 return;
             }
 
@@ -84,11 +112,20 @@ export function registerMcpRoutes(app: FastifyInstance, deps: McpServerDeps) {
 
             // Hijack and handle the initialize request
             reply.hijack();
-            await transport.handleRequest(request.raw, reply.raw, request.body);
+            try {
+                await transport.handleRequest(request.raw, reply.raw, request.body);
+            } catch (transportErr) {
+                deps.logger.error({ error: transportErr }, 'MCP transport error (new session)');
+                if (!reply.raw.writableEnded) {
+                    reply.raw.statusCode = 500;
+                    reply.raw.end(JSON.stringify({ error: 'internal_error' }));
+                }
+                return;
+            }
 
             // Store session after handling (sessionId now available)
             if (transport.sessionId) {
-                sessions.set(transport.sessionId, { transport, setAuth, server });
+                sessions.set(transport.sessionId, { transport, setAuth, server, lastActivity: Date.now() });
                 deps.logger.info({ sessionId: transport.sessionId }, 'MCP session created');
             }
         } catch (error) {
@@ -123,9 +160,18 @@ export function registerMcpRoutes(app: FastifyInstance, deps: McpServerDeps) {
 
             const session = sessions.get(sessionId)!;
             session.setAuth(auth);
+            session.lastActivity = Date.now();
 
             reply.hijack();
-            await session.transport.handleRequest(request.raw, reply.raw);
+            try {
+                await session.transport.handleRequest(request.raw, reply.raw);
+            } catch (transportErr) {
+                deps.logger.error({ error: transportErr }, 'MCP transport error (GET)');
+                if (!reply.raw.writableEnded) {
+                    reply.raw.statusCode = 500;
+                    reply.raw.end(JSON.stringify({ error: 'internal_error' }));
+                }
+            }
         } catch (error) {
             if (error instanceof McpAuthError) {
                 return reply.status(error.statusCode).send({
@@ -160,7 +206,15 @@ export function registerMcpRoutes(app: FastifyInstance, deps: McpServerDeps) {
             session.setAuth(auth);
 
             reply.hijack();
-            await session.transport.handleRequest(request.raw, reply.raw);
+            try {
+                await session.transport.handleRequest(request.raw, reply.raw);
+            } catch (transportErr) {
+                deps.logger.error({ error: transportErr }, 'MCP transport error (DELETE)');
+                if (!reply.raw.writableEnded) {
+                    reply.raw.statusCode = 500;
+                    reply.raw.end(JSON.stringify({ error: 'internal_error' }));
+                }
+            }
         } catch (error) {
             if (error instanceof McpAuthError) {
                 return reply.status(error.statusCode).send({

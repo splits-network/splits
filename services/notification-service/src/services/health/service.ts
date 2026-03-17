@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     ServiceAlertData,
     serviceUnhealthyEmail,
@@ -12,6 +13,7 @@ export class HealthEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) {}
 
@@ -22,15 +24,19 @@ export class HealthEmailService {
         options: {
             eventType: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(null, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_email: to,
             subject,
             template: 'health-alert',
             payload: options.payload,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,
@@ -39,7 +45,7 @@ export class HealthEmailService {
 
         try {
             const { data: result, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

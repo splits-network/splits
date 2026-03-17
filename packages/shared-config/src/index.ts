@@ -60,6 +60,7 @@ export interface StripeConfig {
 export interface ResendConfig {
     apiKey: string;
     fromEmail: string;
+    candidateFromEmail: string;
 }
 
 /**
@@ -231,6 +232,7 @@ export function loadResendConfig(): ResendConfig {
     return {
         apiKey: getEnvOrThrow('RESEND_API_KEY'),
         fromEmail: getEnvOrDefault('RESEND_FROM_EMAIL', 'notifications@updates.splits.network'),
+        candidateFromEmail: getEnvOrDefault('RESEND_CANDIDATE_FROM_EMAIL', 'notifications@updates.applicant.network'),
     };
 }
 
@@ -244,6 +246,7 @@ export async function loadResendConfigFromVault(): Promise<ResendConfig> {
     return {
         apiKey: await getSecret('resend_api_key'),
         fromEmail: getEnvOrDefault('RESEND_FROM_EMAIL', 'notifications@updates.splits.network'),
+        candidateFromEmail: getEnvOrDefault('RESEND_CANDIDATE_FROM_EMAIL', 'notifications@updates.applicant.network'),
     };
 }
 

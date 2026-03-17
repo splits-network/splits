@@ -13,6 +13,17 @@ export interface ChatSidebarShellProps {
     messagesPagePath?: string;
     /** Current user ID for conversation list */
     currentUserId: string | null;
+    /** Called when user clicks call icon. Receives other user ID, participant details, and entity context when in thread view. */
+    onCallClick?: (otherUserId: string | null, otherUserDetails?: {
+        name: string | null;
+        email: string;
+        profile_image_url?: string | null;
+    } | null, entityContext?: {
+        application_id?: string | null;
+        job_id?: string | null;
+        company_id?: string | null;
+        candidate_id?: string | null;
+    }) => void;
 }
 
 const SIDEBAR_WIDTH = 420;
@@ -21,6 +32,7 @@ export function ChatSidebarShell({
     threadRenderer,
     messagesPagePath = "/portal/messages",
     currentUserId,
+    onCallClick,
 }: ChatSidebarShellProps) {
     const { isOpen, isMinimized, view, activeConversationId, close } =
         useChatSidebar();
@@ -37,7 +49,7 @@ export function ChatSidebarShell({
 
     return (
         <div
-            className={`fixed bottom-0 right-0 shadow-md overflow-y-auto
+            className={`fixed bottom-0 right-0 z-50 shadow-md overflow-y-auto
                 max-h-[80vh] ${isMinimized ? "h-12" : "h-auto"} transition-[width,opacity] duration-300 ease-in-out
                 `}
             style={{
@@ -47,7 +59,7 @@ export function ChatSidebarShell({
         >
             {isOpen && (
                 <div className="flex flex-col h-full bg-base-100 border-l-4 border-primary overflow-hidden">
-                    <ChatSidebarHeader messagesPagePath={messagesPagePath} />
+                    <ChatSidebarHeader messagesPagePath={messagesPagePath} currentUserId={currentUserId} onCallClick={onCallClick} />
                     {!isMinimized && (
                         <div className="flex-1 min-h-0 flex flex-col">
                             {view === "list" && (

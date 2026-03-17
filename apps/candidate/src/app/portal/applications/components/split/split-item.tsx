@@ -1,14 +1,13 @@
 "use client";
 
 import type { Application } from "../../types";
-import { stageColor } from "../shared/status-color";
 import {
     companyName,
     recruiterName,
     appliedAgo,
     salaryDisplay,
-    formatStage,
 } from "../shared/helpers";
+import { getStageDisplay, semanticPill } from "@splits-network/basel-ui";
 import ActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
@@ -56,11 +55,14 @@ export function SplitItem({
                         </>
                     ) : null}
                 </div>
-                <span
-                    className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold flex-shrink-0 ${stageColor(app.stage)}`}
-                >
-                    {formatStage(app.stage)}
-                </span>
+                {(() => {
+                    const s = getStageDisplay(app.stage, { acceptedByCandidate: app.accepted_by_candidate });
+                    return (
+                        <span className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold flex-shrink-0 ${semanticPill[s.color]}`}>
+                            {s.label}
+                        </span>
+                    );
+                })()}
             </div>
 
             {/* Row 4: salary, recruiter name */}

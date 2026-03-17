@@ -94,6 +94,8 @@ export const NAV_SECTIONS: NavSection[] = [
                 keywords: ['fraud', 'risk', 'security'],
             },
             { href: '/secure/decision-log', label: 'Decision Log', icon: 'fa-list-check', keywords: ['decision', 'log', 'audit'] },
+            { href: '/secure/support-chat', label: 'Support Chat', icon: 'fa-headset', keywords: ['support', 'chat', 'help', 'visitor'] },
+            { href: '/secure/support-tickets', label: 'Support Tickets', icon: 'fa-ticket', keywords: ['support', 'ticket', 'help', 'offline'] },
             { href: '/secure/chat', label: 'Chat Moderation', icon: 'fa-comments', keywords: ['chat', 'moderation', 'message'] },
             { href: '/secure/ownership', label: 'Ownership Audit', icon: 'fa-magnifying-glass-chart', keywords: ['ownership', 'audit'] },
             { href: '/secure/reputation', label: 'Reputation', icon: 'fa-star', keywords: ['reputation', 'rating', 'score'] },

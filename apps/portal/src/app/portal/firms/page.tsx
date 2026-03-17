@@ -88,12 +88,16 @@ export default function FirmsPage() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Firm, FirmFilters>({
         endpoint: "/firms",
         defaultFilters: { status: undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
     });
 
@@ -105,6 +109,14 @@ export default function FirmsPage() {
             registerEntities("firm", [...new Set(firmIds)]);
         }
     }, [firms, registerEntities]);
+
+    const handleSortChange = useCallback(
+        (field: string, order: "asc" | "desc") => {
+            setSortBy(field);
+            setSortOrder(order);
+        },
+        [setSortBy, setSortOrder],
+    );
 
     const handleSelect = useCallback((firm: Firm) => {
         setSelectedFirmId((prev) => (prev === firm.id ? null : firm.id));
@@ -122,10 +134,7 @@ export default function FirmsPage() {
                 (sum, t) => sum + (t.active_member_count || 0),
                 0,
             ),
-            totalRevenue: firms.reduce(
-                (sum, t) => sum + (t.total_revenue || 0),
-                0,
-            ),
+            listed: firms.filter((t) => t.marketplace_visible).length,
         }),
         [firms, pagination],
     );
@@ -153,6 +162,9 @@ export default function FirmsPage() {
                     totalCount={pagination?.total ?? firms.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
 
                 {/* Content Area */}
@@ -161,7 +173,7 @@ export default function FirmsPage() {
                         {loading && firms.length === 0 ? (
                             <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
                                 <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40">
                                     Loading your firms...
                                 </p>
                             </div>
@@ -181,7 +193,7 @@ export default function FirmsPage() {
                                         clearFilters();
                                     }}
                                     className="btn btn-outline btn-sm"
-                                    style={{ borderRadius: 0 }}
+
                                 >
                                     Reset Filters
                                 </button>

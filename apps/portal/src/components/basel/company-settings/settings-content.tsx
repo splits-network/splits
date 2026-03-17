@@ -6,9 +6,15 @@ import { useUserProfile } from "@/contexts";
 import { redirect } from "next/navigation";
 import { LoadingState } from "@splits-network/shared-ui";
 import { BaselVerticalTabBar, useScrollReveal } from "@splits-network/basel-ui";
-import { MiniLeaderboard, AchievementsSection } from "@splits-network/shared-gamification";
+import {
+    MiniLeaderboard,
+    AchievementsSection,
+} from "@splits-network/shared-gamification";
 import { useAuth } from "@clerk/nextjs";
-import { createUnauthenticatedClient, createAuthenticatedClient } from "@/lib/api-client";
+import {
+    createUnauthenticatedClient,
+    createAuthenticatedClient,
+} from "@/lib/api-client";
 import { CompanyTab } from "./company-tab";
 import { CultureTab } from "./culture-tab";
 import { BillingTab } from "./billing-tab";
@@ -43,7 +49,13 @@ const NAV_ITEMS = [
     },
 ];
 
-const VALID_TABS = new Set<string>(["profile", "culture", "billing", "team", "achievements"]);
+const VALID_TABS = new Set<string>([
+    "profile",
+    "culture",
+    "billing",
+    "team",
+    "achievements",
+]);
 
 interface SettingsContentProps {
     company: Company | null;
@@ -117,7 +129,7 @@ export default function BaselSettingsContent({
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Header ─────────────────────────────────────────────────── */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
@@ -137,7 +149,7 @@ export default function BaselSettingsContent({
                                 settings.
                             </span>
                         </h1>
-                        <p className="scroll-reveal fade-up text-base text-neutral-content/50 max-w-xl">
+                        <p className="scroll-reveal fade-up text-base text-base-content/50 max-w-xl">
                             Manage your company profile, billing configuration,
                             and team members in one place.
                         </p>

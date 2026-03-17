@@ -6,9 +6,9 @@ import {
     formatJobType,
     formatAvailability,
 } from "../../types";
-import { statusColorName } from "../shared/status-color";
+import { statusColorName, statusBorder } from "../shared/status-color";
+import { relationshipBadge, accountBadge } from "../shared/candidate-badges";
 import { BaselBadge } from "@splits-network/basel-ui";
-import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     candidateName,
     candidateInitials,
@@ -16,35 +16,33 @@ import {
     candidateCompany,
     salaryDisplay,
     isNew,
-    addedAgo,
+    lastSeenAgo,
     skillsList,
 } from "../shared/helpers";
 import CandidateActionsToolbar from "../shared/actions-toolbar";
+import { SaveBookmark } from "@/components/save-bookmark";
 import {
     LevelBadge,
     useGamification,
 } from "@splits-network/shared-gamification";
 import { Presence } from "@/components/presense";
-import { usePresence } from "@/hooks/use-presence";
-
-const iconStyles = [
-    "bg-primary text-primary-content",
-    "bg-secondary text-secondary-content",
-    "bg-accent text-accent-content",
-    "bg-warning text-warning-content",
-];
+import { usePresenceStatus } from "@/contexts";
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function GridCard({
     candidate,
     isSelected,
     onSelect,
     onRefresh,
+    onUpdateItem,
 }: {
     candidate: Candidate;
     isSelected: boolean;
     onSelect: () => void;
     onRefresh?: () => void;
+    onUpdateItem?: (id: string, patch: Partial<Candidate>) => void;
 }) {
+    const { isRecruiter } = useUserProfile();
     const { getLevel } = useGamification();
     const level = getLevel(candidate.id);
     const name = candidateName(candidate);
@@ -53,88 +51,58 @@ export function GridCard({
     const company = candidateCompany(candidate);
     const salary = salaryDisplay(candidate);
     const skills = skillsList(candidate);
-    const posted = addedAgo(candidate);
     const candidateUserId = candidate.user_id;
-    const presence = usePresence([candidateUserId], {
-        enabled: Boolean(candidateUserId),
-    });
+    const presenceData = usePresenceStatus(candidateUserId);
+    const presenceStatus = presenceData?.status;
+    const lastSeen = lastSeenAgo(
+        presenceData?.lastSeenAt ?? null,
+        candidate.last_active_at,
+    );
 
-    const presenceStatus = candidateUserId
-        ? presence[candidateUserId]?.status
-        : undefined;
-
-    const stats = [
-        {
-            label: "Salary",
-            value: salary || "N/A",
-            icon: "fa-duotone fa-regular fa-dollar-sign",
-        },
-        {
-            label: "Type",
-            value: formatJobType(candidate.desired_job_type),
-            icon: "fa-duotone fa-regular fa-briefcase",
-        },
-        {
-            label: "Availability",
-            value: formatAvailability(candidate.availability),
-            icon: "fa-duotone fa-regular fa-clock",
-        },
-        {
-            label: "Status",
-            value: formatVerificationStatus(candidate.verification_status),
-            icon: "fa-duotone fa-regular fa-shield-check",
-        },
+    // Inline metadata — always show all, muted when empty (matches recruiter card pattern)
+    const metaItems: { icon: string; color: string; value: string; muted: boolean; tooltip: string }[] = [
+        { icon: "fa-dollar-sign", color: "text-success", value: salary || "\u2014", muted: !salary, tooltip: "Desired salary" },
+        { icon: "fa-briefcase", color: "text-primary", value: formatJobType(candidate.desired_job_type), muted: !candidate.desired_job_type, tooltip: "Desired job type" },
+        { icon: "fa-clock", color: "text-info", value: formatAvailability(candidate.availability), muted: !candidate.availability, tooltip: "Availability" },
     ];
 
     return (
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-md",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-colors",
                 isSelected
-                    ? "border-l-primary border-primary"
-                    : "border-l-primary",
+                    ? "border-primary border-l-primary bg-primary/5"
+                    : `${statusBorder(candidate.verification_status)} hover:border-base-content/20`,
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
-                {/* Kicker row: company + badges */}
-                <div className="flex items-center justify-between mb-3 gap-2">
-                    {company && (
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/40 truncate min-w-0">
-                            {company}
-                        </p>
-                    )}
-                    <div className="flex items-center gap-2 flex-wrap ml-auto">
-                        <BaselBadge
-                            color={statusColorName(candidate.verification_status)}
-                            variant="soft"
-                            size="sm"
-                        >
-                            {formatVerificationStatus(candidate.verification_status)}
-                        </BaselBadge>
-                        {isNew(candidate) && (
-                            <BaselBadge
-                                color="warning"
-                                variant="soft"
-                                size="sm"
-                                icon="fa-sparkles"
-                            >
-                                New
-                            </BaselBadge>
-                        )}
+            <div className="relative bg-base-300 px-5 pt-4 pb-4">
+                {/* Utility icons: absolute top-right */}
+                <div className="absolute top-3 right-3 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    {presenceStatus === "online" && (
                         <Presence
                             variant="badge"
                             size="sm"
                             status={presenceStatus}
                         />
-                    </div>
+                    )}
+                    {isRecruiter && (
+                        <SaveBookmark
+                            entityType="candidate"
+                            entityId={candidate.id}
+                            isSaved={!!candidate.is_saved}
+                            savedRecordId={candidate.saved_record_id ?? null}
+                            size="sm"
+                            onToggle={(saved, recordId) => onUpdateItem?.(candidate.id, { is_saved: saved, saved_record_id: recordId })}
+                        />
+                    )}
                 </div>
 
                 {/* Avatar + Name block */}
-                <div className="flex items-end gap-3">
-                    <div className="relative shrink-0">
-                        <div className="w-14 h-14 bg-primary text-primary-content flex items-center justify-center text-lg font-black tracking-tight select-none">
+                <div className="flex items-start gap-3">
+                    <div className="relative shrink-0 mt-0.5">
+                        <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
                             {initials}
                         </div>
                         {level && (
@@ -143,153 +111,155 @@ export function GridCard({
                             </div>
                         )}
                     </div>
-                    <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
-                            Candidate
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
+                            {company || "Candidate"}
                         </p>
-                        <h3 className="text-xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                        <h3 className="text-lg font-black tracking-tight leading-tight text-base-content truncate group-hover:text-primary transition-colors">
                             {name}
                         </h3>
+                        <p className={`text-sm truncate mt-0.5 ${title ? "text-base-content/50" : "text-base-content/30"}`}>
+                            {title || "No title specified"}
+                        </p>
                     </div>
                 </div>
 
-                {/* Title + Location + date */}
-                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/40">
-                    {title && (
-                        <span className="flex items-center gap-1.5 truncate">
-                            <i className="fa-duotone fa-regular fa-id-badge text-xs" />
-                            {title}
-                        </span>
-                    )}
-                    {title && (
-                        <span className="text-base-content/20">|</span>
-                    )}
+                {/* Location + last seen */}
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/50">
                     <span className="flex items-center gap-1.5 truncate">
-                        <i className="fa-duotone fa-regular fa-location-dot text-xs" />
+                        <i className="fa-duotone fa-regular fa-location-dot text-xs text-secondary" />
                         {candidate.location || "Location not specified"}
                     </span>
-                    {posted && (
+                    {lastSeen && (
                         <>
                             <span className="text-base-content/20">|</span>
                             <span className="flex items-center gap-1.5 shrink-0">
-                                <i className="fa-duotone fa-regular fa-calendar text-xs" />
-                                {posted}
+                                <i className="fa-duotone fa-regular fa-calendar text-xs text-accent" />
+                                {lastSeen}
                             </span>
                         </>
                     )}
                 </div>
+            </div>
 
-                {/* Email */}
-                {candidate.email && (
-                    <div className="text-sm text-base-content/30 truncate mt-1">
-                        {candidate.email}
-                    </div>
-                )}
+            {/* Inline metadata: salary · type · availability */}
+            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {metaItems.map((item, i) => (
+                    <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/60"}`} data-tip={item.tooltip}>
+                        <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
+                        <span className="truncate">{item.value}</span>
+                    </span>
+                ))}
             </div>
 
             {/* About snippet */}
-            <div className="px-6 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-1.5">
-                    About
-                </p>
-                {candidate.bio ? (
-                    <div className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                        <MarkdownRenderer content={candidate.bio} />
-                    </div>
+            <div className="px-5 py-3 border-b border-base-300">
+                {candidate.description ? (
+                    <p className="text-sm text-base-content/60 leading-relaxed line-clamp-2">
+                        {candidate.description}
+                    </p>
                 ) : (
-                    <p className="text-sm text-base-content/20 italic">No bio added yet</p>
+                    <p className="text-sm text-base-content/30">No bio available</p>
                 )}
             </div>
 
-            {/* Stats Grid */}
-            <div className="border-b border-base-300">
-                <div className="grid grid-cols-2 divide-x divide-y divide-base-300">
-                    {stats.map((stat, i) => (
-                        <div
-                            key={stat.label}
-                            className="flex items-center gap-2 px-2 py-3 min-w-0 overflow-hidden"
-                        >
-                            <div
-                                className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyles[i % iconStyles.length]}`}
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
+                <div className="flex flex-wrap gap-1.5">
+                    {/* Single status badge: No Account > Pending Invite > verification status */}
+                    {(() => {
+                        const acct = accountBadge(candidate);
+                        if (acct) {
+                            return (
+                                <BaselBadge color={acct.color} variant="soft-outline" size="sm" icon={acct.icon}>
+                                    {acct.label}
+                                </BaselBadge>
+                            );
+                        }
+                        if (candidate.has_pending_invitation) {
+                            return (
+                                <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-clock">
+                                    Pending
+                                </BaselBadge>
+                            );
+                        }
+                        return (
+                            <BaselBadge
+                                color={statusColorName(candidate.verification_status)}
+                                variant="soft-outline"
+                                size="sm"
                             >
-                                <i className={`${stat.icon} text-xs`} />
-                            </div>
-                            <div className="min-w-0">
-                                <span className="text-sm font-black text-base-content leading-none block truncate">
-                                    {stat.value}
-                                </span>
-                                <span className="text-xs font-semibold uppercase tracking-wide text-base-content/30 leading-none truncate block">
-                                    {stat.label}
-                                </span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Skills */}
-            <div className="px-6 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                    Skills
-                </p>
-                {skills.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                        {skills.slice(0, 4).map((skill) => (
-                            <BaselBadge key={skill} variant="outline" size="sm">
-                                {skill}
+                                {formatVerificationStatus(candidate.verification_status)}
                             </BaselBadge>
-                        ))}
-                        {skills.length > 4 && (
-                            <span className="text-sm font-semibold text-base-content/40 self-center">
-                                +{skills.length - 4} more
-                            </span>
-                        )}
-                    </div>
-                ) : (
-                    <p className="text-sm text-base-content/20 italic">No skills listed</p>
-                )}
-            </div>
-
-            {/* Preferences */}
-            <div className="px-6 py-4 border-b border-base-300">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                    Preferences
-                </p>
-                {candidate.open_to_remote || candidate.open_to_relocation ? (
-                    <div className="flex flex-wrap gap-1.5">
-                        {candidate.open_to_remote && (
-                            <BaselBadge color="primary" size="sm" icon="fa-house-laptop">
-                                Remote
+                        );
+                    })()}
+                    {isNew(candidate) && !accountBadge(candidate) && !candidate.has_pending_invitation && (
+                        <BaselBadge color="warning" variant="soft-outline" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+                    {/* Relationship badge: only Mine or Sourced (Pending folded into status above) */}
+                    {(() => {
+                        const rel = relationshipBadge(candidate);
+                        return rel && rel.label !== "Pending" ? (
+                            <BaselBadge color={rel.color} variant="soft-outline" size="sm" icon={rel.icon}>
+                                {rel.label}
                             </BaselBadge>
-                        )}
-                        {candidate.open_to_relocation && (
-                            <BaselBadge color="secondary" size="sm" icon="fa-truck-moving">
-                                Relocatable
-                            </BaselBadge>
-                        )}
-                    </div>
-                ) : (
-                    <div className="flex flex-wrap gap-1.5">
-                        <BaselBadge variant="outline" size="sm" icon="fa-building">
+                        ) : null;
+                    })()}
+                    {candidate.open_to_remote && (
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-house-laptop">
+                            Remote
+                        </BaselBadge>
+                    )}
+                    {candidate.open_to_relocation && (
+                        <BaselBadge color="neutral" variant="soft" size="sm" icon="fa-truck-moving">
+                            Relocatable
+                        </BaselBadge>
+                    )}
+                    {!candidate.open_to_remote && !candidate.open_to_relocation && (
+                        <BaselBadge variant="soft" color="neutral" size="sm" icon="fa-building">
                             On-Site Only
                         </BaselBadge>
-                    </div>
-                )}
+                    )}
+                    {skills.slice(0, 3).map((skill) => (
+                        <BaselBadge key={skill} variant="soft" color="neutral" size="sm">
+                            {skill}
+                        </BaselBadge>
+                    ))}
+                    {skills.length > 3 && (
+                        <span className="text-sm font-semibold text-base-content/50 self-center">
+                            +{skills.length - 3} more
+                        </span>
+                    )}
+                    {skills.length === 0 && (
+                        <span className="text-sm text-base-content/30">No skills listed</span>
+                    )}
+                </div>
             </div>
 
-            {/* Footer: actions */}
-            <div className="mt-auto flex items-center justify-end px-6 py-4">
-                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <CandidateActionsToolbar
-                        candidate={candidate}
-                        variant="icon-only"
-                        size="sm"
-                        onRefresh={onRefresh}
-                        showActions={{
-                            viewDetails: false,
-                        }}
-                    />
-                </div>
+            {/* Footer: view link + actions */}
+            <div
+                className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button
+                    onClick={onSelect}
+                    className="text-sm font-semibold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
+                >
+                    View Details
+                    <i className="fa-duotone fa-regular fa-arrow-right text-xs" />
+                </button>
+                <CandidateActionsToolbar
+                    candidate={candidate}
+                    variant="icon-only"
+                    size="sm"
+                    onRefresh={onRefresh}
+                    onUpdateItem={onUpdateItem}
+                    showActions={{
+                        viewDetails: false,
+                    }}
+                />
             </div>
         </article>
     );

@@ -5,6 +5,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerWebhookRoutes } from './routes/webhooks/routes';
 import { registerV2Routes } from './v2/routes';
+import { registerV3Routes } from './v3/routes';
 import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import { BillingEventConsumer } from './events/placement-consumer';
 import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
@@ -189,6 +190,14 @@ async function main() {
     const webhookService = new WebhookServiceV2(supabase, logger, outboxPublisher, stripeConfig.secretKey);
     const webhookEventRepository = new WebhookEventRepository(supabase);
     registerWebhookRoutes(app, webhookService, stripeConfig.webhookSecret, webhookEventRepository);
+
+    // Register V3 routes
+    registerV3Routes(app, {
+        supabase,
+        eventPublisher: outboxPublisher,
+        stripeWebhookSecret: stripeConfig.webhookSecret,
+        stripeSecretKey: stripeConfig.secretKey,
+    });
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

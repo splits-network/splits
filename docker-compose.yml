@@ -13,6 +13,25 @@ services:
       timeout: 10s
       retries: 3
 
+  livekit:
+    image: livekit/livekit-server:v1.8
+    container_name: splits-livekit
+    ports:
+      - "7880:7880"
+      - "7881:7881/udp"
+    command:
+      - --dev
+      - --bind=0.0.0.0
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-devkey}: ${LIVEKIT_API_SECRET:-devsecret}"
+    networks:
+      - splits-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7880"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: splits-redis
@@ -63,8 +82,9 @@ services:
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
-      # Portal app (splits.network) Clerk credentials - for syncing user data back to Clerk
-      CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      # Clerk credentials - for syncing user data back to Clerk
+      SPLITS_CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      APP_CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
     volumes:
       - ./services/identity-service/src:/app/services/identity-service/src
       - ./packages:/app/packages
@@ -202,11 +222,8 @@ services:
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       RESEND_API_KEY: ${RESEND_API_KEY}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@updates.splits.network}
-      IDENTITY_SERVICE_URL: http://identity-service:3001
-      ATS_SERVICE_URL: http://ats-service:3002
-      NETWORK_SERVICE_URL: http://network-service:3003
-      CANDIDATE_WEBSITE_URL: http://candidate:3101
-      PORTAL_URL: http://portal:3100
+      RESEND_CANDIDATE_FROM_EMAIL: ${RESEND_CANDIDATE_FROM_EMAIL:-noreply@updates.applicant.network}
+      PORTAL_URL: http://localhost:3100
       STATUS_CONTACT_RECIPIENTS: ${STATUS_CONTACT_RECIPIENTS:-help@applicant.network,help@splits.network,help@employment-networks.com}
     volumes:
       - ./services/notification-service/src:/app/services/notification-service/src
@@ -504,6 +521,36 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  video-service:
+    build:
+      context: .
+      dockerfile: services/video-service/Dockerfile
+      target: development
+    container_name: splits-video-service
+    ports:
+      - "3019:3019"
+    environment:
+      NODE_ENV: development
+      PORT: 3019
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret}
+      LIVEKIT_WS_URL: ws://livekit:7880
+    volumes:
+      - ./services/video-service/src:/app/services/video-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      livekit:
+        condition: service_healthy
+
   analytics-service:
     build:
       context: .
@@ -745,6 +792,7 @@ services:
       MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET}
       LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
       LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
+      INTEGRATION_ENCRYPTION_KEY: ${INTEGRATION_ENCRYPTION_KEY}
     volumes:
       - ./services/integration-service/src:/app/services/integration-service/src
       - ./packages:/app/packages
@@ -785,6 +833,7 @@ services:
       INTEGRATION_SERVICE_URL: http://integration-service:3016
       MATCHING_SERVICE_URL: http://matching-service:3017
       GAMIFICATION_SERVICE_URL: http://gamification-service:3018
+      SUPPORT_SERVICE_URL: http://support-service:3021
       ADMIN_CLERK_SECRET_KEY: ${ADMIN_CLERK_SECRET_KEY}
       CORS_ORIGIN: http://localhost:3200
     volumes:
@@ -804,6 +853,36 @@ services:
         condition: service_started
       billing-service:
         condition: service_started
+
+  call-service:
+    build:
+      context: .
+      dockerfile: services/call-service/Dockerfile
+      target: development
+    container_name: splits-call-service
+    ports:
+      - "3023:3020"
+    environment:
+      NODE_ENV: development
+      PORT: 3020
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret}
+      LIVEKIT_WS_URL: ws://livekit:7880
+    volumes:
+      - ./services/call-service/src:/app/services/call-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      livekit:
+        condition: service_healthy
 
   api-gateway:
     build:
@@ -838,6 +917,10 @@ services:
       INTEGRATION_SERVICE_URL: http://integration-service:3016
       MATCHING_SERVICE_URL: http://matching-service:3017
       GAMIFICATION_SERVICE_URL: http://gamification-service:3018
+      VIDEO_SERVICE_URL: http://video-service:3019
+      CALL_SERVICE_URL: http://call-service:3020
+      SUPPORT_SERVICE_URL: http://support-service:3021
+      ONBOARDING_SERVICE_URL: http://onboarding-service:3023
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
@@ -863,6 +946,8 @@ services:
       network-service:
         condition: service_started
       billing-service:
+        condition: service_started
+      video-service:
         condition: service_started
 
   # Frontend
@@ -965,7 +1050,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3200
-      NEXT_PUBLIC_ADMIN_GATEWAY_URL: http://admin-gateway:3030
+      NEXT_PUBLIC_ADMIN_GATEWAY_URL: http://localhost:3030
+      ADMIN_GATEWAY_INTERNAL_URL: http://admin-gateway:3030
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${ADMIN_CLERK_PUBLISHABLE_KEY}
       CLERK_SECRET_KEY: ${ADMIN_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
@@ -1007,6 +1093,112 @@ services:
     depends_on:
       - api-gateway
     command: pnpm --filter @splits-network/status dev
+
+  video:
+    build:
+      context: .
+      dockerfile: apps/video/Dockerfile
+      target: development
+    container_name: splits-video
+    ports:
+      - "3104:3104"
+    environment:
+      NODE_ENV: development
+      PORT: 3104
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_LIVEKIT_URL: ${LIVEKIT_URL:-ws://localhost:7880}
+    volumes:
+      - ./apps/video/src:/app/apps/video/src
+      - ./apps/video/public:/app/apps/video/public
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/video/.next
+    networks:
+      - splits-network
+    depends_on:
+      - api-gateway
+    command: pnpm --filter @splits-network/video dev
+
+  support-service:
+    build:
+      context: .
+      dockerfile: services/support-service/Dockerfile
+      target: development
+    container_name: splits-support-service
+    ports:
+      - "3021:3021"
+    environment:
+      NODE_ENV: development
+      PORT: 3021
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./services/support-service/src:/app/services/support-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  onboarding-service:
+    build:
+      context: .
+      dockerfile: services/onboarding-service/Dockerfile
+      target: development
+    container_name: splits-onboarding-service
+    ports:
+      - "3023:3023"
+    environment:
+      NODE_ENV: development
+      PORT: 3023
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+    volumes:
+      - .\services\onboarding-service\src:/app/services/onboarding-service/src
+      - .\packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  support-gateway:
+    build:
+      context: .
+      dockerfile: services/support-gateway/Dockerfile
+      target: development
+    container_name: splits-support-gateway
+    ports:
+      - "3022:3022"
+    environment:
+      NODE_ENV: development
+      PORT: 3022
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
+      SPLITS_CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      APP_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
+      APP_CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
+    volumes:
+      - ./services/support-gateway/src:/app/services/support-gateway/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
 
 networks:
   splits-network:

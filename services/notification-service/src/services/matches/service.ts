@@ -6,6 +6,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     recruiterInviteEmail,
     candidateRepresentedInviteEmail,
@@ -22,6 +23,7 @@ export class MatchesEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) {}
 
@@ -36,9 +38,13 @@ export class MatchesEmailService {
             actionUrl?: string;
             actionLabel?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
-        // Create in-app notification
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'both', options.category);
+        if (!effectiveChannel) return;
+
+        // Create notification log (may be downgraded to in_app)
         await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId ?? null,
@@ -46,8 +52,8 @@ export class MatchesEmailService {
             subject,
             template: 'custom',
             payload: options.payload ?? null,
-            channel: 'both',
-            status: 'pending',
+            channel: effectiveChannel,
+            status: effectiveChannel === 'in_app' ? 'sent' : 'pending',
             read: false,
             dismissed: false,
             priority: 'high',
@@ -56,10 +62,13 @@ export class MatchesEmailService {
             action_label: options.actionLabel ?? null,
         });
 
+        // Skip actual email send if downgraded to in-app only
+        if (effectiveChannel === 'in_app') return;
+
         // Send email
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -110,6 +119,7 @@ export class MatchesEmailService {
                 eventType: 'match.invited',
                 userId: data.userId,
                 category: 'matches',
+                source: 'candidate',
                 payload: {
                     jobTitle: data.jobTitle,
                     companyName: data.companyName,
@@ -131,6 +141,7 @@ export class MatchesEmailService {
                 eventType: 'match.invited',
                 userId: data.userId,
                 category: 'matches',
+                source: 'candidate',
                 actionUrl: data.applyUrl,
                 actionLabel: 'View & Apply',
                 payload: {

@@ -3,11 +3,17 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useScrollReveal } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
-import { BadgeGrid, LevelBadge, MiniLeaderboard } from "@splits-network/shared-gamification";
+import {
+    BadgeGrid,
+    LevelBadge,
+    MiniLeaderboard,
+} from "@splits-network/shared-gamification";
 import type {
     BadgeAward,
     EntityLevelInfo,
 } from "@splits-network/shared-gamification";
+import { PlanBadge } from "@/components/entitlements/plan-badge";
+import type { PlanTier } from "@/contexts/user-profile-context";
 import { formatRelativeTime } from "@/lib/utils";
 import type { RecruiterWithUser } from "../types";
 import { getDisplayName, getInitials } from "../types";
@@ -183,7 +189,7 @@ export default function RecruiterProfileClient({
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Header ──────────────────────────────────────────────── */}
-            <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+            <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
@@ -195,12 +201,17 @@ export default function RecruiterProfileClient({
                     <div className="scroll-reveal fade-up flex items-center justify-between mb-8">
                         <div>
                             {recruiter.firm_name && (
-                                <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40">
+                                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                                     {recruiter.firm_name}
                                 </p>
                             )}
                         </div>
                         <div className="flex items-center gap-4">
+                            {recruiter.plan_tier && (
+                                <PlanBadge
+                                    tier={recruiter.plan_tier as PlanTier}
+                                />
+                            )}
                             <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary">
                                 <i className="fa-duotone fa-regular fa-badge-check text-sm" />
                                 Verified
@@ -237,7 +248,7 @@ export default function RecruiterProfileClient({
                                         recruiter.firm_name ||
                                         "Recruiter"}
                                 </p>
-                                <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
+                                <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none text-base-content mb-3">
                                     {name}
                                     {level && (
                                         <span className="ml-3 align-middle inline-block">
@@ -248,7 +259,7 @@ export default function RecruiterProfileClient({
                                         </span>
                                     )}
                                 </h1>
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                     {location && (
                                         <span className="flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-location-dot text-xs" />
@@ -256,7 +267,7 @@ export default function RecruiterProfileClient({
                                         </span>
                                     )}
                                     {location && memberSince && (
-                                        <span className="text-neutral-content/20">
+                                        <span className="text-base-content/20">
                                             |
                                         </span>
                                     )}
@@ -297,10 +308,10 @@ export default function RecruiterProfileClient({
                                         />
                                     </div>
                                     <div>
-                                        <span className="text-xl font-black text-neutral-content leading-none block">
+                                        <span className="text-xl font-black text-base-content leading-none block">
                                             {stat.value}
                                         </span>
-                                        <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                                        <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                             {stat.label}
                                         </span>
                                     </div>
@@ -313,7 +324,11 @@ export default function RecruiterProfileClient({
 
             {/* ── Tab Nav ─────────────────────────────────────────────── */}
             <BaselTabBar
-                tabs={TABS.map(t => ({ label: t.label, value: t.key, icon: t.icon }))}
+                tabs={TABS.map((t) => ({
+                    label: t.label,
+                    value: t.key,
+                    icon: t.icon,
+                }))}
                 active={activeTab}
                 onChange={(v) => setActiveTab(v as ProfileTab)}
                 className="bg-base-100 border-b border-base-300 container mx-auto px-8"

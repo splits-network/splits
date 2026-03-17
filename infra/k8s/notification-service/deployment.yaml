@@ -6,7 +6,7 @@ metadata:
 spec:
     # IMPORTANT: Keep at 1 replica to avoid Resend API rate limiting conflicts
     # Multiple replicas consume the same RabbitMQ events and send duplicate emails
-    replicas: 1
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: notification-service
@@ -15,6 +15,13 @@ spec:
             labels:
                 app: notification-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: notification-service
                   image: ${ACR_SERVER}/notification-service:${IMAGE_TAG}
@@ -52,22 +59,10 @@ spec:
                                 key: resend-api-key
                       - name: RESEND_FROM_EMAIL
                         value: "noreply@updates.splits.network"
-                      - name: IDENTITY_SERVICE_URL
-                        value: "http://identity-service:3001"
-                      - name: ATS_SERVICE_URL
-                        value: "http://ats-service:3002"
-                      - name: NETWORK_SERVICE_URL
-                        value: "http://network-service:3003"
+                      - name: RESEND_CANDIDATE_FROM_EMAIL
+                        value: "noreply@updates.applicant.network"
                       - name: PORTAL_URL
                         value: "${PORTAL_URL}"
-                      - name: CANDIDATE_WEBSITE_URL
-                        value: "${CANDIDATE_URL}"
-                      - name: NEXT_PUBLIC_PORTAL_URL
-                        value: "${PORTAL_URL}"
-                      - name: NEXT_PUBLIC_CANDIDATE_URL
-                        value: "${CANDIDATE_URL}"
-                      - name: NEXT_PUBLIC_CORPORATE_URL
-                        value: "${CORPORATE_URL}"
                   resources:
                       requests:
                           cpu: 100m
@@ -79,14 +74,18 @@ spec:
                       httpGet:
                           path: /health
                           port: 3005
-                      initialDelaySeconds: 30
+                      initialDelaySeconds: 60
                       periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
                   readinessProbe:
                       httpGet:
                           path: /health
                           port: 3005
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 15
                       periodSeconds: 5
+                      timeoutSeconds: 5
+                      failureThreshold: 2
 ---
 apiVersion: v1
 kind: Service

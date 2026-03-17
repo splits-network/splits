@@ -99,7 +99,8 @@ export class CandidateRepository {
                         id,
                         email,
                         name,
-                        clerk_user_id
+                        clerk_user_id,
+                        last_active_at
                     )`;
             }
         }
@@ -132,7 +133,83 @@ export class CandidateRepository {
         // Extract special filters that are NOT database columns
         // scope can come from either filters object or direct query parameter
         const scope = filters.scope || (params as any).scope || 'all';
-        const { scope: _scope, ...columnFilters } = filters;
+        const {
+            scope: _scope,
+            has_account: hasAccountFilter,
+            has_resume: hasResumeFilter,
+            activity: activityFilter,
+            ...columnFilters
+        } = filters;
+
+        // Apply computed filters (not direct column matches)
+        if (hasAccountFilter === 'yes') {
+            query = query.not('user_id', 'is', null);
+        } else if (hasAccountFilter === 'no') {
+            query = query.is('user_id', null);
+        }
+
+        if (hasResumeFilter === 'yes') {
+            query = query.not('resume_metadata', 'is', null);
+        } else if (hasResumeFilter === 'no') {
+            query = query.or('resume_metadata.is.null');
+        }
+
+        // Activity filter: uses users.last_active_at via subquery
+        if (activityFilter) {
+            const now = new Date();
+            let activityQuery = this.supabase.from('users').select('id');
+
+            if (activityFilter === 'online') {
+                // Active within last 15 minutes
+                const threshold = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+                activityQuery = activityQuery.gte('last_active_at', threshold);
+            } else if (activityFilter === 'recent') {
+                // Active within last 7 days but not online
+                const onlineThreshold = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+                const recentThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+                activityQuery = activityQuery.gte('last_active_at', recentThreshold).lt('last_active_at', onlineThreshold);
+            } else if (activityFilter === 'inactive') {
+                // Not active in 7+ days or never active
+                const recentThreshold = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+                activityQuery = activityQuery.lt('last_active_at', recentThreshold);
+            }
+
+            const { data: activityUsers } = await activityQuery;
+            const activeUserIds = (activityUsers || []).map((u: any) => u.id);
+
+            if (activityFilter === 'inactive') {
+                // Inactive includes candidates with no account OR inactive users
+                // We can't easily do OR with user_id IS NULL in supabase, so handle via ID list
+                // First get candidates with no user_id
+                const { data: noAccountCandidates } = await this.supabase
+                    .from('candidates')
+                    .select('id')
+                    .is('user_id', null);
+                const noAccountIds = (noAccountCandidates || []).map((c: any) => c.id);
+
+                // Get candidates whose user_id is in inactive users list
+                let inactiveIds: string[] = [];
+                if (activeUserIds.length > 0) {
+                    const { data: inactiveUserCandidates } = await this.supabase
+                        .from('candidates')
+                        .select('id')
+                        .in('user_id', activeUserIds);
+                    inactiveIds = (inactiveUserCandidates || []).map((c: any) => c.id);
+                }
+
+                const allInactiveIds = [...new Set([...noAccountIds, ...inactiveIds])];
+                if (allInactiveIds.length > 0) {
+                    query = query.in('id', allInactiveIds);
+                } else {
+                    return { data: [], pagination: { page, limit, total: 0, total_pages: 0 } };
+                }
+            } else if (activeUserIds.length > 0) {
+                query = query.in('user_id', activeUserIds);
+            } else {
+                // No users match activity criteria
+                return { data: [], pagination: { page, limit, total: 0, total_pages: 0 } };
+            }
+        }
 
         // Apply role-based access control FIRST
         // Candidates can ONLY see their own candidate record
@@ -187,6 +264,29 @@ export class CandidateRepository {
             query = query.in('id', candidateIds);
         }
 
+        // For recruiters with scope="saved": filter to candidates they have saved
+        if (accessContext.recruiterId && scope === 'saved') {
+            const { data: savedRows, error: savedError } = await this.supabase
+                .from('recruiter_saved_candidates')
+                .select('candidate_id')
+                .eq('recruiter_id', accessContext.recruiterId);
+
+            if (savedError) {
+                console.error('Error fetching saved candidates for filtering:', savedError);
+                throw savedError;
+            }
+
+            const savedIds = (savedRows || []).map((r: any) => r.candidate_id);
+            if (savedIds.length === 0) {
+                return {
+                    data: [],
+                    pagination: { page, limit, total: 0, total_pages: 0 },
+                };
+            }
+
+            query = query.in('id', savedIds);
+        }
+
         // Apply full-text search across all candidate fields
         if (search) {
             // Normalize special chars (email @._- , URL /:) to spaces to match indexing,
@@ -219,6 +319,41 @@ export class CandidateRepository {
             accessContext.recruiterId ?? undefined,
             undefined // Pass undefined to skip post-processing filter
         );
+
+        // Batch-fetch last_active_at from users table for candidates with user_id
+        const userIds = enrichedData.filter((c: any) => c.user_id).map((c: any) => c.user_id);
+        if (userIds.length > 0) {
+            const { data: users } = await this.supabase
+                .from('users')
+                .select('id, last_active_at')
+                .in('id', userIds);
+            const activityByUserId: Record<string, string | null> = {};
+            for (const u of users || []) {
+                activityByUserId[u.id] = u.last_active_at;
+            }
+            for (const c of enrichedData) {
+                c.last_active_at = c.user_id ? (activityByUserId[c.user_id] || null) : null;
+            }
+        }
+
+        // Batch-fetch saved status for recruiter
+        if (accessContext.recruiterId && enrichedData.length > 0) {
+            const candidateIds = enrichedData.map((c: any) => c.id);
+            const { data: savedRows } = await this.supabase
+                .from('recruiter_saved_candidates')
+                .select('id, candidate_id')
+                .eq('recruiter_id', accessContext.recruiterId)
+                .in('candidate_id', candidateIds);
+
+            const savedMap = new Map<string, string>();
+            for (const r of savedRows || []) {
+                savedMap.set(r.candidate_id, r.id);
+            }
+            for (const c of enrichedData) {
+                c.is_saved = savedMap.has(c.id);
+                c.saved_record_id = savedMap.get(c.id) || null;
+            }
+        }
 
         // Batch-fetch skills if requested via include param
         const includeList = params.include ? params.include.split(',').map(s => s.trim()) : [];
@@ -272,6 +407,16 @@ export class CandidateRepository {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
             const enriched = await this.enrichWithRecruiterRelationships([data], accessContext.recruiterId ?? undefined);
             result = enriched[0];
+        }
+
+        // Fetch last_active_at from users table
+        if (result?.user_id) {
+            const { data: userData } = await this.supabase
+                .from('users')
+                .select('last_active_at')
+                .eq('id', result.user_id)
+                .single();
+            result.last_active_at = userData?.last_active_at || null;
         }
 
         // Fetch skills if requested via include param

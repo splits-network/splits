@@ -68,7 +68,7 @@ export default function DocumentList({
             }
         } catch (error) {
             console.error('Failed to download document:', error);
-            toast.error('Failed to download document');
+            toast.error("Document couldn't be downloaded. Try again.");
         } finally {
             setDownloading(null);
         }
@@ -91,7 +91,7 @@ export default function DocumentList({
             await fetchDocuments();
         } catch (error) {
             console.error('Failed to delete document:', error);
-            toast.error('Failed to delete document');
+            toast.error("Document couldn't be deleted. Try again.");
         }
     };
 

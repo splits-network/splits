@@ -4,7 +4,7 @@ metadata:
     name: api-gateway
     namespace: splits-network
 spec:
-    replicas: 3
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: api-gateway
@@ -13,6 +13,13 @@ spec:
             labels:
                 app: api-gateway
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: api-gateway
                   image: ${ACR_SERVER}/api-gateway:${IMAGE_TAG}
@@ -27,7 +34,7 @@ spec:
                       - name: SENTRY_DSN
                         value: "https://97c3c1c116302303b44a844fb1ea9d77@o4510570789732352.ingest.us.sentry.io/4510570904944640"
                       - name: CORS_ORIGIN
-                        value: "https://splits.network,https://www.splits.network,https://applicant.network,https://www.applicant.network,https://employment-networks.com,https://www.employment-networks.com,https://staging.splits.network,https://staging.applicant.network,https://staging.employment-networks.com"
+                        value: "https://splits.network,https://www.splits.network,https://applicant.network,https://www.applicant.network,https://employment-networks.com,https://www.employment-networks.com,https://staging.splits.network,https://staging.applicant.network,https://staging.employment-networks.com,https://video.splits.network,https://video.applicant.network,https://video.staging.splits.network,https://video.staging.applicant.network"
                       - name: SUPABASE_URL
                         valueFrom:
                             secretKeyRef:
@@ -117,6 +124,14 @@ spec:
                         value: "http://matching-service:3017"
                       - name: GAMIFICATION_SERVICE_URL
                         value: "http://gamification-service:3018"
+                      - name: VIDEO_SERVICE_URL
+                        value: "http://video-service:80"
+                      - name: CALL_SERVICE_URL
+                        value: "http://call-service:80"
+                      - name: SUPPORT_SERVICE_URL
+                        value: "http://support-service:80"
+                      - name: ONBOARDING_SERVICE_URL
+                        value: "http://onboarding-service:3023"
                   resources:
                       requests:
                           cpu: 200m
@@ -128,14 +143,18 @@ spec:
                       httpGet:
                           path: /health
                           port: 3000
-                      initialDelaySeconds: 30
+                      initialDelaySeconds: 60
                       periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
                   readinessProbe:
                       httpGet:
                           path: /health
                           port: 3000
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 15
                       periodSeconds: 5
+                      timeoutSeconds: 5
+                      failureThreshold: 2
 ---
 apiVersion: v1
 kind: Service

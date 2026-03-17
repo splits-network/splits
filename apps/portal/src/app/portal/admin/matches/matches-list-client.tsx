@@ -11,10 +11,9 @@ import {
     ErrorState,
     EmptyState,
 } from "@/hooks/use-standard-list";
-import { useUserProfile } from "@/contexts/user-profile-context";
 import { AdminPageHeader } from "../components";
 import { MatchTableRow } from "./components/match-table-row";
-import { TrueScoreUpsell } from "@/components/matches/true-score-upsell";
+import { UpgradePrompt } from "@/components/entitlements/upgrade-prompt";
 import type { EnrichedMatch, MatchTier, MatchStatus } from "@splits-network/shared-types";
 
 interface MatchFilters {
@@ -25,8 +24,6 @@ interface MatchFilters {
 
 export default function MatchesListClient() {
     const { getToken } = useAuth();
-    const { planTier } = useUserProfile();
-    const isPartner = planTier === "partner";
     const [dismissingId, setDismissingId] = useState<string | null>(null);
 
     const defaultFilters = useMemo<MatchFilters>(() => ({ status: "active" }), []);
@@ -128,8 +125,8 @@ export default function MatchesListClient() {
                 </fieldset>
             </div>
 
-            {/* True Score upsell for non-partner */}
-            {!isPartner && <TrueScoreUpsell />}
+            {/* True Score upsell for non-entitled users */}
+            <UpgradePrompt entitlement="ai_match_scoring" variant="card" />
 
             {/* Table */}
             {loading ? (

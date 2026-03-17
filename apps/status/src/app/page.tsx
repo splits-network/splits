@@ -31,7 +31,7 @@ async function fetchSystemHealth(): Promise<{
     try {
         const gatewayUrl =
             process.env.NEXT_PUBLIC_API_GATEWAY_URL || "http://localhost:3000";
-        const response = await fetch(`${gatewayUrl}/api/v2/system-health`, {
+        const response = await fetch(`${gatewayUrl}/api/v3/system-health`, {
             cache: "no-store",
             signal: AbortSignal.timeout(5000),
         });
@@ -68,7 +68,7 @@ async function fetchIncidents(): Promise<HealthIncident[]> {
         const gatewayUrl =
             process.env.NEXT_PUBLIC_API_GATEWAY_URL || "http://localhost:3000";
         const response = await fetch(
-            `${gatewayUrl}/api/v2/system-health/incidents?limit=50`,
+            `${gatewayUrl}/api/v3/system-health/incidents?limit=50`,
             {
                 cache: "no-store",
                 signal: AbortSignal.timeout(5000),

@@ -132,11 +132,11 @@ export default function ReputationManagementClient() {
             const client = createAuthenticatedClient(token);
 
             await client.post(`/recruiters/${recruiterId}/reputation/refresh`, {});
-            toast.success('Reputation recalculated');
+            toast.success('Reputation recalculated.');
             await refresh();
         } catch (err: any) {
             console.error('Failed to refresh reputation:', err);
-            toast.error('Failed to refresh reputation');
+            toast.error("Reputation couldn't be refreshed. Try again.");
         } finally {
             setRefreshingId(null);
         }

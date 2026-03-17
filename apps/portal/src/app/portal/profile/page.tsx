@@ -19,6 +19,7 @@ import { BioSection } from "@/components/basel/profile/bio-section";
 import { PrivacySection } from "@/components/basel/profile/privacy-section";
 import { SubscriptionTab } from "@/components/basel/profile/subscription-tab";
 import { PayoutsTab } from "@/components/basel/profile/payouts-tab";
+import { NotificationsSection } from "@/components/basel/profile/notifications-section";
 import {
     MarketplaceSettingsProvider,
     useMarketplaceSettings,
@@ -51,7 +52,7 @@ interface NavGroup {
     items: NavItem[];
 }
 
-const COMING_SOON: Section[] = ["notifications", "admin"];
+const COMING_SOON: Section[] = ["admin"];
 
 const MARKETPLACE_SECTIONS: Section[] = [
     "marketplace",
@@ -61,7 +62,6 @@ const MARKETPLACE_SECTIONS: Section[] = [
 ];
 
 const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
-    notifications: "Configure email and in-app notification preferences",
     admin: "Platform-wide settings, user management, and analytics",
 };
 
@@ -69,7 +69,8 @@ const COMING_SOON_DESCRIPTIONS: Record<string, string> = {
 
 export default function ProfileBaselPage() {
     const { getToken } = useAuth();
-    const { isLoading, isAdmin, isRecruiter, hasRole, profile } = useUserProfile();
+    const { isLoading, isAdmin, isRecruiter, hasRole, profile } =
+        useUserProfile();
 
     const isCompanyAdmin = hasRole("company_admin");
     const isPlatformAdmin = isAdmin;
@@ -314,21 +315,30 @@ export default function ProfileBaselPage() {
 
                 {/* Achievements */}
                 {active === "achievements" &&
-                    (profile?.recruiter_id || profile?.candidate_id) && (
+                    (profile?.recruiter_id ||
+                        profile?.candidate_id ||
+                        (profile?.organization_ids &&
+                            profile.organization_ids.length > 0)) && (
                         <AchievementsSection
                             entityId={
                                 (profile.recruiter_id ||
-                                    profile.candidate_id) as string
+                                    profile.candidate_id ||
+                                    profile.organization_ids?.[0]) as string
                             }
                             entityType={
                                 profile.recruiter_id
                                     ? "recruiter"
-                                    : "candidate"
+                                    : profile.candidate_id
+                                      ? "candidate"
+                                      : "company"
                             }
                             getToken={getToken}
                             createClient={createAuthenticatedClient}
                         />
                     )}
+
+                {/* Notifications */}
+                {active === "notifications" && <NotificationsSection />}
 
                 {/* Coming soon sections */}
                 {isComingSoon && (
@@ -347,7 +357,7 @@ export default function ProfileBaselPage() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Header ─────────────────────────────────────────────────── */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
@@ -367,7 +377,7 @@ export default function ProfileBaselPage() {
                                 settings.
                             </span>
                         </h1>
-                        <p className="scroll-reveal fade-up text-base text-neutral-content/50 max-w-xl">
+                        <p className="scroll-reveal fade-up text-base text-base-content/50 max-w-xl">
                             Manage your profile, security, notifications, and
                             integrations all in one place.
                         </p>

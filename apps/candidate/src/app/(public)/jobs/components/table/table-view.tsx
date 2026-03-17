@@ -10,7 +10,7 @@ const COLUMNS = [
     "Location",
     "Salary",
     "Type",
-    "Status",
+    "Match",
     "Posted",
 ];
 
@@ -21,7 +21,7 @@ const RESPONSIVE_CLASSES = [
     "hidden md:table-cell", // location
     "hidden lg:table-cell", // salary
     "hidden xl:table-cell", // type
-    "", // status
+    "hidden lg:table-cell", // match
     "hidden md:table-cell", // posted
 ];
 

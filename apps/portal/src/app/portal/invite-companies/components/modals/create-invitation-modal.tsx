@@ -44,7 +44,7 @@ export default function CreateInvitationModal({
                 send_email: sendEmail && !!invitedEmail,
             });
 
-            toast.success("Invitation created successfully");
+            toast.success("Invitation created.");
             onSuccess();
             handleClose();
             return;
@@ -77,14 +77,14 @@ export default function CreateInvitationModal({
     const handleCopyCode = async () => {
         if (createdInvitation?.invite_code) {
             await navigator.clipboard.writeText(createdInvitation.invite_code);
-            toast.success("Code copied to clipboard");
+            toast.info("Code copied to clipboard.");
         }
     };
 
     const handleCopyLink = async () => {
         if (createdInvitation?.invite_url) {
             await navigator.clipboard.writeText(createdInvitation.invite_url);
-            toast.success("Link copied to clipboard");
+            toast.info("Link copied to clipboard.");
         }
     };
 
@@ -106,7 +106,7 @@ export default function CreateInvitationModal({
         } else {
             const message = `${shareData.text}\n\n${createdInvitation.invite_url}`;
             await navigator.clipboard.writeText(message);
-            toast.success("Invitation message copied to clipboard");
+            toast.info("Message copied to clipboard.");
         }
     };
 
@@ -119,10 +119,10 @@ export default function CreateInvitationModal({
                 style={{ borderRadius: 0 }}
             >
                 {/* Basel header */}
-                <div className="bg-neutral text-neutral-content px-6 py-5 relative">
+                <div className="bg-base-300 text-base-content px-6 py-5 relative">
                     <button
                         type="button"
-                        className="btn btn-sm btn-square btn-ghost text-neutral-content absolute right-3 top-3 "
+                        className="btn btn-sm btn-square btn-ghost text-base-content absolute right-3 top-3 "
                         onClick={handleClose}
                         disabled={isSubmitting}
                     >

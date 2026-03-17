@@ -2,16 +2,28 @@
  * Firm Service - Business logic for firms, members, and invitations
  */
 
+import { SupabaseClient } from '@supabase/supabase-js';
 import { EventPublisherV2, IEventPublisher } from '../shared/events';
+import { EntitlementChecker } from '@splits-network/shared-access-context';
 import { FirmRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmRequest, CreateFirmInvitationRequest, TransferOwnershipRequest, PublicFirmFilters, VALID_PLACEMENT_TYPES, VALID_TEAM_SIZE_RANGES } from './types';
 
 export class FirmServiceV2 {
+    private entitlementChecker: EntitlementChecker;
+
     constructor(
         private repository: FirmRepository,
-        private eventPublisher: IEventPublisher
-    ) {}
+        private eventPublisher: IEventPublisher,
+        supabase?: SupabaseClient
+    ) {
+        if (supabase) {
+            this.entitlementChecker = new EntitlementChecker(supabase);
+        } else {
+            // Fallback: create from repository's connection (for backwards compatibility)
+            this.entitlementChecker = new EntitlementChecker(null as any);
+        }
+    }
 
     // ── Firms ──
 
@@ -53,9 +65,9 @@ export class FirmServiceV2 {
             throw { statusCode: 400, message: 'Firm name is required' };
         }
 
-        // Validate partner subscription before allowing firm creation
-        const hasPartner = await this.repository.hasPartnerSubscription(clerkUserId);
-        if (!hasPartner) {
+        // Validate entitlement before allowing firm creation
+        const canCreate = await this.entitlementChecker.hasEntitlementByClerkId(clerkUserId, 'firm_creation');
+        if (!canCreate) {
             throw { statusCode: 403, message: 'An active Partner subscription is required to create a firm' };
         }
 
@@ -228,7 +240,7 @@ export class FirmServiceV2 {
             throw { statusCode: 400, message: 'Could not resolve new owner user' };
         }
 
-        const hasPartner = await this.repository.hasPartnerSubscriptionByUserId(newOwnerUserId);
+        const hasPartner = await this.entitlementChecker.hasEntitlement(newOwnerUserId, 'firm_creation');
         if (!hasPartner) {
             throw { statusCode: 403, message: 'New owner must have an active Partner subscription' };
         }

@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { useFirmConnectStatus } from "@/hooks/use-firm-connect-status";
 import type { Firm, FirmMember } from "../../types";
+import { BaselAlertBox } from "@splits-network/basel-ui";
 import { ReadinessChecklist, OrientationStrip } from "./billing-orientation";
 import { BillingSendColumn } from "./billing-send-column";
 import { BillingReceiveColumn } from "./billing-receive-column";
@@ -47,9 +49,9 @@ interface BillingSectionProps {
 export function BillingSection({ firm, members }: BillingSectionProps) {
     const { getToken } = useAuth();
     const { profile } = useUserProfile();
+    const firmConnect = useFirmConnectStatus(firm.id);
 
     const [billingProfile, setBillingProfile] = useState<BillingProfile | null>(null);
-    const [connectStatus, setConnectStatus] = useState<ConnectStatus | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -57,6 +59,18 @@ export function BillingSection({ firm, members }: BillingSectionProps) {
         (m) => m.recruiter?.user_id === profile?.id && m.status === "active",
     );
     const isAdmin = currentMember?.role === "owner" || currentMember?.role === "admin";
+
+    // Build connectStatus from hook for BillingReceiveColumn
+    const connectStatus: ConnectStatus | null = firmConnect.hasAccount ? {
+        account_id: firmConnect.accountId || "",
+        firm_id: firm.id,
+        charges_enabled: firmConnect.onboarded,
+        payouts_enabled: firmConnect.onboarded,
+        details_submitted: firmConnect.onboarded,
+        onboarded: firmConnect.onboarded,
+        bank_account: firmConnect.bankAccount,
+        pending_balance: firmConnect.pendingBalance,
+    } : null;
 
     const loadBillingData = useCallback(async () => {
         try {
@@ -78,13 +92,6 @@ export function BillingSection({ firm, members }: BillingSectionProps) {
                 } catch {
                     // Payment method may not be retrievable
                 }
-            }
-
-            try {
-                const connectRes = await client.get(`/firm-stripe-connect/${firm.id}/account`);
-                if (connectRes?.data) setConnectStatus(connectRes.data);
-            } catch {
-                // Connect account may not exist yet
             }
         } catch {
             // Billing may not be set up yet
@@ -120,11 +127,29 @@ export function BillingSection({ firm, members }: BillingSectionProps) {
     }
 
     const billingConfigured = !!billingProfile;
+    const paymentMethodConfigured = !!billingProfile?.stripe_default_payment_method_id;
     const payoutConfigured = !!connectStatus?.onboarded;
     const bothConfigured = billingConfigured && payoutConfigured;
+    const billingReady = billingConfigured && paymentMethodConfigured;
 
     return (
         <div className="space-y-4">
+            {/* Contextual explanation — always visible */}
+            <BaselAlertBox variant="info" title="How firm billing works">
+                Splits Network is commission-based — your firm only pays when a recruiter successfully
+                fills a role you posted for an off-platform company. There are no upfront fees or subscriptions.
+                Your billing profile and payment method are used to process placement invoices when a hire is confirmed.
+            </BaselAlertBox>
+
+            {/* Action-required warning — shown when billing is incomplete */}
+            {!billingReady && (
+                <BaselAlertBox variant="warning" title="Billing setup required to post live roles">
+                    Your firm&apos;s roles cannot go live until billing setup is complete.
+                    Configure your billing profile and payment method below to start posting
+                    roles for your off-platform clients.
+                </BaselAlertBox>
+            )}
+
             <ReadinessChecklist
                 billingConfigured={billingConfigured}
                 payoutConfigured={payoutConfigured}
@@ -143,7 +168,8 @@ export function BillingSection({ firm, members }: BillingSectionProps) {
                     firmId={firm.id}
                     firmName={firm.name}
                     connectStatus={connectStatus}
-                    onRefresh={loadBillingData}
+                    onSetup={firmConnect.createAccountAndRedirect}
+                    onManage={firmConnect.openStripeOnboarding}
                 />
             </div>
         </div>

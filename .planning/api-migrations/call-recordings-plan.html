@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 to V3 Migration Plan: call-recordings | Splits Network</title>
+<style>
+  :root {
+    --indigo: #233876;
+    --teal: #0f9d8a;
+    --magenta: #db2777;
+    --bg: #fafbfc;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #1a202c;
+    --text-muted: #64748b;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --yellow: #ca8a04;
+    --yellow-bg: #fef9c3;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --blue-bg: #dbeafe;
+    --code-bg: #f1f5f9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+
+  .header {
+    background: var(--indigo);
+    color: #fff;
+    padding: 40px 32px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .header .kicker {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 4px;
+  }
+
+  .header .subtitle {
+    font-size: 15px;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .header .meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .header .meta span { display: flex; align-items: center; gap: 6px; }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  section {
+    margin-bottom: 40px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .section-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--indigo);
+  }
+
+  .section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 0;
+    background: var(--indigo);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .toggle-icon {
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+
+  .section-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .section-content.collapsed {
+    max-height: 0 !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  th {
+    background: var(--code-bg);
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 13px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-done { background: var(--green-bg); color: var(--green); }
+  .badge-partial { background: var(--yellow-bg); color: var(--yellow); }
+  .badge-missing { background: var(--red-bg); color: var(--red); }
+  .badge-action { background: #ede9fe; color: #7c3aed; }
+  .badge-view { background: var(--blue-bg); color: #2563eb; }
+  .badge-crud { background: var(--green-bg); color: var(--green); }
+  .badge-webhook { background: #fce7f3; color: var(--magenta); }
+  .badge-new { background: var(--teal); color: #fff; }
+
+  .file-tree {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .file-tree .new { color: var(--green); font-weight: 600; }
+  .file-tree .existing { color: var(--text-muted); }
+  .file-tree .rewrite { color: var(--yellow); font-weight: 600; }
+  .file-tree .comment { color: var(--text-muted); font-style: italic; }
+
+  .issue-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    padding: 12px 16px;
+    margin-bottom: 12px;
+  }
+
+  .issue-card.warn { border-left-color: var(--yellow); }
+  .issue-card.info { border-left-color: var(--teal); }
+
+  .issue-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .issue-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .stat-card .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--indigo);
+  }
+
+  .stat-card .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .consumer-group {
+    margin-bottom: 20px;
+  }
+
+  .consumer-group h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--indigo);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .consumer-item {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .consumer-item:last-child { border-bottom: none; }
+
+  .consumer-file { font-family: monospace; color: var(--indigo); min-width: 0; word-break: break-all; flex: 1; }
+  .consumer-desc { color: var(--text-muted); flex: 1; }
+
+  .note-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 16px;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+
+  .note-box.caution {
+    background: #fffbeb;
+    border-color: #fde68a;
+  }
+
+  .note-box strong { display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="kicker">V2 to V3 Migration Plan</div>
+  <h1>call-recordings</h1>
+  <div class="subtitle">video-service &mdash; Full migration scope analysis with consumer map, route classification, and file plan</div>
+  <div class="meta">
+    <span>Generated: 2026-03-16</span>
+    <span>Service: video-service</span>
+    <span>Status: Partial V3 exists (needs rewrite)</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- SECTION 1: V2 API Surface -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">1</span>
+    <h2>V2 API Surface</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Auth</th>
+          <th>Request Shape</th>
+          <th>Response Shape</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>POST</code></td>
+          <td><code>/api/v2/calls/:id/recording/start</code></td>
+          <td>Required (host only)</td>
+          <td>None</td>
+          <td><code>{ data: { recording_status: 'recording' } }</code></td>
+          <td>Creates LiveKit egress, creates call_recordings row. Verifies caller is host via call_participants.</td>
+        </tr>
+        <tr>
+          <td><code>POST</code></td>
+          <td><code>/api/v2/calls/:id/recording/stop</code></td>
+          <td>Required (host only)</td>
+          <td>None</td>
+          <td><code>{ data: { recording_status: 'processing' } }</code></td>
+          <td>Stops LiveKit egress. Verifies caller is host.</td>
+        </tr>
+        <tr>
+          <td><code>GET</code></td>
+          <td><code>/api/v2/calls/:id/recording/playback-url</code></td>
+          <td>Required (participant)</td>
+          <td>Query: <code>?recording_id=uuid</code></td>
+          <td><code>{ data: { url, expires_at } }</code></td>
+          <td>Generates Supabase Storage signed URL. Verifies caller is participant.</td>
+        </tr>
+        <tr>
+          <td><code>POST</code></td>
+          <td><code>/api/v2/calls/recording/webhook</code></td>
+          <td>None (LiveKit signature)</td>
+          <td>LiveKit webhook event body</td>
+          <td><code>{ received: true }</code></td>
+          <td>Handles EGRESS_COMPLETE and EGRESS_FAILED. Publishes <code>call.recording_ready</code> event. Always returns 200.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:24px; font-size:15px; font-weight:600;">V2 Repository Methods (call-repository.ts)</h3>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Table</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>findCallById()</code></td><td>calls</td><td>Verify call exists and is active before recording</td></tr>
+        <tr><td><code>findRecordingByEgressId()</code></td><td>call_recordings</td><td>Webhook: find recording by egress ID</td></tr>
+        <tr><td><code>findActiveRecordingByCallId()</code></td><td>call_recordings</td><td>Stop recording: find active egress</td></tr>
+        <tr><td><code>createRecording()</code></td><td>call_recordings</td><td>Insert new recording row (pending status)</td></tr>
+        <tr><td><code>updateRecordingStatus()</code></td><td>call_recordings</td><td>Update status, blob_url, duration, etc.</td></tr>
+        <tr><td><code>getCallParticipants()</code></td><td>call_participants</td><td>Auth: verify host/participant role</td></tr>
+        <tr><td><code>findReadyRecording()</code></td><td>call_recordings</td><td>Get blob_url for playback URL generation</td></tr>
+        <tr><td><code>resolveUserId()</code></td><td>users</td><td>Convert clerk_user_id to internal user ID</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:24px; font-size:15px; font-weight:600;">V2 Service Methods (call-recording-service.ts)</h3>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Purpose</th><th>External Deps</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>startRecording()</code></td><td>Validate call status, create row, start LiveKit egress</td><td>LiveKit EgressClient, Supabase S3</td></tr>
+        <tr><td><code>stopRecording()</code></td><td>Find active recording, stop egress, update status</td><td>LiveKit EgressClient</td></tr>
+        <tr><td><code>handleEgressComplete()</code></td><td>Update recording with blob_url, duration, file_size</td><td>None (DB only)</td></tr>
+        <tr><td><code>handleEgressFailed()</code></td><td>Mark recording as failed</td><td>None (DB only)</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:24px; font-size:15px; font-weight:600;">Events Published</h3>
+    <table>
+      <thead>
+        <tr><th>Event</th><th>Published By</th><th>Payload</th><th>Consumers</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>call.recording_ready</code></td>
+          <td>V2 webhook handler</td>
+          <td><code>{ call_id, recording_url, duration_seconds, file_size_bytes, participants[] }</code></td>
+          <td>ai-service (transcription pipeline), notification-service (email + in-app notification)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: Existing V3 Surface -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">2</span>
+    <h2>Existing V3 Surface &amp; Issues</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Status</th>
+          <th>Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>GET</code></td>
+          <td><code>/api/v3/call-recordings</code></td>
+          <td><span class="badge badge-partial">Partial</span></td>
+          <td>N+1 query (loops over callIds to check participants). Pagination is broken (total from DB, data post-filtered). No AccessContextResolver. No typed errors.</td>
+        </tr>
+        <tr>
+          <td><code>GET</code></td>
+          <td><code>/api/v3/call-recordings/:id/playback-url</code></td>
+          <td><span class="badge badge-partial">Partial</span></td>
+          <td>Wrong URL pattern (should be a view: <code>/:id/view/playback</code>). Repository throws HTTP errors. Service throws <code>Object.assign</code> errors instead of typed errors.</td>
+        </tr>
+        <tr>
+          <td><code>POST</code></td>
+          <td><code>/api/v3/calls/recording/webhook</code></td>
+          <td><span class="badge badge-partial">Partial</span></td>
+          <td>Imports V2 <code>CallRecordingService</code> (cross-version dependency). Wrong URL pattern (should be action: <code>/call-recordings/actions/webhook</code>).</td>
+        </tr>
+        <tr>
+          <td><code>GET</code></td>
+          <td><code>/api/v3/call-recordings/:id</code></td>
+          <td><span class="badge badge-missing">Missing</span></td>
+          <td>Core CRUD: get by ID not implemented</td>
+        </tr>
+        <tr>
+          <td><code>POST</code></td>
+          <td><code>/api/v3/call-recordings</code></td>
+          <td><span class="badge badge-missing">Missing</span></td>
+          <td>Core CRUD: create not implemented (internal use for start-recording action)</td>
+        </tr>
+        <tr>
+          <td><code>PATCH</code></td>
+          <td><code>/api/v3/call-recordings/:id</code></td>
+          <td><span class="badge badge-missing">Missing</span></td>
+          <td>Core CRUD: update not implemented</td>
+        </tr>
+        <tr>
+          <td><code>DELETE</code></td>
+          <td><code>/api/v3/call-recordings/:id</code></td>
+          <td><span class="badge badge-missing">Missing</span></td>
+          <td>Core CRUD: delete not implemented</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:24px; font-size:15px; font-weight:600;">Detailed Issues</h3>
+
+    <div class="issue-card">
+      <h4>N+1 Query in LIST Endpoint</h4>
+      <p>
+        <code>service.ts:22-29</code> &mdash; After fetching all recordings, the service loops through unique <code>call_id</code> values
+        and calls <code>getCallParticipants()</code> for each one. This is an N+1 query that will degrade as recording volume grows.
+        The correct fix: the LIST endpoint should be a flat <code>select('*')</code> in core CRUD with no participant checks.
+        Participant-scoped listing belongs in a view.
+      </p>
+    </div>
+
+    <div class="issue-card">
+      <h4>Broken Pagination</h4>
+      <p>
+        <code>service.ts:33-38</code> &mdash; The <code>total</code> count comes from the database query, but the <code>data</code>
+        array is post-filtered by participant membership. Result: <code>total</code> says 50 but only 12 items returned.
+        <code>total_pages</code> is wrong. Frontend pagination will break.
+      </p>
+    </div>
+
+    <div class="issue-card">
+      <h4>Wrong URL Pattern for Playback</h4>
+      <p>
+        <code>routes.ts:35</code> &mdash; <code>/api/v3/call-recordings/:id/playback-url</code> is a custom path segment under <code>/:id</code>.
+        Per V3 convention, this should be a view: <code>GET /api/v3/call-recordings/:id/view/playback</code>.
+        It returns a shaped response (signed URL with expiry), not the raw recording row.
+      </p>
+    </div>
+
+    <div class="issue-card warn">
+      <h4>Cross-Version Dependency (V3 Imports V2)</h4>
+      <p>
+        <code>v3/recordings/webhook-handler.ts:15</code> &mdash; Imports <code>CallRecordingService</code> from <code>../../v2/calls/call-recording-service</code>.
+        Also imports <code>IEventPublisher</code> from <code>../../v2/shared/events</code>.
+        The V3 webhook handler depends on V2 code, blocking V2 removal.
+      </p>
+    </div>
+
+    <div class="issue-card warn">
+      <h4>Repository Throws HTTP Errors</h4>
+      <p>
+        <code>repository.ts:50-51,67-68,91</code> &mdash; The V3 repository uses <code>throw Object.assign(new Error(...), { statusCode: ... })</code>.
+        Repositories must never throw HTTP-typed errors. They should return <code>null</code> and let the service decide.
+      </p>
+    </div>
+
+    <div class="issue-card warn">
+      <h4>No AccessContextResolver</h4>
+      <p>
+        Neither the V3 service nor repository uses <code>AccessContextResolver</code>. Participant verification is done manually
+        with <code>resolveUserId()</code> + <code>getCallParticipants()</code>. The service should resolve access context from the
+        shared package.
+      </p>
+    </div>
+
+    <div class="issue-card warn">
+      <h4>No Typed Errors</h4>
+      <p>
+        All errors use <code>Object.assign(new Error(...), { statusCode })</code> instead of
+        <code>BadRequestError</code>, <code>NotFoundError</code>, <code>ForbiddenError</code> from <code>@splits-network/shared-fastify</code>.
+      </p>
+    </div>
+
+    <div class="issue-card info">
+      <h4>V3 Route Registry Imports V2</h4>
+      <p>
+        <code>v3/routes.ts:7-8</code> &mdash; The V3 route registry imports <code>IEventPublisher</code> from V2 shared and
+        <code>CallRecordingService</code> from V2. This must be resolved during migration.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: Consumer Map -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">3</span>
+    <h2>Consumer Map</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="consumer-group">
+      <h4>Frontend: apps/portal (Direct API Consumers)</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/[id]/components/recording-tab.tsx:68</span>
+        <span class="consumer-desc">Calls <code>GET /calls/:callId/recordings/:recordingId/playback-url</code> via call-service V2 gateway proxy. Fetches signed playback URL for audio/video player.</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/hooks/use-call-detail.ts:116</span>
+        <span class="consumer-desc">Calls <code>GET /calls/:id?include=recordings,transcript,summary,notes,participants,entity_links</code> via call-service V2. Returns recordings array as part of call detail.</span>
+      </div>
+    </div>
+
+    <div class="consumer-group">
+      <h4>Frontend: apps/portal (Indirect References)</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/[id]/call-detail-client.tsx:7,77-83</span>
+        <span class="consumer-desc">Imports and renders <code>RecordingTab</code>. Passes <code>call.recordings</code> from detail hook.</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/[id]/components/pipeline-status.tsx:4,10</span>
+        <span class="consumer-desc">Uses <code>CallRecording</code> type for pipeline step visualization.</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/components/entitlements/entitlement-copy.ts:66</span>
+        <span class="consumer-desc">Static entitlement copy for <code>call_recording</code> feature gate (not an API consumer).</span>
+      </div>
+    </div>
+
+    <div class="consumer-group">
+      <h4>API Gateway</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">services/api-gateway/src/routes/v2/calls.ts:33-54</span>
+        <span class="consumer-desc">V2 proxy: <code>POST /api/v2/calls/recording/webhook</code> &rarr; video-service</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">services/api-gateway/src/routes/v2/calls.ts:56-85</span>
+        <span class="consumer-desc">V2 proxy: <code>ALL /api/v2/calls/:id/recording/*</code> (start, stop, playback-url) &rarr; video-service</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">services/api-gateway/src/routes/v3/video.ts:14-15</span>
+        <span class="consumer-desc">V3 proxy: <code>GET /call-recordings</code> and <code>GET /call-recordings/:id/playback-url</code> &rarr; video-service</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">services/api-gateway/src/index.ts:500-502</span>
+        <span class="consumer-desc">Auth bypass: skips JWT validation for <code>POST /api/v2/calls/recording/webhook</code></span>
+      </div>
+    </div>
+
+    <div class="consumer-group">
+      <h4>Backend: call-service (Playback URL)</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">services/call-service/src/v2/routes.ts:193-226</span>
+        <span class="consumer-desc"><code>GET /api/v2/calls/:id/recordings/:recordingId/playback-url</code> &mdash; call-service has its own playback URL route that queries <code>call_recordings</code> table directly. This is the route the portal frontend actually uses (not the video-service route).</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">services/call-service/src/v2/artifact-repository.ts:141-184</span>
+        <span class="consumer-desc"><code>getRecording()</code> and <code>generateRecordingSignedUrl()</code> &mdash; call-service queries <code>call_recordings</code> table and generates signed URLs independently.</span>
+      </div>
+    </div>
+
+    <div class="consumer-group">
+      <h4>Backend: ai-service (Event Consumer)</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">services/ai-service/src/domain-consumer.ts:53,139,301</span>
+        <span class="consumer-desc">Consumes <code>call.recording_ready</code> event to trigger transcription + summarization pipeline.</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">services/ai-service/src/v2/call-pipeline/repository.ts:172-196</span>
+        <span class="consumer-desc"><code>getRecordingSignedUrl()</code> &mdash; Queries <code>call_recordings</code> table to get blob_url for transcription.</span>
+      </div>
+    </div>
+
+    <div class="consumer-group">
+      <h4>Backend: notification-service (Event Consumer)</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">services/notification-service/src/domain-consumer.ts:421,829</span>
+        <span class="consumer-desc">Consumes <code>call.recording_ready</code> event to send email and in-app notifications.</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">services/notification-service/src/jobs/expire-recording-cleanup.ts</span>
+        <span class="consumer-desc">CronJob: Queries <code>call_recordings</code> table directly for expiry cleanup (warning emails + deletion). Not an API consumer.</span>
+      </div>
+    </div>
+
+    <div class="note-box caution">
+      <strong>Key Discovery: Dual Playback URL Routes</strong>
+      The portal frontend calls <code>/calls/:id/recordings/:recordingId/playback-url</code> which is handled by <strong>call-service</strong>
+      (not video-service). The video-service V2 route <code>/calls/:id/recording/playback-url</code> and V3 route <code>/call-recordings/:id/playback-url</code>
+      appear to be unused by the frontend. The migration must consolidate this to a single V3 endpoint.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: Migration Classification -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">4</span>
+    <h2>Migration Classification</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+    <table>
+      <thead>
+        <tr>
+          <th>V2 Route</th>
+          <th>Category</th>
+          <th>V3 Destination</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>GET /v2/calls/:id?include=recordings</code><br>(via call-service)</td>
+          <td><span class="badge badge-crud">CRUD</span></td>
+          <td><code>GET /v3/call-recordings?call_id=:id</code></td>
+          <td>Recordings are returned as part of call detail include. In V3, the frontend fetches recordings separately via core CRUD list filtered by call_id.</td>
+        </tr>
+        <tr>
+          <td>(new)</td>
+          <td><span class="badge badge-crud">CRUD</span></td>
+          <td><code>GET /v3/call-recordings/:id</code></td>
+          <td>Standard get by ID. Flat <code>select('*')</code> from call_recordings.</td>
+        </tr>
+        <tr>
+          <td>(new, internal)</td>
+          <td><span class="badge badge-crud">CRUD</span></td>
+          <td><code>POST /v3/call-recordings</code></td>
+          <td>Create recording row. Used internally by start-recording action. May not be exposed in gateway.</td>
+        </tr>
+        <tr>
+          <td>(new, internal)</td>
+          <td><span class="badge badge-crud">CRUD</span></td>
+          <td><code>PATCH /v3/call-recordings/:id</code></td>
+          <td>Update recording row (status, blob_url, etc). Used internally by webhook action.</td>
+        </tr>
+        <tr>
+          <td>(new)</td>
+          <td><span class="badge badge-crud">CRUD</span></td>
+          <td><code>DELETE /v3/call-recordings/:id</code></td>
+          <td>Soft delete a recording.</td>
+        </tr>
+        <tr>
+          <td><code>GET /v2/calls/:id/recording/playback-url</code><br><code>GET /v2/calls/:id/recordings/:recId/playback-url</code></td>
+          <td><span class="badge badge-view">VIEW</span></td>
+          <td><code>GET /v3/call-recordings/:id/view/playback</code></td>
+          <td>Returns shaped data (signed URL with expiry), not flat row. Requires participant verification. Consolidates two V2 routes.</td>
+        </tr>
+        <tr>
+          <td><code>POST /v2/calls/:id/recording/start</code></td>
+          <td><span class="badge badge-action">ACTION</span></td>
+          <td><code>POST /v3/call-recordings/actions/start</code></td>
+          <td>Triggers LiveKit egress, creates recording row. Major side effect. Requires host verification. Body: <code>{ call_id }</code>.</td>
+        </tr>
+        <tr>
+          <td><code>POST /v2/calls/:id/recording/stop</code></td>
+          <td><span class="badge badge-action">ACTION</span></td>
+          <td><code>POST /v3/call-recordings/:id/actions/stop</code></td>
+          <td>Stops LiveKit egress, transitions status. Side effect on external system. Requires host verification.</td>
+        </tr>
+        <tr>
+          <td><code>POST /v2/calls/recording/webhook</code></td>
+          <td><span class="badge badge-action">ACTION</span></td>
+          <td><code>POST /v3/call-recordings/actions/livekit-webhook</code></td>
+          <td>External webhook receiver. No user auth (LiveKit signature). Updates recording status, publishes event. Always returns 200.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note-box">
+      <strong>Start Recording: Collection Action, Not Instance Action</strong>
+      <code>POST /v3/call-recordings/actions/start</code> is a collection-level action because it <em>creates</em> a new recording row.
+      The call_id is provided in the request body. The response returns the new recording. This differs from stop, which operates
+      on an existing recording instance.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: Role-Based Authorization -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">5</span>
+    <h2>Role-Based Authorization Analysis</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+    <table>
+      <thead>
+        <tr>
+          <th>Operation</th>
+          <th>Who Can Access</th>
+          <th>Authorization Method</th>
+          <th>Separate Views Needed?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>List recordings</td>
+          <td>Any authenticated user</td>
+          <td>Core CRUD returns flat data. Scoping (by participant) handled via AccessContext in service layer filtering by user's calls.</td>
+          <td>No &mdash; same data shape for all roles. Row-level filtering via access context.</td>
+        </tr>
+        <tr>
+          <td>Get recording by ID</td>
+          <td>Call participant</td>
+          <td>Service verifies caller is participant on the recording's call.</td>
+          <td>No &mdash; same data for all participants.</td>
+        </tr>
+        <tr>
+          <td>Playback URL (view)</td>
+          <td>Call participant</td>
+          <td>Service verifies caller is participant. Returns signed URL.</td>
+          <td>No &mdash; all participants see same playback URL.</td>
+        </tr>
+        <tr>
+          <td>Start recording (action)</td>
+          <td>Call host only</td>
+          <td>Service verifies caller is host via call_participants role check.</td>
+          <td>No &mdash; single action, host-gated in service layer.</td>
+        </tr>
+        <tr>
+          <td>Stop recording (action)</td>
+          <td>Call host only</td>
+          <td>Same host verification.</td>
+          <td>No &mdash; single action, host-gated in service layer.</td>
+        </tr>
+        <tr>
+          <td>Webhook</td>
+          <td>LiveKit (no user auth)</td>
+          <td>LiveKit webhook signature verification.</td>
+          <td>No &mdash; system-to-system.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note-box">
+      <strong>No Separate Role-Based Views Needed</strong>
+      All roles (host, participant) see the same recording data. The only difference is write permission (host can start/stop),
+      which is enforced in the service layer of each action. Standard pattern: access context + service-level checks.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: Frontend Impact -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">6</span>
+    <h2>Frontend Impact</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="consumer-group">
+      <h4>Files Requiring URL Updates (apps/portal)</h4>
+
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/[id]/components/recording-tab.tsx</span>
+        <span class="consumer-desc">
+          <strong>Line 68:</strong> Change <code>/calls/:callId/recordings/:recId/playback-url</code>
+          &rarr; <code>/call-recordings/:recId/view/playback</code>.
+          Response shape stays the same: <code>{ data: { url, expires_at } }</code>.
+        </span>
+      </div>
+
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/hooks/use-call-detail.ts</span>
+        <span class="consumer-desc">
+          <strong>Line 116:</strong> Currently fetches <code>/calls/:id?include=recordings</code> from call-service.
+          In V3, recordings should be fetched separately: <code>GET /v3/call-recordings?call_id=:id</code>.
+          This may require splitting the detail hook or adding a parallel fetch for recordings.
+        </span>
+      </div>
+    </div>
+
+    <div class="consumer-group">
+      <h4>Files Requiring No URL Changes (Type-Only References)</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/[id]/call-detail-client.tsx</span>
+        <span class="consumer-desc">Uses <code>RecordingTab</code> component and passes data. No direct API call. May need prop adjustment if recording fetch changes.</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/app/portal/calls/[id]/components/pipeline-status.tsx</span>
+        <span class="consumer-desc">Type import only. No changes needed unless <code>CallRecording</code> type shape changes.</span>
+      </div>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/portal/src/components/entitlements/entitlement-copy.ts</span>
+        <span class="consumer-desc">Static feature gate copy. No API dependency.</span>
+      </div>
+    </div>
+
+    <div class="consumer-group">
+      <h4>No Impact (apps/candidate, apps/corporate)</h4>
+      <div class="consumer-item">
+        <span class="consumer-file">apps/candidate, apps/corporate</span>
+        <span class="consumer-desc">Only legal page text mentions "recording". No API consumers.</span>
+      </div>
+    </div>
+
+    <div class="note-box caution">
+      <strong>Frontend Migration Depends on call-service V3</strong>
+      The portal's <code>use-call-detail.ts</code> hook fetches recordings via <code>?include=recordings</code> on the call-service endpoint.
+      When call-service is migrated to V3, this include pattern will be removed. The frontend must then fetch recordings from the
+      video-service V3 endpoint (<code>/v3/call-recordings?call_id=...</code>) separately. This is a cross-service frontend migration dependency.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 7: V3 File Plan -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">7</span>
+    <h2>V3 File Plan</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+    <div class="file-tree"><span class="comment">services/video-service/src/v3/</span>
+<span class="comment">|</span>
+<span class="rewrite">|-- routes.ts</span>                                  <span class="comment">-- REWRITE: Remove V2 imports, register all call-recording routes</span>
+<span class="comment">|</span>
+<span class="comment">|-- call-recordings/</span>
+<span class="rewrite">|   |-- types.ts</span>                               <span class="comment">-- REWRITE: Add create/update input types, JSON schemas, filter types</span>
+<span class="rewrite">|   |-- repository.ts</span>                          <span class="comment">-- REWRITE: Core CRUD only (flat select), remove HTTP errors, remove participant queries</span>
+<span class="rewrite">|   |-- service.ts</span>                             <span class="comment">-- REWRITE: Add AccessContextResolver, typed errors, event publishing, LiveKit logic</span>
+<span class="rewrite">|   |-- routes.ts</span>                              <span class="comment">-- REWRITE: All 5 core CRUD routes + view/action registration</span>
+<span class="comment">|   |</span>
+<span class="comment">|   |-- views/</span>
+<span class="new">|   |   |-- playback.route.ts</span>                  <span class="comment">-- NEW: GET /call-recordings/:id/view/playback</span>
+<span class="new">|   |   |-- playback.service.ts</span>                <span class="comment">-- NEW: Participant verification, signed URL generation</span>
+<span class="new">|   |   |-- playback.repository.ts</span>             <span class="comment">-- NEW: Query recording blob_url, call_participants join</span>
+<span class="comment">|   |</span>
+<span class="comment">|   |-- actions/</span>
+<span class="new">|   |   |-- start.route.ts</span>                     <span class="comment">-- NEW: POST /call-recordings/actions/start</span>
+<span class="new">|   |   |-- start.service.ts</span>                   <span class="comment">-- NEW: Host verification, call status validation, LiveKit egress start</span>
+<span class="new">|   |   |-- start.repository.ts</span>                <span class="comment">-- NEW: Create recording row, find call, check participants</span>
+<span class="new">|   |   |-- stop.route.ts</span>                      <span class="comment">-- NEW: POST /call-recordings/:id/actions/stop</span>
+<span class="new">|   |   |-- stop.service.ts</span>                    <span class="comment">-- NEW: Host verification, LiveKit egress stop</span>
+<span class="new">|   |   |-- stop.repository.ts</span>                 <span class="comment">-- NEW: Find active recording, update status</span>
+<span class="new">|   |   |-- livekit-webhook.route.ts</span>           <span class="comment">-- NEW: POST /call-recordings/actions/livekit-webhook</span>
+<span class="new">|   |   |-- livekit-webhook.service.ts</span>        <span class="comment">-- NEW: Signature verification, egress complete/failed, event publishing</span>
+<span class="new">|   |   |-- livekit-webhook.repository.ts</span>     <span class="comment">-- NEW: Find by egress_id, update status, get participants</span>
+<span class="comment">|</span>
+<span class="comment">|-- shared/</span>
+<span class="new">|   |-- signed-url.ts</span>                          <span class="comment">-- NEW: Extracted signed URL helper (shared by playback view and webhook)</span>
+<span class="new">|   |-- events.ts</span>                              <span class="comment">-- NEW: Re-export from @splits-network/shared-job-queue (remove V2 import)</span>
+<span class="comment">|</span>
+<span class="comment">|-- recordings/</span>                                <span class="comment">-- DELETE: Remove this directory (webhook moves to call-recordings/actions/)</span>
+<span class="existing">|   |-- webhook-handler.ts</span>                     <span class="comment">-- DELETE</span>
+<span class="existing">|   |-- webhook-routes.ts</span>                      <span class="comment">-- DELETE</span>
+</div>
+
+    <h3 style="margin-top:24px; font-size:15px; font-weight:600;">Gateway Route Updates</h3>
+    <div class="file-tree"><span class="comment">services/api-gateway/src/routes/v3/video.ts</span>
+<span class="comment">-- Current (partial):</span>
+<span class="existing">  { path: '/call-recordings', method: 'GET', auth: 'required' },</span>
+<span class="existing">  { path: '/call-recordings/:id/playback-url', method: 'GET', auth: 'required' },</span>
+
+<span class="comment">-- Target (complete):</span>
+<span class="rewrite">  { resource: 'call-recordings', auth: 'required' },</span>                                  <span class="comment">-- Core 5 CRUD</span>
+<span class="new">  { path: '/call-recordings/:id/view/playback', method: 'GET', auth: 'required' },</span>     <span class="comment">-- Playback view</span>
+<span class="new">  { path: '/call-recordings/actions/start', method: 'POST', auth: 'required' },</span>        <span class="comment">-- Start recording</span>
+<span class="new">  { path: '/call-recordings/:id/actions/stop', method: 'POST', auth: 'required' },</span>     <span class="comment">-- Stop recording</span>
+<span class="new">  { path: '/call-recordings/actions/livekit-webhook', method: 'POST', auth: 'none' },</span>  <span class="comment">-- LiveKit webhook</span>
+</div>
+
+    <div class="note-box">
+      <strong>Gateway Auth Bypass for Webhook</strong>
+      The LiveKit webhook uses <code>auth: 'none'</code> in the V3 gateway config. The video-service verifies the request
+      using LiveKit's <code>WebhookReceiver</code> (signature validation). The existing V2 auth bypass in
+      <code>api-gateway/src/index.ts:500-502</code> handles V2; the V3 proxy config handles V3 declaratively.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION 8: Estimated Scope -->
+<!-- ============================================================ -->
+<section>
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-num">8</span>
+    <h2>Estimated Scope</h2>
+    <span class="toggle-icon">&#9660;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">4</div>
+        <div class="stat-label">Files to Rewrite</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Files to Create</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Files to Delete</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">1</div>
+        <div class="stat-label">Gateway File to Update</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">2</div>
+        <div class="stat-label">Frontend Files to Update</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px; font-size:15px; font-weight:600;">Detailed File Counts</h3>
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Action</th><th>Files</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Core CRUD (rewrite)</td>
+          <td><span class="badge badge-partial">REWRITE</span></td>
+          <td>
+            <code>types.ts</code>, <code>repository.ts</code>, <code>service.ts</code>, <code>routes.ts</code>
+          </td>
+        </tr>
+        <tr>
+          <td>Views (new)</td>
+          <td><span class="badge badge-new">CREATE</span></td>
+          <td>
+            <code>views/playback.route.ts</code>, <code>views/playback.service.ts</code>, <code>views/playback.repository.ts</code>
+          </td>
+        </tr>
+        <tr>
+          <td>Actions (new)</td>
+          <td><span class="badge badge-new">CREATE</span></td>
+          <td>
+            <code>actions/start.route.ts</code>, <code>actions/start.service.ts</code>, <code>actions/start.repository.ts</code>,
+            <code>actions/stop.route.ts</code>, <code>actions/stop.service.ts</code>, <code>actions/stop.repository.ts</code>,
+            <code>actions/livekit-webhook.route.ts</code>, <code>actions/livekit-webhook.service.ts</code>, <code>actions/livekit-webhook.repository.ts</code>
+          </td>
+        </tr>
+        <tr>
+          <td>V3 Route Registry (rewrite)</td>
+          <td><span class="badge badge-partial">REWRITE</span></td>
+          <td><code>v3/routes.ts</code> &mdash; remove V2 imports</td>
+        </tr>
+        <tr>
+          <td>V3 Shared (new)</td>
+          <td><span class="badge badge-new">CREATE</span></td>
+          <td><code>v3/shared/signed-url.ts</code>, <code>v3/shared/events.ts</code></td>
+        </tr>
+        <tr>
+          <td>Old V3 Webhook (delete)</td>
+          <td><span class="badge badge-missing">DELETE</span></td>
+          <td><code>v3/recordings/webhook-handler.ts</code>, <code>v3/recordings/webhook-routes.ts</code>, <code>v3/recordings/</code> directory</td>
+        </tr>
+        <tr>
+          <td>Gateway</td>
+          <td><span class="badge badge-partial">UPDATE</span></td>
+          <td><code>services/api-gateway/src/routes/v3/video.ts</code></td>
+        </tr>
+        <tr>
+          <td>Frontend</td>
+          <td><span class="badge badge-partial">UPDATE</span></td>
+          <td>
+            <code>apps/portal/.../recording-tab.tsx</code> (URL change),
+            <code>apps/portal/.../use-call-detail.ts</code> (separate recording fetch)
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:24px; font-size:15px; font-weight:600;">Migration Steps (Commit Order)</h3>
+    <table>
+      <thead>
+        <tr><th>Step</th><th>Description</th><th>Files Touched</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Core CRUD:</strong> Rewrite types, repository (flat select), service (AccessContextResolver, typed errors), routes (5 routes with JSON schema)</td>
+          <td>4 files rewritten</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Playback View:</strong> Create view/playback with participant verification and signed URL generation</td>
+          <td>3 files created</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Start Action:</strong> Create action with host verification, LiveKit egress start, recording row creation</td>
+          <td>3 files created</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Stop Action:</strong> Create action with host verification, LiveKit egress stop</td>
+          <td>3 files created</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><strong>Webhook Action:</strong> Create action with LiveKit signature verification, event publishing. Remove V2 cross-dependency.</td>
+          <td>3 files created, 3 files deleted</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><strong>V3 Route Registry:</strong> Rewrite routes.ts to remove all V2 imports, register new routes</td>
+          <td>1 file rewritten + shared helpers</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><strong>Gateway:</strong> Update video.ts with full declarative config including webhook auth: 'none'</td>
+          <td>1 file updated</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><strong>Frontend:</strong> Update recording-tab.tsx URL and use-call-detail.ts fetch strategy</td>
+          <td>2 files updated</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note-box caution">
+      <strong>Dependencies &amp; Risks</strong>
+      <ul style="margin-top:8px; padding-left:20px;">
+        <li><strong>LiveKit SDK:</strong> The start/stop actions require <code>livekit-server-sdk</code> (<code>EgressClient</code>). Ensure this dependency stays in video-service only.</li>
+        <li><strong>Supabase S3 Config:</strong> The start action needs S3 credentials for recording upload destination. These env vars must be threaded through to the action service.</li>
+        <li><strong>Frontend depends on call-service V3 migration:</strong> The <code>use-call-detail.ts</code> hook currently gets recordings via call-service <code>?include=recordings</code>. Full frontend migration requires call-service V3 to drop the include pattern.</li>
+        <li><strong>V2 must remain functional:</strong> V2 routes stay untouched. Both V2 and V3 coexist until V2 deprecation.</li>
+        <li><strong>Event contract unchanged:</strong> The <code>call.recording_ready</code> event payload must stay identical so ai-service and notification-service consumers are unaffected.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.toggle-icon');
+  content.classList.toggle('collapsed');
+  icon.style.transform = content.classList.contains('collapsed') ? 'rotate(-90deg)' : 'rotate(0deg)';
+}
+</script>
+
+</body>
+</html>

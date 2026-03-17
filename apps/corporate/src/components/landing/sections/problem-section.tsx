@@ -56,18 +56,16 @@ export function ProblemSection() {
     return (
         <section
             ref={sectionRef}
-            className="py-24 bg-neutral text-neutral-content overflow-hidden"
+            className="py-24 bg-base-300 text-base-content overflow-hidden"
         >
             <div className="container mx-auto px-4">
-                <div
-                    className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto"
-                >
+                <div className="scroll-reveal fade-up text-center mb-16 max-w-3xl mx-auto">
                     <p className="text-sm uppercase tracking-wider opacity-60 mb-3">
                         The Industry Problem
                     </p>
                     <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                        Recruiting is{" "}
-                        <span className="text-error">broken</span> for everyone
+                        Recruiting is <span className="text-error">broken</span>{" "}
+                        for everyone
                     </h2>
                     <p className="text-lg opacity-70">
                         Whether you&apos;re hiring, recruiting, or job
@@ -75,16 +73,16 @@ export function ProblemSection() {
                     </p>
                 </div>
 
-                <div
-                    className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto stagger-children"
-                >
+                <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto stagger-children">
                     {/* Recruiters Column */}
                     <div className="scroll-reveal fade-up pain-column bg-base-100/5 rounded-2xl p-6 border border-base-100/10">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-user-tie text-xl text-primary"></i>
                             </div>
-                            <h3 className="font-bold text-xl">For Recruiters</h3>
+                            <h3 className="font-bold text-xl">
+                                For Recruiters
+                            </h3>
                         </div>
                         <div className="space-y-4 stagger-children">
                             {recruiterPains.map((pain, index) => (
@@ -109,7 +107,9 @@ export function ProblemSection() {
                             <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
                                 <i className="fa-duotone fa-regular fa-user text-xl text-secondary"></i>
                             </div>
-                            <h3 className="font-bold text-xl">For Candidates</h3>
+                            <h3 className="font-bold text-xl">
+                                For Candidates
+                            </h3>
                         </div>
                         <div className="space-y-4 stagger-children">
                             {candidatePains.map((pain, index) => (

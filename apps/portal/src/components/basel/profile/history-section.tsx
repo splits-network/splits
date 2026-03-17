@@ -3,7 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import { BaselAlertBox, BaselEmptyState, BaselStatusPill } from "@splits-network/basel-ui";
+import {
+    BaselAlertBox,
+    BaselEmptyState,
+    BaselStatusPill,
+} from "@splits-network/basel-ui";
 import {
     invoiceStatusColor,
     formatInvoiceStatus,
@@ -78,9 +82,7 @@ export function HistorySection() {
                     setInvoices([]);
                     setHasMore(false);
                 } else {
-                    setError(
-                        err.message || "Failed to load billing history",
-                    );
+                    setError(err.message || "Failed to load billing history");
                 }
             } finally {
                 setLoading(false);
@@ -142,7 +144,7 @@ export function HistorySection() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-neutral text-neutral-content">
+                                <tr className="bg-base-300 text-base-content">
                                     <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
                                         Date
                                     </th>

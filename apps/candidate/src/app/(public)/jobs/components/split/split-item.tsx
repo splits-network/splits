@@ -1,13 +1,12 @@
 "use client";
 
 import type { Job } from "../../types";
-import { statusColor } from "../shared/status-color";
 import {
     salaryDisplay,
-    formatStatusLabel,
     isNew,
     postedAgo,
     companyName,
+    matchScoreTextColor,
 } from "../shared/helpers";
 
 interface SplitItemProps {
@@ -23,25 +22,32 @@ export function SplitItem({ job, isSelected, onSelect }: SplitItemProps) {
     return (
         <div
             onClick={onSelect}
-            className={`cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`cursor-pointer px-5 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors ${
                 isSelected
-                    ? "bg-primary/5 border-l-primary"
-                    : "bg-base-100 border-transparent"
+                    ? "bg-primary/5 border-l-2 border-l-primary"
+                    : "bg-base-100"
             }`}
         >
-            {/* Title + posted time */}
+            {/* Title + match score */}
             <div className="flex items-start justify-between gap-2 mb-1">
                 <div className="flex items-center gap-1.5 min-w-0">
                     {isNew(job) && (
-                        <i className="fa-duotone fa-regular fa-star text-primary text-xs flex-shrink-0" />
+                        <i className="fa-duotone fa-regular fa-sparkles text-warning text-xs flex-shrink-0" />
                     )}
                     <h4 className="font-bold text-sm tracking-tight truncate text-base-content">
                         {job.title}
                     </h4>
                 </div>
-                <span className="text-sm font-bold flex-shrink-0 whitespace-nowrap text-base-content/40">
-                    {postedAgo(job)}
-                </span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    {job.match_score != null && (
+                        <span className={`text-sm font-black ${matchScoreTextColor(job.match_score)}`}>
+                            {Math.round(job.match_score)}%
+                        </span>
+                    )}
+                    <span className="text-sm whitespace-nowrap text-base-content/40">
+                        {postedAgo(job)}
+                    </span>
+                </div>
             </div>
 
             {/* Company */}
@@ -49,27 +55,17 @@ export function SplitItem({ job, isSelected, onSelect }: SplitItemProps) {
                 {name}
             </div>
 
-            {/* Location + status */}
-            <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="text-sm text-base-content/50 truncate">
-                    {job.location && (
-                        <>
-                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                            {job.location}
-                        </>
-                    )}
-                </div>
-                <span
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(job.status)}`}
-                >
-                    {formatStatusLabel(job.status)}
-                </span>
+            {/* Location */}
+            <div className={`text-sm truncate mb-1 ${job.location ? "text-base-content/50" : "text-base-content/30"}`}>
+                <i className={`fa-duotone fa-regular fa-location-dot mr-1 ${job.location ? "text-info" : "text-base-content/20"}`} />
+                {job.location || "Location not specified"}
             </div>
 
             {/* Salary */}
-            <div className="flex items-center gap-3">
-                <span className="text-sm font-bold text-base-content/70">
-                    {salary || "Competitive"}
+            <div className="flex items-center gap-1 mt-1">
+                <i className={`fa-duotone fa-regular fa-dollar-sign text-xs ${salary ? "text-success" : "text-base-content/20"}`} />
+                <span className={`text-sm font-bold ${salary ? "text-base-content/70" : "text-base-content/30"}`}>
+                    {salary || "Not listed"}
                 </span>
             </div>
         </div>

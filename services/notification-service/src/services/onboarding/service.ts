@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     welcomeEmail,
     WelcomeEmailData,
@@ -15,6 +16,7 @@ export class OnboardingEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -31,8 +33,13 @@ export class OnboardingEmailService {
             category?: string;
             actionUrl?: string;
             actionLabel?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const requestedChannel = options.channel || 'email';
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, requestedChannel, options.category || null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -40,8 +47,8 @@ export class OnboardingEmailService {
             subject,
             template: 'custom',
             payload: options.payload,
-            status: 'pending',
-            channel: options.channel || 'email',
+            status: effectiveChannel === 'in_app' ? 'sent' : 'pending',
+            channel: effectiveChannel,
             read: false,
             dismissed: false,
             priority: options.priority || 'normal',
@@ -50,9 +57,12 @@ export class OnboardingEmailService {
             action_label: options.actionLabel,
         });
 
+        // Skip actual email send if downgraded to in-app only
+        if (effectiveChannel === 'in_app') return;
+
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

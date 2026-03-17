@@ -1,34 +1,30 @@
 "use client";
 
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    LabelList,
-    Cell,
-} from "recharts";
 import { ChartLoadingState } from "@splits-network/shared-ui";
-import { useBaselChartColors, hexWithAlpha, getSeriesColors } from "./use-basel-chart-colors";
-import { BaselTooltip } from "./basel-tooltip";
 
 export interface PipelineFunnelChartProps {
-    stages: { label: string; count: number }[];
+    stages: { label: string; count: number; color?: string }[];
     loading?: boolean;
     height?: number;
 }
 
+const STAGE_COLORS: Record<string, string> = {
+    Screen: "bg-info",
+    Submitted: "bg-primary",
+    Interview: "bg-accent",
+    Offer: "bg-warning",
+    Hired: "bg-success",
+};
+
+/**
+ * Horizontal cascade pipeline — replaces the ECharts funnel.
+ * Shows proportional bars per stage with conversion rates between them.
+ */
 export function PipelineFunnelChart({
     stages,
     loading = false,
-    height = 320,
+    height = 200,
 }: PipelineFunnelChartProps) {
-    const colors = useBaselChartColors();
-    const seriesColors = getSeriesColors(colors);
-
     if (loading) {
         return <ChartLoadingState height={height} />;
     }
@@ -37,71 +33,52 @@ export function PipelineFunnelChart({
         return <ChartLoadingState height={height} message="No pipeline data" />;
     }
 
-    // Build data with conversion rates
-    const data = stages.map((stage, i) => ({
-        label: stage.label,
-        count: stage.count,
-        conversion:
-            i > 0 && stages[i - 1].count > 0
-                ? `${((stage.count / stages[i - 1].count) * 100).toFixed(0)}%`
-                : "",
-    }));
-
-    const axisTick = {
-        fontSize: 10,
-        fill: hexWithAlpha(colors.baseContent, 0.6),
-        fontWeight: 500 as const,
-    };
+    const maxCount = Math.max(...stages.map((s) => s.count), 1);
 
     return (
-        <ResponsiveContainer width="100%" height={height}>
-            <BarChart
-                data={data}
-                layout="vertical"
-                margin={{ top: 8, right: 60, bottom: 8, left: 80 }}
-            >
-                <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke={hexWithAlpha(colors.baseContent, 0.08)}
-                    horizontal={false}
-                />
-                <XAxis
-                    type="number"
-                    tick={axisTick}
-                    axisLine={{ stroke: hexWithAlpha(colors.baseContent, 0.15) }}
-                    tickLine={false}
-                />
-                <YAxis
-                    type="category"
-                    dataKey="label"
-                    tick={axisTick}
-                    axisLine={false}
-                    tickLine={false}
-                    width={75}
-                />
-                <Tooltip
-                    content={<BaselTooltip />}
-                    cursor={{ fill: hexWithAlpha(colors.baseContent, 0.04) }}
-                />
-                <Bar dataKey="count" name="Candidates" radius={[0, 0, 0, 0]}>
-                    {data.map((_, index) => (
-                        <Cell
-                            key={`cell-${index}`}
-                            fill={seriesColors[index % seriesColors.length]}
-                        />
-                    ))}
-                    <LabelList
-                        dataKey="count"
-                        position="right"
-                        style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            fill: hexWithAlpha(colors.baseContent, 0.8),
-                        }}
-                        formatter={(value) => typeof value === "number" ? value.toLocaleString() : String(value ?? "")}
-                    />
-                </Bar>
-            </BarChart>
-        </ResponsiveContainer>
+        <div className="flex flex-col justify-center gap-1" style={{ minHeight: height }}>
+            {stages.map((stage, i) => {
+                const pct = (stage.count / maxCount) * 100;
+                const colorClass =
+                    STAGE_COLORS[stage.label] || "bg-base-content/20";
+                const conversionRate =
+                    i > 0 && stages[i - 1].count > 0
+                        ? Math.round(
+                              (stage.count / stages[i - 1].count) * 100,
+                          )
+                        : null;
+
+                return (
+                    <div key={stage.label}>
+                        {/* Conversion arrow between stages */}
+                        {conversionRate !== null && (
+                            <div className="flex items-center gap-1.5 pl-14 py-0.5">
+                                <i className="fa-solid fa-arrow-down text-[8px] text-base-content/30" />
+                                <span className="text-[11px] tabular-nums text-base-content/40 font-medium">
+                                    {conversionRate}%
+                                </span>
+                            </div>
+                        )}
+                        {/* Stage bar */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-base-content/60 w-12 text-right shrink-0 truncate">
+                                {stage.label}
+                            </span>
+                            <div className="flex-1 h-6 bg-base-300/50 rounded overflow-hidden relative">
+                                <div
+                                    className={`h-full ${colorClass} rounded transition-all duration-500 ease-out`}
+                                    style={{
+                                        width: `${Math.max(pct, 2)}%`,
+                                    }}
+                                />
+                                <span className="absolute inset-y-0 left-2 flex items-center text-sm font-semibold tabular-nums text-base-content/80">
+                                    {stage.count.toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
     );
 }

@@ -52,13 +52,24 @@ export function buildAuthHeaders(request: FastifyRequest): Record<string, string
   const auth = request.auth;
 
   if (!auth) {
-    // Return empty headers for public/unauthenticated requests
-    return {};
+    // Return passthrough headers for public/unauthenticated requests
+    const headers: Record<string, string> = {};
+    const supportSessionId = request.headers['x-support-session-id'] as string;
+    if (supportSessionId) {
+      headers['x-support-session-id'] = supportSessionId;
+    }
+    return headers;
   }
 
   const headers: Record<string, string> = {
     'x-clerk-user-id': auth.clerkUserId,
   };
+
+  // Forward which Clerk app authenticated this user (portal or candidate)
+  // Backend services need this for Clerk write-back operations (profile image sync, etc.)
+  if (auth.sourceApp) {
+    headers['x-source-app'] = auth.sourceApp;
+  }
 
   // Include organization ID if user has memberships (for context/logging only)
   // Backend will resolve actual company access via database JOINs
@@ -66,6 +77,12 @@ export function buildAuthHeaders(request: FastifyRequest): Record<string, string
     // Use first membership's org (for now - Phase 1 simplification)
     // TODO: Handle multi-org users in Phase 2
     headers['x-organization-id'] = auth.memberships[0].organization_id;
+  }
+
+  // Forward support session ID for support service endpoints
+  const supportSessionId = request.headers['x-support-session-id'] as string;
+  if (supportSessionId) {
+    headers['x-support-session-id'] = supportSessionId;
   }
 
   return headers;

@@ -5,6 +5,7 @@
 
 import { baseEmailTemplate, EmailSource } from '../base';
 import { heading, paragraph, button, infoCard, alert, divider, badge } from '../components';
+const { PORTAL_URL } = require('../../helpers/urls');
 
 export interface PlacementCreatedData {
     candidateName: string;
@@ -168,7 +169,7 @@ ${paragraph(
     )}
 
 ${button({
-        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/roles`,
+        href: `${PORTAL_URL}/portal/roles`,
         text: 'Find Your Next Placement →',
         variant: 'secondary',
     })}
@@ -226,7 +227,7 @@ ${paragraph(
     )}
 
 ${button({
-        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/help`,
+        href: `${PORTAL_URL}/help`,
         text: 'Contact Support',
         variant: 'secondary',
     })}

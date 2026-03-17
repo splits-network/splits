@@ -4,7 +4,7 @@ import type { BaselSemanticColor } from "../utils/colors";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
-export type BaselBadgeVariant = "solid" | "soft" | "outline" | "ghost";
+export type BaselBadgeVariant = "solid" | "soft" | "outline" | "ghost" | "soft-outline";
 export type BaselBadgeSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 export interface BaselBadgeProps {
@@ -32,7 +32,7 @@ const colorClass: Record<BaselSemanticColor, string> = {
     error: "badge-error",
     warning: "badge-warning",
     info: "badge-info",
-    neutral: "badge-neutral",
+    neutral: "badge-primary",
 };
 
 const variantClass: Record<BaselBadgeVariant, string> = {
@@ -40,6 +40,7 @@ const variantClass: Record<BaselBadgeVariant, string> = {
     soft: "badge-soft",
     outline: "badge-outline",
     ghost: "badge-ghost",
+    "soft-outline": "badge-soft badge-outline",
 };
 
 const sizeClass: Record<BaselBadgeSize, string> = {
@@ -78,9 +79,7 @@ export function BaselBadge({
                 .filter(Boolean)
                 .join(" ")}
         >
-            {icon && (
-                <i className={`fa-duotone fa-regular ${icon}`} />
-            )}
+            {icon && <i className={`fa-duotone fa-regular ${icon}`} />}
             {children}
         </span>
     );

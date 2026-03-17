@@ -61,7 +61,7 @@ export function PanelHeader({
     const hasStats = stats && stats.length > 0;
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -71,7 +71,7 @@ export function PanelHeader({
             <div className={`relative px-6 pt-6 ${hasStats ? "" : "pb-5"}`}>
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
                         {kicker || "\u00A0"}
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
@@ -91,7 +91,7 @@ export function PanelHeader({
                         {onClose && (
                             <button
                                 onClick={onClose}
-                                className="btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content"
+                                className="btn btn-sm btn-square btn-primary"
                             >
                                 <i className="fa-duotone fa-regular fa-xmark text-lg" />
                             </button>
@@ -123,11 +123,11 @@ export function PanelHeader({
                                 {subtitle}
                             </p>
                         )}
-                        <h2 className="text-3xl font-black tracking-tight leading-none text-neutral-content mb-2 truncate">
+                        <h2 className="text-3xl font-black tracking-tight leading-none text-base-content mb-2 truncate">
                             {title}
                         </h2>
                         {meta && meta.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 {meta.map((m, i) =>
                                     m.href ? (
                                         <a
@@ -163,7 +163,7 @@ export function PanelHeader({
                 {/* Stats strip */}
                 {hasStats && (
                     <div
-                        className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6 "
+                        className="grid divide-x divide-base-content/10 border-t border-base-content/10 mt-6 "
                         style={{
                             gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
                         }}
@@ -179,10 +179,10 @@ export function PanelHeader({
                                     <i className={`${stat.icon} text-sm`} />
                                 </div>
                                 <div>
-                                    <span className="text-lg font-black text-neutral-content leading-none block">
+                                    <span className="text-lg font-black text-base-content leading-none block">
                                         {stat.value}
                                     </span>
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                         {stat.label}
                                     </span>
                                 </div>

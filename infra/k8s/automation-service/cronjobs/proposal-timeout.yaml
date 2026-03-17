@@ -2,110 +2,117 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: application-timeout-checker
-  namespace: splits-network
-  labels:
-    app: automation-service
-    component: cron
-    feature: application-timeout
-    managed-by: splits-network
-spec:
-  # Run every 6 hours at minute 0
-  # Checks 4 times per day to catch stalled applications shortly after they expire
-  schedule: "0 */6 * * *"
-
-  # Keep history of successful/failed jobs for debugging
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 5
-
-  # Prevent overlapping runs - if previous job is still running, skip this execution
-  concurrencyPolicy: Forbid
-
-  # Suspend can be set to true to temporarily disable the cron job
-  suspend: false
-
-  jobTemplate:
-    metadata:
-      labels:
+    name: application-timeout-checker
+    namespace: splits-network
+    labels:
         app: automation-service
-        component: cron-job
+        component: cron
         feature: application-timeout
-    spec:
-      # Retry failed jobs up to 2 times with exponential backoff
-      backoffLimit: 2
+        managed-by: splits-network
+spec:
+    # Run every 6 hours at minute 0
+    # Checks 4 times per day to catch stalled applications shortly after they expire
+    schedule: "0 */6 * * *"
 
-      # Job must complete within 10 minutes or it will be terminated
-      activeDeadlineSeconds: 600
+    # Keep history of successful/failed jobs for debugging
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 5
 
-      template:
+    # Prevent overlapping runs - if previous job is still running, skip this execution
+    concurrencyPolicy: Forbid
+
+    # Suspend can be set to true to temporarily disable the cron job
+    suspend: false
+
+    jobTemplate:
         metadata:
-          labels:
-            app: automation-service
-            component: cron-job
-            feature: application-timeout
-          annotations:
-            prometheus.io/scrape: "true"
-            prometheus.io/port: "9090"
-            prometheus.io/path: "/metrics"
+            labels:
+                app: automation-service
+                component: cron-job
+                feature: application-timeout
         spec:
-          restartPolicy: OnFailure
+            # Retry failed jobs up to 2 times with exponential backoff
+            backoffLimit: 2
 
-          # Service account with permissions to access secrets
-          serviceAccountName: automation-service
+            # Job must complete within 10 minutes or it will be terminated
+            activeDeadlineSeconds: 600
 
-          containers:
-          - name: timeout-checker
-            image: splits-network/automation-service:latest
-            imagePullPolicy: Always
+            template:
+                metadata:
+                    labels:
+                        app: automation-service
+                        component: cron-job
+                        feature: application-timeout
+                    annotations:
+                        prometheus.io/scrape: "true"
+                        prometheus.io/port: "9090"
+                        prometheus.io/path: "/metrics"
+                spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
+                    restartPolicy: OnFailure
 
-            # Execute the application timeout job
-            command: ["node"]
-            args: ["dist/jobs/application-timeout.js"]
+                    # Service account with permissions to access secrets
+                    serviceAccountName: automation-service
 
-            # Resource allocation
-            resources:
-              requests:
-                cpu: "50m"
-                memory: "128Mi"
-              limits:
-                cpu: "200m"
-                memory: "256Mi"
+                    containers:
+                        - name: timeout-checker
+                          image: splits-network/automation-service:latest
+                          imagePullPolicy: Always
 
-            # Environment variables
-            env:
-              - name: NODE_ENV
-                value: "production"
+                          # Execute the application timeout job
+                          command: ["node"]
+                          args: ["dist/jobs/application-timeout.js"]
 
-              - name: SUPABASE_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: supabase-credentials
-                    key: url
+                          # Resource allocation
+                          resources:
+                              requests:
+                                  cpu: "50m"
+                                  memory: "128Mi"
+                              limits:
+                                  cpu: "200m"
+                                  memory: "256Mi"
 
-              - name: SUPABASE_SERVICE_ROLE_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: supabase-credentials
-                    key: service-role-key
+                          # Environment variables
+                          env:
+                              - name: NODE_ENV
+                                value: "production"
 
-              - name: RABBITMQ_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: rabbitmq-credentials
-                    key: url
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-credentials
+                                        key: url
 
-              - name: SERVICE_NAME
-                value: "automation-service"
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-credentials
+                                        key: service-role-key
 
-              - name: SERVICE_VERSION
-                value: "1.0.0"
+                              - name: RABBITMQ_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: rabbitmq-credentials
+                                        key: url
 
-            # Security context
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 1000
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
-              capabilities:
-                drop:
-                  - ALL
+                              - name: SERVICE_NAME
+                                value: "automation-service"
+
+                              - name: SERVICE_VERSION
+                                value: "1.0.0"
+
+                          # Security context
+                          securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              allowPrivilegeEscalation: false
+                              readOnlyRootFilesystem: false
+                              capabilities:
+                                  drop:
+                                      - ALL

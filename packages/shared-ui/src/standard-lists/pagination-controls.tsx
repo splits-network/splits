@@ -149,7 +149,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                             Per page:
                         </span>
                         <select
-                            className="select select-sm"
+                            className="select select-sm z-0"
                             value={limit}
                             onChange={(e) =>
                                 onLimitChange(Number(e.target.value))

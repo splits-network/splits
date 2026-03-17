@@ -230,7 +230,7 @@ export class GptActionRepository {
             candidate_id: candidateId,
             job_id: jobId,
             cover_letter: coverLetter,
-            stage: 'ai_review',
+            stage: 'gpt_review',
         };
 
         if (resumeData) {
@@ -255,7 +255,7 @@ export class GptActionRepository {
     }
 
     /**
-     * Accept a recruiter proposal and transition to AI review.
+     * Accept a recruiter proposal and transition to GPT review.
      * Updates an existing recruiter_proposed application with candidate-provided data.
      */
     async acceptProposalForReview(
@@ -265,7 +265,7 @@ export class GptActionRepository {
         resumeSource?: 'mcp_tool' | 'custom_gpt',
     ): Promise<any> {
         const updatePayload: Record<string, unknown> = {
-            stage: 'ai_review',
+            stage: 'gpt_review',
             cover_letter: coverLetter,
         };
 

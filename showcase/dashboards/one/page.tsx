@@ -1206,7 +1206,7 @@ export default function DashboardOne() {
                         aria-label="close sidebar"
                         className="drawer-overlay"
                     ></label>
-                    <aside className="w-64 min-h-screen bg-neutral text-neutral-content flex flex-col">
+                    <aside className="w-64 min-h-screen bg-base-300 text-base-content flex flex-col">
                         {/* Brand */}
                         <div className="sidebar-brand p-6 pb-4 scroll-reveal fade-up">
                             <div className="flex items-center gap-3">
@@ -1229,7 +1229,7 @@ export default function DashboardOne() {
 
                         {/* Navigation */}
                         <nav className="flex-1 px-3 py-4">
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/30 px-3 mb-3">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/30 px-3 mb-3">
                                 Navigation
                             </p>
                             <ul className="space-y-1">
@@ -1239,7 +1239,7 @@ export default function DashboardOne() {
                                             className={`sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200 scroll-reveal fade-up ${
                                                 item.active
                                                     ? "bg-primary text-primary-content font-bold"
-                                                    : "text-neutral-content/70 hover:bg-neutral-content/5 hover:text-neutral-content"
+                                                    : "text-base-content/70 hover:bg-neutral-content/5 hover:text-base-content"
                                             }`}
                                             onClick={() =>
                                                 setSidebarOpen(false)
@@ -1269,11 +1269,11 @@ export default function DashboardOne() {
                                     <p className="text-xs font-semibold truncate">
                                         Sarah Kim
                                     </p>
-                                    <p className="text-sm text-neutral-content/40 truncate">
+                                    <p className="text-sm text-base-content/40 truncate">
                                         Admin
                                     </p>
                                 </div>
-                                <button className="text-neutral-content/30 hover:text-neutral-content transition-colors">
+                                <button className="text-base-content/30 hover:text-base-content transition-colors">
                                     <i className="fa-duotone fa-regular fa-gear text-sm"></i>
                                 </button>
                             </div>
@@ -1712,7 +1712,7 @@ export default function DashboardOne() {
                     {/* ═══════════════════════════════════════════════════════
                 BOTTOM CTA
                ═══════════════════════════════════════════════════════ */}
-                    <section className="py-20 bg-neutral text-neutral-content">
+                    <section className="py-20 bg-base-300 text-base-content">
                         <div className="container mx-auto px-6 lg:px-12">
                             <div className="max-w-4xl mx-auto text-center">
                                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4">

@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { FirmConnectModal } from "./firm-connect-modal";
-
 interface ConnectStatus {
     account_id: string;
     firm_id: string;
@@ -18,22 +15,17 @@ interface BillingReceiveColumnProps {
     firmId: string;
     firmName?: string;
     connectStatus: ConnectStatus | null;
-    onRefresh: () => void;
+    onSetup: () => void;
+    onManage: () => void;
 }
 
 export function BillingReceiveColumn({
     firmId,
     firmName,
     connectStatus,
-    onRefresh,
+    onSetup,
+    onManage,
 }: BillingReceiveColumnProps) {
-    const [showModal, setShowModal] = useState(false);
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-        onRefresh();
-    };
-
     return (
         <div className="bg-base-100 border border-base-300 border-t-[3px] border-t-secondary">
             {/* Header */}
@@ -55,19 +47,12 @@ export function BillingReceiveColumn({
                 {connectStatus ? (
                     <ConfiguredState
                         connectStatus={connectStatus}
-                        onEdit={() => setShowModal(true)}
+                        onManage={onManage}
                     />
                 ) : (
-                    <NotConfiguredState onSetup={() => setShowModal(true)} />
+                    <NotConfiguredState onSetup={onSetup} />
                 )}
             </div>
-
-            <FirmConnectModal
-                isOpen={showModal}
-                onClose={handleCloseModal}
-                firmId={firmId}
-                firmName={firmName}
-            />
         </div>
     );
 }
@@ -77,7 +62,7 @@ function HowItWorksReceive() {
         "A recruiter at your firm closes a placement on the platform",
         "Your firm\u2019s admin take is calculated from the placement fee",
         "The payout is sent to your linked bank account via Stripe Connect",
-        "Identity verification is a one-time Stripe compliance requirement",
+        "Identity verification is handled securely by Stripe",
     ];
 
     return (
@@ -101,10 +86,10 @@ function HowItWorksReceive() {
 
 function ConfiguredState({
     connectStatus,
-    onEdit,
+    onManage,
 }: {
     connectStatus: ConnectStatus;
-    onEdit: () => void;
+    onManage: () => void;
 }) {
     return (
         <>
@@ -139,20 +124,20 @@ function ConfiguredState({
             {!connectStatus.onboarded ? (
                 <button
                     className="btn btn-sm btn-warning btn-outline"
-                    style={{ borderRadius: 0 }}
-                    onClick={onEdit}
+
+                    onClick={onManage}
                 >
-                    <i className="fa-duotone fa-regular fa-arrow-right mr-1" />
-                    Complete Onboarding
+                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square mr-1" />
+                    Complete on Stripe
                 </button>
             ) : (
                 <button
                     className="btn btn-sm btn-ghost"
-                    style={{ borderRadius: 0 }}
-                    onClick={onEdit}
+
+                    onClick={onManage}
                 >
-                    <i className="fa-duotone fa-regular fa-pen mr-1" />
-                    Edit Payout Account
+                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square mr-1" />
+                    Manage on Stripe
                 </button>
             )}
         </>
@@ -168,7 +153,7 @@ function NotConfiguredState({ onSetup }: { onSetup: () => void }) {
             </p>
             <button
                 className="btn btn-sm btn-secondary"
-                style={{ borderRadius: 0 }}
+
                 onClick={onSetup}
             >
                 <i className="fa-duotone fa-regular fa-building-columns mr-1" />

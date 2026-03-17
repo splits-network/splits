@@ -22,7 +22,9 @@ export default clerkMiddleware(async (auth, request) => {
         path === '/' ||
         path.startsWith('/sign-in') ||
         path.startsWith('/sign-up') ||
-        path.startsWith('/sso-callback');
+        path.startsWith('/sso-callback') ||
+        path.startsWith('/api/v3/') ||
+        path.startsWith('/api/v2/');
 
     if (isPublicRoute) {
         return response;
@@ -31,7 +33,6 @@ export default clerkMiddleware(async (auth, request) => {
     // Protected routes that require authentication
     const isProtectedRoute = path.startsWith('/portal/') ||
         path.startsWith('/onboarding') ||
-        path.startsWith('/api/v2/') ||
         path.startsWith('/api/notifications/') ||
         path === '/api/healthcheck';
 

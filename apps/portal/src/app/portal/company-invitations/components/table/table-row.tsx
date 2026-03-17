@@ -8,7 +8,8 @@ import {
     getCounterpartyName,
     getCounterpartySubtext,
 } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName, statusBorder } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import { isNew, postedAgo } from "../shared/helpers";
 import { ConnectionDetail } from "../shared/connection-detail";
 import ConnectionActionsToolbar from "../shared/actions-toolbar";
@@ -37,7 +38,7 @@ export function TableRow({
 
     const rowBase = isSelected
         ? "bg-primary/5 border-l-4 border-l-primary"
-        : `border-l-4 border-l-transparent ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
+        : `border-l-4 ${statusBorder(invitation.status)} ${idx % 2 === 0 ? "bg-base-100" : "bg-base-200/30"}`;
 
     return (
         <Fragment>
@@ -70,8 +71,8 @@ export function TableRow({
                 </td>
 
                 {/* Details */}
-                <td className="px-4 py-3 text-sm font-semibold text-base-content/70">
-                    {counterpartySubtext || "—"}
+                <td className={`px-4 py-3 text-sm ${counterpartySubtext ? "text-base-content/70" : "text-base-content/30"}`}>
+                    {counterpartySubtext || "No details"}
                 </td>
 
                 {/* Type */}
@@ -81,11 +82,9 @@ export function TableRow({
 
                 {/* Status */}
                 <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(invitation.status)}`}
-                    >
+                    <BaselBadge color={statusColorName(invitation.status)} size="xs" variant="soft">
                         {getStatusLabel(invitation.status)}
-                    </span>
+                    </BaselBadge>
                 </td>
 
                 {/* Received */}

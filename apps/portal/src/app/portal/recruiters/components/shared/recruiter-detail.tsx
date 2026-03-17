@@ -6,7 +6,6 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import type { RecruiterWithUser } from "../../types";
 import { getDisplayName, getInitials } from "../../types";
-import { statusColor } from "./status-color";
 import {
     recruiterEmail,
     recruiterLocation,
@@ -20,14 +19,14 @@ import {
 } from "./helpers";
 import Link from "next/link";
 import RecruiterActionsToolbar from "./actions-toolbar";
-import { usePresence } from "@/hooks/use-presence";
+import { usePresenceStatus } from "@/contexts";
 import { Presence } from "@/components/presense";
 import {
     LevelBadge,
     BadgeGrid,
     useGamification,
 } from "@splits-network/shared-gamification";
-import { BaselTabBar } from "@splits-network/basel-ui";
+import { BaselTabBar, BaselBadge } from "@splits-network/basel-ui";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -51,131 +50,92 @@ function HeroHeader({
     const status = recruiter.status || "active";
     const memberSince = memberSinceDisplay(recruiter);
     const recruiterUserId = recruiter.users?.id;
-    const presence = usePresence([recruiterUserId], {
-        enabled: Boolean(recruiterUserId),
-    });
-    const presenceStatus = recruiterUserId
-        ? presence[recruiterUserId]?.status
-        : undefined;
+    const presenceData = usePresenceStatus(recruiterUserId);
+    const presenceStatus = presenceData?.status;
 
-    const stats = [
-        {
-            label: "Placed",
-            value: placementsDisplay(recruiter),
-            icon: "fa-duotone fa-regular fa-handshake",
-        },
-        successRateDisplay(recruiter)
-            ? {
-                  label: "Success",
-                  value: successRateDisplay(recruiter)!,
-                  icon: "fa-duotone fa-regular fa-bullseye",
-              }
-            : null,
-        reputationDisplay(recruiter)
-            ? {
-                  label: "Rating",
-                  value: reputationDisplay(recruiter)!,
-                  icon: "fa-duotone fa-regular fa-star",
-              }
-            : null,
-        experienceDisplay(recruiter)
-            ? {
-                  label: "Exp.",
-                  value: experienceDisplay(recruiter)!,
-                  icon: "fa-duotone fa-regular fa-clock",
-              }
-            : null,
-    ].filter(Boolean) as { label: string; value: string; icon: string }[];
+    const successRate = successRateDisplay(recruiter);
+    const reputation = reputationDisplay(recruiter);
+    const experience = experienceDisplay(recruiter);
+
+    const stats: { label: string; value: string; icon: string; muted: boolean }[] = [
+        { label: "Placed", value: placementsDisplay(recruiter), icon: "fa-duotone fa-regular fa-handshake", muted: false },
+        { label: "Success", value: successRate || "\u2014", icon: "fa-duotone fa-regular fa-bullseye", muted: !successRate },
+        { label: "Rating", value: reputation || "\u2014", icon: "fa-duotone fa-regular fa-star", muted: !reputation },
+        { label: "Exp.", value: experience || "\u2014", icon: "fa-duotone fa-regular fa-clock", muted: !experience },
+    ];
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
-            {/* Diagonal accent */}
-            <div
-                className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
-                style={{
-                    clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)",
-                }}
-            />
-
-            <div className="relative px-6 pt-6 pb-0">
+        <header className="bg-base-300 text-base-content border-l-4 border-l-primary">
+            <div className="px-6 pt-6 pb-0">
                 {/* Close button */}
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content"
+                        className="absolute top-4 right-4 btn btn-sm btn-square btn-primary rounded-none"
                     >
                         <i className="fa-duotone fa-regular fa-xmark" />
                     </button>
                 )}
 
-                {/* Kicker row: firm + status */}
+                {/* Kicker row: firm + status badges */}
                 <div className="flex items-center justify-between mb-6 pr-10">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 truncate">
                         {recruiter.firm_name || "Independent"}
                     </p>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                         {presenceStatus === "online" && (
                             <Presence status={presenceStatus} variant="badge" />
                         )}
-                        <span className={`badge ${statusColor(status)}`}>
+                        <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} variant="soft" size="sm">
                             {formatStatus(status)}
-                        </span>
+                        </BaselBadge>
                         {isNew(recruiter) && (
-                            <span className="badge badge-warning badge-soft badge-outline">
-                                <i className="fa-duotone fa-regular fa-sparkles" />
+                            <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
                                 New
-                            </span>
+                            </BaselBadge>
                         )}
                     </div>
                 </div>
 
                 {/* Avatar + Identity */}
                 <div className="flex items-end gap-5">
-                    {recruiter.users?.profile_image_url ? (
-                        <img
-                            src={recruiter.users.profile_image_url}
-                            alt={name}
-                            className="w-20 h-20 object-cover border-2 border-primary shrink-0"
-                        />
-                    ) : (
-                        <div className="w-20 h-20 bg-primary text-primary-content flex items-center justify-center text-2xl font-black tracking-tight select-none shrink-0">
-                            {getInitials(name)}
-                        </div>
-                    )}
+                    <div className="relative shrink-0">
+                        {recruiter.users?.profile_image_url ? (
+                            <img
+                                src={recruiter.users.profile_image_url}
+                                alt={name}
+                                className="w-20 h-20 object-cover border-2 border-primary"
+                            />
+                        ) : (
+                            <div className="w-20 h-20 bg-primary text-primary-content flex items-center justify-center text-2xl font-black tracking-tight select-none">
+                                {getInitials(name)}
+                            </div>
+                        )}
+                        {level && (
+                            <div className="absolute -bottom-1 -right-1">
+                                <LevelBadge level={level} size="sm" />
+                            </div>
+                        )}
+                    </div>
                     <div className="min-w-0 pb-1">
                         {recruiter.tagline && (
-                            <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1 truncate">
+                            <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-1 truncate">
                                 {recruiter.tagline}
                             </p>
                         )}
-                        <h2 className="text-3xl font-black tracking-tight leading-none text-neutral-content mb-2 truncate">
+                        <h2 className="text-3xl font-black tracking-tight leading-none text-base-content mb-2 truncate">
                             {name}
-                            {level && (
-                                <span className="ml-2 align-middle inline-block">
-                                    <LevelBadge level={level} size="sm" />
-                                </span>
-                            )}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
-                            {location && (
-                                <span className="flex items-center gap-1.5">
-                                    <i className="fa-duotone fa-regular fa-location-dot text-xs" />
-                                    {location}
-                                </span>
-                            )}
-                            {memberSince && (
-                                <>
-                                    {location && (
-                                        <span className="text-neutral-content/20">
-                                            |
-                                        </span>
-                                    )}
-                                    <span className="flex items-center gap-1.5">
-                                        <i className="fa-duotone fa-regular fa-calendar text-xs" />
-                                        Member since {memberSince}
-                                    </span>
-                                </>
-                            )}
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                            <span className={`flex items-center gap-1.5 ${location ? "text-base-content/40" : "text-base-content/20"}`}>
+                                <i className="fa-duotone fa-regular fa-location-dot text-xs" />
+                                {location || "Location not specified"}
+                            </span>
+                            <span className="text-base-content/20">|</span>
+                            <span className={`flex items-center gap-1.5 ${memberSince ? "text-base-content/40" : "text-base-content/20"}`}>
+                                <i className="fa-duotone fa-regular fa-calendar text-xs" />
+                                {memberSince ? `Member since ${memberSince}` : "Join date unknown"}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -192,49 +152,35 @@ function HeroHeader({
                     <div className="w-px self-stretch bg-neutral-content/20" />
                     <Link
                         href={`/recruiters/${recruiter.slug || recruiter.id}`}
-                        className="btn btn-sm btn-link gap-2"
+                        className="btn btn-sm btn-link btn-accent gap-2"
                     >
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                         <span className="hidden md:inline">View Profile</span>
                     </Link>
                 </div>
 
-                {/* Stats strip */}
+                {/* Stats strip — always show all 4 */}
                 <div
-                    className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
-                    style={{
-                        gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
-                    }}
+                    className="grid grid-cols-4 divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
                 >
-                    {stats.map((stat, i) => {
-                        const iconStyles = [
-                            "bg-primary text-primary-content",
-                            "bg-secondary text-secondary-content",
-                            "bg-accent text-accent-content",
-                            "bg-warning text-warning-content",
-                        ];
-                        const iconStyle = iconStyles[i % iconStyles.length];
-                        return (
-                            <div
-                                key={stat.label}
-                                className="flex items-center gap-2.5 px-3 py-4"
-                            >
-                                <div
-                                    className={`w-9 h-9 flex items-center justify-center shrink-0 ${iconStyle}`}
-                                >
-                                    <i className={`${stat.icon} text-sm`} />
-                                </div>
-                                <div>
-                                    <span className="text-lg font-black text-neutral-content leading-none block">
-                                        {stat.value}
-                                    </span>
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
-                                        {stat.label}
-                                    </span>
-                                </div>
+                    {stats.map((stat) => (
+                        <div
+                            key={stat.label}
+                            className="flex items-center gap-2.5 px-3 py-4"
+                        >
+                            <div className="w-9 h-9 flex items-center justify-center shrink-0 bg-primary/10">
+                                <i className={`${stat.icon} text-sm ${stat.muted ? "text-base-content/20" : "text-primary"}`} />
                             </div>
-                        );
-                    })}
+                            <div>
+                                <span className={`text-lg font-black leading-none block ${stat.muted ? "text-base-content/30" : "text-base-content"}`}>
+                                    {stat.value}
+                                </span>
+                                <span className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40 leading-none">
+                                    {stat.label}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </header>
@@ -253,7 +199,7 @@ function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
             {/* Bio */}
             {bioContent && (
                 <div className="border-l-4 border-l-primary pl-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">
                         About
                     </p>
                     <MarkdownRenderer
@@ -266,14 +212,14 @@ function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
             {/* Specialties */}
             {specialties.length > 0 && (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">
                         Specializations
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {specialties.map((spec) => (
-                            <span key={spec} className="badge badge-primary">
+                            <BaselBadge key={spec} color="primary" size="sm">
                                 {spec}
-                            </span>
+                            </BaselBadge>
                         ))}
                     </div>
                 </div>
@@ -282,17 +228,14 @@ function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
             {/* Industries */}
             {industries.length > 0 && (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">
                         Industries
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {industries.map((ind) => (
-                            <span
-                                key={ind}
-                                className="badge badge-soft badge-outline"
-                            >
+                            <BaselBadge key={ind} color="info" variant="soft" size="sm">
                                 {ind}
-                            </span>
+                            </BaselBadge>
                         ))}
                     </div>
                 </div>
@@ -300,37 +243,31 @@ function AboutPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
 
             {/* Partnership */}
             <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">
                     Partnership
                 </p>
                 <div className="flex flex-wrap gap-2">
-                    <span
-                        className={`badge gap-2 ${
-                            recruiter.company_recruiter
-                                ? "badge-primary"
-                                : "badge-ghost"
-                        }`}
+                    <BaselBadge
+                        color={recruiter.company_recruiter ? "primary" : "neutral"}
+                        size="sm"
+                        icon="fa-building"
                     >
-                        <i className="fa-duotone fa-regular fa-building" />
                         Company Recruiter
-                    </span>
-                    <span
-                        className={`badge gap-2 ${
-                            recruiter.candidate_recruiter
-                                ? "badge-secondary"
-                                : "badge-ghost"
-                        }`}
+                    </BaselBadge>
+                    <BaselBadge
+                        color={recruiter.candidate_recruiter ? "secondary" : "neutral"}
+                        size="sm"
+                        icon="fa-user-tie"
                     >
-                        <i className="fa-duotone fa-regular fa-user-tie" />
                         Candidate Recruiter
-                    </span>
+                    </BaselBadge>
                 </div>
             </div>
 
             {/* Earned Badges */}
             {badges.length > 0 && (
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-4">
                         Earned Badges
                     </p>
                     <div className="bg-base-200 border border-base-300">
@@ -380,7 +317,7 @@ function ContactPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
         <div className="p-6">
             <div className="bg-base-200 border border-base-300 border-l-4 border-l-primary">
                 <div className="px-6 py-4 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
+                    <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/40">
                         Contact
                     </p>
                 </div>
@@ -396,7 +333,7 @@ function ContactPanel({ recruiter }: { recruiter: RecruiterWithUser }) {
                                 />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-0.5">
+                                <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-0.5">
                                     {c.label}
                                 </p>
                                 {c.href ? (
@@ -447,8 +384,16 @@ export function RecruiterDetail({
             />
             <BaselTabBar
                 tabs={[
-                    { label: "About", value: "about", icon: "fa-duotone fa-regular fa-user" },
-                    { label: "Contact", value: "contact", icon: "fa-duotone fa-regular fa-address-book" },
+                    {
+                        label: "About",
+                        value: "about",
+                        icon: "fa-duotone fa-regular fa-user",
+                    },
+                    {
+                        label: "Contact",
+                        value: "contact",
+                        icon: "fa-duotone fa-regular fa-address-book",
+                    },
                 ]}
                 active={activeTab}
                 onChange={(v) => setActiveTab(v as DetailTab)}
@@ -483,10 +428,7 @@ export function DetailLoader({
                 if (!token || signal?.cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: RecruiterWithUser }>(
-                    `/recruiters/${id}`,
-                    {
-                        params: { include: "user,reputation" },
-                    },
+                    `/recruiters/${id}/view/profile`,
                 );
                 if (!signal?.cancelled) setRecruiter(res.data);
             } catch (err) {

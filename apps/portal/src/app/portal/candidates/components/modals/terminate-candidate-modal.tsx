@@ -190,8 +190,7 @@ export default function TerminateCandidateModal({
     return (
         <dialog className="modal modal-open modal-bottom sm:modal-middle">
             <div
-                className="modal-box max-w-2xl w-full p-0"
-                style={{ borderRadius: 0 }}
+                className="modal-box max-w-2xl w-full p-0 rounded-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -276,8 +275,7 @@ export default function TerminateCandidateModal({
                                         {affectedApps.map((app) => (
                                             <div
                                                 key={app.id}
-                                                className="border-2 border-base-300 p-3 flex items-center justify-between gap-3"
-                                                style={{ borderRadius: 0 }}
+                                                className="border-2 border-base-300 p-3 flex items-center justify-between gap-3 rounded-none"
                                             >
                                                 <div className="min-w-0 flex-1">
                                                     <p className="font-black text-sm uppercase tracking-tight text-base-content truncate">
@@ -289,8 +287,7 @@ export default function TerminateCandidateModal({
                                                     </p>
                                                 </div>
                                                 <select
-                                                    className="select select-sm"
-                                                    style={{ borderRadius: 0 }}
+                                                    className="select select-sm rounded-none"
                                                     value={
                                                         decisions[app.id] ||
                                                         "keep"
@@ -338,13 +335,12 @@ export default function TerminateCandidateModal({
                                     Reason <span className="text-error">*</span>
                                 </label>
                                 <textarea
-                                    className="textarea textarea-bordered w-full"
+                                    className="textarea textarea-bordered w-full rounded-none"
                                     rows={3}
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
                                     placeholder="Explain why you are ending this representation..."
                                     disabled={submitting}
-                                    style={{ borderRadius: 0 }}
                                 />
                             </div>
 
@@ -352,8 +348,7 @@ export default function TerminateCandidateModal({
                             <div className="flex items-center justify-end gap-3 pt-2 border-t-2 border-base-300">
                                 <button
                                     type="button"
-                                    className="btn btn-outline"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-outline rounded-none"
                                     onClick={handleClose}
                                     disabled={submitting}
                                 >
@@ -361,8 +356,7 @@ export default function TerminateCandidateModal({
                                 </button>
                                 <button
                                     type="submit"
-                                    className="btn btn-error"
-                                    style={{ borderRadius: 0 }}
+                                    className="btn btn-error rounded-none"
                                     disabled={
                                         submitting ||
                                         !reason.trim() ||

@@ -426,6 +426,22 @@ Categorize findings:
 - ⚠️ Warning: Indicates incomplete (TODO comments, console.log)
 - ℹ️ Info: Notable but not problematic
 
+## Step 7b: Domain-Specific Verification
+
+If the phase created or modified backend API code, apply additional checks:
+
+**Backend API (V3 resources):**
+- Three-layer pattern: every endpoint has route.ts → service.ts → repository.ts
+- Core CRUD routes have NO joins (flat data only)
+- Views are GET-only, Actions are POST-only
+- No role branching in repositories (should use separate views per role)
+- Gateway routes registered in `services/api-gateway/src/routes/v3/`
+- Fastify JSON Schema on all routes (no Zod)
+- No try/catch in routes (global error handler)
+- File size limits: routes <150, services <300, repos <400 lines
+
+**Reference:** `@.claude/agents/api.md` for full V3 validation checklist (38 checks).
+
 ## Step 8: Identify Human Verification Needs
 
 Some things can't be verified programmatically:

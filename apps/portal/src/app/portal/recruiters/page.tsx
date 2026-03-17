@@ -18,15 +18,12 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
-import { CompanyProvider, useCompanyContext } from "./contexts/company-context";
+import { useCompanyContext } from "./contexts/company-context";
 import { useGamification } from "@splits-network/shared-gamification";
+import { PresenceProvider, useRegisterPresence } from "@/contexts";
 
 export default function RecruitersBaselPage() {
-    return (
-        <CompanyProvider>
-            <RecruitersContent />
-        </CompanyProvider>
-    );
+    return <RecruitersContent />;
 }
 
 function RecruitersContent() {
@@ -96,14 +93,17 @@ function RecruitersContent() {
         total,
         totalPages,
         refresh,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<RecruiterWithUser, MarketplaceFilters>({
-        endpoint: "/recruiters",
+        endpoint: "/recruiters/views/marketplace-listing",
         defaultFilters: { status: "active", marketplace_enabled: true },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
-        include: "user,reputation,firm",
     });
 
     // Register recruiter IDs with gamification context for batch fetching
@@ -113,6 +113,20 @@ function RecruitersContent() {
             registerEntities("recruiter", recruiters.map(r => r.id));
         }
     }, [recruiters, registerEntities]);
+
+    // Register user IDs with presence context for batch fetching
+    const registerPresence = useRegisterPresence();
+    useEffect(() => {
+        const userIds = recruiters.map(r => r.users?.id).filter(Boolean) as string[];
+        if (userIds.length > 0) {
+            registerPresence(userIds);
+        }
+    }, [recruiters, registerPresence]);
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     const handleSelect = useCallback((recruiter: RecruiterWithUser) => {
         setSelectedRecruiterId((prev) =>
@@ -154,6 +168,7 @@ function RecruitersContent() {
     }
 
     return (
+        <PresenceProvider>
         <RecruitersAnimator>
             <HeaderSection stats={stats} />
 
@@ -173,6 +188,9 @@ function RecruitersContent() {
                 totalCount={pagination?.total ?? recruiters.length}
                 loading={loading}
                 refresh={refresh}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
             />
 
             <section className="min-h-screen">
@@ -240,5 +258,6 @@ function RecruitersContent() {
                 </div>
             </section>
         </RecruitersAnimator>
+        </PresenceProvider>
     );
 }

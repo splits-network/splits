@@ -6,7 +6,7 @@ interface MarketplaceHeroProps {
 
 export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20 overflow-hidden">
+        <section className="relative bg-base-300 text-base-content py-16 lg:py-20 overflow-hidden">
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -43,7 +43,7 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                                 tools.
                             </span>
                         </h1>
-                        <p className="scroll-reveal fade-up text-base text-neutral-content/50 max-w-xl">
+                        <p className="scroll-reveal fade-up text-base text-base-content/50 max-w-xl">
                             Link your calendar, email, and recruiting tools to
                             streamline your workflow and keep everything in
                             sync.
@@ -56,16 +56,16 @@ export function MarketplaceHero({ activeCount }: MarketplaceHeroProps) {
                             <p className="text-3xl font-black text-primary">
                                 {activeCount}
                             </p>
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40">
                                 Connected
                             </p>
                         </div>
-                        <div className="w-px bg-neutral-content/10" />
+                        <div className="w-px bg-base-content/10" />
                         <div className="scroll-reveal fade-up">
                             <p className="text-3xl font-black text-secondary">
                                 4
                             </p>
-                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40">
+                            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40">
                                 Available
                             </p>
                         </div>

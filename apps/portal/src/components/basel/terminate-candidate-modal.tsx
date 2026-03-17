@@ -40,11 +40,10 @@ export default function TerminateCandidateModal({
     const [reason, setReason] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [relationship, setRelationship] =
-        useState<RelationshipInfo | null>(null);
-    const [affectedApps, setAffectedApps] = useState<AffectedApplication[]>(
-        [],
+    const [relationship, setRelationship] = useState<RelationshipInfo | null>(
+        null,
     );
+    const [affectedApps, setAffectedApps] = useState<AffectedApplication[]>([]);
     const [loading, setLoading] = useState(true);
     const [decisions, setDecisions] = useState<
         Record<string, "keep" | "withdraw">
@@ -124,9 +123,7 @@ export default function TerminateCandidateModal({
         setError(null);
 
         if (!reason.trim()) {
-            setError(
-                "Please provide a reason for ending this relationship.",
-            );
+            setError("Please provide a reason for ending this relationship.");
             return;
         }
 
@@ -218,7 +215,7 @@ export default function TerminateCandidateModal({
                             Ending Representation
                         </label>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-neutral text-neutral-content flex items-center justify-center font-bold text-sm">
+                            <div className="w-10 h-10 bg-base-300 text-base-content flex items-center justify-center font-bold text-sm">
                                 {candidateName?.[0] || "?"}
                             </div>
                             <div>
@@ -243,8 +240,9 @@ export default function TerminateCandidateModal({
                                     This action is permanent
                                 </p>
                                 <p className="text-sm text-base-content/70">
-                                    The candidate will be notified and you will lose the ability to
-                                    submit them to roles. This cannot be undone.
+                                    The candidate will be notified and you will
+                                    lose the ability to submit them to roles.
+                                    This cannot be undone.
                                 </p>
                             </div>
                         </div>
@@ -261,11 +259,12 @@ export default function TerminateCandidateModal({
                             {affectedApps.length > 0 && (
                                 <div>
                                     <label className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/50 mb-2 block">
-                                        Affected Applications ({affectedApps.length})
+                                        Affected Applications (
+                                        {affectedApps.length})
                                     </label>
                                     <p className="text-sm text-base-content/50 mb-3">
-                                        Decide whether to keep or withdraw each active application
-                                        for this candidate.
+                                        Decide whether to keep or withdraw each
+                                        active application for this candidate.
                                     </p>
                                     <div className="space-y-2 max-h-48 overflow-y-auto">
                                         {affectedApps.map((app) => (

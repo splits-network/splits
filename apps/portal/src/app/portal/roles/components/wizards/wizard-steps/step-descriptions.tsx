@@ -19,8 +19,9 @@ export function StepDescriptions({ formData, onChange }: StepDescriptionsProps) 
                 </span>
             </div>
 
-            <fieldset>
-                <label className="block font-bold text-sm uppercase tracking-wider mb-2">
+            <fieldset className="border-l-4 border-warning pl-4">
+                <label className="block font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-lock text-warning" />
                     Recruiter Brief
                 </label>
                 <MarkdownEditor
@@ -32,8 +33,9 @@ export function StepDescriptions({ formData, onChange }: StepDescriptionsProps) 
                 />
             </fieldset>
 
-            <fieldset>
-                <label className="block font-bold text-sm uppercase tracking-wider mb-2">
+            <fieldset className="border-l-4 border-success pl-4">
+                <label className="block font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i className="fa-duotone fa-regular fa-globe text-success" />
                     Candidate-Facing Description
                 </label>
                 <MarkdownEditor

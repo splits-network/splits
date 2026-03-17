@@ -73,6 +73,7 @@ export function Footer() {
     return (
         <BaselFooter
             containerRef={containerRef as React.RefObject<HTMLElement>}
+            newsletter={<></>}
             cta={
                 <div className="grid lg:grid-cols-5 gap-8 items-center">
                     <div className="lg:col-span-3">
@@ -111,7 +112,7 @@ export function Footer() {
                             className="h-12 w-auto brightness-0 invert"
                         />
                     </div>
-                    <p className="text-sm opacity-50 leading-relaxed mb-4">
+                    <p className="text-sm opacity-50 leading-relaxed mb-4 text-neutral-content/60">
                         Building the future of recruiting through innovative
                         split-fee collaboration.
                     </p>
@@ -135,7 +136,7 @@ export function Footer() {
                 <>
                     {/* Products */}
                     <div className="footer-col scroll-reveal fade-up">
-                        <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
+                        <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-content/40 mb-4 flex items-center gap-2">
                             <span className="w-4 h-0.5 bg-primary" />
                             Products
                         </h4>

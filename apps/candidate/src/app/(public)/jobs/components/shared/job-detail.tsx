@@ -12,16 +12,18 @@ import { BaselBadge } from "@splits-network/basel-ui";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import type { Job } from "../../types";
 import { formatCommuteTypes, formatJobLevel } from "../../types";
-import { statusColor } from "./status-color";
+import { statusSemanticColor } from "./status-color";
 import {
     salaryDisplay,
     formatEmploymentType,
     formatStatusLabel,
     isNew,
+    isFirmJob,
     companyName,
     companyInitials,
     requiredSkillNames,
     preferredSkillNames,
+    matchScoreTextColor,
 } from "./helpers";
 
 /* ── Detail Panel ── */
@@ -225,26 +227,32 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                     <div className="flex-1">
                         {/* Badges */}
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <span
-                                className={`text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 ${statusColor(job.status)}`}
+                            <BaselBadge
+                                color={statusSemanticColor(job.status)}
+                                variant="soft"
+                                size="sm"
                             >
                                 {formatStatusLabel(job.status)}
-                            </span>
+                            </BaselBadge>
                             {isNew(job) && (
-                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-warning/15 text-warning">
-                                    <i className="fa-duotone fa-regular fa-sparkles mr-1" />
+                                <BaselBadge
+                                    color="warning"
+                                    variant="soft"
+                                    size="sm"
+                                    icon="fa-sparkles"
+                                >
                                     New
-                                </span>
+                                </BaselBadge>
                             )}
                             {job.employment_type && (
-                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <BaselBadge variant="outline" size="sm">
                                     {formatEmploymentType(job.employment_type)}
-                                </span>
+                                </BaselBadge>
                             )}
                             {level && (
-                                <span className="text-sm uppercase tracking-[0.2em] font-bold px-2 py-1 bg-base-200 text-base-content/50">
+                                <BaselBadge variant="outline" size="sm">
                                     {level}
-                                </span>
+                                </BaselBadge>
                             )}
                         </div>
 
@@ -280,16 +288,28 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                         </div>
                     </div>
 
-                    {/* Close button */}
-                    {onClose && (
-                        <button
-                            onClick={onClose}
-                            className="btn btn-sm btn-square btn-ghost"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
-                        </button>
-                    )}
+                    {/* Match score + Close */}
+                    <div className="flex items-start gap-3 shrink-0">
+                        {job.match_score != null && (
+                            <div className="text-right pt-1">
+                                <span className={`text-2xl font-black leading-none ${matchScoreTextColor(job.match_score)}`}>
+                                    {Math.round(job.match_score)}%
+                                </span>
+                                <span className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 block mt-0.5">
+                                    Match
+                                </span>
+                            </div>
+                        )}
+                        {onClose && (
+                            <button
+                                onClick={onClose}
+                                className="btn btn-sm btn-square btn-ghost"
+                                style={{ borderRadius: 0 }}
+                            >
+                                <i className="fa-duotone fa-regular fa-xmark text-lg" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* CTA */}
@@ -489,16 +509,23 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                     </div>
                 )}
 
-                {/* Company info */}
+                {/* Company / Firm info */}
                 <div className="border-t-2 border-base-300 pt-6">
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40 mb-4">
-                        About the Company
-                    </h3>
+                    <div className="flex items-center gap-2 mb-4">
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-base-content/40">
+                            {isFirmJob(job) ? "About the Recruiting Firm" : "About the Company"}
+                        </h3>
+                        {isFirmJob(job) && (
+                            <BaselBadge color="secondary" variant="soft" size="sm" icon="fa-handshake">
+                                3rd Party
+                            </BaselBadge>
+                        )}
+                    </div>
                     <div className="flex items-center gap-4 mb-4">
                         <div className="relative shrink-0">
-                            {job.company?.logo_url ? (
+                            {(job.company?.logo_url || job.firm?.logo_url) ? (
                                 <img
-                                    src={job.company.logo_url}
+                                    src={job.company?.logo_url || job.firm?.logo_url || ""}
                                     alt={name}
                                     className="w-12 h-12 object-contain border-2 border-base-300"
                                 />
@@ -587,6 +614,7 @@ interface JobDetailLoaderProps {
 export function JobDetailLoader({ jobId, onClose }: JobDetailLoaderProps) {
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
+    const { getToken } = useAuth();
 
     useEffect(() => {
         let cancelled = false;
@@ -594,11 +622,11 @@ export function JobDetailLoader({ jobId, onClose }: JobDetailLoaderProps) {
 
         (async () => {
             try {
-                const res = await apiClient.get<{ data: Job }>(
-                    `/jobs/${jobId}`,
-                    {
-                        params: { include: "company,requirements,skills" },
-                    },
+                // Optional auth — send token if available for personalized enrichment (e.g. match scores)
+                const token = await getToken().catch(() => null);
+                const client = token ? createAuthenticatedClient(token) : apiClient;
+                const res = await client.get<{ data: Job }>(
+                    `/jobs/${jobId}/view/candidate-detail`,
                 );
                 if (!cancelled) setJob(res.data);
             } catch (err) {

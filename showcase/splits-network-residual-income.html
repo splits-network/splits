@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Splits Network — Lifetime Residual Income for Recruiters</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #3b5ccc;
+    --secondary: #14b8a6;
+    --accent: #ec4899;
+    --gold: #f59e0b;
+    --bg: #09090b;
+    --surface: #18181b;
+    --text: #fafafa;
+    --text-dim: #a1a1aa;
+    --glow-primary: rgba(59, 92, 204, 0.6);
+    --glow-accent: rgba(236, 72, 153, 0.6);
+    --glow-secondary: rgba(20, 184, 166, 0.6);
+    --glow-gold: rgba(245, 158, 11, 0.6);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    cursor: none;
+  }
+
+  .cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gold);
+    pointer-events: none;
+    z-index: 99999;
+    mix-blend-mode: difference;
+    transition: transform 0.1s;
+  }
+  .cursor-dot {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    pointer-events: none;
+    z-index: 99999;
+  }
+
+  .scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+  .scene.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  @keyframes glitch1 {
+    0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-2px, 0); }
+    20% { clip-path: inset(30% 0 40% 0); transform: translate(3px, 0); }
+    40% { clip-path: inset(60% 0 10% 0); transform: translate(-1px, 0); }
+    60% { clip-path: inset(10% 0 70% 0); transform: translate(4px, 0); }
+    80% { clip-path: inset(80% 0 5% 0); transform: translate(-3px, 0); }
+  }
+  @keyframes glitch2 {
+    0%, 100% { clip-path: inset(95% 0 0 0); transform: translate(2px, 0); }
+    20% { clip-path: inset(40% 0 30% 0); transform: translate(-3px, 0); }
+    40% { clip-path: inset(10% 0 60% 0); transform: translate(1px, 0); }
+    60% { clip-path: inset(70% 0 10% 0); transform: translate(-4px, 0); }
+    80% { clip-path: inset(5% 0 80% 0); transform: translate(3px, 0); }
+  }
+
+  .glitch-text { position: relative; }
+  .glitch-text::before, .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+  }
+  .glitch-text::before { color: var(--gold); animation: glitch1 0.3s infinite linear; z-index: -1; }
+  .glitch-text::after { color: var(--secondary); animation: glitch2 0.3s infinite linear; z-index: -1; }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Boot scene */
+  .boot-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--secondary);
+    text-align: left;
+    white-space: pre-line;
+    line-height: 1.8;
+    max-width: 700px;
+  }
+  .boot-text span { opacity: 0; }
+
+  /* Bold headline */
+  .headline-word {
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    transform: scale(3) rotate(-10deg);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .headline-word.visible {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+  .headline-word.gold {
+    color: var(--gold);
+    text-shadow: 0 0 60px var(--glow-gold);
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+  }
+
+  /* Flow diagram */
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 1.5rem;
+  }
+  .flow-step.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .flow-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--surface);
+    border: 2px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+  .flow-icon.gold-border { border-color: var(--gold); box-shadow: 0 0 20px var(--glow-gold); }
+  .flow-text h3 { font-size: 1.2rem; font-weight: 700; }
+  .flow-text p { color: var(--text-dim); font-size: 0.95rem; margin-top: 0.25rem; }
+  .flow-arrow {
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-left: 28px;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .flow-arrow.visible { opacity: 1; }
+
+  /* Money counter */
+  .money-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold), #fbbf24, var(--gold));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: goldShift 2s ease infinite;
+    text-shadow: none;
+  }
+  @keyframes goldShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Stat cards */
+  .stat-card {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 2rem 3rem;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0) rotate(var(--rot, 0deg));
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .stat-card.visible {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rot, 0deg));
+  }
+  .stat-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(135deg, var(--gold), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-top: 0.5rem;
+  }
+
+  /* Network visualization */
+  .network-node {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: var(--surface);
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .network-node.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .network-node.you {
+    border-color: var(--gold);
+    box-shadow: 0 0 30px var(--glow-gold);
+    width: 90px;
+    height: 90px;
+    font-size: 2.2rem;
+  }
+  .network-line {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    transform-origin: left center;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .network-line.visible { opacity: 0.4; }
+
+  /* Income streams */
+  .income-stream {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 1rem;
+    max-width: 550px;
+  }
+  .income-stream.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .income-stream .stream-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+  .income-stream .stream-label {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .income-stream .stream-desc {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+  }
+  .income-stream .stream-amount {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* Timeline */
+  .timeline-container {
+    position: relative;
+    max-width: 800px;
+    width: 90vw;
+  }
+  .timeline-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    position: relative;
+    margin: 2rem 0;
+  }
+  .timeline-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--gold));
+    width: 0%;
+    transition: width 2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .timeline-marker {
+    position: absolute;
+    top: -8px;
+    width: 20px;
+    height: 20px;
+    background: var(--gold);
+    border: 3px solid var(--bg);
+    transform: translateX(-50%) scale(0);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .timeline-marker.visible { transform: translateX(-50%) scale(1); }
+  .timeline-label {
+    position: absolute;
+    top: 24px;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .timeline-label.visible { opacity: 1; }
+  .timeline-amount {
+    position: absolute;
+    bottom: 24px;
+    transform: translateX(-50%);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .timeline-amount.visible { opacity: 1; }
+
+  /* Flip card */
+  .flip-container { perspective: 1500px; }
+  .flip-card {
+    width: 600px;
+    height: 350px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .flip-card.flipped { transform: rotateY(180deg); }
+  .flip-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .flip-front {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .flip-back {
+    background: linear-gradient(135deg, #92400e, #78350f);
+    border: 2px solid var(--gold);
+    transform: rotateY(180deg);
+  }
+
+  /* CTA */
+  .cta-container { text-align: center; }
+  .cta-title {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--gold), var(--accent), var(--primary));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: goldShift 3s ease infinite;
+  }
+  .cta-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+  }
+  .cta-btn {
+    display: inline-block;
+    padding: 1.2rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: white;
+    background: linear-gradient(135deg, var(--gold), var(--primary));
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cta-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px var(--glow-gold), 0 0 80px var(--glow-primary);
+  }
+  .cta-btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, var(--gold), var(--primary), var(--secondary), var(--gold));
+    background-size: 400% 400%;
+    animation: goldShift 2s ease infinite;
+    z-index: -1;
+    filter: blur(10px);
+  }
+  .cta-free {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: var(--secondary);
+    font-weight: 600;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--gold), var(--secondary));
+    z-index: 99999;
+    transition: width 0.3s;
+  }
+
+  /* Screen flash */
+  .flash {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 99990;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .flash.bang { animation: flashBang 0.3s ease-out; }
+  @keyframes flashBang {
+    0% { opacity: 0.8; }
+    100% { opacity: 0; }
+  }
+
+  /* Floating emojis */
+  .float-emoji {
+    position: fixed;
+    font-size: 2rem;
+    pointer-events: none;
+    z-index: 9990;
+    animation: floatUp 3s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(-400px) rotate(720deg) scale(0); }
+  }
+
+  /* Matrix rain */
+  .matrix-char {
+    position: fixed;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--gold);
+    opacity: 0.3;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1;
+    animation: matrixFall linear forwards;
+  }
+  @keyframes matrixFall {
+    0% { transform: translateY(-20px); opacity: 0.5; }
+    100% { transform: translateY(100vh); opacity: 0; }
+  }
+
+  /* Explosion particles */
+  .explosion-particle {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: explode 1s ease-out forwards;
+  }
+  @keyframes explode {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+  }
+
+  /* Countdown */
+  .countdown {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(6rem, 15vw, 12rem);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 60px var(--glow-gold), 0 0 120px var(--glow-gold);
+    animation: pulse 0.5s ease-in-out;
+  }
+  @keyframes pulse {
+    0% { transform: scale(2); opacity: 0; }
+    50% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Logo */
+  .logo-text {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .logo-text.visible { opacity: 1; transform: translateY(0); }
+  .logo-text .highlight { color: var(--gold); }
+  .logo-tagline {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.5s 0.3s;
+  }
+  .logo-tagline.visible { opacity: 1; }
+
+  /* Money coin animation */
+  .coin {
+    position: fixed;
+    font-size: 1.5rem;
+    pointer-events: none;
+    z-index: 9990;
+    animation: coinFall 2s ease-in forwards;
+  }
+  @keyframes coinFall {
+    0% { opacity: 1; transform: translateY(-50px) rotateY(0deg); }
+    100% { opacity: 0; transform: translateY(100vh) rotateY(1080deg); }
+  }
+
+  /* Sound wave */
+  .sound-wave {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    height: 60px;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9990;
+  }
+  .wave-bar {
+    width: 3px;
+    background: var(--gold);
+    animation: waveAnim var(--dur, 0.5s) ease-in-out infinite alternate;
+    opacity: 0.6;
+  }
+  @keyframes waveAnim {
+    0% { height: 5px; }
+    100% { height: var(--h, 40px); }
+  }
+
+  /* Play button */
+  .play-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    cursor: pointer;
+  }
+  .play-overlay.hidden { display: none; }
+  .play-btn {
+    width: 100px;
+    height: 100px;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .play-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 60px var(--glow-gold);
+  }
+  .play-btn svg { width: 40px; height: 40px; fill: white; margin-left: 5px; }
+  .play-label {
+    margin-top: 1.5rem;
+    font-size: 1rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Skip button */
+  .skip-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100001;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--text-dim);
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+    display: none;
+  }
+  .skip-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+  .skip-btn.visible { display: block; }
+
+  /* Compounding graph */
+  .graph-container {
+    position: relative;
+    width: 700px;
+    height: 300px;
+  }
+  .graph-bar {
+    position: absolute;
+    bottom: 0;
+    background: linear-gradient(180deg, var(--gold), var(--primary));
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .graph-bar.visible {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  .graph-label {
+    position: absolute;
+    bottom: -30px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .graph-value {
+    position: absolute;
+    top: -28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .graph-value.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Play overlay -->
+<div class="play-overlay" id="playOverlay">
+  <div class="play-btn">
+    <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+  </div>
+  <div class="play-label">Click to experience</div>
+</div>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- Overlays -->
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<div class="flash" id="flash"></div>
+<canvas id="particles"></canvas>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progress" style="width: 0%"></div>
+
+<!-- Skip -->
+<button class="skip-btn" id="skipBtn">Skip &raquo;</button>
+
+<!-- Sound wave -->
+<div class="sound-wave" id="soundWave" style="display:none"></div>
+
+<!-- ===================== SCENES ===================== -->
+
+<!-- Scene 0: Boot -->
+<div class="scene" id="scene-boot">
+  <div class="boot-text" id="bootText"></div>
+</div>
+
+<!-- Scene 1: Hook -->
+<div class="scene" id="scene-hook">
+  <div style="text-align:center">
+    <div class="headline-word gold" id="hw1" data-text="WHAT IF">WHAT IF</div>
+    <div class="headline-word" id="hw2" data-text="EVERY PLACEMENT" style="margin-top:-0.5rem; font-size:clamp(2rem, 5vw, 4.5rem);">EVERY PLACEMENT</div>
+    <div class="headline-word gold" id="hw3" data-text="PAID YOU FOREVER?" style="margin-top:-0.5rem">PAID YOU FOREVER?</div>
+  </div>
+</div>
+
+<!-- Scene 2: The Problem -->
+<div class="scene" id="scene-problem">
+  <div style="text-align:center; max-width:700px;">
+    <div id="problemPoints" style="font-size:1.6rem; line-height:2.2; font-weight:600;"></div>
+  </div>
+</div>
+
+<!-- Scene 3: Logo reveal -->
+<div class="scene" id="scene-logo">
+  <div style="text-align:center">
+    <div class="logo-text" id="logoText">
+      splits<span class="highlight">.network</span>
+    </div>
+    <div class="logo-tagline" id="logoTagline">Recruiting reimagined. Income redefined.</div>
+  </div>
+</div>
+
+<!-- Scene 4: How it works - Bring candidates -->
+<div class="scene" id="scene-how-candidates">
+  <div style="max-width:650px; padding:2rem;">
+    <div style="font-size:1rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--gold); margin-bottom:1.5rem; font-weight:700;">Revenue Stream #1</div>
+    <div style="font-size:2.2rem; font-weight:900; margin-bottom:2rem;">Bring Candidates to the Network</div>
+    <div class="flow-step" id="fc1">
+      <div class="flow-icon">&#x1F464;</div>
+      <div class="flow-text">
+        <h3>You Refer a Candidate</h3>
+        <p>Invite talented candidates to join Splits Network</p>
+      </div>
+    </div>
+    <div class="flow-arrow" id="fa1">&#x2193;</div>
+    <div class="flow-step" id="fc2">
+      <div class="flow-icon">&#x1F3AF;</div>
+      <div class="flow-text">
+        <h3>They Get Placed by Any Recruiter</h3>
+        <p>Another recruiter on the network places your candidate</p>
+      </div>
+    </div>
+    <div class="flow-arrow" id="fa2">&#x2193;</div>
+    <div class="flow-step" id="fc3">
+      <div class="flow-icon gold-border">&#x1F4B0;</div>
+      <div class="flow-text">
+        <h3>You Earn a Residual Split</h3>
+        <p>Every single time. For as long as your account is active.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 5: How it works - Bring companies -->
+<div class="scene" id="scene-how-companies">
+  <div style="max-width:650px; padding:2rem;">
+    <div style="font-size:1rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--accent); margin-bottom:1.5rem; font-weight:700;">Revenue Stream #2</div>
+    <div style="font-size:2.2rem; font-weight:900; margin-bottom:2rem;">Bring Companies to the Network</div>
+    <div class="flow-step" id="fco1">
+      <div class="flow-icon">&#x1F3E2;</div>
+      <div class="flow-text">
+        <h3>You Onboard a Company</h3>
+        <p>Bring employers who need talent onto the platform</p>
+      </div>
+    </div>
+    <div class="flow-arrow" id="fao1">&#x2193;</div>
+    <div class="flow-step" id="fco2">
+      <div class="flow-icon">&#x1F91D;</div>
+      <div class="flow-text">
+        <h3>Any Recruiter Fills Their Roles</h3>
+        <p>The network's recruiters place candidates at that company</p>
+      </div>
+    </div>
+    <div class="flow-arrow" id="fao2">&#x2193;</div>
+    <div class="flow-step" id="fco3">
+      <div class="flow-icon gold-border">&#x1F4B0;</div>
+      <div class="flow-text">
+        <h3>You Earn a Residual Split</h3>
+        <p>On every hire. Every time. Lifetime residual income.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 6: Compounding graph -->
+<div class="scene" id="scene-compound">
+  <div style="text-align:center;">
+    <div style="font-size:1.8rem; font-weight:900; margin-bottom:0.5rem;">Your Income Compounds Over Time</div>
+    <div style="color:var(--text-dim); margin-bottom:2.5rem; font-size:1.1rem;">More referrals = more placements = more residual income</div>
+    <div class="graph-container" id="graphContainer">
+      <div style="position:absolute; bottom:0; left:0; right:0; height:1px; background:rgba(255,255,255,0.2);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 7: Income streams breakdown -->
+<div class="scene" id="scene-streams">
+  <div style="max-width:600px; padding:2rem;">
+    <div style="font-size:2rem; font-weight:900; margin-bottom:0.5rem;">Multiple Revenue Streams</div>
+    <div style="color:var(--text-dim); margin-bottom:2rem; font-size:1.1rem;">All running simultaneously. All compounding.</div>
+    <div class="income-stream" id="is1">
+      <div class="stream-icon">&#x1F3AF;</div>
+      <div>
+        <div class="stream-label">Your Own Placements</div>
+        <div class="stream-desc">Place candidates directly into roles</div>
+      </div>
+      <div class="stream-amount">Full Fee</div>
+    </div>
+    <div class="income-stream" id="is2">
+      <div class="stream-icon">&#x1F464;</div>
+      <div>
+        <div class="stream-label">Candidate Referral Splits</div>
+        <div class="stream-desc">Your referred candidates get placed</div>
+      </div>
+      <div class="stream-amount">Residual</div>
+    </div>
+    <div class="income-stream" id="is3">
+      <div class="stream-icon">&#x1F3E2;</div>
+      <div>
+        <div class="stream-label">Company Referral Splits</div>
+        <div class="stream-desc">Hires made at companies you brought</div>
+      </div>
+      <div class="stream-amount">Residual</div>
+    </div>
+    <div class="income-stream" id="is4">
+      <div class="stream-icon">&#x267E;&#xFE0F;</div>
+      <div>
+        <div class="stream-label">Lifetime Duration</div>
+        <div class="stream-desc">Keeps paying while your account is active</div>
+      </div>
+      <div class="stream-amount" style="color:var(--secondary);">Forever</div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 8: Flip card -->
+<div class="scene" id="scene-flip">
+  <div class="flip-container">
+    <div class="flip-card" id="flipCard">
+      <div class="flip-face flip-front">
+        <div style="font-size:3rem; margin-bottom:1rem;">&#x1F6AB;</div>
+        <div style="font-size:1.5rem; font-weight:700;">Traditional Recruiting</div>
+        <div style="color:var(--text-dim); margin-top:0.5rem; max-width:400px;">One placement. One fee. Start from zero next month. The hamster wheel never stops.</div>
+      </div>
+      <div class="flip-face flip-back">
+        <div style="font-size:3rem; margin-bottom:1rem;">&#x1F4B0;</div>
+        <div style="font-size:1.5rem; font-weight:700;">Splits Network</div>
+        <div style="color:rgba(255,255,255,0.8); margin-top:0.5rem; max-width:400px;">Every candidate. Every company. Lifetime residuals. Your network becomes your net worth.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 9: Money counter -->
+<div class="scene" id="scene-money">
+  <div style="text-align:center;">
+    <div style="font-size:1.2rem; text-transform:uppercase; letter-spacing:0.3em; color:var(--text-dim); margin-bottom:1rem;">Residual Income Growing</div>
+    <div class="money-display" id="moneyCounter">$0</div>
+    <div style="margin-top:1.5rem; color:var(--text-dim); font-size:1.1rem;" id="moneySubtext">Every placement adds to your recurring revenue...</div>
+  </div>
+</div>
+
+<!-- Scene 10: CTA -->
+<div class="scene" id="scene-cta">
+  <div class="cta-container">
+    <div class="cta-title" id="ctaTitle">Build Your<br>Recruiting<br>Empire.</div>
+    <div class="cta-subtitle">Lifetime residual income. Active account. That's it.</div>
+    <a href="https://splits.network" target="_blank" class="cta-btn">Start Earning Residuals</a>
+    <div class="cta-free">Free to join. Start building your network today.</div>
+  </div>
+</div>
+
+<script>
+// ==================== ENGINE ====================
+const $ = id => document.getElementById(id);
+const scenes = {};
+let currentScene = null;
+
+function showScene(id) {
+  if (currentScene) currentScene.classList.remove('active');
+  const scene = $(id);
+  scene.classList.add('active');
+  currentScene = scene;
+}
+
+function hideAllScenes() {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  currentScene = null;
+}
+
+function flash() {
+  const f = $('flash');
+  f.classList.remove('bang');
+  void f.offsetWidth;
+  f.classList.add('bang');
+}
+
+function explosion(x, y, count = 30) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'explosion-particle';
+    const angle = (Math.PI * 2 * i) / count;
+    const dist = 100 + Math.random() * 200;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    p.style.cssText = `left:${x}px; top:${y}px; --dx:${dx}px; --dy:${dy}px; background:hsl(${40 + Math.random()*20},90%,${50+Math.random()*20}%);`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  }
+}
+
+function spawnEmoji(emoji, x, y) {
+  const el = document.createElement('div');
+  el.className = 'float-emoji';
+  el.textContent = emoji;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function spawnCoin(x) {
+  const el = document.createElement('div');
+  el.className = 'coin';
+  el.textContent = '\u{1FA99}';
+  el.style.left = x + 'px';
+  el.style.top = '-50px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+function matrixRain(duration = 3000) {
+  const chars = 'SPLITS.NETWORK$$$'.split('');
+  const interval = setInterval(() => {
+    const c = document.createElement('div');
+    c.className = 'matrix-char';
+    c.textContent = chars[Math.floor(Math.random() * chars.length)];
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDuration = (1 + Math.random() * 2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3000);
+  }, 50);
+  setTimeout(() => clearInterval(interval), duration);
+}
+
+function coinRain(duration = 3000) {
+  const interval = setInterval(() => {
+    spawnCoin(Math.random() * window.innerWidth);
+  }, 150);
+  setTimeout(() => clearInterval(interval), duration);
+}
+
+function animateNumber(el, target, suffix = '', duration = 1500) {
+  const start = performance.now();
+  const numTarget = parseInt(target.replace(/,/g, ''));
+  function update(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const val = Math.round(numTarget * ease);
+    el.textContent = val.toLocaleString() + suffix;
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function animateMoney(el, target, duration = 4000) {
+  const start = performance.now();
+  function update(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const val = Math.round(target * ease);
+    el.textContent = '$' + val.toLocaleString();
+    if (t < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+function setProgress(pct) {
+  $('progress').style.width = pct + '%';
+}
+
+// Sound wave bars
+function initSoundWave() {
+  const sw = $('soundWave');
+  for (let i = 0; i < 20; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'wave-bar';
+    bar.style.setProperty('--h', (10 + Math.random() * 40) + 'px');
+    bar.style.setProperty('--dur', (0.3 + Math.random() * 0.5) + 's');
+    sw.appendChild(bar);
+  }
+}
+initSoundWave();
+
+// Custom cursor
+document.addEventListener('mousemove', e => {
+  $('cursor').style.left = (e.clientX - 10) + 'px';
+  $('cursor').style.top = (e.clientY - 10) + 'px';
+  $('cursorDot').style.left = (e.clientX - 3) + 'px';
+  $('cursorDot').style.top = (e.clientY - 3) + 'px';
+});
+
+// Particle background
+const canvas = $('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function createParticles(count = 80) {
+  particles = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 2 + 0.5,
+      color: ['#3b5ccc', '#f59e0b', '#14b8a6'][Math.floor(Math.random() * 3)]
+    });
+  }
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = 0.4;
+    ctx.fill();
+  });
+  ctx.globalAlpha = 0.05;
+  ctx.strokeStyle = '#f59e0b';
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      if (dx * dx + dy * dy < 15000) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+createParticles();
+drawParticles();
+
+// ==================== TIMELINE ====================
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function typeLine(container, text, speed = 30) {
+  const span = document.createElement('span');
+  container.appendChild(span);
+  for (let i = 0; i < text.length; i++) {
+    span.textContent += text[i];
+    await sleep(speed);
+  }
+  span.style.opacity = 1;
+  return span;
+}
+
+async function runShow() {
+  $('skipBtn').classList.add('visible');
+  $('soundWave').style.display = 'flex';
+
+  // ---- BOOT SEQUENCE ----
+  setProgress(0);
+  showScene('scene-boot');
+  const bootLines = [
+    '> initializing residual_income_engine v2.0...',
+    '> loading recruiter_network... [OK]',
+    '> mapping candidate_referrals... [OK]',
+    '> mapping company_referrals... [OK]',
+    '> calculating lifetime_residuals... [OK]',
+    '> income_streams: COMPOUNDING',
+    '> status: READY',
+    '',
+    '> LAUNCHING splits.network_'
+  ];
+  matrixRain(4000);
+  for (const line of bootLines) {
+    await typeLine($('bootText'), line + '\n', 20);
+    await sleep(200);
+  }
+  await sleep(800);
+  flash();
+
+  // ---- HOOK ----
+  setProgress(10);
+  showScene('scene-hook');
+  await sleep(300);
+  $('hw1').classList.add('visible');
+  await sleep(300);
+  $('hw2').classList.add('visible');
+  await sleep(300);
+  $('hw3').classList.add('visible');
+  await sleep(500);
+  $('hw3').classList.add('glitch-text');
+  await sleep(2000);
+
+  // ---- PROBLEM ----
+  setProgress(20);
+  flash();
+  showScene('scene-problem');
+  const problems = [
+    { text: '\u274C You make a placement. You get paid once.', color: '#ef4444' },
+    { text: '\u274C Next month? Back to zero.', color: '#ef4444' },
+    { text: '\u274C Your network makes you nothing after the deal.', color: '#ef4444' },
+    { text: '\u274C All that relationship-building. Wasted revenue.', color: '#ef4444' },
+  ];
+  for (const p of problems) {
+    const div = document.createElement('div');
+    div.textContent = p.text;
+    div.style.opacity = '0';
+    div.style.transform = 'translateX(-50px)';
+    div.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+    div.style.color = p.color;
+    $('problemPoints').appendChild(div);
+    await sleep(100);
+    div.style.opacity = '1';
+    div.style.transform = 'translateX(0)';
+    await sleep(800);
+  }
+  await sleep(1000);
+
+  // ---- LOGO REVEAL ----
+  setProgress(30);
+  flash();
+  showScene('scene-logo');
+  await sleep(300);
+  $('logoText').classList.add('visible');
+  explosion(window.innerWidth/2, window.innerHeight/2, 50);
+  for (let i = 0; i < 15; i++) {
+    spawnEmoji(['\u{1F4B0}','\u{1FA99}','\u2728','\u{1F4B8}','\u{1F4B5}'][Math.floor(Math.random()*5)],
+      Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+  }
+  await sleep(500);
+  $('logoTagline').classList.add('visible');
+  await sleep(2000);
+
+  // ---- HOW IT WORKS: CANDIDATES ----
+  setProgress(40);
+  flash();
+  showScene('scene-how-candidates');
+  await sleep(400);
+  $('fc1').classList.add('visible');
+  await sleep(600);
+  $('fa1').classList.add('visible');
+  await sleep(300);
+  $('fc2').classList.add('visible');
+  await sleep(600);
+  $('fa2').classList.add('visible');
+  await sleep(300);
+  $('fc3').classList.add('visible');
+  explosion(window.innerWidth*0.3, window.innerHeight*0.7, 20);
+  coinRain(1500);
+  await sleep(2500);
+
+  // ---- HOW IT WORKS: COMPANIES ----
+  setProgress(50);
+  flash();
+  showScene('scene-how-companies');
+  await sleep(400);
+  $('fco1').classList.add('visible');
+  await sleep(600);
+  $('fao1').classList.add('visible');
+  await sleep(300);
+  $('fco2').classList.add('visible');
+  await sleep(600);
+  $('fao2').classList.add('visible');
+  await sleep(300);
+  $('fco3').classList.add('visible');
+  explosion(window.innerWidth*0.3, window.innerHeight*0.7, 20);
+  coinRain(1500);
+  await sleep(2500);
+
+  // ---- COMPOUNDING GRAPH ----
+  setProgress(60);
+  flash();
+  showScene('scene-compound');
+  const graphData = [
+    { label: 'Month 1', value: 30, amount: '$2,500' },
+    { label: 'Month 3', value: 55, amount: '$5,800' },
+    { label: 'Month 6', value: 90, amount: '$12,400' },
+    { label: 'Month 9', value: 140, amount: '$22,000' },
+    { label: 'Year 1', value: 195, amount: '$38,500' },
+    { label: 'Year 2', value: 260, amount: '$72,000' },
+    { label: 'Year 3', value: 300, amount: '$125,000' },
+  ];
+  const gc = $('graphContainer');
+  const barWidth = 60;
+  const gap = (700 - graphData.length * barWidth) / (graphData.length + 1);
+  for (let i = 0; i < graphData.length; i++) {
+    const d = graphData[i];
+    const bar = document.createElement('div');
+    bar.className = 'graph-bar';
+    const left = gap + i * (barWidth + gap);
+    bar.style.left = left + 'px';
+    bar.style.width = barWidth + 'px';
+    bar.style.height = d.value + 'px';
+    bar.id = 'gbar' + i;
+
+    const label = document.createElement('div');
+    label.className = 'graph-label';
+    label.textContent = d.label;
+    label.style.left = (left + barWidth/2) + 'px';
+    label.id = 'glabel' + i;
+
+    const val = document.createElement('div');
+    val.className = 'graph-value';
+    val.textContent = d.amount;
+    val.style.left = (left + barWidth/2) + 'px';
+    val.id = 'gval' + i;
+
+    gc.appendChild(bar);
+    gc.appendChild(label);
+    gc.appendChild(val);
+  }
+  await sleep(300);
+  for (let i = 0; i < graphData.length; i++) {
+    $('gbar' + i).classList.add('visible');
+    $('glabel' + i).classList.add('visible');
+    $('gval' + i).classList.add('visible');
+    if (i >= 4) explosion(gap + i * (barWidth + gap) + barWidth/2 + gc.getBoundingClientRect().left, gc.getBoundingClientRect().top, 10);
+    await sleep(400);
+  }
+  await sleep(2000);
+
+  // ---- INCOME STREAMS ----
+  setProgress(70);
+  flash();
+  showScene('scene-streams');
+  const streams = ['is1','is2','is3','is4'];
+  for (const sid of streams) {
+    $(sid).classList.add('visible');
+    await sleep(500);
+  }
+  await sleep(2500);
+
+  // ---- FLIP ----
+  setProgress(80);
+  flash();
+  showScene('scene-flip');
+  await sleep(1500);
+  $('flipCard').classList.add('flipped');
+  await sleep(500);
+  explosion(window.innerWidth/2, window.innerHeight/2, 40);
+  coinRain(2000);
+  await sleep(2500);
+
+  // ---- MONEY COUNTER ----
+  setProgress(90);
+  flash();
+  showScene('scene-money');
+  animateMoney($('moneyCounter'), 125000, 5000);
+  // Spawn coins during count
+  const coinInterval = setInterval(() => {
+    spawnCoin(Math.random() * window.innerWidth);
+  }, 100);
+  await sleep(2000);
+  $('moneySubtext').textContent = 'Compounding. Every month. Every year.';
+  await sleep(1500);
+  $('moneySubtext').textContent = 'Lifetime residuals. Just keep your account active.';
+  await sleep(1500);
+  clearInterval(coinInterval);
+
+  // ---- CTA FINALE ----
+  setProgress(100);
+  flash();
+  flash();
+  showScene('scene-cta');
+  matrixRain(5000);
+  coinRain(5000);
+
+  const emojiInterval = setInterval(() => {
+    spawnEmoji(['\u{1F4B0}','\u{1FA99}','\u{1F4B8}','\u2728','\u{1F525}','\u26A1'][Math.floor(Math.random()*6)],
+      Math.random() * window.innerWidth, window.innerHeight);
+  }, 200);
+
+  const explosionInterval = setInterval(() => {
+    explosion(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 5);
+  }, 1500);
+
+  $('skipBtn').classList.remove('visible');
+
+  setTimeout(() => {
+    clearInterval(emojiInterval);
+    clearInterval(explosionInterval);
+  }, 10000);
+}
+
+// ==================== START ====================
+$('playOverlay').addEventListener('click', () => {
+  $('playOverlay').classList.add('hidden');
+  runShow();
+});
+
+$('skipBtn').addEventListener('click', () => {
+  hideAllScenes();
+  setProgress(100);
+  showScene('scene-cta');
+  $('skipBtn').classList.remove('visible');
+});
+</script>
+</body>
+</html>

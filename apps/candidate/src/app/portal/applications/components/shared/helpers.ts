@@ -1,10 +1,7 @@
 import type { Application } from "../../types";
-import { formatStage } from "../../types";
-
-export { formatStage };
 
 export function companyName(app: Application): string {
-    return app.job?.company?.name || app.company?.name || "Unknown Company";
+    return app.job?.company?.name || app.job?.firm?.name || app.company?.name || "Unknown Company";
 }
 
 export function companyInitials(name: string): string {
@@ -47,6 +44,16 @@ export function salaryDisplay(app: Application): string | null {
     if (job?.salary_min) return `${currency}${(job.salary_min / 1000).toFixed(0)}k+`;
     if (job?.salary_max) return `Up to ${currency}${(job.salary_max / 1000).toFixed(0)}k`;
     return null;
+}
+
+export function offerSalaryDisplay(app: Application): string | null {
+    if (!app.salary) return null;
+    const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: app.job?.salary_currency || "USD",
+        maximumFractionDigits: 0,
+    }).format(app.salary);
+    return `${formatted}/year`;
 }
 
 export function hasAiReview(app: Application): boolean {

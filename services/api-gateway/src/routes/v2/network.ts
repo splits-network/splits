@@ -1057,6 +1057,26 @@ function registerRecruiterCodeRoutes(app: FastifyInstance, services: ServiceRegi
         }
     );
 
+    // GET default code for authenticated recruiter
+    app.get(
+        '/api/v2/recruiter-codes/default',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/api/v2/recruiter-codes/default',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch default recruiter code');
+            }
+        }
+    );
+
     // GET code by ID (authenticated)
     app.get(
         '/api/v2/recruiter-codes/:id',

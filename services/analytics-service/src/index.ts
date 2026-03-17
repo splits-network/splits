@@ -8,6 +8,7 @@ import { createLogger } from "@splits-network/shared-logging";
 import { CacheManager } from "./cache/cache-manager";
 import { CacheInvalidator } from "./cache/invalidation";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { DomainEventConsumer } from "./consumers/domain-consumer";
 import { DashboardEventPublisher } from "./v2/shared/dashboard-events";
 import { startBackgroundJobs } from "./jobs";
@@ -118,6 +119,25 @@ app.register(registerV2Routes, {
     config,
     redis: redisData,
     activityService,
+});
+
+// Register V3 routes (coexist with V2)
+// V3 reuses V2 service instances for charts/stats (complex logic already implemented)
+import { ChartRepository } from "./v2/charts/repository";
+import { ChartServiceV2 } from "./v2/charts/service";
+import { StatsRepository } from "./v2/stats/repository";
+import { StatsServiceV2 } from "./v2/stats/service";
+
+const v3ChartRepo = new ChartRepository(supabase);
+const v3ChartService = new ChartServiceV2(v3ChartRepo, supabase);
+const v3StatsRepo = new StatsRepository(supabase);
+const v3StatsService = new StatsServiceV2(v3StatsRepo);
+
+registerV3Routes(app, {
+    supabase,
+    activityService,
+    chartServiceV2: v3ChartService,
+    statsServiceV2: v3StatsService,
 });
 
 // Initialize event consumer and activity publisher

@@ -125,12 +125,15 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export function useCompanyContext() {
+const EMPTY_CONTEXT: CompanyContextValue = {
+    companies: [],
+    companyIds: [],
+    canInvite: false,
+    recruiterRelationships: new Map(),
+    refreshRelationships: () => {},
+};
+
+export function useCompanyContext(): CompanyContextValue {
     const context = useContext(CompanyContext);
-    if (!context) {
-        throw new Error(
-            "useCompanyContext must be used within CompanyProvider",
-        );
-    }
-    return context;
+    return context ?? EMPTY_CONTEXT;
 }

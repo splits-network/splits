@@ -6,6 +6,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     tierPromotionEmail,
     tierDemotionEmail,
@@ -22,6 +23,7 @@ export class ReputationEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) {}
 
@@ -33,8 +35,12 @@ export class ReputationEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -43,7 +49,7 @@ export class ReputationEmailService {
             template: 'custom',
             payload: options.payload,
             status: 'pending',
-            channel: 'email',
+            channel: effectiveChannel,
             read: false,
             dismissed: false,
             priority: 'normal',
@@ -51,7 +57,7 @@ export class ReputationEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

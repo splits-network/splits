@@ -9,12 +9,16 @@ import {
     guaranteeExpiringEmail,
     firstPlacementEmail,
 } from '../../templates/placements';
+import type { EmailSource } from '../../templates/base';
+
+const { PORTAL_URL: _PORTAL_URL } = require('../../helpers/urls');
 
 export class PlacementsEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -29,8 +33,12 @@ export class PlacementsEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -39,7 +47,7 @@ export class PlacementsEmailService {
             template: 'custom',
             payload: options.payload,
             status: 'pending',
-            channel: 'email',
+            channel: effectiveChannel,
             // Email-only records don't need these in-app fields (but DB requires them with defaults)
             read: false,
             dismissed: false,
@@ -48,7 +56,7 @@ export class PlacementsEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -139,6 +147,7 @@ export class PlacementsEmailService {
             actionLabel?: string;
             priority?: 'low' | 'normal' | 'high';
             category?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         await this.sendEmail(to, subject, html, options);
@@ -164,7 +173,7 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `Placement Confirmed: ${data.candidateName} - $${data.recruiterShare.toFixed(2)}`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements/${data.placementId}`;
 
         const html = placementCreatedEmail({
             candidateName: data.candidateName,
@@ -201,7 +210,7 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `Placement Activated: ${data.candidateName} Started!`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements/${data.placementId}`;
 
         const html = placementActivatedEmail({
             candidateName: data.candidateName,
@@ -235,7 +244,7 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `💰 Placement Completed: ${data.candidateName} - $${data.finalPayout.toFixed(2)}`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements/${data.placementId}`;
 
         const html = placementCompletedEmail({
             candidateName: data.candidateName,
@@ -268,7 +277,7 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `Placement Issue: ${data.candidateName}`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements/${data.placementId}`;
 
         const html = placementFailedEmail({
             candidateName: data.candidateName,
@@ -301,7 +310,7 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `Congratulations on your first placement!`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements/${data.placementId}`;
 
         const html = firstPlacementEmail({
             candidateName: data.candidateName,
@@ -335,7 +344,7 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `⏳ Guarantee Period Ending Soon: ${data.candidateName}`;
-        const placementUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+        const placementUrl = `${_PORTAL_URL}/portal/placements/${data.placementId}`;
 
         const html = guaranteeExpiringEmail({
             candidateName: data.candidateName,

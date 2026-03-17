@@ -1,3 +1,5 @@
+import type { BaselSortOption } from "@splits-network/basel-ui";
+
 export type InvitationStatus = "pending" | "accepted" | "expired" | "revoked";
 
 export interface CompanyInvitation {
@@ -25,4 +27,28 @@ export interface CompanyInvitation {
 
 export interface InvitationFilters {
     status?: string;
+    has_email?: string;
+    expiry_status?: string;
 }
+
+export const HAS_EMAIL_LABELS: Record<string, string> = {
+    yes: "Email Sent",
+    no: "No Email",
+};
+
+export const INVITE_EXPIRY_LABELS: Record<string, string> = {
+    active: "Not Expired",
+    expired: "Expired",
+};
+
+export const INVITE_STATUS_LABELS: Record<string, string> = {
+    pending: "Pending",
+    accepted: "Accepted",
+    expired: "Expired",
+    revoked: "Revoked",
+};
+
+export const INVITE_COMPANY_SORT_OPTIONS: BaselSortOption[] = [
+    { value: "created_at", label: "Date Created" },
+    { value: "status", label: "Status" },
+];

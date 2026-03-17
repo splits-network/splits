@@ -11,9 +11,7 @@ function LoadingFallback() {
                     A
                 </div>
                 <span className="loading loading-spinner loading-lg text-primary" />
-                <p className="text-neutral-content/40 text-sm mt-4">
-                    Loading...
-                </p>
+                <p className="text-base-content/40 text-sm mt-4">Loading...</p>
             </div>
         </div>
     );

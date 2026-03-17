@@ -5,7 +5,7 @@ metadata:
     namespace: splits-network
 spec:
     # 2 replicas for redundancy - audit consumer uses exclusive queues so each message goes to one replica only
-    replicas: 2
+    replicas: ${REPLICAS:-2}
     selector:
         matchLabels:
             app: gpt-service
@@ -14,6 +14,13 @@ spec:
             labels:
                 app: gpt-service
         spec:
+            nodeSelector:
+                agentpool: userpool
+            tolerations:
+                - key: "kubernetes.azure.com/scalesetpriority"
+                  operator: "Equal"
+                  value: "spot"
+                  effect: "NoSchedule"
             containers:
                 - name: gpt-service
                   image: ${ACR_SERVER}/gpt-service:${IMAGE_TAG}

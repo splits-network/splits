@@ -31,18 +31,18 @@ Each feature has `{feature}-data.ts` (mock data) and `{feature}-panel.tsx` (comp
 
 ### Feature → Showcase File Lookup
 
-| Feature | Showcase Panel | Real Portal Component |
-|---------|---------------|----------------------|
-| Recruiters | `panels/recruiter-panel.tsx` | `portal/recruiters/components/shared/recruiter-detail.tsx` |
-| Candidates | `panels/candidate-panel.tsx` | `portal/candidates/components/shared/candidate-detail.tsx` |
-| Companies | `panels/company-panel.tsx` | `portal/companies/components/shared/company-detail.tsx` |
-| Roles/Jobs | `panels/role-panel.tsx` | `portal/roles/components/shared/job-detail.tsx` |
-| Applications | `panels/application-panel.tsx` | `portal/applications/components/shared/application-detail.tsx` |
-| Placements | `panels/placement-panel.tsx` | `portal/placements/components/shared/detail-panel.tsx` |
-| Firms | `panels/firm-panel.tsx` | `portal/firms/components/shared/firm-detail.tsx` |
-| Matches | `panels/match-panel.tsx` | `portal/matches/components/shared/match-detail-panel.tsx` |
-| Invitations | `panels/invitation-panel.tsx` | `portal/invitations/components/shared/invitation-detail.tsx` |
-| Referral Codes | `panels/referral-panel.tsx` | `portal/referral-codes/` (table only, no detail yet) |
+| Feature        | Showcase Panel                 | Real Portal Component                                          |
+| -------------- | ------------------------------ | -------------------------------------------------------------- |
+| Recruiters     | `panels/recruiter-panel.tsx`   | `portal/recruiters/components/shared/recruiter-detail.tsx`     |
+| Candidates     | `panels/candidate-panel.tsx`   | `portal/candidates/components/shared/candidate-detail.tsx`     |
+| Companies      | `panels/company-panel.tsx`     | `portal/companies/components/shared/company-detail.tsx`        |
+| Roles/Jobs     | `panels/role-panel.tsx`        | `portal/roles/components/shared/job-detail.tsx`                |
+| Applications   | `panels/application-panel.tsx` | `portal/applications/components/shared/application-detail.tsx` |
+| Placements     | `panels/placement-panel.tsx`   | `portal/placements/components/shared/detail-panel.tsx`         |
+| Firms          | `panels/firm-panel.tsx`        | `portal/firms/components/shared/firm-detail.tsx`               |
+| Matches        | `panels/match-panel.tsx`       | `portal/matches/components/shared/match-detail-panel.tsx`      |
+| Invitations    | `panels/invitation-panel.tsx`  | `portal/invitations/components/shared/invitation-detail.tsx`   |
+| Referral Codes | `panels/referral-panel.tsx`    | `portal/referral-codes/` (table only, no detail yet)           |
 
 ## Panel Anatomy
 
@@ -50,7 +50,7 @@ Every Basel detail panel follows this vertical structure:
 
 ```
 ┌──────────────────────────────────────────┐
-│ HEADER (bg-neutral text-neutral-content) │
+│ HEADER (bg-base-300 text-base-content) │
 │  ┌── Diagonal accent (bg-primary/10)     │
 │  │   clipPath: polygon(15% 0,100%...)    │
 │  ├── Kicker row: category + badges       │
@@ -79,14 +79,14 @@ Located at `showcase/detail-panel/one/panels/panel-header.tsx`. Accepts:
 
 ```tsx
 interface PanelHeaderProps {
-    kicker: string;                                    // Uppercase category text
-    badges: { label: string; className: string }[];    // Status badges
-    avatar?: { initials: string; imageUrl?: string };  // Square avatar
-    title: string;                                     // 3xl font-black
-    subtitle?: string;                                 // Primary kicker above title
-    meta?: { icon: string; text: string }[];           // Location, date, etc.
-    stats: { label: string; value: string; icon: string }[];  // Stats strip
-    actions?: { icon: string; label: string; className?: string }[];  // Toolbar buttons
+    kicker: string; // Uppercase category text
+    badges: { label: string; className: string }[]; // Status badges
+    avatar?: { initials: string; imageUrl?: string }; // Square avatar
+    title: string; // 3xl font-black
+    subtitle?: string; // Primary kicker above title
+    meta?: { icon: string; text: string }[]; // Location, date, etc.
+    stats: { label: string; value: string; icon: string }[]; // Stats strip
+    actions?: { icon: string; label: string; className?: string }[]; // Toolbar buttons
 }
 ```
 
@@ -97,11 +97,19 @@ Render-prop wrapper around `BaselTabBar`:
 ```tsx
 <PanelTabs
     tabs={[
-        { label: "About", value: "about", icon: "fa-duotone fa-regular fa-user" },
-        { label: "Contact", value: "contact", icon: "fa-duotone fa-regular fa-address-book" },
+        {
+            label: "About",
+            value: "about",
+            icon: "fa-duotone fa-regular fa-user",
+        },
+        {
+            label: "Contact",
+            value: "contact",
+            icon: "fa-duotone fa-regular fa-address-book",
+        },
     ]}
 >
-    {(activeTab) => activeTab === "about" ? <AboutTab /> : <ContactTab />}
+    {(activeTab) => (activeTab === "about" ? <AboutTab /> : <ContactTab />)}
 </PanelTabs>
 ```
 
@@ -110,14 +118,12 @@ Render-prop wrapper around `BaselTabBar`:
 ### Dark Header with Diagonal Accent
 
 ```tsx
-<header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+<header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
     <div
         className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
         style={{ clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)" }}
     />
-    <div className="relative px-6 pt-6 pb-0">
-        {/* content */}
-    </div>
+    <div className="relative px-6 pt-6 pb-0">{/* content */}</div>
 </header>
 ```
 
@@ -125,12 +131,14 @@ Render-prop wrapper around `BaselTabBar`:
 
 ```tsx
 <div className="flex items-center justify-between mb-6">
-    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
+    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
         {categoryText}
     </p>
     <div className="flex items-center gap-2 shrink-0">
         <span className="badge badge-success">Active</span>
-        <span className="badge badge-warning badge-soft badge-outline">New</span>
+        <span className="badge badge-warning badge-soft badge-outline">
+            New
+        </span>
     </div>
 </div>
 ```
@@ -150,15 +158,20 @@ Render-prop wrapper around `BaselTabBar`:
             "bg-warning text-warning-content",
         ];
         return (
-            <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
-                <div className={`w-9 h-9 flex items-center justify-center shrink-0 ${iconStyles[i % 4]}`}>
+            <div
+                key={stat.label}
+                className="flex items-center gap-2.5 px-3 py-4"
+            >
+                <div
+                    className={`w-9 h-9 flex items-center justify-center shrink-0 ${iconStyles[i % 4]}`}
+                >
                     <i className={`${stat.icon} text-sm`} />
                 </div>
                 <div>
-                    <span className="text-lg font-black text-neutral-content leading-none block">
+                    <span className="text-lg font-black text-base-content leading-none block">
                         {stat.value}
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                         {stat.label}
                     </span>
                 </div>
@@ -190,13 +203,16 @@ Render-prop wrapper around `BaselTabBar`:
     </p>
     <div className="flex flex-wrap gap-2">
         {items.map((item) => (
-            <span key={item} className="badge badge-primary">{item}</span>
+            <span key={item} className="badge badge-primary">
+                {item}
+            </span>
         ))}
     </div>
 </div>
 ```
 
 Badge variants by content type:
+
 - **Required skills**: `badge badge-primary`
 - **Nice-to-have skills**: `badge badge-soft badge-outline`
 - **Industries**: `badge badge-soft badge-outline`
@@ -243,8 +259,12 @@ Badge variants by content type:
 <div className="grid grid-cols-3 gap-[2px] bg-base-300">
     {cells.map((cell) => (
         <div key={cell.label} className="bg-base-100 p-4">
-            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">{cell.label}</p>
-            <p className={`text-lg font-black tracking-tight ${cell.accent ? "text-primary" : ""}`}>
+            <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                {cell.label}
+            </p>
+            <p
+                className={`text-lg font-black tracking-tight ${cell.accent ? "text-primary" : ""}`}
+            >
                 {cell.value}
             </p>
         </div>
@@ -261,10 +281,16 @@ Badge variants by content type:
             {i < events.length - 1 && (
                 <div className="absolute left-[14px] top-8 bottom-0 w-px bg-base-300" />
             )}
-            <div className={`w-7 h-7 flex items-center justify-center shrink-0 ${
-                event.done ? "bg-success text-success-content" : "bg-base-300 text-base-content/40"
-            }`}>
-                <i className={`fa-duotone fa-regular ${event.done ? "fa-check" : "fa-circle"} text-xs`} />
+            <div
+                className={`w-7 h-7 flex items-center justify-center shrink-0 ${
+                    event.done
+                        ? "bg-success text-success-content"
+                        : "bg-base-300 text-base-content/40"
+                }`}
+            >
+                <i
+                    className={`fa-duotone fa-regular ${event.done ? "fa-check" : "fa-circle"} text-xs`}
+                />
             </div>
             <div className="pt-0.5">
                 <p className="text-sm font-bold">{event.label}</p>
@@ -297,15 +323,15 @@ When migrating an existing detail panel to Basel:
 2. **Read the showcase data file** (`{feature}-data.ts`) to understand all fields
 3. **Read the real portal detail component** to understand data flow and hooks
 4. **Create the Basel version** at `{feature}-detail-basel/` or modify in-place:
-   - Keep the data layer (API calls, hooks, types)
-   - Replace the UI with showcase patterns
-   - Use `PanelHeader` and `PanelTabs` (or inline the patterns)
-   - Match all tabs, sections, badges from the showcase
+    - Keep the data layer (API calls, hooks, types)
+    - Replace the UI with showcase patterns
+    - Use `PanelHeader` and `PanelTabs` (or inline the patterns)
+    - Match all tabs, sections, badges from the showcase
 5. **Validate** against the checklist below
 
 ## Checklist
 
-- [ ] Dark header with `bg-neutral text-neutral-content border-l-4 border-l-primary`
+- [ ] Dark header with `bg-base-300 text-base-content border-l-4 border-l-primary`
 - [ ] Diagonal clip-path accent (`bg-primary/10`)
 - [ ] Kicker row with uppercase tracking and status badges
 - [ ] Avatar uses `w-20 h-20` with image or initials fallback

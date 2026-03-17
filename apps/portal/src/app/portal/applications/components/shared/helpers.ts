@@ -18,7 +18,11 @@ export function roleTitle(application: Application): string {
 }
 
 export function companyName(application: Application): string {
-    return application.job?.company?.name || "Company Pending";
+    return application.job?.company?.name || application.job?.firm?.name || "Company Pending";
+}
+
+export function isFirmJob(application: Application): boolean {
+    return !application.job?.company && !!application.job?.firm;
 }
 
 export function aiScore(application: Application): number | null {

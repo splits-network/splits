@@ -4,7 +4,6 @@
  */
 
 import { NotificationService } from '../../service';
-import { ServiceRegistry } from '../../clients';
 import { Logger } from '@splits-network/shared-logging';
 import { DataLookupHelper } from '../../helpers/data-lookup';
 import { ContactLookupHelper } from '../../helpers/contact-lookup';
@@ -12,7 +11,6 @@ import { ContactLookupHelper } from '../../helpers/contact-lookup';
 export class InvitationsConsumer {
     constructor(
         private notificationService: NotificationService,
-        private serviceRegistry: ServiceRegistry,
         private logger: Logger,
         private portalUrl: string,
         private candidateWebsiteUrl: string,

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import ActionsToolbar from "./actions-toolbar";
-import { getStageDisplay, getStageDisplayWithExpired } from "./status-color";
+import { BaselBadge, getStageDisplay } from "@splits-network/basel-ui";
 import { formatApplicationDate } from "../../types";
 import type { Application } from "../../types";
 
@@ -28,10 +28,11 @@ export function ApplicationDetailHeader({
 }: ApplicationDetailHeaderProps) {
     const candidate = application.candidate;
     const job = application.job;
-    const stageDisplay = getStageDisplayWithExpired(
-        application.stage,
-        (application as any).expired_at,
-    );
+    const stageOpts = {
+        expiredAt: (application as any).expired_at,
+        acceptedByCandidate: application.accepted_by_candidate,
+    };
+    const stageDisplay = getStageDisplay(application.stage, stageOpts);
 
     const candidateName = candidate?.full_name || "Unnamed Candidate";
     const candidateInitials = candidateName
@@ -47,10 +48,16 @@ export function ApplicationDetailHeader({
 
     const meta = [
         candidate?.current_title
-            ? { icon: "fa-duotone fa-regular fa-briefcase", text: candidate.current_title }
+            ? {
+                  icon: "fa-duotone fa-regular fa-briefcase",
+                  text: candidate.current_title,
+              }
             : null,
         candidate?.current_company
-            ? { icon: "fa-duotone fa-regular fa-building", text: candidate.current_company }
+            ? {
+                  icon: "fa-duotone fa-regular fa-building",
+                  text: candidate.current_company,
+              }
             : null,
     ].filter(Boolean) as { icon: string; text: string }[];
 
@@ -74,28 +81,49 @@ export function ApplicationDetailHeader({
                 if (!cancelled && review?.fit_score != null) {
                     setFetchedAiScore(Math.round(review.fit_score));
                 }
-            } catch { /* silent */ }
+            } catch {
+                /* silent */
+            }
         })();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [application.id, aiScoreFromApp]);
 
     const aiScore = aiScoreFromApp ?? fetchedAiScore;
-    const stageLabel = getStageDisplay(application.stage);
+    const stageLabel = getStageDisplay(application.stage, stageOpts);
     const docsCount = application.documents?.length || 0;
     const daysInPipeline = Math.floor(
-        (Date.now() - new Date(application.created_at).getTime()) / (1000 * 60 * 60 * 24),
+        (Date.now() - new Date(application.created_at).getTime()) /
+            (1000 * 60 * 60 * 24),
     );
 
     const stats = [
-        { label: "AI Score", value: aiScore != null ? `${aiScore}%` : "\u2014", icon: "fa-duotone fa-regular fa-brain" },
-        { label: "Stage", value: stageLabel.label, icon: `fa-duotone fa-regular ${stageLabel.icon}` },
-        { label: "Docs", value: String(docsCount), icon: "fa-duotone fa-regular fa-file" },
-        { label: "Pipeline", value: `${daysInPipeline}d`, icon: "fa-duotone fa-regular fa-clock" },
+        {
+            label: "AI Score",
+            value: aiScore != null ? `${aiScore}%` : "\u2014",
+            icon: "fa-duotone fa-regular fa-brain",
+        },
+        {
+            label: "Stage",
+            value: stageLabel.label,
+            icon: `fa-duotone fa-regular ${stageLabel.icon}`,
+        },
+        {
+            label: "Docs",
+            value: String(docsCount),
+            icon: "fa-duotone fa-regular fa-file",
+        },
+        {
+            label: "Pipeline",
+            value: `${daysInPipeline}d`,
+            icon: "fa-duotone fa-regular fa-clock",
+        },
     ];
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary shrink-0">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary shrink-0">
             {/* Diagonal accent */}
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
@@ -105,7 +133,7 @@ export function ApplicationDetailHeader({
             {/* Close button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 btn btn-sm btn-square btn-ghost text-neutral-content/60 hover:text-neutral-content"
+                className="absolute top-4 right-4 z-10 btn btn-sm btn-square btn-primary"
             >
                 <i className="fa-duotone fa-regular fa-xmark" />
             </button>
@@ -113,14 +141,21 @@ export function ApplicationDetailHeader({
             <div className="relative px-6 pt-6 pb-0">
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-6 pr-10">
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40 truncate">
-                        Submitted {formatApplicationDate(application.created_at)}
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40 truncate">
+                        Submitted{" "}
+                        {formatApplicationDate(application.created_at)}
                     </p>
                     <div className="flex items-center gap-2 shrink-0">
-                        <span className={`badge badge-${stageDisplay.color}`}>
-                            <i className={`fa-duotone fa-regular ${stageDisplay.icon} mr-1`} />
+                        <BaselBadge
+                            color={stageDisplay.color}
+                            size="sm"
+                            variant="soft"
+                        >
+                            <i
+                                className={`fa-duotone fa-regular ${stageDisplay.icon}`}
+                            />
                             {stageDisplay.label}
-                        </span>
+                        </BaselBadge>
                     </div>
                 </div>
 
@@ -135,13 +170,16 @@ export function ApplicationDetailHeader({
                                 {subtitle}
                             </p>
                         )}
-                        <h2 className="text-3xl font-black tracking-tight leading-none text-neutral-content mb-2 truncate">
+                        <h2 className="text-3xl font-black tracking-tight leading-none text-base-content mb-2 truncate">
                             {candidateName}
                         </h2>
                         {meta.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 {meta.map((m, i) => (
-                                    <span key={i} className="flex items-center gap-1.5">
+                                    <span
+                                        key={i}
+                                        className="flex items-center gap-1.5"
+                                    >
                                         <i className={`${m.icon} text-xs`} />
                                         {m.text}
                                     </span>
@@ -165,18 +203,25 @@ export function ApplicationDetailHeader({
                 {/* Stats strip */}
                 <div
                     className="grid divide-x divide-neutral-content/10 border-t border-neutral-content/10 mt-6"
-                    style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}
+                    style={{
+                        gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+                    }}
                 >
                     {stats.map((stat, i) => (
-                        <div key={stat.label} className="flex items-center gap-2.5 px-3 py-4">
-                            <div className={`w-9 h-9 flex items-center justify-center shrink-0 ${ICON_STYLES[i % ICON_STYLES.length]}`}>
+                        <div
+                            key={stat.label}
+                            className="flex items-center gap-2.5 px-3 py-4"
+                        >
+                            <div
+                                className={`w-9 h-9 flex items-center justify-center shrink-0 ${ICON_STYLES[i % ICON_STYLES.length]}`}
+                            >
                                 <i className={`${stat.icon} text-sm`} />
                             </div>
                             <div>
-                                <span className="text-lg font-black text-neutral-content leading-none block">
+                                <span className="text-lg font-black text-base-content leading-none block">
                                     {stat.value}
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                                <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                     {stat.label}
                                 </span>
                             </div>

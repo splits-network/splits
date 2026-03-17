@@ -35,7 +35,11 @@ export function postedAgo(job: Job): string {
 }
 
 export function companyName(job: Job): string {
-    return job.company?.name || "3rd Party Firm";
+    return job.company?.name || job.firm?.name || "3rd Party Firm";
+}
+
+export function isFirmJob(job: Job): boolean {
+    return !job.company && !!job.firm;
 }
 
 export function companyInitials(name: string): string {
@@ -55,6 +59,28 @@ export function truncateDescription(
     return stripped.length > maxLength
         ? stripped.substring(0, maxLength) + "..."
         : stripped;
+}
+
+/** Match score → semantic color (mirrors portal's getAIScoreBadgeColor) */
+export function matchScoreColor(score: number | null | undefined): string {
+    if (score == null) return "neutral";
+    if (score >= 90) return "success";
+    if (score >= 70) return "primary";
+    if (score >= 50) return "warning";
+    return "error";
+}
+
+/** Match score text color class */
+const SCORE_TEXT_COLORS: Record<string, string> = {
+    success: "text-success",
+    primary: "text-primary",
+    warning: "text-warning",
+    error: "text-error",
+    neutral: "text-base-content/20",
+};
+
+export function matchScoreTextColor(score: number | null | undefined): string {
+    return SCORE_TEXT_COLORS[matchScoreColor(score)] || "text-base-content/20";
 }
 
 export function requiredSkillNames(job: Job): string[] {

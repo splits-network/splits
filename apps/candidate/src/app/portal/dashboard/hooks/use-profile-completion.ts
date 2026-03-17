@@ -12,6 +12,7 @@ export function useProfileCompletion() {
     const { getToken } = useAuth();
     const [profileCompletion, setProfileCompletion] = useState<ProfileCompleteness | null>(null);
     const [hasResume, setHasResume] = useState(false);
+    const [hasPrimaryResume, setHasPrimaryResume] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const refresh = useCallback(async () => {
@@ -27,12 +28,16 @@ export function useProfileCompletion() {
             if (profile) {
                 setProfileCompletion(calculateProfileCompleteness(profile));
 
-                const resumeExists = profile.documents?.some(
+                const resumes = profile.documents?.filter(
                     (doc: any) =>
                         doc.type === 'resume' ||
                         doc.name?.toLowerCase().includes('resume'),
-                ) || false;
-                setHasResume(resumeExists);
+                ) || [];
+                setHasResume(resumes.length > 0);
+                setHasPrimaryResume(
+                    resumes.some((doc: any) => doc.metadata?.is_primary_for_candidate === true)
+                    || profile.resume_metadata != null
+                );
             }
         } catch {
             // Profile completion is non-critical — silently fail so the dashboard
@@ -47,5 +52,5 @@ export function useProfileCompletion() {
         refresh();
     }, [refresh]);
 
-    return { profileCompletion, hasResume, loading, refresh };
+    return { profileCompletion, hasResume, hasPrimaryResume, loading, refresh };
 }

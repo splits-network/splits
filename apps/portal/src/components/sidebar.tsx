@@ -29,6 +29,7 @@ interface NavItemData {
     expandable?: boolean;
     shortcut?: string;
     isNew?: boolean;
+    isBeta?: boolean;
 }
 
 // ─── Navigation Items ───────────────────────────────────────────────────────
@@ -184,6 +185,30 @@ const navItems: NavItemData[] = [
         shortcut: "M",
     },
     {
+        href: "/portal/email",
+        label: "Email",
+        icon: "fa-duotone fa-regular fa-envelope",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "management",
+        isBeta: true,
+    },
+    {
+        href: "/portal/calendar",
+        label: "Calendar",
+        icon: "fa-duotone fa-regular fa-calendar",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "management",
+        isBeta: true,
+    },
+    {
+        href: "/portal/calls",
+        label: "Calls",
+        icon: "fa-duotone fa-regular fa-video",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "management",
+        isBeta: true,
+    },
+    {
         href: "/portal/placements",
         label: "Placements",
         icon: "fa-duotone fa-regular fa-trophy",
@@ -200,7 +225,12 @@ const navItems: NavItemData[] = [
         href: "/portal/leaderboard",
         label: "Leaderboard",
         icon: "fa-duotone fa-regular fa-ranking-star",
-        roles: ["recruiter", "company_admin", "hiring_manager", "platform_admin"],
+        roles: [
+            "recruiter",
+            "company_admin",
+            "hiring_manager",
+            "platform_admin",
+        ],
         section: "management",
     },
     {
@@ -217,6 +247,7 @@ const navItems: NavItemData[] = [
         icon: "fa-duotone fa-regular fa-plug",
         roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "settings",
+        isBeta: true,
     },
     {
         href: "/portal/company/settings",
@@ -255,7 +286,7 @@ export function Sidebar() {
 
         try {
             const response: any = await client.get(
-                "/notifications/counts-by-category",
+                "/notifications/views/counts-by-category",
             );
             const counts = response?.data || {};
             setBadges((prev) => ({
@@ -427,6 +458,7 @@ export function Sidebar() {
                     ? `Alt+${item.shortcut}`
                     : undefined,
                 isNew: item.isNew,
+                isBeta: item.isBeta,
                 children: item.children?.map(mapItem),
                 expanded: expandedItems.has(item.href),
                 onToggle: item.expandable
@@ -474,7 +506,7 @@ export function Sidebar() {
     const footerSlot = (
         <button
             onClick={handleHelpToggle}
-            className="flex items-center gap-2 text-neutral-content/30 hover:text-neutral-content/50 transition-colors"
+            className="flex items-center gap-2 text-base-content/30 hover:text-base-content/50 transition-colors"
         >
             <i className="fa-duotone fa-regular fa-keyboard text-xs" />
             <span className="text-sm font-bold uppercase tracking-[0.15em]">
@@ -530,7 +562,7 @@ export function Sidebar() {
                                             className={`w-8 h-8 flex items-center justify-center ${
                                                 isItemActive
                                                     ? "bg-primary text-primary-content"
-                                                    : "text-neutral-content/40"
+                                                    : "text-base-content/40"
                                             }`}
                                         >
                                             <i
@@ -540,8 +572,8 @@ export function Sidebar() {
                                         <span
                                             className={`text-[8px] font-black uppercase tracking-wider ${
                                                 isItemActive
-                                                    ? "text-neutral-content"
-                                                    : "text-neutral-content/40"
+                                                    ? "text-base-content"
+                                                    : "text-base-content/40"
                                             }`}
                                         >
                                             {item.label}
@@ -574,10 +606,10 @@ export function Sidebar() {
                                     className="flex flex-col items-center gap-1 px-2 py-1 cursor-pointer list-none"
                                     title="More options"
                                 >
-                                    <div className="w-8 h-8 flex items-center justify-center text-neutral-content/40">
+                                    <div className="w-8 h-8 flex items-center justify-center text-base-content/40">
                                         <i className="fa-duotone fa-regular fa-ellipsis text-lg" />
                                     </div>
-                                    <span className="text-[8px] font-black uppercase tracking-wider text-neutral-content/40">
+                                    <span className="text-[8px] font-black uppercase tracking-wider text-base-content/40">
                                         More
                                     </span>
                                 </summary>
@@ -605,7 +637,7 @@ export function Sidebar() {
                                                             item.href,
                                                         )
                                                             ? "text-primary"
-                                                            : "text-neutral-content/60"
+                                                            : "text-base-content/60"
                                                     }
                                                 `}
                                             >

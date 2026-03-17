@@ -11,6 +11,7 @@ import { JsonLd } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getHeaderNav } from "@/lib/content";
+import { SupportWidgetWrapper } from "@/components/support-widget-wrapper";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://employment-networks.com"),
@@ -132,9 +133,11 @@ export default async function RootLayout({
             </head>
             <body className="antialiased flex flex-col min-h-screen">
                 <ThemeProvider>
-                    <Header navItems={headerNav?.items} />
-                    <main className="flex-grow">{children}</main>
-                    <Footer />
+                    <SupportWidgetWrapper>
+                        <Header navItems={headerNav?.items} />
+                        <main className="flex-grow">{children}</main>
+                        <Footer />
+                    </SupportWidgetWrapper>
                     <BaselCookieConsent
                         cookiePolicyHref="/cookie-policy"
                         privacyPolicyHref="/privacy-policy"

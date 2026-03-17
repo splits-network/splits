@@ -25,10 +25,11 @@ export default async function SecureLayout({
     let isAdmin = false;
     try {
         const gatewayUrl =
+            process.env.ADMIN_GATEWAY_INTERNAL_URL ||
             process.env.NEXT_PUBLIC_ADMIN_GATEWAY_URL ||
             "http://admin-gateway:3030";
         const response = await fetch(
-            `${gatewayUrl}/api/v2/identity/api/v2/users/me`,
+            `${gatewayUrl}/api/v3/identity/api/v3/users/me`,
             {
                 headers: { Authorization: `Bearer ${token}` },
             },

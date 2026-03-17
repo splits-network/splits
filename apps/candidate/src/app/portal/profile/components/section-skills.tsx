@@ -108,7 +108,7 @@ export default function SectionSkills({
                 );
             } catch (err) {
                 console.error("Failed to save skills:", err);
-                toast.error("Failed to save skills");
+                toast.error("Skills couldn't be saved. Try again.");
             } finally {
                 setSaving(false);
             }
@@ -127,7 +127,7 @@ export default function SectionSkills({
                 }
             } catch (err) {
                 console.error("Failed to add resume skill:", err);
-                toast.error("Failed to add skill");
+                toast.error("Skill couldn't be added. Try again.");
             }
         },
         [skills, createSkill, handleSkillsChange, toast],

@@ -20,65 +20,13 @@ describe('DomainEventConsumer (unit)', () => {
         vi.restoreAllMocks();
     });
 
-    it('ignores application.created when stage is not ai_review', async () => {
+    it('ignores application.stage_changed when new_stage is not a review stage', async () => {
         const aiReviewService = {
             enrichApplicationData: vi.fn(),
             createReview: vi.fn(),
         } as unknown as AIReviewServiceV2;
         const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
-
-        const event = {
-            event_type: 'application.created',
-            payload: {
-                application_id: 'app-1',
-                stage: 'submitted',
-                candidate_id: 'cand-1',
-                job_id: 'job-1',
-            },
-        };
-
-        await (consumer as any).handleEvent(event);
-
-        expect(aiReviewService.enrichApplicationData).not.toHaveBeenCalled();
-        expect(aiReviewService.createReview).not.toHaveBeenCalled();
-    });
-
-    it('triggers AI review on application.created when stage is ai_review', async () => {
-        const aiReviewService = {
-            enrichApplicationData: vi.fn().mockResolvedValue({ application_id: 'app-1' }),
-            createReview: vi.fn().mockResolvedValue({ id: 'review-1' }),
-        } as unknown as AIReviewServiceV2;
-        const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
-
-        const event = {
-            event_type: 'application.created',
-            payload: {
-                application_id: 'app-1',
-                stage: 'ai_review',
-                candidate_id: 'cand-1',
-                job_id: 'job-1',
-            },
-        };
-
-        await (consumer as any).handleEvent(event);
-
-        expect(aiReviewService.enrichApplicationData).toHaveBeenCalledWith({
-            application_id: 'app-1',
-            candidate_id: 'cand-1',
-            job_id: 'job-1',
-        });
-        expect(aiReviewService.createReview).toHaveBeenCalled();
-    });
-
-    it('ignores application.stage_changed when new_stage is not ai_review', async () => {
-        const aiReviewService = {
-            enrichApplicationData: vi.fn(),
-            createReview: vi.fn(),
-        } as unknown as AIReviewServiceV2;
-        const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
 
         const event = {
             event_type: 'application.stage_changed',
@@ -103,13 +51,13 @@ describe('DomainEventConsumer (unit)', () => {
             createReview: vi.fn().mockResolvedValue({ id: 'review-2' }),
         } as unknown as AIReviewServiceV2;
         const logger = createLoggerMock();
-        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, logger);
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
 
         const event = {
             event_type: 'application.stage_changed',
             payload: {
                 application_id: 'app-2',
-                previous_stage: 'submitted',
+                previous_stage: 'draft',
                 new_stage: 'ai_review',
                 candidate_id: 'cand-2',
                 job_id: 'job-2',
@@ -124,5 +72,58 @@ describe('DomainEventConsumer (unit)', () => {
             job_id: 'job-2',
         });
         expect(aiReviewService.createReview).toHaveBeenCalled();
+    });
+
+    it('triggers AI review on application.stage_changed to gpt_review', async () => {
+        const aiReviewService = {
+            enrichApplicationData: vi.fn().mockResolvedValue({ application_id: 'app-3' }),
+            createReview: vi.fn().mockResolvedValue({ id: 'review-3' }),
+        } as unknown as AIReviewServiceV2;
+        const logger = createLoggerMock();
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
+
+        const event = {
+            event_type: 'application.stage_changed',
+            payload: {
+                application_id: 'app-3',
+                old_stage: 'draft',
+                new_stage: 'gpt_review',
+                candidate_id: 'cand-3',
+                job_id: 'job-3',
+            },
+        };
+
+        await (consumer as any).handleEvent(event);
+
+        expect(aiReviewService.enrichApplicationData).toHaveBeenCalledWith({
+            application_id: 'app-3',
+            candidate_id: 'cand-3',
+            job_id: 'job-3',
+        });
+        expect(aiReviewService.createReview).toHaveBeenCalled();
+    });
+
+    it('does not handle application.created events', async () => {
+        const aiReviewService = {
+            enrichApplicationData: vi.fn(),
+            createReview: vi.fn(),
+        } as unknown as AIReviewServiceV2;
+        const logger = createLoggerMock();
+        const consumer = new DomainEventConsumer('amqp://localhost', aiReviewService, {} as any, {} as any, {} as any, undefined, logger);
+
+        const event = {
+            event_type: 'application.created',
+            payload: {
+                application_id: 'app-4',
+                stage: 'ai_review',
+                candidate_id: 'cand-4',
+                job_id: 'job-4',
+            },
+        };
+
+        await (consumer as any).handleEvent(event);
+
+        expect(aiReviewService.enrichApplicationData).not.toHaveBeenCalled();
+        expect(aiReviewService.createReview).not.toHaveBeenCalled();
     });
 });

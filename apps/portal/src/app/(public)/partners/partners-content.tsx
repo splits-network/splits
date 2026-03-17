@@ -353,7 +353,7 @@ export function PartnersBaselContent() {
             {/* ═══════════════════════════════════════════════════════════
                 4. PULL QUOTE 1
                ═══════════════════════════════════════════════════════════ */}
-            <section className="scroll-reveal scale-in py-20 bg-neutral text-neutral-content">
+            <section className="scroll-reveal scale-in py-20 bg-base-300 text-base-content">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -364,7 +364,7 @@ export function PartnersBaselContent() {
                                 who win are the ones who connect their network
                                 to a bigger one.&rdquo;
                             </blockquote>
-                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                            <cite className="text-sm uppercase tracking-[0.2em] text-base-content/50 not-italic">
                                 {/* COPY: Pull quote 1 attribution */}
                                 -- The case for structured split-fee
                                 partnerships
@@ -450,7 +450,7 @@ export function PartnersBaselContent() {
             {/* ═══════════════════════════════════════════════════════════
                 6. STATS BAR
                ═══════════════════════════════════════════════════════════ */}
-            <section className="stats-bar bg-neutral text-neutral-content py-10">
+            <section className="stats-bar bg-base-300 text-base-content py-10">
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {stats.map((stat, i) => (

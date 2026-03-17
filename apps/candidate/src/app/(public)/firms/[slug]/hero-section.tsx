@@ -3,7 +3,10 @@
 import type { PublicFirm } from "../types";
 import { firmLocation, firmInitials } from "../types";
 import { HeroStats } from "./hero-stats";
-import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import {
+    LevelBadge,
+    useGamification,
+} from "@splits-network/shared-gamification";
 
 interface HeroSectionProps {
     firm: PublicFirm;
@@ -19,14 +22,18 @@ function extractDomain(url: string): string {
     }
 }
 
-export default function HeroSection({ firm, connected, onConnect }: HeroSectionProps) {
+export default function HeroSection({
+    firm,
+    connected,
+    onConnect,
+}: HeroSectionProps) {
     const { getLevel } = useGamification();
     const firmLevel = firm.id ? getLevel(firm.id) : undefined;
     const location = firmLocation(firm);
     const initials = firmInitials(firm.name);
 
     return (
-        <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
             <div
                 className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                 style={{ clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)" }}
@@ -34,7 +41,7 @@ export default function HeroSection({ firm, connected, onConnect }: HeroSectionP
             <div className="relative px-8 pt-10 pb-0">
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-8">
-                    <p className="scroll-reveal fade-up hero-kicker text-xs font-bold uppercase tracking-[0.22em] text-neutral-content/40">
+                    <p className="scroll-reveal fade-up hero-kicker text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
                         {firm.industries.join(" \u00B7 ")}
                     </p>
                     <div className="flex items-center gap-4">
@@ -78,10 +85,10 @@ export default function HeroSection({ firm, connected, onConnect }: HeroSectionP
                             <p className="text-xs font-bold uppercase tracking-[0.22em] text-primary mb-1">
                                 Recruiting Firm
                             </p>
-                            <h1 className="scroll-reveal fade-up firm-name text-4xl lg:text-5xl font-black tracking-tight leading-none text-neutral-content mb-3">
+                            <h1 className="scroll-reveal fade-up firm-name text-4xl lg:text-5xl font-black tracking-tight leading-none text-base-content mb-3">
                                 {firm.name}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-content/40">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-base-content/40">
                                 {location && (
                                     <span className="scroll-reveal fade-up firm-meta flex items-center gap-1.5">
                                         <i className="fa-duotone fa-regular fa-location-dot text-xs" />
@@ -90,7 +97,11 @@ export default function HeroSection({ firm, connected, onConnect }: HeroSectionP
                                 )}
                                 {firm.founded_year && (
                                     <>
-                                        {location && <span className="text-neutral-content/20">|</span>}
+                                        {location && (
+                                            <span className="text-base-content/20">
+                                                |
+                                            </span>
+                                        )}
                                         <span className="scroll-reveal fade-up firm-meta flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-calendar text-xs" />
                                             Est. {firm.founded_year}
@@ -99,7 +110,9 @@ export default function HeroSection({ firm, connected, onConnect }: HeroSectionP
                                 )}
                                 {firm.website_url && (
                                     <>
-                                        <span className="text-neutral-content/20">|</span>
+                                        <span className="text-base-content/20">
+                                            |
+                                        </span>
                                         <span className="scroll-reveal fade-up firm-meta flex items-center gap-1.5">
                                             <i className="fa-duotone fa-regular fa-globe text-xs" />
                                             {extractDomain(firm.website_url)}
@@ -114,7 +127,7 @@ export default function HeroSection({ firm, connected, onConnect }: HeroSectionP
                     <div className="flex flex-wrap gap-2 pb-1 shrink-0">
                         {connected ? (
                             <a
-                                href="/chat"
+                                href="/portal/messages"
                                 className="scroll-reveal fade-up firm-action btn btn-primary btn-sm font-bold uppercase tracking-wider"
                             >
                                 <i className="fa-duotone fa-regular fa-comments" />

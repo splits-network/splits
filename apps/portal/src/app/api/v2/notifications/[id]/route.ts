@@ -14,7 +14,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000'}/api/v2/notifications/${id}`;
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000'}/api/v3/notifications/${id}`;
 
     const response = await fetch(apiUrl, {
         method: 'PATCH',
@@ -45,7 +45,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000'}/api/v2/notifications/${id}`;
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000'}/api/v3/notifications/${id}`;
 
     const response = await fetch(apiUrl, {
         method: 'DELETE',

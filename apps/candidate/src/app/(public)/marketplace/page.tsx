@@ -95,7 +95,6 @@ async function buildMarketplaceParams(
         limit,
         sort_by: sortBy,
         sort_order: sortOrder,
-        include: "user,reputation",
         ...(search ? { search } : {}),
         filters: mergedFilters,
     };
@@ -112,7 +111,7 @@ export default async function MarketplacePage({
 
     try {
         const response = await apiClient.get<StandardListResponse<Recruiter>>(
-            "/recruiters",
+            "/recruiters/views/marketplace-listing",
             { params },
         );
         initialData = response.data ?? [];

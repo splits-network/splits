@@ -12,6 +12,11 @@ export interface CompanyFilters extends PaginationParams, SortParams {
     org_id?: string;
     /** When true, skips organization-based filtering to show all companies (marketplace browse) */
     browse_all?: string;
+    industry?: string;
+    company_size?: string;
+    stage?: string;
+    founded_year_range?: string;
+    has_open_roles?: string;
 }
 
 export interface CompanyUpdate {

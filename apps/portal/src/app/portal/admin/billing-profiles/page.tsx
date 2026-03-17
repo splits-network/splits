@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useMemo, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useMemo, useState, useCallback } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import {
     useStandardList,
     PaginationControls,
@@ -11,15 +11,15 @@ import {
     EmptyState,
     LoadingState,
     ErrorState,
-} from '@/hooks/use-standard-list';
-import { AdminPageHeader } from '../components';
+} from "@/hooks/use-standard-list";
+import { AdminPageHeader } from "../components";
 
 interface CompanyBillingProfile {
     id: string;
     company_id: string;
-    billing_terms: 'immediate' | 'net_30' | 'net_60' | 'net_90';
+    billing_terms: "immediate" | "net_30" | "net_60" | "net_90";
     billing_email: string | null;
-    invoice_delivery_method: 'email' | 'none';
+    invoice_delivery_method: "email" | "none";
     stripe_customer_id: string | null;
     stripe_default_payment_method_id?: string | null;
     stripe_tax_id?: string | null;
@@ -36,12 +36,12 @@ interface PlacementInvoice {
     company_id: string;
     stripe_invoice_id: string | null;
     stripe_invoice_number: string | null;
-    invoice_status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+    invoice_status: "draft" | "open" | "paid" | "void" | "uncollectible";
     amount_due: number;
     amount_paid: number;
     currency: string;
-    collection_method: 'charge_automatically' | 'send_invoice';
-    billing_terms: 'immediate' | 'net_30' | 'net_60' | 'net_90';
+    collection_method: "charge_automatically" | "send_invoice";
+    billing_terms: "immediate" | "net_30" | "net_60" | "net_90";
     due_date: string | null;
     collectible_at: string | null;
     finalized_at: string | null;
@@ -55,7 +55,8 @@ interface PlacementInvoice {
 
 export default function AdminBillingProfilesPage() {
     const { getToken } = useAuth();
-    const [selectedProfile, setSelectedProfile] = useState<CompanyBillingProfile | null>(null);
+    const [selectedProfile, setSelectedProfile] =
+        useState<CompanyBillingProfile | null>(null);
 
     const {
         items: profiles,
@@ -67,9 +68,9 @@ export default function AdminBillingProfilesPage() {
         setPage,
         refresh,
     } = useStandardList<CompanyBillingProfile>({
-        endpoint: '/company-billing-profiles',
-        defaultSortBy: 'created_at',
-        defaultSortOrder: 'desc',
+        endpoint: "/company-billing",
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
         defaultLimit: 25,
         syncToUrl: true,
     });
@@ -86,7 +87,7 @@ export default function AdminBillingProfilesPage() {
                 profile.stripe_customer_id,
             ]
                 .filter(Boolean)
-                .join(' ')
+                .join(" ")
                 .toLowerCase();
             return haystack.includes(query);
         });
@@ -107,20 +108,20 @@ export default function AdminBillingProfilesPage() {
             }
 
             const token = await getToken();
-            if (!token) throw new Error('No auth token');
+            if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
             const queryParams = new URLSearchParams();
-            queryParams.set('page', String(params.page));
-            queryParams.set('limit', String(params.limit));
+            queryParams.set("page", String(params.page));
+            queryParams.set("limit", String(params.limit));
 
             const response = await apiClient.get(
-                `/company-billing-profiles/${selectedProfile.company_id}/invoices?${queryParams.toString()}`
+                `/company-billing/${selectedProfile.company_id}/invoices?${queryParams.toString()}`,
             );
 
             return response;
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [selectedProfile?.company_id]
+        [selectedProfile?.company_id],
     );
 
     const {
@@ -133,27 +134,43 @@ export default function AdminBillingProfilesPage() {
     } = useStandardList<PlacementInvoice>({
         fetchFn: fetchInvoices,
         defaultLimit: 10,
-        defaultSortBy: 'created_at',
-        defaultSortOrder: 'desc',
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
         syncToUrl: false,
         autoFetch: true,
     });
 
-    function StatusBadge({ status }: { status: PlacementInvoice['invoice_status'] }) {
+    function StatusBadge({
+        status,
+    }: {
+        status: PlacementInvoice["invoice_status"];
+    }) {
         const colors: Record<string, string> = {
-            draft: 'badge-ghost',
-            open: 'badge-info',
-            paid: 'badge-success',
-            void: 'badge-neutral',
-            uncollectible: 'badge-error',
+            draft: "badge-ghost",
+            open: "badge-info",
+            paid: "badge-success",
+            void: "badge-primary",
+            uncollectible: "badge-error",
         };
         return (
-            <span className={`badge ${colors[status] || 'badge-neutral'} gap-1`}>
-                {status === 'draft' && <i className="fa-duotone fa-regular fa-file-pen"></i>}
-                {status === 'open' && <i className="fa-duotone fa-regular fa-envelope-open"></i>}
-                {status === 'paid' && <i className="fa-duotone fa-regular fa-check"></i>}
-                {status === 'void' && <i className="fa-duotone fa-regular fa-ban"></i>}
-                {status === 'uncollectible' && <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>}
+            <span
+                className={`badge ${colors[status] || "badge-primary"} gap-1`}
+            >
+                {status === "draft" && (
+                    <i className="fa-duotone fa-regular fa-file-pen"></i>
+                )}
+                {status === "open" && (
+                    <i className="fa-duotone fa-regular fa-envelope-open"></i>
+                )}
+                {status === "paid" && (
+                    <i className="fa-duotone fa-regular fa-check"></i>
+                )}
+                {status === "void" && (
+                    <i className="fa-duotone fa-regular fa-ban"></i>
+                )}
+                {status === "uncollectible" && (
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
+                )}
                 {status}
             </span>
         );
@@ -164,7 +181,7 @@ export default function AdminBillingProfilesPage() {
             <AdminPageHeader
                 title="Billing Profiles"
                 subtitle="Review company billing terms, contacts, and invoice history"
-                breadcrumbs={[{ label: 'Billing Profiles' }]}
+                breadcrumbs={[{ label: "Billing Profiles" }]}
             />
 
             <div className="grid grid-cols-1 xl:grid-cols-[1.35fr_1fr] gap-6">
@@ -175,7 +192,10 @@ export default function AdminBillingProfilesPage() {
                             onChange={setSearchInput}
                             placeholder="Search company, email, or Stripe customer..."
                         />
-                        <button className="btn btn-sm btn-ghost" onClick={() => refresh()}>
+                        <button
+                            className="btn btn-sm btn-ghost"
+                            onClick={() => refresh()}
+                        >
                             <i className="fa-duotone fa-regular fa-arrows-rotate"></i>
                             Refresh
                         </button>
@@ -208,27 +228,50 @@ export default function AdminBillingProfilesPage() {
                                         </thead>
                                         <tbody>
                                             {visibleProfiles.map((profile) => {
-                                                const isSelected = selectedProfile?.id === profile.id;
+                                                const isSelected =
+                                                    selectedProfile?.id ===
+                                                    profile.id;
                                                 return (
-                                                    <tr key={profile.id} className={isSelected ? 'bg-base-200' : ''}>
+                                                    <tr
+                                                        key={profile.id}
+                                                        className={
+                                                            isSelected
+                                                                ? "bg-base-200"
+                                                                : ""
+                                                        }
+                                                    >
                                                         <td>
                                                             <div className="font-semibold">
-                                                                {profile.company?.name || 'Unknown Company'}
+                                                                {profile.company
+                                                                    ?.name ||
+                                                                    "Unknown Company"}
                                                             </div>
                                                             <div className="text-xs text-base-content/60 font-mono">
-                                                                {profile.company_id.substring(0, 8)}...
+                                                                {profile.company_id.substring(
+                                                                    0,
+                                                                    8,
+                                                                )}
+                                                                ...
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <div className="text-sm">{profile.billing_email || '-'}</div>
+                                                            <div className="text-sm">
+                                                                {profile.billing_email ||
+                                                                    "-"}
+                                                            </div>
                                                             {profile.billing_contact_name && (
                                                                 <div className="text-xs text-base-content/60">
-                                                                    {profile.billing_contact_name}
+                                                                    {
+                                                                        profile.billing_contact_name
+                                                                    }
                                                                 </div>
                                                             )}
                                                         </td>
                                                         <td className="uppercase text-xs tracking-wide">
-                                                            {profile.billing_terms.replace('_', ' ')}
+                                                            {profile.billing_terms.replace(
+                                                                "_",
+                                                                " ",
+                                                            )}
                                                         </td>
                                                         <td>
                                                             {profile.stripe_customer_id ? (
@@ -244,17 +287,25 @@ export default function AdminBillingProfilesPage() {
                                                             )}
                                                         </td>
                                                         <td>
-                                                            {new Date(profile.created_at).toLocaleDateString()}
+                                                            {new Date(
+                                                                profile.created_at,
+                                                            ).toLocaleDateString()}
                                                         </td>
                                                         <td className="text-right">
                                                             <button
-                                                                className={`btn btn-xs ${isSelected ? 'btn-primary' : 'btn-ghost'}`}
+                                                                className={`btn btn-xs ${isSelected ? "btn-primary" : "btn-ghost"}`}
                                                                 onClick={() => {
-                                                                    setSelectedProfile(profile);
-                                                                    setInvoicePage(1);
+                                                                    setSelectedProfile(
+                                                                        profile,
+                                                                    );
+                                                                    setInvoicePage(
+                                                                        1,
+                                                                    );
                                                                 }}
                                                             >
-                                                                {isSelected ? 'Selected' : 'View invoices'}
+                                                                {isSelected
+                                                                    ? "Selected"
+                                                                    : "View invoices"}
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -268,7 +319,10 @@ export default function AdminBillingProfilesPage() {
                     )}
 
                     {!loading && !error && visibleProfiles.length > 0 && (
-                        <PaginationControls pagination={pagination} setPage={setPage} />
+                        <PaginationControls
+                            pagination={pagination}
+                            setPage={setPage}
+                        />
                     )}
                 </div>
 
@@ -281,7 +335,12 @@ export default function AdminBillingProfilesPage() {
                             </h2>
                             {selectedProfile ? (
                                 <div className="text-sm text-base-content/70">
-                                    {selectedProfile.company?.name || 'Company'} · {selectedProfile.billing_terms.replace('_', ' ')}
+                                    {selectedProfile.company?.name || "Company"}{" "}
+                                    ·{" "}
+                                    {selectedProfile.billing_terms.replace(
+                                        "_",
+                                        " ",
+                                    )}
                                 </div>
                             ) : (
                                 <div className="text-sm text-base-content/70">
@@ -294,7 +353,10 @@ export default function AdminBillingProfilesPage() {
                     {!selectedProfile ? null : invoicesLoading ? (
                         <LoadingState />
                     ) : invoicesError ? (
-                        <ErrorState message={invoicesError} onRetry={refreshInvoices} />
+                        <ErrorState
+                            message={invoicesError}
+                            onRetry={refreshInvoices}
+                        />
                     ) : invoices.length === 0 ? (
                         <EmptyState
                             icon="fa-duotone fa-regular fa-file-invoice"
@@ -320,34 +382,59 @@ export default function AdminBillingProfilesPage() {
                                                 <tr key={invoice.id}>
                                                     <td>
                                                         <div className="font-mono text-sm">
-                                                            {invoice.stripe_invoice_number || invoice.id.substring(0, 8)}
+                                                            {invoice.stripe_invoice_number ||
+                                                                invoice.id.substring(
+                                                                    0,
+                                                                    8,
+                                                                )}
                                                         </div>
                                                         <div className="text-xs text-base-content/60">
-                                                            Placement {invoice.placement_id.substring(0, 8)}...
+                                                            Placement{" "}
+                                                            {invoice.placement_id.substring(
+                                                                0,
+                                                                8,
+                                                            )}
+                                                            ...
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <StatusBadge status={invoice.invoice_status} />
+                                                        <StatusBadge
+                                                            status={
+                                                                invoice.invoice_status
+                                                            }
+                                                        />
                                                     </td>
                                                     <td>
                                                         <div className="font-semibold">
-                                                            ${Number(invoice.amount_due || 0).toLocaleString()}
+                                                            $
+                                                            {Number(
+                                                                invoice.amount_due ||
+                                                                    0,
+                                                            ).toLocaleString()}
                                                         </div>
                                                         <div className="text-xs text-base-content/60">
-                                                            Paid ${Number(invoice.amount_paid || 0).toLocaleString()}
+                                                            Paid $
+                                                            {Number(
+                                                                invoice.amount_paid ||
+                                                                    0,
+                                                            ).toLocaleString()}
                                                         </div>
                                                     </td>
                                                     <td>
                                                         {invoice.due_date
-                                                            ? new Date(invoice.due_date).toLocaleDateString()
-                                                            : '-'}
+                                                            ? new Date(
+                                                                  invoice.due_date,
+                                                              ).toLocaleDateString()
+                                                            : "-"}
                                                     </td>
                                                     <td>
                                                         <div className="flex gap-2">
                                                             {invoice.hosted_invoice_url && (
                                                                 <a
                                                                     className="btn btn-xs btn-ghost"
-                                                                    href={invoice.hosted_invoice_url}
+                                                                    href={
+                                                                        invoice.hosted_invoice_url
+                                                                    }
                                                                     target="_blank"
                                                                     rel="noreferrer"
                                                                 >
@@ -358,7 +445,9 @@ export default function AdminBillingProfilesPage() {
                                                             {invoice.invoice_pdf_url && (
                                                                 <a
                                                                     className="btn btn-xs btn-ghost"
-                                                                    href={invoice.invoice_pdf_url}
+                                                                    href={
+                                                                        invoice.invoice_pdf_url
+                                                                    }
                                                                     target="_blank"
                                                                     rel="noreferrer"
                                                                 >
@@ -377,9 +466,14 @@ export default function AdminBillingProfilesPage() {
                         </div>
                     )}
 
-                    {!invoicesLoading && !invoicesError && invoices.length > 0 && (
-                        <PaginationControls pagination={invoicesPagination} setPage={setInvoicePage} />
-                    )}
+                    {!invoicesLoading &&
+                        !invoicesError &&
+                        invoices.length > 0 && (
+                            <PaginationControls
+                                pagination={invoicesPagination}
+                                setPage={setInvoicePage}
+                            />
+                        )}
                 </div>
             </div>
         </div>

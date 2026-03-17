@@ -43,7 +43,7 @@ const ICON_BG_MAP: Record<string, string> = {
     primary: "bg-primary text-primary-content",
     secondary: "bg-secondary text-secondary-content",
     accent: "bg-accent text-accent-content",
-    neutral: "bg-neutral text-neutral-content",
+    neutral: "bg-base-300 text-base-content",
     info: "bg-info text-info-content",
     success: "bg-success text-success-content",
     warning: "bg-warning text-warning-content",
@@ -77,14 +77,14 @@ export function BaselModalHeader({
     const isDestructive = variant === "destructive";
     const bgClass = isDestructive
         ? "bg-error/10"
-        : "bg-neutral text-neutral-content";
-    const titleClass = isDestructive ? "text-error" : "text-neutral-content";
+        : "bg-base-300 text-base-content";
+    const titleClass = isDestructive ? "text-error" : "text-base-content";
     const subtitleClass = isDestructive
         ? "text-error/70"
-        : "text-neutral-content/60";
+        : "text-base-content/60";
     const closeBtnClass = isDestructive
         ? "text-error/60 hover:text-error"
-        : "text-neutral-content/60 hover:text-neutral-content";
+        : "text-base-content/60 hover:text-base-content";
 
     return (
         <div

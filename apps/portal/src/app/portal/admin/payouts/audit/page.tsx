@@ -13,6 +13,7 @@ import {
     LoadingState,
     ErrorState,
 } from "@/hooks/use-standard-list";
+import { FeatureGate } from "@/components/entitlements/feature-gate";
 
 interface AuditLogEntry {
     id: string;
@@ -310,10 +311,12 @@ export default function AuditLogPage() {
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={exportToCSV} className="btn btn-outline">
-                        <i className="fa-duotone fa-regular fa-download"></i>
-                        Export CSV
-                    </button>
+                    <FeatureGate entitlement="data_export" variant="inline">
+                        <button onClick={exportToCSV} className="btn btn-outline">
+                            <i className="fa-duotone fa-regular fa-download"></i>
+                            Export CSV
+                        </button>
+                    </FeatureGate>
                     <Link
                         href="/portal/admin/payouts/schedules"
                         className="btn btn-ghost"

@@ -79,6 +79,89 @@ export class RecruiterRepository {
             query = query.eq('marketplace_enabled', params.filters?.marketplace_enabled);
         }
 
+        // Recruiter type filters
+        if (params.is_candidate_recruiter === 'yes') {
+            query = query.eq('candidate_recruiter', true);
+        } else if (params.is_candidate_recruiter === 'no') {
+            query = query.eq('candidate_recruiter', false);
+        }
+        if (params.is_company_recruiter === 'yes') {
+            query = query.eq('company_recruiter', true);
+        } else if (params.is_company_recruiter === 'no') {
+            query = query.eq('company_recruiter', false);
+        }
+
+        // Marketplace enabled (flat string version)
+        if (params.is_marketplace_enabled === 'yes') {
+            query = query.eq('marketplace_enabled', true);
+        } else if (params.is_marketplace_enabled === 'no') {
+            query = query.eq('marketplace_enabled', false);
+        }
+
+        // Reputation tier — subquery on recruiter_reputation
+        if (params.reputation_tier) {
+            const { data: repRows } = await this.supabase
+                .from('recruiter_reputation')
+                .select('recruiter_id, reputation_score');
+            const repMap = new Map((repRows || []).map((r: any) => [r.recruiter_id, r.reputation_score]));
+            const allRecruiterIds = (repRows || []).map((r: any) => r.recruiter_id);
+
+            switch (params.reputation_tier) {
+                case 'high': {
+                    const ids = (repRows || []).filter((r: any) => r.reputation_score >= 80).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'medium': {
+                    const ids = (repRows || []).filter((r: any) => r.reputation_score >= 50 && r.reputation_score < 80).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'low': {
+                    const ids = (repRows || []).filter((r: any) => r.reputation_score < 50).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'no_score': {
+                    if (allRecruiterIds.length > 0) {
+                        query = query.not('id', 'in', `(${allRecruiterIds.join(',')})`);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Hire rate tier — subquery on recruiter_reputation
+        if (params.hire_rate_tier) {
+            const { data: repRows } = await this.supabase
+                .from('recruiter_reputation')
+                .select('recruiter_id, hire_rate');
+
+            switch (params.hire_rate_tier) {
+                case 'high': {
+                    const ids = (repRows || []).filter((r: any) => r.hire_rate >= 20).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'medium': {
+                    const ids = (repRows || []).filter((r: any) => r.hire_rate >= 10 && r.hire_rate < 20).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+                case 'low': {
+                    const ids = (repRows || []).filter((r: any) => r.hire_rate < 10).map((r: any) => r.recruiter_id);
+                    if (ids.length > 0) query = query.in('id', ids);
+                    else return { data: [], total: 0 };
+                    break;
+                }
+            }
+        }
+
         // Filter by company relationship (for "My Recruiters" toggle)
         if (params.filters?.company_ids?.length) {
             const { data: rels } = await this.supabase
@@ -105,7 +188,13 @@ export class RecruiterRepository {
             'avg_time_to_hire_days', 'avg_response_time_hours',
         ]);
 
-        if (reputationColumns.has(sortBy)) {
+        // Columns sorted in the service layer after enrichment (not DB columns)
+        const serviceSortedColumns = new Set(['plan_tier']);
+
+        if (serviceSortedColumns.has(sortBy)) {
+            // Default DB ordering; actual sort applied in service after enrichment
+            query = query.order('created_at', { ascending: false });
+        } else if (reputationColumns.has(sortBy)) {
             query = query.order(sortBy, { ascending: sortOrder, referencedTable: 'recruiter_reputation' });
         } else {
             query = query.order(sortBy, { ascending: sortOrder });
@@ -271,6 +360,29 @@ export class RecruiterRepository {
         return selectParts.join(', ');
     }
 
+
+    /**
+     * Batch-fetch plan tiers for a list of recruiter IDs.
+     * Joins subscriptions → plans to get the tier for each recruiter.
+     * Returns a map of recruiter_id → tier slug (defaults to 'starter' if no active subscription).
+     */
+    async batchGetPlanTiers(recruiterIds: string[]): Promise<Map<string, string>> {
+        const tierMap = new Map<string, string>();
+        if (recruiterIds.length === 0) return tierMap;
+
+        const { data } = await this.supabase
+            .from('subscriptions')
+            .select('recruiter_id, plan:plans(tier)')
+            .in('recruiter_id', recruiterIds)
+            .in('status', ['active', 'trialing']);
+
+        for (const row of data || []) {
+            const tier = (row.plan as any)?.tier ?? 'starter';
+            tierMap.set(row.recruiter_id, tier);
+        }
+
+        return tierMap;
+    }
 
     async findRecruiterBySlug(slug: string, include?: string): Promise<any | null> {
         const selectClause = this.buildSelectClause(include);

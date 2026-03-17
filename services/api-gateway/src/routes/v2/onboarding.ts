@@ -163,22 +163,50 @@ export function registerOnboardingRoutes(
                                 createErr.jsonBody?.error?.code === '23505';
 
                             if (isDuplicate) {
-                                // Wait briefly for claim to propagate, then retry
-                                await new Promise(r => setTimeout(r, 500));
-                                try {
-                                    const retryResponse = await atsService().get<any>(
-                                        '/api/v2/candidates/me', undefined, correlationId, authHeaders
-                                    );
-                                    candidate = retryResponse?.data ?? retryResponse;
-                                    candidateWasExisting = true;
-                                } catch {
-                                    request.log.error('Failed to fetch candidate after duplicate error');
+                                // Retry GET with backoff — webhook may still be committing the claim
+                                let claimed = false;
+                                for (let attempt = 1; attempt <= 3; attempt++) {
+                                    await new Promise(r => setTimeout(r, attempt * 500));
+                                    try {
+                                        const retryResponse = await atsService().get<any>(
+                                            '/api/v2/candidates/me', undefined, correlationId, authHeaders
+                                        );
+                                        candidate = retryResponse?.data ?? retryResponse;
+                                        candidateWasExisting = true;
+                                        claimed = true;
+                                        break;
+                                    } catch (retryErr: any) {
+                                        request.log.warn(
+                                            { attempt, error: retryErr.message },
+                                            'Retry GET /candidates/me after duplicate — attempt failed'
+                                        );
+                                    }
+                                }
+                                if (!claimed) {
+                                    request.log.error('All retries exhausted: could not link candidate after duplicate email error');
+                                    return reply.code(409).send({
+                                        error: {
+                                            code: 'CANDIDATE_LINK_FAILED',
+                                            message: 'A candidate profile exists for this email but could not be linked to your account. Please try again.',
+                                        },
+                                    });
                                 }
                             } else {
                                 throw createErr;
                             }
                         }
                     }
+                }
+
+                // Guard: candidate app must always have a candidate or we return an error
+                if (body.source_app === 'candidate' && !candidate) {
+                    request.log.error({ correlationId }, 'Onboarding init: candidate path completed but candidate is null');
+                    return reply.code(500).send({
+                        error: {
+                            code: 'CANDIDATE_CREATION_FAILED',
+                            message: 'Failed to create or link candidate profile. Please try again.',
+                        },
+                    });
                 }
 
                 const statusCode = userWasExisting ? 200 : 201;
@@ -404,179 +432,26 @@ export function registerOnboardingRoutes(
     );
 
     // ── POST /api/v2/onboarding/business ─────────────────────────────────
-    // Submit business onboarding: create org + company + membership + billing + mark complete
+    // Proxied to onboarding-service for atomic transaction handling.
+    const onboardingService = () => services.get('onboarding');
+
     app.post(
         '/api/v2/onboarding/business',
         { preHandler: requireAuth() },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
-            const body = request.body as {
-                company: {
-                    name: string;
-                    website?: string;
-                    industry?: string;
-                    size?: string;
-                    description?: string;
-                    headquarters_location?: string;
-                    logo_url?: string;
-                };
-                billing: {
-                    billing_terms: string;
-                    billing_email: string;
-                    invoice_delivery_method?: string;
-                };
-                from_invitation?: { id: string };
-                referred_by_recruiter_id?: string;
-            };
-
-            if (!body.company?.name) {
-                return reply.code(400).send({ error: { message: 'company.name is required' } });
-            }
-            if (!body.billing?.billing_email) {
-                return reply.code(400).send({ error: { message: 'billing.billing_email is required' } });
-            }
 
             try {
-                // Step 1: Get current user
-                const userResponse = await identityService().get<any>(
-                    '/api/v2/users/me', undefined, correlationId, authHeaders
-                );
-                const user = userResponse?.data ?? userResponse;
-
-                if (user?.onboarding_status === 'completed') {
-                    return reply.code(409).send({
-                        data: { user },
-                        error: { message: 'Onboarding already completed' },
-                    });
-                }
-
-                // Step 2: Create organization
-                const orgSlug = body.company.name
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
-
-                const orgResponse = await identityService().post<any>(
-                    '/api/v2/organizations',
-                    { name: body.company.name, type: 'company', slug: orgSlug },
+                // Route to onboarding-service V3 action endpoint (handles both V2 and V3)
+                const response = await onboardingService().post<any>(
+                    '/api/v3/onboarding/actions/business',
+                    request.body,
                     correlationId,
                     authHeaders
                 );
-                const organization = orgResponse?.data ?? orgResponse;
 
-                // Step 3: Create company
-                const companyResponse = await atsService().post<any>(
-                    '/api/v2/companies',
-                    {
-                        identity_organization_id: organization.id,
-                        name: body.company.name,
-                        website: body.company.website || null,
-                        industry: body.company.industry || null,
-                        company_size: body.company.size || null,
-                        description: body.company.description || null,
-                        headquarters_location: body.company.headquarters_location || null,
-                        logo_url: body.company.logo_url || null,
-                    },
-                    correlationId,
-                    authHeaders
-                );
-                const company = companyResponse?.data ?? companyResponse;
-
-                // Step 4: Create membership
-                const membershipResponse = await identityService().post<any>(
-                    '/api/v2/memberships',
-                    {
-                        user_id: user.id,
-                        role_name: 'company_admin',
-                        organization_id: organization.id,
-                    },
-                    correlationId,
-                    authHeaders
-                );
-                const membership = membershipResponse?.data ?? membershipResponse;
-
-                // Step 5: Create billing profile
-                let billingProfile: any = null;
-                try {
-                    const billingResponse = await billingService().post<any>(
-                        `/api/v2/company-billing-profiles/${company.id}`,
-                        {
-                            billing_terms: body.billing.billing_terms || 'net_30',
-                            billing_email: body.billing.billing_email,
-                            invoice_delivery_method: body.billing.invoice_delivery_method || 'email',
-                        },
-                        correlationId,
-                        authHeaders
-                    );
-                    billingProfile = billingResponse?.data ?? billingResponse;
-                } catch (billingErr: any) {
-                    request.log.error({ error: billingErr.message }, 'Failed to create billing profile');
-                }
-
-                // Step 6: Non-blocking relationship completions
-                let invitationCompleted = false;
-                let sourcerConnectionCreated = false;
-
-                if (body.from_invitation?.id) {
-                    try {
-                        await networkService().post(
-                            '/api/v2/company-invitations/complete-relationship',
-                            {
-                                invitation_id: body.from_invitation.id,
-                                company_id: company.id,
-                            },
-                            correlationId,
-                            authHeaders
-                        );
-                        invitationCompleted = true;
-                    } catch (invErr: any) {
-                        request.log.error({ error: invErr.message }, 'Failed to complete invitation relationship');
-                    }
-                }
-
-                if (body.referred_by_recruiter_id && !body.from_invitation?.id) {
-                    try {
-                        await networkService().post(
-                            '/api/v2/recruiter-companies/request-connection',
-                            {
-                                recruiter_id: body.referred_by_recruiter_id,
-                                company_id: company.id,
-                                relationship_type: 'sourcer',
-                            },
-                            correlationId,
-                            authHeaders
-                        );
-                        sourcerConnectionCreated = true;
-                    } catch (relErr: any) {
-                        request.log.error({ error: relErr.message }, 'Failed to create sourcer relationship');
-                    }
-                }
-
-                // Step 7: Mark onboarding complete
-                const completeResponse = await identityService().patch<any>(
-                    '/api/v2/users/me',
-                    {
-                        onboarding_status: 'completed',
-                        onboarding_step: 4,
-                        onboarding_completed_at: new Date().toISOString(),
-                    },
-                    correlationId,
-                    authHeaders
-                );
-                const updatedUser = completeResponse?.data ?? completeResponse;
-
-                return reply.code(201).send({
-                    data: {
-                        user: updatedUser,
-                        organization,
-                        company,
-                        membership,
-                        billing_profile: billingProfile,
-                        invitation_completed: invitationCompleted,
-                        sourcer_connection_created: sourcerConnectionCreated,
-                    },
-                });
+                return reply.code(201).send(response);
             } catch (error: any) {
                 request.log.error({ error: error.message, correlationId }, 'Business onboarding submit failed');
                 return reply

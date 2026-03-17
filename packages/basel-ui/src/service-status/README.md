@@ -126,7 +126,7 @@ interface SiteNotification {
 | `primary`   | `bg-primary`, `text-primary-content`     | `fa-bullhorn`                     | Important announcements |
 | `secondary` | `bg-secondary`, `text-secondary-content` | `fa-sparkles`                     | Feature updates         |
 | `accent`    | `bg-accent`, `text-accent-content`       | `fa-star`                         | Promotional content     |
-| `neutral`   | `bg-neutral`, `text-neutral-content`     | `fa-circle-info`                  | General information     |
+| `neutral`   | `bg-neutral`, `text-base-content`        | `fa-circle-info`                  | General information     |
 
 ## Migration from Memphis
 

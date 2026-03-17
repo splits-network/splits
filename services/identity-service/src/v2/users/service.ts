@@ -500,6 +500,18 @@ export class UserServiceV2 {
     }
 
     /**
+     * Touch last_active_at for a user (throttled at repository level).
+     * Called by chat-gateway on presence pings and by webhook on session.created.
+     */
+    async touchLastActive(userId: string): Promise<void> {
+        try {
+            await this.repository.updateLastActive(userId);
+        } catch (error) {
+            this.logger.error({ userId, error: error instanceof Error ? error.message : String(error) }, 'Failed to update last_active_at');
+        }
+    }
+
+    /**
      * Delete user (soft delete)
      */
     async deleteUser(clerkUserId: string, id: string) {

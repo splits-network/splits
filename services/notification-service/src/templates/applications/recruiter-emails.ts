@@ -7,6 +7,20 @@ import { baseEmailTemplate } from '../base';
 import { heading, paragraph, button, infoCard, alert, divider } from '../components';
 
 // ============================================================================
+// Formatting Helpers
+// ============================================================================
+
+function formatSalary(salary?: number): string {
+    if (!salary) return 'Not specified';
+    return `$${salary.toLocaleString()}`;
+}
+
+function formatFee(fee?: number): string {
+    if (!fee) return 'To be calculated';
+    return `$${fee.toLocaleString()}`;
+}
+
+// ============================================================================
 // Company Review Stage
 // ============================================================================
 
@@ -192,47 +206,59 @@ export interface RecruiterOfferExtendedData {
     jobTitle: string;
     companyName: string;
     applicationUrl: string;
+    salary?: number;
+    feePercentage?: number;
+    estimatedFee?: number;
 }
 
 export function recruiterOfferExtendedEmail(data: RecruiterOfferExtendedData): string {
+    const offerItems: Array<{ label: string; value: string | number; highlight?: boolean }> = [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName },
+        { label: 'Salary', value: formatSalary(data.salary) },
+    ];
+
+    if (data.feePercentage) {
+        offerItems.push({ label: 'Fee Rate', value: `${data.feePercentage}%` });
+    }
+
+    if (data.estimatedFee || (data.salary && data.feePercentage)) {
+        const estimated = data.estimatedFee || Math.round((data.salary! * data.feePercentage!) / 100);
+        offerItems.push({ label: 'Estimated Fee', value: formatFee(estimated), highlight: true });
+    }
+
+    offerItems.push({ label: 'Status', value: 'Offer Extended', highlight: true });
+
     const content = `
-${heading({ level: 1, text: 'Offer extended to your candidate' })}
+${heading({ level: 1, text: 'Formal offer extended to your candidate' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
 ${alert({
-        type: 'success',
-        title: 'Offer extended',
-        message: `${data.companyName} has extended a job offer to ${data.candidateName} for the ${data.jobTitle} position.`,
+        type: 'info',
+        title: 'What this means',
+        message: 'This is a significant milestone \u2014 a formal job offer means the company wants to hire your candidate. If they accept, a placement record will be created and your fee will be calculated.',
     })}
 
 ${infoCard({
         title: 'Offer Details',
-        items: [
-            { label: 'Candidate', value: data.candidateName },
-            { label: 'Position', value: data.jobTitle },
-            { label: 'Company', value: data.companyName },
-            { label: 'Status', value: 'Offer Extended', highlight: true },
-        ],
+        items: offerItems,
     })}
 
-${paragraph('<strong>Important Next Steps:</strong>')}
-
-${paragraph(
-        `1. Connect with ${data.candidateName} to discuss the offer<br>
-2. Help negotiate terms if needed<br>
-3. Facilitate a smooth acceptance process`
-    )}
+${paragraph(`<strong>What happens next:</strong><br/>\u2022 Connect with <strong>${data.candidateName}</strong> to discuss the offer details<br/>\u2022 Help negotiate terms if needed \u2014 salary, benefits, start date<br/>\u2022 Facilitate a smooth acceptance process<br/>\u2022 When the candidate is hired, a placement record and fee are created automatically`)}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Offer Details \u2192',
+        text: 'View Application \u2192',
         variant: 'primary',
     })}
 
 ${divider()}
 
-${paragraph('Once the candidate accepts, a placement record will be created automatically.')}
+${paragraph('When the candidate accepts and is marked as hired, your placement fee will be calculated based on the agreed salary.')}
+
+${paragraph(`<em style="color: #71717a; font-size: 13px;">This is an automated notification from Splits Network based on an application stage change.</em>`)}
     `.trim();
 
     return baseEmailTemplate({
@@ -252,49 +278,83 @@ export interface RecruiterCandidateHiredData {
     jobTitle: string;
     companyName: string;
     applicationUrl: string;
+    salary?: number;
+    placementFee?: number;
+    feePercentage?: number;
+    guaranteeDays?: number;
+    guaranteeExpiresAt?: string;
+    startDate?: string;
 }
 
 export function recruiterCandidateHiredEmail(data: RecruiterCandidateHiredData): string {
+    const placementItems: Array<{ label: string; value: string | number; highlight?: boolean }> = [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName },
+        { label: 'Salary', value: formatSalary(data.salary) },
+        { label: 'Placement Fee', value: formatFee(data.placementFee), highlight: true },
+    ];
+
+    if (data.feePercentage) {
+        placementItems.push({ label: 'Fee Rate', value: `${data.feePercentage}%` });
+    }
+
+    if (data.startDate) {
+        placementItems.push({ label: 'Start Date', value: data.startDate });
+    }
+
+    if (data.guaranteeDays) {
+        placementItems.push({ label: 'Guarantee Period', value: `${data.guaranteeDays} days` });
+    }
+
+    if (data.guaranteeExpiresAt) {
+        placementItems.push({ label: 'Guarantee Expires', value: data.guaranteeExpiresAt });
+    }
+
+    placementItems.push({ label: 'Status', value: 'Hired', highlight: true });
+
+    const guaranteeSection = data.guaranteeDays
+        ? `\n${alert({
+            type: 'info',
+            title: 'Important: Guarantee Period',
+            message: `During the ${data.guaranteeDays}-day guarantee period, if the candidate leaves or is terminated, the placement fee may be adjusted. The guarantee period runs from ${data.startDate || 'the start date'} to ${data.guaranteeExpiresAt || 'the expiry date'}. Stay in regular contact with your candidate during this time.`,
+        })}`
+        : '';
+
     const content = `
-${heading({ level: 1, text: 'Placement confirmed' })}
+${heading({ level: 1, text: 'Placement confirmed \u2014 you earned a fee' })}
 
 ${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
 
 ${alert({
         type: 'success',
-        title: 'Placement confirmed',
-        message: `${data.candidateName} has been hired for the ${data.jobTitle} position at ${data.companyName}. A placement record has been created.`,
+        title: 'Congratulations!',
+        message: `Your candidate <strong>${data.candidateName}</strong> has been hired for the <strong>${data.jobTitle}</strong> position at <strong>${data.companyName}</strong>! A placement record has been created and your fee has been calculated.`,
     })}
 
 ${infoCard({
         title: 'Placement Details',
-        items: [
-            { label: 'Candidate', value: data.candidateName },
-            { label: 'Position', value: data.jobTitle },
-            { label: 'Company', value: data.companyName },
-            { label: 'Status', value: 'Hired', highlight: true },
-        ],
+        items: placementItems,
     })}
 
-${paragraph('<strong>What Happens Next:</strong>')}
-
-${paragraph(
-        '1. A placement record has been automatically created<br>2. The split-fee arrangement will be processed per your agreement<br>3. Stay in touch with your candidate during their onboarding period'
-    )}
+${paragraph(`<strong>What happens next:</strong><br/>\u2022 A placement record has been automatically created in your dashboard<br/>\u2022 Your fee will be processed per the agreed billing terms<br/>\u2022 Stay in touch with <strong>${data.candidateName}</strong> during their onboarding and guarantee period<br/>\u2022 This placement will be reflected in your reputation score`)}
+${guaranteeSection}
 
 ${button({
         href: data.applicationUrl,
-        text: 'View Placement \u2192',
+        text: 'View Placement Record \u2192',
         variant: 'primary',
     })}
 
 ${divider()}
 
-${paragraph('Great work! This placement will be reflected in your dashboard and reputation score.')}
+${paragraph('Great work! Successful placements build your reputation and unlock more opportunities on the platform.')}
+
+${paragraph(`<em style="color: #71717a; font-size: 13px;">This is an automated notification from Splits Network based on an application stage change.</em>`)}
     `.trim();
 
     return baseEmailTemplate({
-        preheader: `Placement: ${data.candidateName} hired as ${data.jobTitle} at ${data.companyName}`,
+        preheader: `Placement confirmed: ${data.candidateName} hired as ${data.jobTitle} at ${data.companyName}`,
         content,
         source: 'portal',
     });

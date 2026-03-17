@@ -91,7 +91,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         setMarkingAllRead(true);
         try {
             const client = createAuthenticatedClient(token);
-            await client.post("/notifications/mark-all-read", {});
+            await client.post("/notifications/actions/mark-all-read", {});
             listState.refresh();
         } catch (err) {
             console.error("Failed to mark all as read:", err);

@@ -102,7 +102,7 @@ export function MembersSection({
             toast.success(`Resent invitation to ${invitation.email}`);
             onRefresh();
         } catch (err: any) {
-            toast.error(err.message || "Failed to resend invitation");
+            toast.error(err.message || "Invitation couldn't be resent. Try again.");
         } finally {
             setResendingId(null);
         }
@@ -120,7 +120,7 @@ export function MembersSection({
                     </h3>
                     <button
                         className="btn btn-sm btn-primary"
-                        style={{ borderRadius: 0 }}
+
                         onClick={() => setShowInviteModal(true)}
                     >
                         <i className="fa-duotone fa-regular fa-user-plus mr-1" />
@@ -157,7 +157,7 @@ export function MembersSection({
                                 <div className="relative flex-shrink-0">
                                     <div
                                         className="w-10 h-10 bg-base-200 border border-base-300 flex items-center justify-center text-sm font-bold"
-                                        style={{ borderRadius: 0 }}
+                
                                     >
                                         {firmInitials(
                                             member.recruiter.user?.name ?? "",
@@ -194,7 +194,7 @@ export function MembersSection({
                                 {member.role !== "owner" && (
                                     <button
                                         className="btn btn-ghost btn-xs btn-square"
-                                        style={{ borderRadius: 0 }}
+                
                                         onClick={() =>
                                             setRemovingMember(member)
                                         }
@@ -235,7 +235,7 @@ export function MembersSection({
                                 >
                                     <div
                                         className="w-10 h-10 bg-base-200 border border-base-300 border-dashed flex items-center justify-center text-sm flex-shrink-0"
-                                        style={{ borderRadius: 0 }}
+                
                                     >
                                         <i className="fa-duotone fa-regular fa-envelope text-base-content/40" />
                                     </div>
@@ -265,7 +265,7 @@ export function MembersSection({
 
                                     <button
                                         className="btn btn-ghost btn-xs"
-                                        style={{ borderRadius: 0 }}
+                
                                         onClick={() =>
                                             handleResendInvitation(invitation)
                                         }
@@ -281,7 +281,7 @@ export function MembersSection({
 
                                     <button
                                         className="btn btn-ghost btn-xs btn-square"
-                                        style={{ borderRadius: 0 }}
+                
                                         onClick={() =>
                                             setCancellingInvitation(invitation)
                                         }
@@ -305,7 +305,7 @@ export function MembersSection({
                                 >
                                     <div
                                         className="w-10 h-10 bg-base-200 border border-base-300 border-dashed flex items-center justify-center text-sm flex-shrink-0"
-                                        style={{ borderRadius: 0 }}
+                
                                     >
                                         <i className="fa-duotone fa-regular fa-envelope text-base-content/40" />
                                     </div>

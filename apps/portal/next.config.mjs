@@ -6,21 +6,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    async redirects() {
-        return [
-            {
-                source: "/status",
-                destination: process.env.NEXT_PUBLIC_STATUS_URL || "https://status.splits.network",
-                permanent: true,
-            },
-        ];
-    },
     transpilePackages: [
         "@splits-network/shared-types",
         "@splits-network/shared-config",
         "@splits-network/shared-ui",
         "@splits-network/shared-gamification",
-        "@splits-network/memphis-ui",
         "@splits-network/basel-ui",
     ],
     serverExternalPackages: ["@supabase/supabase-js"],

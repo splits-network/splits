@@ -3,8 +3,8 @@
  * Job Status Auto-Transition
  *
  * Runs on a schedule to:
- * 1. Promote early → active when activates_at has passed
- * 2. Close early/active/priority → closed when closes_at has passed
+ * 1. Clear is_early_access when activates_at has passed
+ * 2. Close active jobs when closes_at has passed
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -43,47 +43,46 @@ async function main() {
     let closed = 0;
     let failed = 0;
 
-    // 1. Early → Active (activates_at has passed)
+    // 1. Clear early access when activates_at has passed
     const { data: earlyJobs, error: earlyError } = await supabase
         .from('jobs')
         .select('id')
-        .eq('status', 'early')
+        .eq('is_early_access', true)
         .not('activates_at', 'is', null)
         .lte('activates_at', now)
         .limit(500);
 
     if (earlyError) {
-        console.error('Failed to query early jobs:', earlyError.message);
+        console.error('Failed to query early access jobs:', earlyError.message);
     } else {
         for (const job of earlyJobs || []) {
             try {
                 const { error: updateError } = await supabase
                     .from('jobs')
-                    .update({ status: 'active', updated_at: now })
+                    .update({ is_early_access: false, updated_at: now })
                     .eq('id', job.id);
 
                 if (updateError) throw updateError;
 
-                await eventPublisher.publish('job.status_changed', {
+                await eventPublisher.publish('job.updated', {
                     job_id: job.id,
-                    previous_status: 'early',
-                    new_status: 'active',
-                    changed_by: 'system',
+                    updated_fields: ['is_early_access'],
+                    changed_by: '00000000-0000-0000-0000-000000000000',
                 });
 
                 activated++;
             } catch (err: any) {
                 failed++;
-                console.error(`Failed to activate job ${job.id}:`, err?.message || err);
+                console.error(`Failed to clear early access for job ${job.id}:`, err?.message || err);
             }
         }
     }
 
-    // 2. Early/Active/Priority → Closed (closes_at has passed)
+    // 2. Active → Closed (closes_at has passed)
     const { data: expiredJobs, error: closedError } = await supabase
         .from('jobs')
         .select('id, status')
-        .in('status', ['early', 'active', 'priority'])
+        .eq('status', 'active')
         .not('closes_at', 'is', null)
         .lte('closes_at', now)
         .limit(500);
@@ -104,7 +103,7 @@ async function main() {
                     job_id: job.id,
                     previous_status: job.status,
                     new_status: 'closed',
-                    changed_by: 'system',
+                    changed_by: '00000000-0000-0000-0000-000000000000',
                 });
 
                 closed++;

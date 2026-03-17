@@ -5,16 +5,10 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { LoadingSpinner } from "@splits-network/shared-ui";
 import type { CompanyContact } from "@/app/portal/companies/types";
-import { getRelationshipStatusBadgeClass } from "@/app/portal/companies/types";
 
 interface CompanyContactsProps {
     companyId: string;
     compact?: boolean;
-}
-
-interface RelationshipInfo {
-    status: string;
-    relationship_type: string;
 }
 
 function getRoleBadge(role: string) {
@@ -44,9 +38,6 @@ export default function CompanyContacts({
 }: CompanyContactsProps) {
     const { getToken } = useAuth();
     const [contacts, setContacts] = useState<CompanyContact[]>([]);
-    const [relationship, setRelationship] = useState<RelationshipInfo | null>(
-        null,
-    );
     const [loading, setLoading] = useState(false);
 
     const fetchData = useCallback(async () => {
@@ -57,29 +48,11 @@ export default function CompanyContacts({
             if (!token) return;
             const client = createAuthenticatedClient(token);
 
-            // Fetch contacts and relationship in parallel
-            const [contactsRes, relationshipRes] = await Promise.all([
-                client.get(`/companies/${companyId}/contacts`).catch(() => ({
-                    data: [],
-                })),
-                client
-                    .get("/recruiter-companies", {
-                        params: { company_id: companyId, limit: 1 },
-                    })
-                    .catch(() => ({ data: [] })),
-            ]);
+            const contactsRes = await client.get(`/companies/${companyId}/contacts`).catch(() => ({
+                data: [],
+            }));
 
             setContacts((contactsRes as any).data || []);
-
-            const relationships = (relationshipRes as any).data;
-            if (relationships && relationships.length > 0) {
-                setRelationship({
-                    status: relationships[0].status,
-                    relationship_type: relationships[0].relationship_type,
-                });
-            } else {
-                setRelationship(null);
-            }
         } catch (err) {
             console.error("Failed to fetch company contacts:", err);
         } finally {
@@ -100,7 +73,7 @@ export default function CompanyContacts({
         );
     }
 
-    if (contacts.length === 0 && !relationship) {
+    if (contacts.length === 0) {
         return (
             <div className="p-4 text-center text-base-content/40">
                 <i className="fa-duotone fa-users text-2xl mb-2 block opacity-50" />
@@ -111,24 +84,6 @@ export default function CompanyContacts({
 
     return (
         <div className={compact ? "space-y-2" : "space-y-3"}>
-            {/* Relationship badge */}
-            {relationship && (
-                <div className="flex items-center gap-2 mb-1">
-                    <i className="fa-duotone fa-handshake text-base-content/60 text-xs" />
-                    <span className="text-xs text-base-content/60">
-                        Relationship:
-                    </span>
-                    <span
-                        className={`badge badge-xs ${getRelationshipStatusBadgeClass(relationship.status)}`}
-                    >
-                        {relationship.status}
-                    </span>
-                    <span className="text-xs text-base-content/40 capitalize">
-                        ({relationship.relationship_type})
-                    </span>
-                </div>
-            )}
-
             {/* Contact cards */}
             {contacts.map((contact) => {
                 const roleBadge = getRoleBadge(contact.role);

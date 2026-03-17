@@ -8,6 +8,7 @@ import StepDocuments from "@/components/application-wizard/step-documents";
 import StepCoverLetter from "@/components/application-wizard/step-cover-letter";
 import StepQuestions from "@/components/application-wizard/step-questions";
 import StepNotes from "@/components/application-wizard/step-notes";
+import StepRecruiter from "@/components/application-wizard/step-recruiter";
 import StepReview from "@/components/application-wizard/step-review";
 
 interface ApplicationWizardModalProps {
@@ -19,8 +20,14 @@ interface ApplicationWizardModalProps {
     existingApplication?: any;
 }
 
-const STEP_LABELS = ["Documents", "Cover Letter", "Questions", "Notes", "Review"];
-const STEP_LABELS_NO_QUESTIONS = ["Documents", "Cover Letter", "Notes", "Review"];
+function buildStepLabels(hasQuestions: boolean, hasRecruiterChoice: boolean): string[] {
+    const steps = ["Documents", "Cover Letter"];
+    if (hasQuestions) steps.push("Questions");
+    steps.push("Notes");
+    if (hasRecruiterChoice) steps.push("Recruiter");
+    steps.push("Review");
+    return steps;
+}
 
 export default function ApplicationWizardModal({
     jobId,
@@ -42,6 +49,7 @@ export default function ApplicationWizardModal({
     const [questions, setQuestions] = useState<any[]>([]);
     const [documents, setDocuments] = useState<any[]>([]);
     const [localDocuments, setLocalDocuments] = useState<any[]>([]);
+    const [activeRecruiters, setActiveRecruiters] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         documents: {
             selected:
@@ -50,10 +58,12 @@ export default function ApplicationWizardModal({
         },
         cover_letter: existingApplication?.cover_letter || "",
         pre_screen_answers:
-            existingApplication?.pre_screen_answers?.map((a: any, i: number) => ({
-                index: i,
-                answer: a.answer,
-            })) ||
+            existingApplication?.pre_screen_answers?.map(
+                (a: any, i: number) => ({
+                    index: i,
+                    answer: a.answer,
+                }),
+            ) ||
             ([] as Array<{
                 index: number;
                 answer: string | string[] | boolean;
@@ -62,13 +72,16 @@ export default function ApplicationWizardModal({
             existingApplication?.notes ||
             existingApplication?.candidate_notes ||
             "",
+        candidate_recruiter_id:
+            existingApplication?.candidate_recruiter_id || (null as string | null),
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const hasQuestions = questions.length > 0;
-    const totalSteps = hasQuestions ? 5 : 4;
-    const stepLabels = hasQuestions ? STEP_LABELS : STEP_LABELS_NO_QUESTIONS;
+    const hasRecruiterChoice = activeRecruiters.length > 1;
+    const stepLabels = buildStepLabels(hasQuestions, hasRecruiterChoice);
+    const totalSteps = stepLabels.length;
 
     const currentStepLabel = stepLabels[currentStep - 1] || "";
 
@@ -101,11 +114,13 @@ export default function ApplicationWizardModal({
                 }
 
                 const authClient = createAuthenticatedClient(token);
-                const [jobResponse, documentsResponse] =
-                    await Promise.all([
-                        authClient.get<{ data: any }>(`/jobs/${jobId}`),
-                        authClient.get<{ data: any[] }>("/documents"),
-                    ]);
+                const [jobResponse, documentsResponse, recruitersResponse] = await Promise.all([
+                    authClient.get<{ data: any }>(
+                        `/jobs/${jobId}/view/candidate-detail`,
+                    ),
+                    authClient.get<{ data: any[] }>("/documents"),
+                    authClient.get<{ data: any[] }>("/recruiter-candidates"),
+                ]);
 
                 const jobData = jobResponse.data;
                 const questionsData = jobData.pre_screen_questions || [];
@@ -113,9 +128,7 @@ export default function ApplicationWizardModal({
 
                 if (existingApplication?.documents?.length > 0) {
                     const appDocIds = new Set(
-                        existingApplication.documents.map(
-                            (doc: any) => doc.id,
-                        ),
+                        existingApplication.documents.map((doc: any) => doc.id),
                     );
                     const appOriginalDocIds = new Set(
                         existingApplication.documents
@@ -136,6 +149,21 @@ export default function ApplicationWizardModal({
                         ...documentsData,
                         ...existingApplication.documents,
                     ];
+                }
+
+                // Filter to active recruiters with consent
+                const allRecruiters = recruitersResponse.data || [];
+                const active = allRecruiters.filter(
+                    (r: any) => r.status === "active" && r.consent_given !== false,
+                );
+                setActiveRecruiters(active);
+
+                // Auto-select if only one recruiter
+                if (active.length === 1 && !existingApplication?.candidate_recruiter_id) {
+                    setFormData((prev) => ({
+                        ...prev,
+                        candidate_recruiter_id: active[0].recruiter_id,
+                    }));
                 }
 
                 setJob(jobData);
@@ -181,7 +209,9 @@ export default function ApplicationWizardModal({
 
             // Build JSONB snapshot: merge question metadata with answers
             const preScreenAnswers = questions.map((q: any, i: number) => {
-                const ans = formData.pre_screen_answers.find((a: any) => a.index === i);
+                const ans = formData.pre_screen_answers.find(
+                    (a: any) => a.index === i,
+                );
                 return {
                     question: q.question,
                     question_type: q.question_type,
@@ -193,29 +223,41 @@ export default function ApplicationWizardModal({
             });
 
             if (existingApplication) {
+                // Save application data first (stage stays as-is)
                 await authClient.patch<{ data: any }>(
                     `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
-                        stage: "ai_review",
                     },
                 );
                 applicationId = existingApplication.id;
             } else {
+                // Create as draft first (ATS always creates as draft for candidates)
+                const createPayload: Record<string, any> = {
+                    job_id: jobId,
+                    document_ids: formData.documents.selected,
+                    cover_letter: formData.cover_letter,
+                    pre_screen_answers: preScreenAnswers,
+                };
+                if (formData.candidate_recruiter_id) {
+                    createPayload.candidate_recruiter_id = formData.candidate_recruiter_id;
+                    createPayload.application_source = "recruiter";
+                }
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
-                    {
-                        job_id: jobId,
-                        document_ids: formData.documents.selected,
-                        cover_letter: formData.cover_letter,
-                        pre_screen_answers: preScreenAnswers,
-                        stage: "ai_review",
-                    },
+                    createPayload,
                 );
                 applicationId = result.data.id;
             }
+
+            // Transition to ai_review — triggers application.stage_changed event
+            // which the ai-service picks up to run the AI review pipeline
+            await authClient.patch<{ data: any }>(
+                `/applications/${applicationId}`,
+                { stage: "ai_review" },
+            );
 
             if (formData.notes && formData.notes.trim()) {
                 try {
@@ -229,17 +271,12 @@ export default function ApplicationWizardModal({
                         },
                     );
                 } catch (noteError) {
-                    console.warn(
-                        "Failed to create candidate note:",
-                        noteError,
-                    );
+                    console.warn("Failed to create candidate note:", noteError);
                 }
             }
 
             onClose();
-            router.push(
-                `/portal/applications?applicationId=${applicationId}`,
-            );
+            router.push(`/portal/applications?applicationId=${applicationId}`);
         } catch (err: any) {
             console.error("Failed to submit application:", err);
             setError(err.message || "Failed to submit application");
@@ -260,7 +297,9 @@ export default function ApplicationWizardModal({
 
             // Build JSONB snapshot for draft too
             const preScreenAnswers = questions.map((q: any, i: number) => {
-                const ans = formData.pre_screen_answers.find((a: any) => a.index === i);
+                const ans = formData.pre_screen_answers.find(
+                    (a: any) => a.index === i,
+                );
                 return {
                     question: q.question,
                     question_type: q.question_type,
@@ -278,20 +317,24 @@ export default function ApplicationWizardModal({
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
-                        stage: "draft",
                     },
                 );
                 applicationId = existingApplication.id;
             } else {
+                // ATS creates as draft by default for candidates
+                const draftPayload: Record<string, any> = {
+                    job_id: jobId,
+                    document_ids: formData.documents.selected,
+                    cover_letter: formData.cover_letter,
+                    pre_screen_answers: preScreenAnswers,
+                };
+                if (formData.candidate_recruiter_id) {
+                    draftPayload.candidate_recruiter_id = formData.candidate_recruiter_id;
+                    draftPayload.application_source = "recruiter";
+                }
                 const result = await authClient.post<{ data: any }>(
                     "/applications",
-                    {
-                        job_id: jobId,
-                        document_ids: formData.documents.selected,
-                        cover_letter: formData.cover_letter,
-                        pre_screen_answers: preScreenAnswers,
-                        stage: "draft",
-                    },
+                    draftPayload,
                 );
                 applicationId = result.data.id;
             }
@@ -308,10 +351,7 @@ export default function ApplicationWizardModal({
                         },
                     );
                 } catch (noteError) {
-                    console.warn(
-                        "Failed to create candidate note:",
-                        noteError,
-                    );
+                    console.warn("Failed to create candidate note:", noteError);
                 }
             }
 
@@ -395,6 +435,21 @@ export default function ApplicationWizardModal({
                         onBack={handleBack}
                     />
                 );
+            case "Recruiter":
+                return (
+                    <StepRecruiter
+                        recruiters={activeRecruiters}
+                        selectedRecruiterId={formData.candidate_recruiter_id}
+                        onChange={(id: string) =>
+                            setFormData({
+                                ...formData,
+                                candidate_recruiter_id: id,
+                            })
+                        }
+                        onNext={handleNext}
+                        onBack={handleBack}
+                    />
+                );
             case "Review":
                 return (
                     <StepReview
@@ -405,6 +460,11 @@ export default function ApplicationWizardModal({
                         questions={questions}
                         answers={formData.pre_screen_answers}
                         additionalNotes={formData.notes}
+                        selectedRecruiter={
+                            activeRecruiters.find(
+                                (r: any) => r.recruiter_id === formData.candidate_recruiter_id,
+                            ) || null
+                        }
                         onSubmit={handleSubmit}
                         onSaveAsDraft={handleSaveAsDraft}
                         onBack={handleBack}
@@ -430,11 +490,14 @@ export default function ApplicationWizardModal({
                 className="modal-box max-w-3xl bg-base-100 p-0 overflow-hidden max-h-[90vh] flex flex-col transition-all duration-300 ease-out"
                 style={{
                     opacity: visible && !closing ? 1 : 0,
-                    transform: visible && !closing ? "translateY(0) scale(1)" : "translateY(40px) scale(0.96)",
+                    transform:
+                        visible && !closing
+                            ? "translateY(0) scale(1)"
+                            : "translateY(40px) scale(0.96)",
                 }}
             >
                 {/* ── Header ──────────────────────────────────── */}
-                <div className="bg-neutral text-neutral-content px-8 py-6 flex-shrink-0">
+                <div className="bg-base-300 text-base-content px-8 py-6 flex-shrink-0">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center flex-shrink-0">
@@ -446,7 +509,7 @@ export default function ApplicationWizardModal({
                                         ? "Edit Your Application"
                                         : "Apply to This Role"}
                                 </h3>
-                                <p className="text-xs text-neutral-content/60 uppercase tracking-wider">
+                                <p className="text-xs text-base-content/60 uppercase tracking-wider">
                                     {loading
                                         ? "Loading..."
                                         : `Step ${currentStep} of ${totalSteps} — ${currentStepLabel}`}
@@ -455,7 +518,7 @@ export default function ApplicationWizardModal({
                         </div>
                         <button
                             onClick={handleClose}
-                            className="btn btn-ghost btn-sm btn-square text-neutral-content/60 hover:text-neutral-content"
+                            className="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
                             disabled={submitting}
                         >
                             <i className="fa-duotone fa-regular fa-xmark text-lg" />
@@ -522,9 +585,7 @@ export default function ApplicationWizardModal({
                                 <div className="bg-error/5 border-l-4 border-error p-4 mb-6">
                                     <div className="flex items-start gap-3">
                                         <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
-                                        <span className="text-sm">
-                                            {error}
-                                        </span>
+                                        <span className="text-sm">{error}</span>
                                     </div>
                                 </div>
                             )}

@@ -5,6 +5,7 @@
 
 import { baseEmailTemplate, EmailSource } from '../base';
 import { heading, paragraph, button, infoCard, alert, divider, list, markdownToHtml } from '../components';
+const { PORTAL_URL } = require('../../helpers/urls');
 
 export interface CompanyPlatformInvitationData {
     recruiterName: string;
@@ -83,7 +84,7 @@ ${infoCard({
         ],
     })}
 
-${paragraph(`Visit <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/join" style="color: #233876; text-decoration: none; font-weight: 600;">splits.network/join</a> and enter the code above to join.`)}
+${paragraph(`Visit <a href="${PORTAL_URL}/join" style="color: #233876; text-decoration: none; font-weight: 600;">splits.network/join</a> and enter the code above to join.`)}
 
 ${divider()}
 
@@ -139,7 +140,7 @@ ${list([
     ])}
 
 ${button({
-        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/dashboard`,
+        href: `${PORTAL_URL}/portal/dashboard`,
         text: 'View Dashboard →',
         variant: 'secondary',
     })}

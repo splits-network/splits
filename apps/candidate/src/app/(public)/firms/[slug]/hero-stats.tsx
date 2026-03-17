@@ -16,16 +16,32 @@ interface HeroStatsProps {
 export function HeroStats({ firm }: HeroStatsProps) {
     const stats = [
         firm.team_size_range
-            ? { label: "Team Size", value: firm.team_size_range.replace("-", "\u2013"), icon: "fa-duotone fa-regular fa-users" }
+            ? {
+                  label: "Team Size",
+                  value: firm.team_size_range.replace("-", "\u2013"),
+                  icon: "fa-duotone fa-regular fa-users",
+              }
             : null,
         firm.show_member_count && firm.active_member_count != null
-            ? { label: "Active", value: String(firm.active_member_count), icon: "fa-duotone fa-regular fa-user-check" }
+            ? {
+                  label: "Active",
+                  value: String(firm.active_member_count),
+                  icon: "fa-duotone fa-regular fa-user-check",
+              }
             : null,
         firm.founded_year
-            ? { label: "Founded", value: String(firm.founded_year), icon: "fa-duotone fa-regular fa-calendar" }
+            ? {
+                  label: "Founded",
+                  value: String(firm.founded_year),
+                  icon: "fa-duotone fa-regular fa-calendar",
+              }
             : null,
         firm.placement_types.length > 0
-            ? { label: "Placement Types", value: String(firm.placement_types.length), icon: "fa-duotone fa-regular fa-briefcase" }
+            ? {
+                  label: "Placement Types",
+                  value: String(firm.placement_types.length),
+                  icon: "fa-duotone fa-regular fa-briefcase",
+              }
             : null,
     ].filter(Boolean) as { label: string; value: string; icon: string }[];
 
@@ -36,15 +52,20 @@ export function HeroStats({ firm }: HeroStatsProps) {
             {stats.map((stat, i) => {
                 const iconStyle = ICON_STYLES[i % ICON_STYLES.length];
                 return (
-                    <div key={stat.label} className="scroll-reveal fade-up stat-block flex items-center gap-3 px-4 py-4">
-                        <div className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}>
+                    <div
+                        key={stat.label}
+                        className="scroll-reveal fade-up stat-block flex items-center gap-3 px-4 py-4"
+                    >
+                        <div
+                            className={`w-10 h-10 flex items-center justify-center shrink-0 ${iconStyle}`}
+                        >
                             <i className={`${stat.icon} text-base`} />
                         </div>
                         <div>
-                            <span className="text-xl font-black text-neutral-content leading-none block">
+                            <span className="text-xl font-black text-base-content leading-none block">
                                 {stat.value}
                             </span>
-                            <span className="text-xs font-bold uppercase tracking-[0.16em] text-neutral-content/40 leading-none">
+                            <span className="text-xs font-bold uppercase tracking-[0.16em] text-base-content/40 leading-none">
                                 {stat.label}
                             </span>
                         </div>

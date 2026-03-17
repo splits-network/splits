@@ -2,7 +2,7 @@
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
 import { CompanyDetailLoader } from "../shared/company-detail";
-import { companyId } from "../shared/helpers";
+import { companyId, rowId } from "../shared/helpers";
 import { MobileDetailOverlay } from "@/components/standard-lists";
 import { SplitItem } from "./split-item";
 
@@ -21,7 +21,7 @@ export function SplitView({
 }) {
     const isMarketplace = activeTab === "marketplace";
     const selectedItem = items.find(
-        (item) => companyId(item, isMarketplace) === selectedId,
+        (item) => rowId(item, isMarketplace) === selectedId,
     );
 
     return (
@@ -31,21 +31,17 @@ export function SplitView({
         >
             {/* Left list -- hidden on mobile when a company is selected */}
             <div
-                className={`w-full md:w-2/5 border-r-2 border-base-300 overflow-y-auto ${
+                className={`w-full md:w-1/3 border-r border-base-300 overflow-y-auto ${
                     selectedId ? "hidden md:block" : "block"
                 }`}
             >
                 {items.map((item) => (
                     <SplitItem
-                        key={
-                            isMarketplace
-                                ? (item as Company).id
-                                : (item as CompanyRelationship).id
-                        }
+                        key={rowId(item, isMarketplace)}
                         item={item}
                         activeTab={activeTab}
                         isSelected={
-                            selectedId === companyId(item, isMarketplace)
+                            selectedId === rowId(item, isMarketplace)
                         }
                         onSelect={() => onSelect(item)}
                     />
@@ -55,21 +51,22 @@ export function SplitView({
             {/* Right detail -- MobileDetailOverlay handles mobile portal */}
             <MobileDetailOverlay
                 isOpen={!!(selectedItem && selectedId)}
-                className="md:w-3/5 w-full bg-base-100"
+                className="md:w-2/3 w-full bg-base-100"
             >
                 {selectedItem && selectedId ? (
                     <CompanyDetailLoader
-                        companyId={selectedId}
+                        companyId={companyId(selectedItem, isMarketplace)}
                         onClose={() => onSelect(selectedItem)}
                         onRefresh={onRefresh}
                     />
                 ) : (
-                    <div className="h-full flex items-center justify-center p-12">
+                    <div className="flex-1 flex items-center justify-center p-12">
                         <div className="text-center">
-                            <i className="fa-duotone fa-regular fa-hand-pointer text-5xl text-base-content/30 mb-4" />
-                            <h3 className="font-bold text-base text-base-content/30 tracking-tight">
-                                Select a company to view details
-                            </h3>
+                            <div className="w-16 h-16 mx-auto mb-6 bg-primary/10 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-building text-2xl text-primary" />
+                            </div>
+                            <h3 className="font-black text-xl tracking-tight mb-2">Select a Company</h3>
+                            <p className="text-sm text-base-content/50">Click a company on the left to view their profile</p>
                         </div>
                     </div>
                 )}

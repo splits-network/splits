@@ -3,3 +3,6 @@ export { monthlyHiringReportEmail, type MonthlyReportData } from './monthly-repo
 export { candidateProfileReminderEmail, type CandidateReminderData } from './candidate-reminder';
 export { recruiterInactivityReminderEmail, type RecruiterReminderData } from './recruiter-reminder';
 export { candidateMatchDigestEmail, type CandidateMatchDigestData, type MatchItem } from './candidate-match-digest';
+export { recruiterAftercareEmail, getRecruiterAftercareSubject, type RecruiterAftercareData, type AftercareMilestone } from './aftercare-recruiter';
+export { candidateAftercareEmail, getCandidateAftercareSubject, type CandidateAftercareData } from './aftercare-candidate';
+export { companyAftercareEmail, getCompanyAftercareSubject, type CompanyAftercareData } from './aftercare-company';

@@ -85,11 +85,11 @@ function JobsPageInner() {
         setLimit,
         refresh,
     } = useStandardList<Job, JobFilters>({
-        endpoint: "/jobs",
+        endpoint: "/jobs/views/candidate-listing",
         defaultFilters: { employment_type: undefined },
         defaultSortBy: "updated_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 25,
         syncToUrl: true,
         autoFetch: true,
         requireAuth: false,

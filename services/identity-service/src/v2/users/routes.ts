@@ -152,6 +152,21 @@ export function registerUserRoutes(
         }
     });
 
+    // Internal: touch last_active_at (called by chat-gateway, no user auth required)
+    app.post('/api/v2/users/activity', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { userId } = request.body as { userId: string };
+            if (!userId) {
+                return reply.code(400).send({ error: { message: 'userId is required' } });
+            }
+            await userService.touchLastActive(userId);
+            reply.send({ data: { ok: true } });
+        } catch (error) {
+            logError('POST /api/v2/users/activity failed', error);
+            reply.code(500).send({ error: { message: 'Failed to update activity' } });
+        }
+    });
+
     // Profile Image Update Route
     app.patch('/api/v2/users/profile-image', async (request: FastifyRequest, reply: FastifyReply) => {
         try {

@@ -21,8 +21,11 @@ export class BadRequestError extends HttpError {
 }
 
 export class UnauthorizedError extends HttpError {
-    constructor(message = 'Unauthorized') {
+    public context?: Record<string, any>;
+
+    constructor(message = 'Unauthorized', context?: Record<string, any>) {
         super(401, 'UNAUTHORIZED', message);
+        this.context = context;
     }
 }
 

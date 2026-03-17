@@ -10,19 +10,17 @@ Connecting recruiters and companies through a marketplace model with transparent
 
 ## Current State
 
-v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, tech stack, perks, culture tags, social links. Company cards redesigned to Basel editorial design. Search index enriched with new data.
+v10.0 Video Platform & Recruiting Calls shipped. v8.0 Company Experience Enhancement shelved (requirements defined but not executed — see REQUIREMENTS-v8.md if resuming).
 
-## Current Milestone: v8.0 Company Experience Enhancement
+## Current Milestone: v11.0 Candidate Call Experience
 
-**Goal:** Make the portal a first-class experience for company users — invite matched candidates to apply (with email + in-app notifications to both candidate and recruiter), tailor role detail tabs per user role, and surface top matches on the company dashboard.
+**Goal:** Surface video calls in the candidate app so candidates on the platform can see upcoming calls, receive notifications, and join calls via video.applicant.network.
 
 **Target features:**
-- Invite to Apply: company users can invite matched candidates, triggering email + in-app notifications to candidate AND recruiter
-- New match status `invited` with `invited_by`/`invited_at` tracking
-- `match.invited` RabbitMQ event with notification-service consumers
-- Candidate-side "Invited" badge on match cards
-- Role-aware tab experience: company users see tabs tailored to their context (not recruiter-centric)
-- Company dashboard "Top Matches" widget showing highest-scored matches across company roles
+- Upcoming calls on candidate dashboard with call details and Join button
+- Calls tab on application detail page showing entity-linked calls
+- Join flow from candidate app redirecting to video.applicant.network
+- In-app and email notifications when calls are scheduled, rescheduled, or cancelled involving candidates
 
 ## Requirements
 
@@ -90,13 +88,31 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 - Computed open roles count and average salary from jobs table — v7.0
 - Search index enriched with new company profile data — v7.0
 
+<!-- v9.0 -->
+
+- LiveKit self-hosted infrastructure on K8s with video-service microservice — v9.0
+- Interview scheduling with stage triggers, standalone action, and Google Calendar sync — v9.0
+- Video call UI with lobby, controls, screen share, 1:1 and panel support — v9.0
+- Magic link join for candidates without accounts — v9.0
+- Interview recording via LiveKit Egress with object storage — v9.0
+- AI transcription and summary generation via ai-service — v9.0
+- Dedicated interviews tab on applications/roles with recording playback — v9.0
+- AI summary auto-posted as application note — v9.0
+
+<!-- v10.0 -->
+
+- Dedicated video app with full-screen call experience on branded subdomains — v10.0
+- Recruiter ↔ Company video calls with entity-linked AI summaries — v10.0
+- Generalized call types (`interview`, `client_meeting`) with polymorphic entity linking — v10.0
+- Migration of existing interview video flows from portal/candidate to video app — v10.0
+- Two branded video subdomains: video.splits.network and video.applicant.network — v10.0
+
 ### Active
 
-- Invite to Apply: match action with `invited` status, `invited_by`/`invited_at` columns — v8.0
-- `match.invited` event with email + in-app notification to candidate and recruiter — v8.0
-- Candidate-side "Invited" badge on match cards — v8.0
-- Role-aware role detail tabs (company vs recruiter persona) — v8.0
-- Company dashboard top matches widget — v8.0
+- Upcoming calls on candidate dashboard with Join Call button — v11.0
+- Calls tab on candidate application detail page with entity-linked calls — v11.0
+- Candidate join flow redirecting to video.applicant.network — v11.0
+- Call notifications (in-app + email) for candidates when calls are scheduled/rescheduled/cancelled — v11.0
 
 ### Out of Scope
 
@@ -108,6 +124,7 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 - Payment processing via GPT — too risky for v1
 - Fully autonomous submissions — all writes require explicit confirmation
 - GPT Store publishing — v5.0 builds the backend, store listing is a separate step
+- v8.0 Company Experience Enhancement — shelved (invite to apply, role-aware tabs, top matches widget)
 
 ## Context
 
@@ -171,6 +188,9 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 | Admin routes under /admin/* in domain services | Clean separation from user-scoped /api/v2/* routes. Gateway rewritePrefix strips service prefix. | ✓ Good |
 | useStandardList clientFactory option | Admin wrapper injects createAdminClient. No Clerk coupling in shared-hooks. | ✓ Good |
 
+| LiveKit over Daily/Twilio/100ms | Self-hostable on existing K8s, open-source, full control over data and costs. Already running K8s so infra overhead is minimal. | ✓ Good |
+| Separate video app per brand | Candidates shouldn't see Splits Network branding — avoids feeling like a commodity in a financial transaction. Same codebase, different brand shell. | — Pending |
+| Generalize calls over interview-only video | Recruiter-company calls are a natural workflow extension. AI summaries linked to entities is unique value vs Zoom. | — Pending |
 | Tech stack reuses skills table | Tech stack items are the same domain as skills. Reusing avoids duplication and enables cross-entity matching (candidate skills vs company tech stack). | ✓ Good |
 | Perks as new lookup table | Perks are a distinct domain from skills. Slug-deduplication pattern with BaselSkillPicker UI. | ✓ Good |
 | Culture tags as new lookup table | Culture is open-ended enough to warrant a lookup. Remote-first, async-friendly, etc. | ✓ Good |
@@ -178,4 +198,4 @@ v7.0 Company Profile Enhancement shipped. Company profiles enriched with stage, 
 | Computed open roles and avg salary | Derived from jobs table at query time, not stored. Always accurate. | ✓ Good |
 
 ---
-*Last updated: 2026-03-04 after v8.0 milestone started*
+*Last updated: 2026-03-08 after v10.0 milestone started (v9.0 shipped)*

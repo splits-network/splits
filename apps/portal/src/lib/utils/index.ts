@@ -2,13 +2,11 @@
  * Central export file for all utility functions
  * 
  * This provides a single import point for all utilities:
- * import { formatDate, getApplicationStageBadge } from '@/lib/utils';
+ * import { formatDate, getJobStatusBadge } from '@/lib/utils';
  */
 
 // Badge utilities
 export {
-    getApplicationStageBadge,
-    getApplicationStageClass,
     getJobStatusBadge,
     getRelationshipStatusBadge,
     getVerificationStatusBadge,

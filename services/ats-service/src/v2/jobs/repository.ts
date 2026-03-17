@@ -79,39 +79,39 @@ export class JobRepository {
                     .maybeSingle();
 
                 const tier = (sub?.plan as any)?.tier ?? 'starter';
-                const visibleStatuses = tier === 'partner'
-                    ? ['active', 'priority', 'early']
-                    : ['active', 'priority'];
 
-                query = query.in('status', visibleStatuses);
+                query = query.eq('status', 'active');
+                // Non-partner tier recruiters cannot see early access jobs
+                if (tier !== 'partner') {
+                    query = query.eq('is_early_access', false);
+                }
                 if (filters.job_owner_filter === 'assigned') {
                     // Filter to jobs where recruiter has:
-                    // 1. Is the job_owner_recruiter_id or company_recruiter_id (they created/own the job)
-                    // 2. OR has applications in active stages
+                    // 1. Is the job_owner_recruiter_id (they created/own the job)
+                    // 2. OR has applications as candidate_recruiter or company_recruiter
                     // 3. OR has placements (hired candidates)
 
-                    // Get job IDs from applications with active stages
+                    // Get job IDs from applications with active stages (as candidate or company recruiter)
                     const { data: applications } = await this.supabase
                         .from('applications')
                         .select('job_id')
-                        .eq('candidate_recruiter_id', accessContext.recruiterId)
+                        .or(`candidate_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`)
                         .in('stage', ['recruiter_proposed', 'draft', 'recruiter_request', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
 
                     // Get job IDs from placements
                     const { data: placements } = await this.supabase
                         .from('placements')
                         .select('job_id')
-                        .eq('candidate_recruiter_id', accessContext.recruiterId);
+                        .or(`candidate_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`);
 
                     // Combine unique job IDs from applications and placements
                     const applicationJobIds = applications?.map(a => a.job_id) || [];
                     const placementJobIds = placements?.map(p => p.job_id) || [];
                     const involvedJobIds = [...new Set([...applicationJobIds, ...placementJobIds])];
 
-                    // Build OR condition: job_owner_recruiter_id OR company_recruiter_id OR in involvedJobIds
+                    // Build OR condition: job_owner_recruiter_id OR in involvedJobIds
                     const orConditions = [
-                        `job_owner_recruiter_id.eq.${accessContext.recruiterId}`,
-                        `company_recruiter_id.eq.${accessContext.recruiterId}`
+                        `job_owner_recruiter_id.eq.${accessContext.recruiterId}`
                     ];
 
                     if (involvedJobIds.length > 0) {
@@ -136,20 +136,17 @@ export class JobRepository {
                 }
                 query = query.in('company_id', orgCompanyIds);
 
-                if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
-                    // Further filter to only jobs where this user is the job_owner_id
-                    query = query.eq('job_owner_id', accessContext.identityUserId);
-                }
+                // Note: job_owner_id removed from jobs table; company users see all org jobs
             } else if (accessContext.candidateId) {
-                // Candidates see active and priority jobs
-                query = query.in('status', ['active', 'priority']);
+                // Candidates see active jobs (not early access)
+                query = query.eq('status', 'active').eq('is_early_access', false);
             } else {
                 // No role found - return empty
                 return { data: [], total: 0 };
             }
         } else {
-            // Unauthenticated - show active and priority jobs
-            query = query.in('status', ['active', 'priority']);
+            // Unauthenticated - show active jobs (not early access)
+            query = query.eq('status', 'active').eq('is_early_access', false);
         }
 
         // Apply full-text search
@@ -192,6 +189,79 @@ export class JobRepository {
         const jobLevelFilter = filters.job_level || params.job_level;
         if (jobLevelFilter) {
             query = query.eq('job_level', jobLevelFilter);
+        }
+
+        // Open to relocation (boolean column, comes as string from query params)
+        if (filters.open_to_relocation === 'true') {
+            query = query.eq('open_to_relocation', true);
+        } else if (filters.open_to_relocation === 'false') {
+            query = query.eq('open_to_relocation', false);
+        }
+
+        // Remote filter (boolean column)
+        if (filters.is_remote === 'true') {
+            query = query.eq('is_remote', true);
+        } else if (filters.is_remote === 'false') {
+            query = query.eq('is_remote', false);
+        }
+
+        // Job source: company vs firm
+        if (filters.job_source === 'company') {
+            query = query.not('company_id', 'is', null).is('source_firm_id', null);
+        } else if (filters.job_source === 'firm') {
+            query = query.not('source_firm_id', 'is', null);
+        }
+
+        // Salary range buckets (based on salary_min)
+        if (filters.salary_range) {
+            switch (filters.salary_range) {
+                case 'under_50k': query = query.lt('salary_min', 50000); break;
+                case '50k_100k': query = query.gte('salary_min', 50000).lt('salary_min', 100000); break;
+                case '100k_150k': query = query.gte('salary_min', 100000).lt('salary_min', 150000); break;
+                case '150k_200k': query = query.gte('salary_min', 150000).lt('salary_min', 200000); break;
+                case 'over_200k': query = query.gte('salary_min', 200000); break;
+            }
+        }
+
+        // Fee percentage range buckets
+        if (filters.fee_range) {
+            switch (filters.fee_range) {
+                case 'under_15': query = query.lt('fee_percentage', 15); break;
+                case '15_20': query = query.gte('fee_percentage', 15).lt('fee_percentage', 20); break;
+                case '20_25': query = query.gte('fee_percentage', 20).lt('fee_percentage', 25); break;
+                case 'over_25': query = query.gte('fee_percentage', 25); break;
+            }
+        }
+
+        // Guarantee days buckets
+        if (filters.guarantee_range) {
+            switch (filters.guarantee_range) {
+                case '30': query = query.lte('guarantee_days', 30); break;
+                case '60': query = query.gt('guarantee_days', 30).lte('guarantee_days', 60); break;
+                case '90': query = query.gt('guarantee_days', 60).lte('guarantee_days', 90); break;
+                case 'over_90': query = query.gt('guarantee_days', 90); break;
+            }
+        }
+
+        // Has applications filter (subquery)
+        if (filters.has_applications) {
+            const { data: jobsWithApps } = await this.supabase
+                .from('applications')
+                .select('job_id');
+            const jobIdsWithApps = [...new Set((jobsWithApps || []).map((a: any) => a.job_id))];
+
+            if (filters.has_applications === 'yes') {
+                if (jobIdsWithApps.length > 0) {
+                    query = query.in('id', jobIdsWithApps);
+                } else {
+                    return { data: [], total: 0 };
+                }
+            } else if (filters.has_applications === 'no') {
+                if (jobIdsWithApps.length > 0) {
+                    query = query.not('id', 'in', `(${jobIdsWithApps.join(',')})`);
+                }
+                // If no applications exist at all, no filtering needed — all jobs have no apps
+            }
         }
 
         // Apply sorting - relevance-based when searching, otherwise by sort_by parameter
@@ -253,7 +323,7 @@ export class JobRepository {
             .eq('id', id);
 
         if (!clerkUserId) {
-            query = query.in('status', ['active', 'priority']);
+            query = query.eq('status', 'active').eq('is_early_access', false);
         }
 
         const { data, error } = await query.single();
@@ -362,13 +432,11 @@ export class JobRepository {
         const jobData = { ...job };
         if (creatorRecruiterId) {
             if (isOffPlatform) {
-                // Off-platform: set company_recruiter (manages the job) but NOT job_owner (no commission)
-                jobData.company_recruiter_id = creatorRecruiterId;
+                // Off-platform: no job owner (no commission)
                 jobData.job_owner_recruiter_id = null;
             } else {
-                // Platform job: set both as before
+                // Platform job: set job owner
                 jobData.job_owner_recruiter_id = creatorRecruiterId;
-                jobData.company_recruiter_id = creatorRecruiterId;
             }
         }
 
@@ -532,7 +600,7 @@ export class JobRepository {
 
     /**
      * Find active jobs affected by a recruiter-company relationship termination.
-     * Returns jobs where the recruiter is job_owner_recruiter_id or company_recruiter_id
+     * Returns jobs where the recruiter is job_owner_recruiter_id
      * for the given company, with active/paused status.
      */
     async findAffectedByTermination(
@@ -548,8 +616,8 @@ export class JobRepository {
                 created_at
             `)
             .eq('company_id', companyId)
-            .or(`job_owner_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`)
-            .in('status', ['active', 'early', 'priority', 'paused'])
+            .eq('job_owner_recruiter_id', recruiterId)
+            .in('status', ['active', 'paused'])
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -604,21 +672,15 @@ export class JobRepository {
                 updates.status = 'paused';
             }
 
-            // For keep and pause, also unassign the recruiter
-            // Check which field the recruiter is on and null it out
+            // For keep and pause, also unassign the recruiter if they're the job owner
             const { data: job } = await this.supabase
                 .from('jobs')
-                .select('job_owner_recruiter_id, company_recruiter_id')
+                .select('job_owner_recruiter_id')
                 .eq('id', decision.job_id)
                 .single();
 
-            if (job) {
-                if (job.job_owner_recruiter_id === recruiterId) {
-                    updates.job_owner_recruiter_id = null;
-                }
-                if (job.company_recruiter_id === recruiterId) {
-                    updates.company_recruiter_id = null;
-                }
+            if (job && job.job_owner_recruiter_id === recruiterId) {
+                updates.job_owner_recruiter_id = null;
             }
 
             const { error } = await this.supabase

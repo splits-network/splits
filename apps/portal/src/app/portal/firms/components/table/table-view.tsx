@@ -8,8 +8,8 @@ const COLUMNS = [
     "Firm",
     "Status",
     "Members",
-    "Placements",
-    "Revenue",
+    "Team Size",
+    "Marketplace",
     "Created",
     "", // actions
 ] as const;

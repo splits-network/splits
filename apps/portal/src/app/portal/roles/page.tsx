@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 import {
     useStandardList,
     PaginationControls,
@@ -12,12 +11,13 @@ import {
 } from "@/hooks/use-standard-list";
 import { useUserProfile } from "@/contexts";
 import { useGamification } from "@splits-network/shared-gamification";
-import { createAuthenticatedClient } from "@/lib/api-client";
 import { ModalPortal } from "@splits-network/shared-ui";
 import type { Job, UnifiedJobFilters } from "./types";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
+import { BaselAlertBox } from "@splits-network/basel-ui";
 import { isNew } from "./components/shared/helpers";
 import { RolesAnimator } from "./roles-animator";
+import { BillingReadinessProvider, useBillingReadiness } from "./hooks/billing-readiness-context";
 import { HeaderSection } from "./components/shared/header-section";
 import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
@@ -74,33 +74,22 @@ export default function RolesPage() {
         isRecruiter,
         isCompanyUser,
         getCompanyIdsWithPermission,
+        firmIds,
     } = useUserProfile();
-    const { getToken } = useAuth();
-    const [isFirmMember, setIsFirmMember] = useState(false);
 
-    useEffect(() => {
-        if (!isRecruiter) return;
-        let cancelled = false;
-        async function checkFirm() {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) return;
-                const client = createAuthenticatedClient(token);
-                const res = await client.get<{ data: any[] }>("/firms/my-firms");
-                if (!cancelled && res.data?.length > 0) setIsFirmMember(true);
-            } catch { /* not a firm member */ }
-        }
-        checkFirm();
-        return () => { cancelled = true; };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isRecruiter]);
+    /* ── Role-based endpoint selection ── */
+    const boardEndpoint = isAdmin
+        ? "/jobs/views/admin-board"
+        : isCompanyUser
+            ? "/jobs/views/company-board"
+            : "/jobs/views/recruiter-board";
 
     const canCreateRole =
         isAdmin ||
         isCompanyUser ||
         (isRecruiter &&
             getCompanyIdsWithPermission("can_create_jobs").length > 0) ||
-        (isRecruiter && isFirmMember);
+        (isRecruiter && firmIds.length > 0);
 
     /* ── Data ── */
     const {
@@ -122,14 +111,18 @@ export default function RolesPage() {
         totalPages,
         refresh,
         updateItem,
+        sortBy,
+        sortOrder,
+        setSortBy,
+        setSortOrder,
     } = useStandardList<Job, UnifiedJobFilters>({
-        endpoint: "/jobs",
-        defaultFilters: { status: undefined, job_owner_filter: "assigned" },
+        endpoint: boardEndpoint,
+        defaultFilters: { status: undefined, job_owner_filter: isRecruiter ? "assigned" : undefined },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
-        defaultLimit: 24,
+        defaultLimit: 10,
+        limitKey: 'roles-per-page',
         syncToUrl: true,
-        include: "company,skills",
     });
 
     const { registerEntities } = useGamification();
@@ -150,6 +143,11 @@ export default function RolesPage() {
     const handleViewModeChange = useCallback((mode: ViewMode) => {
         setViewMode(mode);
     }, []);
+
+    const handleSortChange = useCallback((field: string, order: "asc" | "desc") => {
+        setSortBy(field);
+        setSortOrder(order);
+    }, [setSortBy, setSortOrder]);
 
     const stats = useMemo(
         () => ({
@@ -186,69 +184,83 @@ export default function RolesPage() {
                     totalCount={pagination?.total ?? jobs.length}
                     loading={loading}
                     refresh={refresh}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
+                    isRecruiter={isRecruiter}
                 />
 
-                {/* Content Area */}
-                <section className="content-area scroll-reveal fade-in p-4">
-                    <div ref={contentRef}>
-                        {loading && jobs.length === 0 ? (
-                            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
-                                <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
-                                <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
-                                    Loading your pipeline...
-                                </p>
-                            </div>
-                        ) : jobs.length === 0 ? (
-                            <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
-                                <i className="fa-duotone fa-regular fa-magnifying-glass text-5xl text-base-content/15 mb-6 block" />
-                                <h3 className="text-2xl font-black tracking-tight mb-2">
-                                    No matching roles
-                                </h3>
-                                <p className="text-base-content/50 mb-6">
-                                    Adjust your search or clear filters to see
-                                    available positions.
-                                </p>
-                                <button
-                                    onClick={() => {
-                                        clearSearch();
-                                        clearFilters();
-                                    }}
-                                    className="btn btn-outline btn-sm"
-                                    style={{ borderRadius: 0 }}
-                                >
-                                    Reset Filters
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                {viewMode === "table" && (
-                                    <TableView
-                                        jobs={jobs}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedJobId}
-                                        onRefresh={refresh}
-                                    />
-                                )}
-                                {viewMode === "grid" && (
-                                    <GridView
-                                        jobs={jobs}
-                                        onSelectAction={handleSelect}
-                                        selectedId={selectedJobId}
-                                        onRefreshAction={refresh}
-                                    />
-                                )}
-                                {viewMode === "split" && (
-                                    <SplitView
-                                        jobs={jobs}
-                                        onSelect={handleSelect}
-                                        selectedId={selectedJobId}
-                                        onRefresh={refresh}
-                                    />
-                                )}
-                            </>
-                        )}
-                    </div>
-                </section>
+                <BillingReadinessProvider jobs={jobs} checkCompanyBilling={isCompanyUser || isAdmin} ownFirmIds={isRecruiter ? firmIds : undefined}>
+                    <RolesBillingBanner isCompanyUser={isCompanyUser} />
+
+                    {/* Content Area */}
+                    <section className="content-area scroll-reveal fade-in p-4">
+                        <div ref={contentRef}>
+                            {loading && jobs.length === 0 ? (
+                                <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                                    <span className="loading loading-spinner loading-lg text-primary mb-6 block" />
+                                    <p className="text-sm uppercase tracking-[0.2em] font-bold text-base-content/40">
+                                        Loading your pipeline...
+                                    </p>
+                                </div>
+                            ) : jobs.length === 0 ? (
+                                <div className="container mx-auto px-6 lg:px-12 py-28 text-center">
+                                    <i className={`fa-duotone fa-regular ${filters.job_owner_filter === "saved" ? "fa-bookmark" : "fa-magnifying-glass"} text-5xl text-base-content/15 mb-6 block`} />
+                                    <h3 className="text-2xl font-black tracking-tight mb-2">
+                                        {filters.job_owner_filter === "saved" ? "No saved roles yet" : "No matching roles"}
+                                    </h3>
+                                    <p className="text-base-content/50 mb-6">
+                                        {filters.job_owner_filter === "saved"
+                                            ? "Browse roles and use the bookmark icon to save them for quick access."
+                                            : "Adjust your search or clear filters to see available positions."}
+                                    </p>
+                                    {filters.job_owner_filter !== "saved" && (
+                                        <button
+                                            onClick={() => {
+                                                clearSearch();
+                                                clearFilters();
+                                            }}
+                                            className="btn btn-outline btn-sm"
+                                            style={{ borderRadius: 0 }}
+                                        >
+                                            Reset Filters
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    {viewMode === "table" && (
+                                        <TableView
+                                            jobs={jobs}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedJobId}
+                                            onRefresh={refresh}
+                                            onUpdateItem={updateItem}
+                                        />
+                                    )}
+                                    {viewMode === "grid" && (
+                                        <GridView
+                                            jobs={jobs}
+                                            onSelectAction={handleSelect}
+                                            selectedId={selectedJobId}
+                                            onRefreshAction={refresh}
+                                            onUpdateItemAction={updateItem}
+                                        />
+                                    )}
+                                    {viewMode === "split" && (
+                                        <SplitView
+                                            jobs={jobs}
+                                            onSelect={handleSelect}
+                                            selectedId={selectedJobId}
+                                            onRefresh={refresh}
+                                            onUpdateItem={updateItem}
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </section>
+                </BillingReadinessProvider>
 
                 {/* Pagination */}
                 <div className="mx-auto px-6 lg:px-12 py-6">
@@ -278,5 +290,40 @@ export default function RolesPage() {
                 )}
             </ModalPortal>
         </>
+    );
+}
+
+/* ── Billing Banner (uses context, must be inside BillingReadinessProvider) ── */
+
+function RolesBillingBanner({ isCompanyUser }: { isCompanyUser: boolean }) {
+    const { hasUnreadyBilling, loading } = useBillingReadiness();
+
+    if (loading || !hasUnreadyBilling) return null;
+
+    const settingsUrl = isCompanyUser
+        ? "/portal/company/settings?tab=billing"
+        : "/portal/firms";
+
+    return (
+        <section className="px-4 lg:px-6 pt-4">
+            <BaselAlertBox variant="warning" title="Billing Setup Required">
+                <p className="mb-2">
+                    Roles cannot be published until billing is configured. Set up
+                    your payment method so recruiter placement fees can be
+                    processed when a role is filled.
+                </p>
+                <p className="mb-3">
+                    There are no upfront costs — you only pay when a recruiter
+                    successfully fills your role.
+                </p>
+                <a
+                    href={settingsUrl}
+                    className="btn btn-warning btn-sm"
+                >
+                    <i className="fa-duotone fa-regular fa-credit-card mr-1" />
+                    Complete Billing Setup
+                </a>
+            </BaselAlertBox>
+        </section>
     );
 }

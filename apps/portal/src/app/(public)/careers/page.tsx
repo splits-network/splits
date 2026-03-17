@@ -234,7 +234,7 @@ export default function CareersPage() {
             </section>
 
             {/* Values */}
-            <section className="py-20 bg-neutral text-neutral-content overflow-hidden">
+            <section className="py-20 bg-base-300 text-base-content overflow-hidden">
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
                         <h2 className="text-4xl font-bold mb-12 text-center scroll-reveal fade-up">

@@ -11,54 +11,19 @@ export type FirmConnectStatus =
     | "action_required"
     | "ready";
 
-export interface UpdateFirmDetailsPayload {
-    company_name?: string;
-    company_phone?: string;
-    company_tax_id?: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone?: string;
-    dob: { day: number; month: number; year: number };
-    ssn_last_4?: string;
-    address: {
-        line1: string;
-        line2?: string;
-        city: string;
-        state: string;
-        postal_code: string;
-    };
-}
-
-export interface AddFirmBankAccountPayload {
-    token: string;
-}
-
 export interface FirmConnectStatusState {
     loading: boolean;
     error: string | null;
     hasAccount: boolean;
     accountId: string | null;
-    chargesEnabled: boolean;
-    payoutsEnabled: boolean;
-    detailsSubmitted: boolean;
     onboarded: boolean;
-    currentlyDue: string[];
-    eventuallyDue: string[];
-    pastDue: string[];
-    pendingVerification: string[];
-    disabledReason: string | null;
-    needsIdentityVerification: boolean;
     bankAccount: { bank_name: string; last4: string; account_type: string } | null;
     payoutSchedule: { interval: string; weekly_anchor?: string; monthly_anchor?: number; delay_days?: number } | null;
     pendingBalance: number;
     status: FirmConnectStatus;
     refresh: () => Promise<void>;
-    createAccount: () => Promise<void>;
-    updateDetails: (data: UpdateFirmDetailsPayload) => Promise<void>;
-    addBankAccount: (data: AddFirmBankAccountPayload) => Promise<void>;
-    acceptTos: () => Promise<{ needs_identity_verification: boolean }>;
-    createVerificationSession: () => Promise<{ client_secret: string }>;
+    createAccountAndRedirect: () => Promise<void>;
+    openStripeOnboarding: () => Promise<void>;
 }
 
 function deriveStatus(data: {
@@ -86,30 +51,22 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
     const [accountData, setAccountData] = useState<{
         hasAccount: boolean;
         accountId: string | null;
-        chargesEnabled: boolean;
-        payoutsEnabled: boolean;
-        detailsSubmitted: boolean;
         onboarded: boolean;
+        detailsSubmitted: boolean;
         currentlyDue: string[];
-        eventuallyDue: string[];
         pastDue: string[];
         pendingVerification: string[];
-        disabledReason: string | null;
         bankAccount: { bank_name: string; last4: string; account_type: string } | null;
         payoutSchedule: { interval: string; weekly_anchor?: string; monthly_anchor?: number; delay_days?: number } | null;
         pendingBalance: number;
     }>({
         hasAccount: false,
         accountId: null,
-        chargesEnabled: false,
-        payoutsEnabled: false,
-        detailsSubmitted: false,
         onboarded: false,
+        detailsSubmitted: false,
         currentlyDue: [],
-        eventuallyDue: [],
         pastDue: [],
         pendingVerification: [],
-        disabledReason: null,
         bankAccount: null,
         payoutSchedule: null,
         pendingBalance: 0,
@@ -125,7 +82,7 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
 
             const api = createAuthenticatedClient(token);
             const response: any = await api.get(
-                `/firm-stripe-connect/${firmId}/account`
+                `/stripe/firm-connect/${firmId}/account`
             );
             const data = response?.data;
 
@@ -134,15 +91,11 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
                 setAccountData({
                     hasAccount: true,
                     accountId: data.account_id,
-                    chargesEnabled: !!data.charges_enabled,
-                    payoutsEnabled: !!data.payouts_enabled,
-                    detailsSubmitted: !!data.details_submitted,
                     onboarded: !!data.onboarded,
+                    detailsSubmitted: !!data.details_submitted,
                     currentlyDue: requirements.currently_due || [],
-                    eventuallyDue: requirements.eventually_due || [],
                     pastDue: requirements.past_due || [],
                     pendingVerification: requirements.pending_verification || [],
-                    disabledReason: requirements.disabled_reason || null,
                     bankAccount: data.bank_account || null,
                     payoutSchedule: data.payout_schedule || null,
                     pendingBalance: data.pending_balance || 0,
@@ -164,7 +117,12 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [firmId]);
 
-    const createAccount = useCallback(async () => {
+    const getReturnUrl = () => {
+        if (typeof window === "undefined") return "";
+        return `${window.location.origin}/portal/firms?firmId=${firmId}&tab=billing`;
+    };
+
+    const createAccountAndRedirect = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -173,55 +131,41 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
-            await api.post(`/firm-stripe-connect/${firmId}/account`);
+            await api.post(`/stripe/firm-connect/${firmId}/account`);
+            const returnUrl = getReturnUrl();
+            const response: any = await api.post(`/stripe/firm-connect/${firmId}/onboarding-link`, {
+                return_url: returnUrl,
+                refresh_url: returnUrl,
+            });
+            if (response?.data?.url) {
+                window.open(response.data.url, "_blank");
+            }
             await fetchStatus();
         } catch (err: any) {
             setError(err?.message || "Failed to create payout account");
+        } finally {
             setLoading(false);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [firmId, fetchStatus]);
 
-    const updateDetails = useCallback(async (data: UpdateFirmDetailsPayload) => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
+    const openStripeOnboarding = useCallback(async () => {
+        try {
+            const token = await getToken();
+            if (!token) return;
 
-        const api = createAuthenticatedClient(token);
-        await api.patch(`/firm-stripe-connect/${firmId}/account`, data);
-        await fetchStatus(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [firmId, fetchStatus]);
-
-    const addBankAccount = useCallback(async (data: AddFirmBankAccountPayload) => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const api = createAuthenticatedClient(token);
-        await api.post(`/firm-stripe-connect/${firmId}/bank-account`, data);
-        await fetchStatus(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [firmId, fetchStatus]);
-
-    const acceptTos = useCallback(async (): Promise<{ needs_identity_verification: boolean }> => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const api = createAuthenticatedClient(token);
-        const response: any = await api.post(`/firm-stripe-connect/${firmId}/accept-tos`);
-        await fetchStatus(true);
-        return {
-            needs_identity_verification: !!response?.data?.needs_identity_verification,
-        };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [firmId, fetchStatus]);
-
-    const createVerificationSession = useCallback(async (): Promise<{ client_secret: string }> => {
-        const token = await getToken();
-        if (!token) throw new Error("Not authenticated");
-
-        const api = createAuthenticatedClient(token);
-        const response: any = await api.post(`/firm-stripe-connect/${firmId}/verification-session`);
-        return { client_secret: response?.data?.client_secret };
+            const api = createAuthenticatedClient(token);
+            const returnUrl = getReturnUrl();
+            const response: any = await api.post(`/stripe/firm-connect/${firmId}/onboarding-link`, {
+                return_url: returnUrl,
+                refresh_url: returnUrl,
+            });
+            if (response?.data?.url) {
+                window.open(response.data.url, "_blank");
+            }
+        } catch (err: any) {
+            setError(err?.message || "Failed to open Stripe onboarding");
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [firmId]);
 
@@ -231,23 +175,18 @@ export function useFirmConnectStatus(firmId: string): FirmConnectStatusState {
 
     const status = deriveStatus(accountData);
 
-    const needsIdentityVerification =
-        accountData.hasAccount &&
-        !accountData.onboarded &&
-        (accountData.currentlyDue.some((r) => r.includes("verification.document")) ||
-         accountData.eventuallyDue.some((r) => r.includes("verification.document")));
-
     return {
         loading,
         error,
-        ...accountData,
-        needsIdentityVerification,
+        hasAccount: accountData.hasAccount,
+        accountId: accountData.accountId,
+        onboarded: accountData.onboarded,
+        bankAccount: accountData.bankAccount,
+        payoutSchedule: accountData.payoutSchedule,
+        pendingBalance: accountData.pendingBalance,
         status,
         refresh: fetchStatus,
-        createAccount,
-        updateDetails,
-        addBankAccount,
-        acceptTos,
-        createVerificationSession,
+        createAccountAndRedirect,
+        openStripeOnboarding,
     };
 }

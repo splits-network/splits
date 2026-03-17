@@ -4,6 +4,7 @@ import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupPr
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerV2Routes } from './v2/routes';
+import { registerV3Routes } from './v3/routes';
 import { EventPublisherV2, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
 
@@ -133,12 +134,18 @@ async function main() {
     outboxWorker.start();
     logger.info('📤 Outbox worker started - events will be durably delivered');
 
-    // Register V2 routes only
+    // Register V2 routes (legacy — both versions coexist)
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         eventPublisher: outboxPublisher,
         logger,
+    });
+
+    // Register V3 routes (new standard)
+    registerV3Routes(app, {
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher,
     });
 
     // Register standardized health check with dependency monitoring

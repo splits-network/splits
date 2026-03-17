@@ -185,7 +185,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 1
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content scroll-reveal fade-up">
+            <section className="pull-quote-block py-20 bg-base-300 text-base-content scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -195,7 +195,7 @@ export default function ArticleOnePage() {
                                 professional services sector to resist
                                 structural collaboration.&rdquo;
                             </blockquote>
-                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                            <cite className="text-sm uppercase tracking-[0.2em] text-base-content/50 not-italic">
                                 -- Industry Analysis, 2025
                             </cite>
                         </div>
@@ -378,7 +378,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 STATS BAR — Key metrics
                ═══════════════════════════════════════════════════════ */}
-            <section className="stats-bar bg-neutral text-neutral-content py-10">
+            <section className="stats-bar bg-base-300 text-base-content py-10">
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {[
@@ -390,7 +390,10 @@ export default function ArticleOnePage() {
                             { value: "40%", label: "Less Admin Overhead" },
                             { value: "92%", label: "Partner Satisfaction" },
                         ].map((stat, i) => (
-                            <div key={i} className="stat-item scroll-reveal fade-up">
+                            <div
+                                key={i}
+                                className="stat-item scroll-reveal fade-up"
+                            >
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {stat.value}
                                 </div>
@@ -549,7 +552,7 @@ export default function ArticleOnePage() {
             {/* ═══════════════════════════════════════════════════════
                 PULL QUOTE 3
                ═══════════════════════════════════════════════════════ */}
-            <section className="pull-quote-block py-20 bg-neutral text-neutral-content scroll-reveal fade-up">
+            <section className="pull-quote-block py-20 bg-base-300 text-base-content scroll-reveal fade-up">
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl mx-auto">
                         <div className="border-l-4 border-secondary pl-8 lg:pl-12">
@@ -559,7 +562,7 @@ export default function ArticleOnePage() {
                                 everything is tracked and transparent,
                                 collaboration becomes effortless.&rdquo;
                             </blockquote>
-                            <cite className="text-sm uppercase tracking-[0.2em] text-neutral-content/50 not-italic">
+                            <cite className="text-sm uppercase tracking-[0.2em] text-base-content/50 not-italic">
                                 -- Hiring Manager, Enterprise Client
                             </cite>
                         </div>

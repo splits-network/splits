@@ -9,7 +9,10 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-ne
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import { ChatEventPublisher } from "./v3/shared/chat-event-publisher";
+import Redis from "ioredis";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -134,6 +137,21 @@ async function main() {
         eventPublisher: outboxPublisher,
     });
 
+    // Create Redis client for V3 real-time chat events
+    const v3Redis = new Redis({
+        host: redisConfig.host,
+        port: redisConfig.port,
+        password: redisConfig.password || undefined,
+    });
+    const chatEventPublisher = new ChatEventPublisher(v3Redis);
+
+    // Register V3 routes (coexist with V2)
+    registerV3Routes(app, {
+        supabase: supabaseClient,
+        eventPublisher: outboxPublisher,
+        chatEventPublisher,
+    });
+
     app.get("/health", async (request, reply) => {
         return reply.status(200).send({
             status: "healthy",
@@ -146,6 +164,7 @@ async function main() {
     process.on("SIGTERM", async () => {
         logger.info("SIGTERM received, shutting down gracefully");
         outboxWorker.stop();
+        await chatEventPublisher.close();
         await eventPublisher.close();
         await app.close();
         process.exit(0);
@@ -161,6 +180,7 @@ async function main() {
             await Sentry.flush(2000);
         }
         outboxWorker.stop();
+        await chatEventPublisher.close();
         await eventPublisher.close();
         process.exit(1);
     }

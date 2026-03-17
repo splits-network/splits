@@ -24,6 +24,24 @@ export class RecruiterServiceV2 {
         // Flatten reputation data if included
         const flattenedData = result.data.map(recruiter => this.flattenRecruiterData(recruiter));
 
+        // Enrich with plan tier (batch lookup to avoid N+1)
+        const recruiterIds = flattenedData.map((r: any) => r.id).filter(Boolean);
+        const tierMap = await this.repository.batchGetPlanTiers(recruiterIds);
+        for (const recruiter of flattenedData) {
+            recruiter.plan_tier = tierMap.get(recruiter.id) || 'starter';
+        }
+
+        // Sort by plan tier priority if requested (partner > pro > starter)
+        if (filters.sort_by === 'plan_tier') {
+            const tierPriority: Record<string, number> = { partner: 0, pro: 1, starter: 2 };
+            const ascending = filters.sort_order?.toLowerCase() === 'asc';
+            flattenedData.sort((a: any, b: any) => {
+                const aP = tierPriority[a.plan_tier] ?? 3;
+                const bP = tierPriority[b.plan_tier] ?? 3;
+                return ascending ? aP - bP : bP - aP;
+            });
+        }
+
         return buildPaginationResponse(
             flattenedData,
             result.total,

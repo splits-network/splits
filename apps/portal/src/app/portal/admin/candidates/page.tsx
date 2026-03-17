@@ -267,13 +267,13 @@ export default function CandidatesAdminPage() {
                                                 )}
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">
+                                                <span className="badge badge-primary">
                                                     {candidate.application_count ??
                                                         0}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className="badge badge-neutral">
+                                                <span className="badge badge-primary">
                                                     {candidate.placement_count ??
                                                         0}
                                                 </span>

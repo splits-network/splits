@@ -44,6 +44,7 @@ Design standards: in the root /showcase directory
 1. **Nano-service philosophy** — small, focused services; new purpose = new service
 1. **Technical Debt Paydown** — if you see something wrong, fix it immediately; no "I'll do it later"
 1. **Don't leave unused code** — if something is no longer needed, delete it; don't comment it out or leave it in limbo
+1. **MANDATORY: V3 CRUD routes must be pure** — Core CRUD (list, get, create, update, delete) must NEVER contain joins, access control, enrichment, computed fields, or includes. They are flat `select('*')` against a single table. ALWAYS `auth: 'required'` in the gateway. If a frontend page needs joined data, enrichment, role-based scoping, or public/optional auth — use a **view**. See `docs/guidance/v3-crud-vs-views.md`.
 
 ## Decision-Making Rules
 
@@ -69,26 +70,79 @@ Design standards: in the root /showcase directory
 
 ## Skills (On-Demand Patterns)
 
-| Skill             | Purpose                       |
-| ----------------- | ----------------------------- |
-| `/api:scaffold`   | Scaffold V2 backend resource  |
-| `/api:audit`      | Audit service V2 compliance   |
-| `/migration`      | Create database migration     |
-| `/test:scaffold`  | Scaffold Vitest tests         |
-| `/event:scaffold` | Scaffold RabbitMQ event flow  |
-| `/auth`           | Clerk auth patterns & gotchas |
-| `/ui`             | DaisyUI component patterns    |
-| `/email:scaffold` | Create email template         |
-| `/basel`          | Basel design system migration |
-| `/seo`            | SEO audit & optimization      |
-| `/aio`            | AI optimization audit         |
+| Skill                    | Purpose                          |
+| ------------------------ | -------------------------------- |
+| `/api:scaffold`          | Scaffold V3 backend resource     |
+| `/api:audit`             | Audit service V2 compliance      |
+| `/api:plan`              | Plan V2 to V3 backend migration  |
+| `/api:migrate`           | Migrate V2 resource to V3        |
+| `/api:validate`          | Validate V3 resource compliance  |
+| `/api:deprecate`         | Deprecate V2 resource            |
+| `/api:remove`            | Remove deprecated V2 resource    |
+| `/api-frontend:scan`     | Scan frontend V3 migration scope |
+| `/api-frontend:migrate`  | Migrate frontend to V3 APIs      |
+| `/api-frontend:validate` | Validate frontend V3 migration   |
+| `/api-frontend:cleanup`  | Clean up V2 frontend artifacts   |
+| `/migration`             | Create database migration        |
+| `/test:scaffold`         | Scaffold Vitest tests            |
+| `/event:scaffold`        | Scaffold RabbitMQ event flow     |
+| `/auth`                  | Clerk auth patterns & gotchas    |
+| `/ui`                    | DaisyUI component patterns       |
+| `/email:scaffold`        | Create email template            |
+| `/basel`                 | Basel design system migration    |
+| `/seo`                   | SEO audit & optimization         |
+| `/aio`                   | AI optimization audit            |
+| `/dashboard`             | Dashboard design patterns (GA-quality) |
+| `/promo:create`          | Create social media promo video  |
+| `/promo:record`          | Record HTML animation to MP4     |
 
 ## Guidance Documents
 
 Key standards in `docs/guidance/`:
 
+- `v3-crud-vs-views.md` — **MANDATORY**: CRUD is flat, views handle joins/public/enrichment
 - `api-response-format.md` — `{ data: <payload> }` envelope
 - `form-controls.md` — `fieldset` wrapper, no `-bordered` suffixes
 - `pagination.md` — StandardListParams/StandardListResponse
 - `user-identification-standard.md` — Always use `clerkUserId`
 - `loading-patterns-usage-guide.md` — Standardized loading components
+
+## Design Context
+
+### Users
+- **Recruiters** (portal): Power users managing candidate pipelines, split-fee deals, and placements. They work in the app daily and need speed, clarity, and confidence that nothing falls through the cracks.
+- **Candidates** (applicant network): Job seekers reviewing opportunities and managing their profile. They need a trustworthy, straightforward experience.
+- **Companies** (corporate): Employers evaluating the platform. They need to quickly understand the value proposition and feel this is a professional, credible partner.
+
+### Brand Personality
+**Bold, Transparent, Energetic.** The interface should feel like a sharp, modern tool that moves fast and hides nothing. Strong visual presence without being loud. The brand takes a stand — split-fee recruiting done right, with radical transparency on fees and process.
+
+### Emotional Goals
+The interface should evoke:
+- **Confidence & Control** — "I'm on top of my pipeline, everything is clear"
+- **Speed & Efficiency** — "Nothing slows me down, minimal friction"
+- **Trust & Transparency** — "I see exactly what's happening, no surprises"
+- **Professional Pride** — "This tool reflects well on my work"
+
+### Aesthetic Direction
+- **Design language**: Editorial product design — Basel UI treats every surface like a magazine layout. Uppercase kicker labels, bold display headings, section-based composition with clear visual rhythm. Data-dense but editorially composed, not dashboard-generic.
+- **Reference**: Stripe Dashboard — data-dense but elegant, professional financial feel
+- **Visual tone**: Sharp, minimal, zero-depth (0 border-radius, no shadows, no gradients)
+- **Colors**: Deep indigo primary (`#233876`), teal secondary (`#0f9d8a`), magenta accent (`#db2777`). Full light/dark theme support.
+- **Typography**: System font stack, bold headings, `text-sm` body in portal, `text-base` on public pages. Editorial kickers use `text-sm font-bold uppercase tracking-[0.2em]`.
+- **Icons**: FontAwesome 6 duotone inline icons
+- **Animations**: CSS-only keyframes with scroll reveal. Reduced motion respected automatically.
+- **Theme**: Light + dark mode via DaisyUI semantic tokens (`splits-light`, `splits-dark`)
+
+### Design Principles
+1. **Clarity over decoration** — Every element earns its place. No ornamental UI. If it doesn't help the user act, remove it.
+2. **Data density done right** — Show more information per screen (like Stripe), but with clear hierarchy so nothing feels cluttered.
+3. **Sharp and decisive** — Zero border-radius, no shadows, strong contrasts. The UI reflects the brand's boldness and transparency.
+4. **Framework-first** — Use DaisyUI semantic tokens and Basel UI components. Never build custom when the framework provides.
+5. **Speed is a feature** — System fonts, minimal assets, CSS-only animations. Performance is a design choice.
+
+### Accessibility
+- WCAG 2.1 AA compliance
+- Semantic color system with proper contrast ratios in both themes
+- Reduced motion support via `@media (prefers-reduced-motion)` in all animations
+- Text opacity hierarchy: `base-content` (primary), `base-content/70` (secondary), `base-content/50` (muted)

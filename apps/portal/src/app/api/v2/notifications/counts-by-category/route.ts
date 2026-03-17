@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000'}/api/v2/notifications/counts-by-category`;
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000'}/api/v3/notifications/views/counts-by-category`;
 
     const response = await fetch(apiUrl, {
         headers: {

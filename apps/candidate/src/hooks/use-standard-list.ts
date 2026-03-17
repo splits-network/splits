@@ -353,8 +353,9 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
                     const client = createAuthenticatedClient(token);
                     response = await client.get<StandardListResponse<T>>(endpoint, { params });
                 } else {
-                    // Public endpoint - no auth required
-                    const client = new ApiClient(); // Works without token for public endpoints
+                    // Optional auth — send token if available for personalized enrichment (e.g. match scores)
+                    const token = await getToken().catch(() => null);
+                    const client = token ? createAuthenticatedClient(token) : new ApiClient();
                     response = await client.get<StandardListResponse<T>>(endpoint, { params });
                 }
             } else {

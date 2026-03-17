@@ -15,6 +15,12 @@ interface Answer {
     answer: string | string[] | boolean;
 }
 
+interface SelectedRecruiter {
+    recruiter_id: string;
+    recruiter_name: string;
+    recruiter_email: string;
+}
+
 interface StepReviewProps {
     job: any;
     documents: any[];
@@ -23,6 +29,7 @@ interface StepReviewProps {
     questions: PreScreenQuestion[];
     answers: Answer[];
     additionalNotes: string;
+    selectedRecruiter?: SelectedRecruiter | null;
     onBack: () => void;
     onSubmit: () => Promise<void>;
     onSaveAsDraft: () => Promise<void>;
@@ -36,6 +43,7 @@ export default function StepReview({
     questions,
     answers,
     additionalNotes,
+    selectedRecruiter,
     onBack,
     onSubmit,
     onSaveAsDraft,
@@ -95,11 +103,12 @@ export default function StepReview({
                     Final Step
                 </p>
                 <h3 className="text-xl font-black tracking-tight mb-2">
-                    Review and submit
+                    Review and submit for AI review
                 </h3>
                 <p className="text-sm text-base-content/60 leading-relaxed">
-                    Take a moment to make sure everything looks right before
-                    sending your application.
+                    Take a moment to make sure everything looks right. Your
+                    application will go through an AI review before being
+                    sent to the hiring team.
                 </p>
             </div>
 
@@ -130,6 +139,29 @@ export default function StepReview({
                         </div>
                     </div>
                 </div>
+
+                {/* Recruiter */}
+                {selectedRecruiter && (
+                    <>
+                        <div className="border-t border-base-300" />
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2">
+                                Your Recruiter
+                            </p>
+                            <div className="flex items-center gap-3">
+                                <i className="fa-duotone fa-regular fa-user-tie text-primary" />
+                                <div>
+                                    <p className="font-bold text-sm">
+                                        {selectedRecruiter.recruiter_name}
+                                    </p>
+                                    <p className="text-sm text-base-content/50">
+                                        {selectedRecruiter.recruiter_email}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 <div className="border-t border-base-300" />
 
@@ -258,9 +290,10 @@ export default function StepReview({
                             What happens next?
                         </p>
                         <p>
-                            Your application will be reviewed by our system and
-                            then forwarded to the hiring team. You can track its
-                            status anytime from your dashboard.
+                            Your application will first be reviewed by our AI
+                            system for completeness and quality. Once it passes,
+                            it will be forwarded to the hiring team. You can
+                            track its status anytime from your dashboard.
                         </p>
                     </div>
                 </div>
@@ -305,12 +338,12 @@ export default function StepReview({
                         {submitting ? (
                             <>
                                 <span className="loading loading-spinner loading-sm" />
-                                Submitting...
+                                Submitting for Review...
                             </>
                         ) : (
                             <>
                                 <i className="fa-duotone fa-regular fa-paper-plane" />
-                                Submit Application
+                                Submit for AI Review
                             </>
                         )}
                     </button>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BaselHeader, ThemeToggle } from "@splits-network/basel-ui";
 import type { NavItem } from "@splits-network/shared-types";
+import { SupportTrigger } from "@splits-network/support-widget";
 
 // ─── Default Nav Data (fallback when CMS is unavailable) ────────────────────
 
@@ -69,6 +70,7 @@ export function Header({ navItems }: { navItems?: NavItem[] }) {
             actions={
                 <div className="flex items-center gap-2">
                     <ThemeToggle />
+                    <SupportTrigger />
                     <a
                         href="https://splits.network"
                         className="hidden md:inline-flex btn btn-ghost text-md font-semibold uppercase tracking-wider"

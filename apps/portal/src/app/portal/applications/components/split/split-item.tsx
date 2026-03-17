@@ -1,6 +1,7 @@
 "use client";
 
 import type { Application } from "../../types";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     candidateName,
     roleTitle,
@@ -9,7 +10,8 @@ import {
     aiScore,
     isNew,
 } from "../shared/helpers";
-import { getStageDisplayWithExpired, getAIScoreBadge } from "../shared/status-color";
+import { getStageDisplay } from "@splits-network/basel-ui";
+import { getAIScoreBadgeColor } from "../shared/status-color";
 import ActionsToolbar from "../shared/actions-toolbar";
 
 export function SplitItem({
@@ -23,7 +25,10 @@ export function SplitItem({
     onSelect: () => void;
     onRefresh?: () => void;
 }) {
-    const stage = getStageDisplayWithExpired(application.stage, (application as any).expired_at);
+    const stage = getStageDisplay(application.stage, {
+        expiredAt: (application as any).expired_at,
+        acceptedByCandidate: application.accepted_by_candidate,
+    });
     const score = aiScore(application);
 
     return (
@@ -63,21 +68,15 @@ export function SplitItem({
 
             {/* Row 3: stage badge + AI score */}
             <div className="flex items-center gap-2">
-                <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold ${stage.badge}`}
-                >
-                    <i
-                        className={`fa-duotone fa-regular ${stage.icon} text-sm`}
-                    />
+                <BaselBadge color={stage.color} size="xs" variant="soft">
+                    <i className={`fa-duotone fa-regular ${stage.icon} text-sm`} />
                     {stage.label}
-                </span>
+                </BaselBadge>
                 {score != null && (
-                    <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold ${getAIScoreBadge(score)}`}
-                    >
+                    <BaselBadge color={getAIScoreBadgeColor(score)} size="xs" variant="soft">
                         <i className="fa-duotone fa-regular fa-robot text-sm" />
                         {score}%
-                    </span>
+                    </BaselBadge>
                 )}
             </div>
         </div>

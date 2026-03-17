@@ -51,12 +51,17 @@ import {
     companyApplicationExpiredEmail,
     companyExpirationWarningEmail,
 } from '../../templates/applications/company-emails';
+import type { EmailSource } from '../../templates/base';
+
+// Centralized URL imports — never read NEXT_PUBLIC_* env vars for user-facing links
+const { PORTAL_URL: _PORTAL_URL, CANDIDATE_URL: _CANDIDATE_URL } = require('../../helpers/urls');
 
 export class ApplicationsEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -71,8 +76,12 @@ export class ApplicationsEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId ?? null,
@@ -80,7 +89,7 @@ export class ApplicationsEmailService {
             subject,
             template: 'custom',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,
@@ -94,7 +103,7 @@ export class ApplicationsEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -184,6 +193,7 @@ export class ApplicationsEmailService {
             actionLabel?: string;
             priority?: 'low' | 'normal' | 'high' | 'urgent';
             category?: string;
+            source?: EmailSource;
         }
     ): Promise<void> {
         // Send email first (primary channel)
@@ -191,6 +201,7 @@ export class ApplicationsEmailService {
             eventType: options.eventType,
             userId: options.userId,
             payload: options.payload,
+            source: options.source,
         });
 
         // Create in-app notification if we have a userId
@@ -220,7 +231,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Candidate Submitted: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = applicationCreatedEmail({
             candidateName: data.candidateName,
@@ -253,7 +264,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Received: ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateApplicationSubmittedEmail({
             candidateName: data.candidateName,
@@ -272,6 +283,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -286,7 +298,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Candidate Application to Review: ${data.candidateName}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = applicationCreatedEmail({
             candidateName: data.candidateName,
@@ -318,7 +330,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Candidate: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = companyApplicationReceivedEmail({
             candidateName: data.candidateName,
@@ -352,7 +364,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Withdrawn: ${data.candidateName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = applicationWithdrawnEmail({
             candidateName: data.candidateName,
@@ -387,7 +399,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Update: ${data.candidateName} - ${data.newStage}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = applicationStageChangedEmail({
             candidateName: data.candidateName,
@@ -420,7 +432,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `🎉 Submission Accepted: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = applicationAcceptedEmail({
             candidateName: data.candidateName,
@@ -453,7 +465,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Pre-Screen Request: ${data.candidateName} for ${data.jobTitle}`;
-        const portalUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/dashboard`;
+        const portalUrl = `${_PORTAL_URL}/portal/dashboard`;
 
         const html = preScreenRequestedEmail({
             candidateName: data.candidateName,
@@ -486,7 +498,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Pre-Screen Request Submitted for ${data.candidateName}`;
-        const portalUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications`;
+        const portalUrl = `${_PORTAL_URL}/portal/applications`;
 
         const html = preScreenRequestConfirmationEmail({
             candidateName: data.candidateName,
@@ -522,7 +534,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `AI Review Complete - ${data.jobTitle}`;
-        const candidateUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const candidateUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = aiReviewCompletedCandidateEmail({
             candidateName: data.candidateName,
@@ -543,6 +555,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Review',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -564,7 +577,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `AI Review: ${data.candidateName}'s ${data.jobTitle} Application`;
-        const portalUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const portalUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = aiReviewCompletedRecruiterEmail({
             recruiterName: data.recruiterName,
@@ -604,7 +617,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Action Needed: ${data.recruiterName} has requested updates to your application`;
-        const candidatePortalUrl = process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network';
+        const candidatePortalUrl = _CANDIDATE_URL;
         const applicationUrl = `${candidatePortalUrl}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterRequestChangesEmail({
@@ -624,6 +637,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Update Application',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -639,7 +653,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Job Opportunity: ${data.jobTitle} at ${data.companyName}`;
-        const candidatePortalUrl = process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network';
+        const candidatePortalUrl = _CANDIDATE_URL;
         const applicationUrl = `${candidatePortalUrl}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = jobProposalToCandidateEmail({
@@ -658,6 +672,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Job Details',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -677,7 +692,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `${data.candidateName} Accepted Your Proposal: ${data.jobTitle}`;
-        const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
+        const portalUrl = _PORTAL_URL;
         const applicationUrl = `${portalUrl}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = proposalAcceptedByApplicationEmail({
@@ -713,7 +728,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Update: ${data.candidateName} - ${data.jobTitle}`;
-        const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
+        const portalUrl = _PORTAL_URL;
         const candidateProfileUrl = `${portalUrl}/portal/candidates?candidateId=${data.candidateId}`;
 
         const html = proposalDeclinedByApplicationEmail({
@@ -753,7 +768,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Submitted for Review - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateApplicationWithRecruiterEmail({
             candidateName: data.candidateName,
@@ -771,6 +786,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -785,7 +801,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Submitted - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateDirectApplicationEmail({
             candidateName: data.candidateName,
@@ -802,6 +818,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -818,7 +835,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Interview Request - ${data.jobTitle} at ${data.companyName}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateInterviewInviteEmail({
             candidateName: data.candidateName,
@@ -837,6 +854,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'high',
             category: 'interview',
+            source: 'candidate',
         });
     }
 
@@ -853,7 +871,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `🎉 Job Offer Received - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateOfferReceivedEmail({
             candidateName: data.candidateName,
@@ -872,6 +890,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Offer',
             priority: 'urgent',
             category: 'offer',
+            source: 'candidate',
         });
     }
 
@@ -904,6 +923,7 @@ export class ApplicationsEmailService {
             payload: data,
             priority: 'urgent',
             category: 'success',
+            source: 'candidate',
         });
     }
 
@@ -936,6 +956,7 @@ export class ApplicationsEmailService {
             payload: data,
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -952,7 +973,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Job Opportunity - ${data.jobTitle}`;
-        const proposalUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/proposals/${data.proposalId}`;
+        const proposalUrl = `${_CANDIDATE_URL}/proposals/${data.proposalId}`;
 
         const html = recruiterJobProposalEmail({
             candidateName: data.candidateName,
@@ -971,6 +992,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Review Opportunity',
             priority: 'high',
             category: 'proposal',
+            source: 'candidate',
         });
     }
 
@@ -986,7 +1008,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `AI Review Started - ${data.jobTitle} Application`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateAIReviewEmail({
             candidateName: data.candidateName,
@@ -1004,6 +1026,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track AI Review',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1019,7 +1042,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Submitted by ${data.recruiterName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateApplicationSubmittedByRecruiterEmail({
             candidateName: data.candidateName,
@@ -1037,6 +1060,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1053,7 +1077,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Under Review - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateCompanyReviewEmail({
             candidateName: data.candidateName,
@@ -1072,6 +1096,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Review Status',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1088,7 +1113,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Company Feedback Received - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateCompanyFeedbackEmail({
             candidateName: data.candidateName,
@@ -1107,6 +1132,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Feedback',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1122,7 +1148,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `You've Been Proposed - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateRecruiterProposedEmail({
             candidateName: data.candidateName,
@@ -1140,6 +1166,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Proposal',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1157,7 +1184,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `AI Analysis Complete - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateAIReviewedEmail({
             candidateName: data.candidateName,
@@ -1177,6 +1204,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View AI Results',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1192,7 +1220,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Recruiter Review in Progress - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateRecruiterReviewEmail({
             candidateName: data.candidateName,
@@ -1210,6 +1238,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Track Review',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1226,7 +1255,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Expired - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateApplicationExpiredEmail({
             candidateName: data.candidateName,
@@ -1245,6 +1274,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View History',
             priority: 'low',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1268,8 +1298,8 @@ export class ApplicationsEmailService {
     ): Promise<void> {
         const subject = `New Note: ${data.candidateName} - ${data.jobTitle}`;
         const baseUrl = data.source === 'candidate'
-            ? (process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network')
-            : (process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network');
+            ? (_CANDIDATE_URL)
+            : (_PORTAL_URL);
         const applicationUrl = `${baseUrl}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = applicationNoteCreatedEmail({
@@ -1311,7 +1341,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Company Reviewing: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterCompanyReviewEmail({
             recruiterName: data.recruiterName,
@@ -1344,7 +1374,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Company Feedback: ${data.candidateName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterCompanyFeedbackEmail({
             recruiterName: data.recruiterName,
@@ -1377,7 +1407,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Interview Scheduled: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterInterviewScheduledEmail({
             recruiterName: data.recruiterName,
@@ -1407,10 +1437,13 @@ export class ApplicationsEmailService {
             companyName: string;
             applicationId: string;
             userId?: string;
+            salary?: number;
+            feePercentage?: number;
+            estimatedFee?: number;
         }
     ): Promise<void> {
         const subject = `Offer Extended: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterOfferExtendedEmail({
             recruiterName: data.recruiterName,
@@ -1418,6 +1451,9 @@ export class ApplicationsEmailService {
             jobTitle: data.jobTitle,
             companyName: data.companyName,
             applicationUrl,
+            salary: data.salary,
+            feePercentage: data.feePercentage,
+            estimatedFee: data.estimatedFee,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
@@ -1440,10 +1476,16 @@ export class ApplicationsEmailService {
             companyName: string;
             applicationId: string;
             userId?: string;
+            salary?: number;
+            placementFee?: number;
+            feePercentage?: number;
+            guaranteeDays?: number;
+            guaranteeExpiresAt?: string;
+            startDate?: string;
         }
     ): Promise<void> {
         const subject = `Placement Made: ${data.candidateName} hired as ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterCandidateHiredEmail({
             recruiterName: data.recruiterName,
@@ -1451,6 +1493,12 @@ export class ApplicationsEmailService {
             jobTitle: data.jobTitle,
             companyName: data.companyName,
             applicationUrl,
+            salary: data.salary,
+            placementFee: data.placementFee,
+            feePercentage: data.feePercentage,
+            guaranteeDays: data.guaranteeDays,
+            guaranteeExpiresAt: data.guaranteeExpiresAt,
+            startDate: data.startDate,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
@@ -1476,7 +1524,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Update: ${data.candidateName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterCandidateRejectedEmail({
             recruiterName: data.recruiterName,
@@ -1515,7 +1563,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Expired - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateApplicationExpiredEmail({
             candidateName: data.candidateName,
@@ -1535,6 +1583,7 @@ export class ApplicationsEmailService {
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1551,7 +1600,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Expired: ${data.candidateName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterApplicationExpiredEmail({
             recruiterName: data.recruiterName,
@@ -1585,7 +1634,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Lost: ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications`;
 
         const html = companyApplicationExpiredEmail({
             jobTitle: data.jobTitle,
@@ -1620,7 +1669,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Action Required: Application for ${data.jobTitle} expiring soon`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_CANDIDATE_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = candidateExpirationWarningEmail({
             candidateName: data.candidateName,
@@ -1640,6 +1689,7 @@ export class ApplicationsEmailService {
             actionLabel: 'Respond Now',
             priority: 'high',
             category: 'application',
+            source: 'candidate',
         });
     }
 
@@ -1657,7 +1707,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Expiring: ${data.candidateName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications?applicationId=${data.applicationId}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
 
         const html = recruiterExpirationWarningEmail({
             recruiterName: data.recruiterName,
@@ -1691,7 +1741,7 @@ export class ApplicationsEmailService {
     ): Promise<void> {
         const appCount = data.applications.length;
         const subject = `${appCount} application${appCount === 1 ? '' : 's'} expiring in ${data.daysRemaining} days`;
-        const dashboardUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/applications`;
+        const dashboardUrl = `${_PORTAL_URL}/portal/applications`;
 
         const html = companyExpirationWarningEmail({
             companyName: data.companyName,

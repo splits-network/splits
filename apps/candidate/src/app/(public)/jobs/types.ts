@@ -25,9 +25,10 @@ export interface Job {
     show_salary_range?: boolean;
     guarantee_days?: number | null;
     status?: string;
+    match_score?: number | null;
     updated_at?: string;
     created_at?: string | Date;
-    // Relation
+    // Relations
     company?: {
         id: string;
         name: string;
@@ -36,6 +37,12 @@ export interface Job {
         industry?: string | null;
         description?: string | null;
     };
+    firm?: {
+        id: string;
+        name: string;
+        logo_url?: string | null;
+    };
+    source_firm_id?: string | null;
     requirements?: JobRequirement[];
     skills?: JobSkill[];
 }
@@ -141,7 +148,7 @@ export function getStatusBadgeColor(status?: string): string {
         case "closed":
             return "badge-error";
         default:
-            return "badge-neutral";
+            return "badge-primary";
     }
 }
 
@@ -152,7 +159,7 @@ export function formatStatus(status?: string): string {
 
 // Resolve company name from joined relation
 export function getCompanyName(job: Job): string {
-    return job.company?.name || "3rd Party Firm";
+    return job.company?.name || job.firm?.name || "3rd Party Firm";
 }
 
 // Resolve company industry from joined relation

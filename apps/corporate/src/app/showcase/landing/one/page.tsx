@@ -204,7 +204,10 @@ export default function LandingOne() {
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {stats.map((stat, i) => (
-                            <div key={i} className="stat-item scroll-reveal fade-up">
+                            <div
+                                key={i}
+                                className="stat-item scroll-reveal fade-up"
+                            >
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {stat.value}
                                 </div>
@@ -297,7 +300,7 @@ export default function LandingOne() {
                ═══════════════════════════════════════════════════════ */}
             <section
                 id="how-it-works"
-                className="hiw-section py-28 bg-neutral text-neutral-content"
+                className="hiw-section py-28 bg-base-300 text-base-content"
             >
                 <div className="container mx-auto px-6 lg:px-12">
                     <div className="hiw-heading max-w-3xl mb-20 scroll-reveal fade-up">

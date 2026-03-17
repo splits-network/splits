@@ -1,62 +1,85 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
-import { getGatewayBaseUrl } from '../service-status/gateway-url';
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { getGatewayBaseUrl } from "../service-status/gateway-url";
 
 const HEARTBEAT_INTERVAL = 30_000; // 30 seconds
-const SESSION_KEY = 'splits_activity_session';
+const SESSION_KEY = "splits_activity_session";
 
 function getOrCreateSessionId(): string {
-    if (typeof window === 'undefined') return '';
+    if (typeof window === "undefined") return "";
+
     let id = sessionStorage.getItem(SESSION_KEY);
-    if (!id) {
-        id = crypto.randomUUID();
+    if (!id || id.length < 8) {
+        // Generate session ID with fallback for browser compatibility
+        try {
+            id = crypto.randomUUID();
+        } catch {
+            // Fallback for browsers without crypto.randomUUID()
+            id = `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+        }
         sessionStorage.setItem(SESSION_KEY, id);
     }
     return id;
 }
 
 export interface ActivityTrackerProps {
-    app: 'portal' | 'candidate' | 'corporate';
+    app: "portal" | "candidate" | "corporate";
     userId?: string;
     userType?: string;
 }
 
-export function ActivityTracker({ app, userId, userType }: ActivityTrackerProps) {
+export function ActivityTracker({
+    app,
+    userId,
+    userType,
+}: ActivityTrackerProps) {
     const pathname = usePathname();
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const userIdRef = useRef(userId);
     const userTypeRef = useRef(userType);
     const pathnameRef = useRef(pathname);
 
-    useEffect(() => { userIdRef.current = userId; }, [userId]);
-    useEffect(() => { userTypeRef.current = userType; }, [userType]);
-    useEffect(() => { pathnameRef.current = pathname; }, [pathname]);
+    useEffect(() => {
+        userIdRef.current = userId;
+    }, [userId]);
+    useEffect(() => {
+        userTypeRef.current = userType;
+    }, [userType]);
+    useEffect(() => {
+        pathnameRef.current = pathname;
+    }, [pathname]);
 
     useEffect(() => {
         const sessionId = getOrCreateSessionId();
-        if (!sessionId) return;
+        if (!sessionId || sessionId.length < 8) return;
 
-        const sendHeartbeat = (status: 'active' | 'idle' = 'active') => {
+        const sendHeartbeat = (status: "active" | "idle" = "active") => {
+            // Double-check session ID before sending
+            if (!sessionId || sessionId.length < 8) return;
+
             const payload = JSON.stringify({
                 session_id: sessionId,
                 user_id: userIdRef.current || undefined,
                 user_type: userTypeRef.current || undefined,
                 app,
-                page: pathnameRef.current || '/',
+                page: pathnameRef.current || "/",
                 status,
             });
 
-            const gatewayUrl = getGatewayBaseUrl() || 'http://127.0.0.1:3000';
+            const gatewayUrl = getGatewayBaseUrl() || "http://127.0.0.1:3000";
             const url = `${gatewayUrl}/api/public/activity/heartbeat`;
 
             if (navigator.sendBeacon) {
-                navigator.sendBeacon(url, new Blob([payload], { type: 'application/json' }));
+                navigator.sendBeacon(
+                    url,
+                    new Blob([payload], { type: "application/json" }),
+                );
             } else {
                 fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: payload,
                     keepalive: true,
                 }).catch(() => {});
@@ -64,23 +87,23 @@ export function ActivityTracker({ app, userId, userType }: ActivityTrackerProps)
         };
 
         // Initial heartbeat
-        sendHeartbeat('active');
+        sendHeartbeat("active");
 
         // Periodic heartbeat
         intervalRef.current = setInterval(() => {
-            sendHeartbeat(document.hidden ? 'idle' : 'active');
+            sendHeartbeat(document.hidden ? "idle" : "active");
         }, HEARTBEAT_INTERVAL);
 
         // Page visibility change
         const handleVisibility = () => {
-            sendHeartbeat(document.hidden ? 'idle' : 'active');
+            sendHeartbeat(document.hidden ? "idle" : "active");
         };
 
-        document.addEventListener('visibilitychange', handleVisibility);
+        document.addEventListener("visibilitychange", handleVisibility);
 
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
-            document.removeEventListener('visibilitychange', handleVisibility);
+            document.removeEventListener("visibilitychange", handleVisibility);
         };
     }, [app]);
 

@@ -47,7 +47,7 @@ export function AuthHeroPanel() {
     return (
         <div
             ref={panelRef}
-            className="hidden lg:flex lg:w-2/5 bg-neutral text-neutral-content flex-col items-start justify-center px-12 xl:px-16 relative"
+            className="hidden lg:flex lg:w-2/5 bg-base-300 text-base-content flex-col items-start justify-center px-12 xl:px-16 relative"
         >
             {/* Kicker */}
             <p className="scroll-reveal fade-up text-md font-semibold uppercase tracking-[0.25em] text-secondary mb-5">
@@ -64,7 +64,9 @@ export function AuthHeroPanel() {
                     className="scroll-reveal fade-up inline-block text-primary transition-all duration-300 ease-in-out"
                     style={{
                         opacity: transitioning ? 0 : 1,
-                        transform: transitioning ? "translateY(-12px)" : "translateY(0)",
+                        transform: transitioning
+                            ? "translateY(-12px)"
+                            : "translateY(0)",
                     }}
                 >
                     {HEADLINES[headlineIndex]}
@@ -72,10 +74,11 @@ export function AuthHeroPanel() {
             </h2>
 
             {/* Subtitle */}
-            <p className="scroll-reveal fade-up text-md text-neutral-content/50 leading-relaxed max-w-sm">
+            <p className="scroll-reveal fade-up text-md text-base-content/50 leading-relaxed max-w-sm">
                 Multiple recruiters work on your behalf, each bringing their own
-                network and expertise. You see where your profile stands, who&apos;s
-                representing you, and what&apos;s next &mdash; without the guesswork.
+                network and expertise. You see where your profile stands,
+                who&apos;s representing you, and what&apos;s next &mdash;
+                without the guesswork.
             </p>
         </div>
     );

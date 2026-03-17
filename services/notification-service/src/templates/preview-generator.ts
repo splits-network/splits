@@ -26,6 +26,14 @@ import {
     applicationNoteCreatedEmail,
 } from './applications';
 import {
+    candidateOfferReceivedEmail,
+    candidateHiredEmail,
+} from './applications/candidate-emails';
+import {
+    recruiterOfferExtendedEmail,
+    recruiterCandidateHiredEmail,
+} from './applications/recruiter-emails';
+import {
     placementCreatedEmail,
     placementActivatedEmail,
     placementCompletedEmail,
@@ -261,6 +269,53 @@ const applicationNoteCreatedData = {
     addedByName: 'Mike Chen',
     addedByRole: 'Hiring Manager',
     applicationUrl: 'https://splits.network/applications/abc123',
+};
+
+// ── Candidate Stage Email sample data ────────────────────────────────
+
+const candidateOfferReceivedData = {
+    candidateName: 'Brandon Test2',
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    applicationUrl: 'https://applicant.network/candidate/applications/00000000-0000-0000-0000-000000000000',
+    hasRecruiter: true,
+    recruiterName: 'Jane Smith',
+};
+
+const candidateHiredData = {
+    candidateName: 'Brandon Test2',
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    hasRecruiter: true,
+    recruiterName: 'Jane Smith',
+    startDate: '2026-06-07',
+};
+
+// ── Recruiter Stage Email sample data ───────────────────────────────
+
+const recruiterOfferExtendedData = {
+    recruiterName: 'Jane Smith',
+    candidateName: 'Brandon Test2',
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    applicationUrl: 'https://splits.network/portal/applications?applicationId=abc123',
+    salary: 150000,
+    feePercentage: 25,
+    estimatedFee: 37500,
+};
+
+const recruiterCandidateHiredData = {
+    recruiterName: 'Jane Smith',
+    candidateName: 'Brandon Test2',
+    jobTitle: 'Backend Engineer (Go)',
+    companyName: 'TechCorp Inc',
+    applicationUrl: 'https://splits.network/portal/applications?applicationId=abc123',
+    salary: 150000,
+    placementFee: 37500,
+    feePercentage: 25,
+    guaranteeDays: 90,
+    guaranteeExpiresAt: '2026-09-05',
+    startDate: '2026-06-07',
 };
 
 // ── Placement sample data ────────────────────────────────────────────
@@ -802,6 +857,14 @@ function generatePreviews() {
         { name: 'proposal-accepted', html: proposalAcceptedByApplicationEmail(proposalAcceptedData) },
         { name: 'proposal-declined', html: proposalDeclinedByApplicationEmail(proposalDeclinedData) },
         { name: 'application-note-created', html: applicationNoteCreatedEmail(applicationNoteCreatedData) },
+
+        // Candidate Stage Emails
+        { name: 'candidate-offer-received', html: candidateOfferReceivedEmail(candidateOfferReceivedData) },
+        { name: 'candidate-hired', html: candidateHiredEmail(candidateHiredData) },
+
+        // Recruiter Stage Emails
+        { name: 'recruiter-offer-extended', html: recruiterOfferExtendedEmail(recruiterOfferExtendedData) },
+        { name: 'recruiter-candidate-hired', html: recruiterCandidateHiredEmail(recruiterCandidateHiredData) },
 
         // Placements
         { name: 'placement-created', html: placementCreatedEmail(placementCreatedData) },

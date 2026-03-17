@@ -45,7 +45,7 @@ export default function CreateFirmModal({
             const client = createAuthenticatedClient(token);
             await client.post("/firms", { name: name.trim() });
 
-            toast.success("Firm created successfully!");
+            toast.success("Firm created.");
             onSuccess();
         } catch (err: any) {
             setError(err.message || "Failed to create firm");
@@ -80,8 +80,8 @@ export default function CreateFirmModal({
                         <BaselFormField label="Firm Name" required>
                             <input
                                 type="text"
-                                className="input input-bordered w-full bg-base-200 border-base-300"
-                                style={{ borderRadius: 0 }}
+                                className="input w-full bg-base-200 border-base-300"
+
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="e.g., Tech Recruiters Inc."
@@ -96,7 +96,7 @@ export default function CreateFirmModal({
                     <button
                         type="button"
                         className="btn btn-ghost"
-                        style={{ borderRadius: 0 }}
+
                         onClick={onClose}
                         disabled={loading}
                     >
@@ -105,7 +105,7 @@ export default function CreateFirmModal({
                     <button
                         type="submit"
                         className="btn btn-primary"
-                        style={{ borderRadius: 0 }}
+
                         disabled={loading || !name.trim()}
                     >
                         <ButtonLoading

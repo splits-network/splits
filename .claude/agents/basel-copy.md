@@ -247,7 +247,7 @@ When sourcing placeholder images from Unsplash:
 All content must use DaisyUI semantic tokens:
 - `text-primary`, `text-secondary`, `text-accent` for emphasis
 - `text-base-content`, `text-base-content/70`, `text-base-content/60` for text hierarchy
-- `text-neutral-content`, `text-neutral-content/60` on dark backgrounds
+- `text-base-content`, `text-base-content/60` on dark backgrounds
 - NEVER use Memphis colors (coral, teal, cream, dark, yellow, purple)
 - NEVER use raw Tailwind palette (blue-500, red-400, etc.)
 

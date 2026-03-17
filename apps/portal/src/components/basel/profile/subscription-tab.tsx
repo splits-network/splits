@@ -92,7 +92,8 @@ export function SubscriptionTab() {
     const [showPlanModal, setShowPlanModal] = useState(false);
 
     // Payment method state
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethodResponse | null>(null);
+    const [paymentMethod, setPaymentMethod] =
+        useState<PaymentMethodResponse | null>(null);
     const [pmLoading, setPmLoading] = useState(true);
 
     // Invoice state
@@ -113,12 +114,17 @@ export function SubscriptionTab() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get<{ data: Subscription }>("/subscriptions/me");
+            const response = await client.get<{ data: Subscription }>(
+                "/subscriptions/me",
+            );
             const data = response.data;
             setSubscription(data);
             if (data?.plan) setPlan(data.plan);
         } catch (err: any) {
-            if (err.message?.includes("No active subscription") || err.message?.includes("not found")) {
+            if (
+                err.message?.includes("No active subscription") ||
+                err.message?.includes("not found")
+            ) {
                 setSubscription(null);
             } else {
                 setSubError(err.message || "Failed to load subscription");
@@ -136,11 +142,19 @@ export function SubscriptionTab() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get<{ data: PaymentMethodResponse }>("/subscriptions/payment-methods");
+            const response = await client.get<{ data: PaymentMethodResponse }>(
+                "/subscriptions/payment-methods",
+            );
             setPaymentMethod(response.data);
         } catch (err: any) {
-            if (err.message?.includes("No subscription") || err.message?.includes("No customer")) {
-                setPaymentMethod({ has_payment_method: false, default_payment_method: null });
+            if (
+                err.message?.includes("No subscription") ||
+                err.message?.includes("No customer")
+            ) {
+                setPaymentMethod({
+                    has_payment_method: false,
+                    default_payment_method: null,
+                });
             }
         } finally {
             setPmLoading(false);
@@ -148,38 +162,46 @@ export function SubscriptionTab() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const fetchInvoices = useCallback(async (loadMore = false) => {
-        try {
-            if (loadMore) {
-                setLoadingMore(true);
-            } else {
-                setInvLoading(true);
-            }
-            setInvError(null);
-            const token = await getToken();
-            if (!token) return;
+    const fetchInvoices = useCallback(
+        async (loadMore = false) => {
+            try {
+                if (loadMore) {
+                    setLoadingMore(true);
+                } else {
+                    setInvLoading(true);
+                }
+                setInvError(null);
+                const token = await getToken();
+                if (!token) return;
 
-            const client = createAuthenticatedClient(token);
-            const currentLimit = loadMore ? limit + 10 : limit;
-            const response = await client.get<{ data: InvoicesResponse }>(
-                `/subscriptions/invoices?limit=${currentLimit}`,
-            );
-            setInvoices(response.data.invoices);
-            setHasMore(response.data.has_more);
-            if (loadMore) setLimit(currentLimit);
-        } catch (err: any) {
-            if (err.message?.includes("No subscription") || err.message?.includes("No customer")) {
-                setInvoices([]);
-                setHasMore(false);
-            } else {
-                setInvError(err.message || "Failed to load billing history");
+                const client = createAuthenticatedClient(token);
+                const currentLimit = loadMore ? limit + 10 : limit;
+                const response = await client.get<{ data: InvoicesResponse }>(
+                    `/subscriptions/invoices?limit=${currentLimit}`,
+                );
+                setInvoices(response.data.invoices);
+                setHasMore(response.data.has_more);
+                if (loadMore) setLimit(currentLimit);
+            } catch (err: any) {
+                if (
+                    err.message?.includes("No subscription") ||
+                    err.message?.includes("No customer")
+                ) {
+                    setInvoices([]);
+                    setHasMore(false);
+                } else {
+                    setInvError(
+                        err.message || "Failed to load billing history",
+                    );
+                }
+            } finally {
+                setInvLoading(false);
+                setLoadingMore(false);
             }
-        } finally {
-            setInvLoading(false);
-            setLoadingMore(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [limit]);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [limit],
+    );
 
     useEffect(() => {
         fetchSubscription();
@@ -201,15 +223,21 @@ export function SubscriptionTab() {
 
     return (
         <div>
-            <h2 className="text-xl font-black tracking-tight mb-1">Subscription</h2>
+            <h2 className="text-xl font-black tracking-tight mb-1">
+                Subscription
+            </h2>
             <p className="text-base text-base-content/50 mb-8">
-                Your plan, payment method, and billing history — all in one place.
+                Your plan, payment method, and billing history — all in one
+                place.
             </p>
 
             {subError && (
                 <BaselAlertBox variant="error" className="mb-6">
                     {subError}
-                    <button className="btn btn-ghost btn-sm ml-2" onClick={fetchSubscription}>
+                    <button
+                        className="btn btn-ghost btn-sm ml-2"
+                        onClick={fetchSubscription}
+                    >
                         Retry
                     </button>
                 </BaselAlertBox>
@@ -268,7 +296,8 @@ export function SubscriptionTab() {
                                         {
                                             label: "Select a Plan",
                                             style: "btn-primary",
-                                            onClick: () => setShowPlanModal(true),
+                                            onClick: () =>
+                                                setShowPlanModal(true),
                                         },
                                     ]}
                                 />
@@ -278,8 +307,14 @@ export function SubscriptionTab() {
                         {/* Right: Payment method (40%) */}
                         <div className="lg:col-span-2">
                             <PaymentMethodCard
-                                paymentMethod={paymentMethod?.default_payment_method || null}
-                                hasPaymentMethod={!!paymentMethod?.has_payment_method && !!paymentMethod?.default_payment_method}
+                                paymentMethod={
+                                    paymentMethod?.default_payment_method ||
+                                    null
+                                }
+                                hasPaymentMethod={
+                                    !!paymentMethod?.has_payment_method &&
+                                    !!paymentMethod?.default_payment_method
+                                }
                                 loading={pmLoading}
                                 onRefresh={fetchPaymentMethod}
                             />
@@ -288,7 +323,9 @@ export function SubscriptionTab() {
 
                     {/* ── Inline invoice history ─────────────────────────────── */}
                     <div>
-                        <h3 className="text-lg font-black tracking-tight mb-1">Invoice History</h3>
+                        <h3 className="text-lg font-black tracking-tight mb-1">
+                            Invoice History
+                        </h3>
                         <p className="text-sm text-base-content/50 mb-4">
                             View and download your past invoices.
                         </p>
@@ -296,7 +333,10 @@ export function SubscriptionTab() {
                         {invError && (
                             <BaselAlertBox variant="error" className="mb-4">
                                 {invError}
-                                <button className="btn btn-ghost btn-sm ml-2" onClick={() => fetchInvoices()}>
+                                <button
+                                    className="btn btn-ghost btn-sm ml-2"
+                                    onClick={() => fetchInvoices()}
+                                >
                                     Retry
                                 </button>
                             </BaselAlertBox>
@@ -310,7 +350,8 @@ export function SubscriptionTab() {
                             <div className="bg-base-200 border border-base-300 p-6 text-center">
                                 <i className="fa-duotone fa-regular fa-file-invoice text-2xl text-base-content/20 mb-2" />
                                 <p className="text-sm text-base-content/50">
-                                    Your invoices will appear here once you have billing activity.
+                                    Your invoices will appear here once you have
+                                    billing activity.
                                 </p>
                             </div>
                         ) : (
@@ -318,12 +359,22 @@ export function SubscriptionTab() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left">
                                         <thead>
-                                            <tr className="bg-neutral text-neutral-content">
-                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Date</th>
-                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Description</th>
-                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Amount</th>
-                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Status</th>
-                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">Invoice</th>
+                                            <tr className="bg-base-300 text-base-content">
+                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                                    Date
+                                                </th>
+                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                                    Description
+                                                </th>
+                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                                    Amount
+                                                </th>
+                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                                    Status
+                                                </th>
+                                                <th className="px-4 py-3 text-sm font-black uppercase tracking-wider">
+                                                    Invoice
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -331,35 +382,54 @@ export function SubscriptionTab() {
                                                 <tr
                                                     key={invoice.id}
                                                     className={`border-b border-base-300 ${
-                                                        i % 2 === 0 ? "bg-base-100" : "bg-base-200/50"
+                                                        i % 2 === 0
+                                                            ? "bg-base-100"
+                                                            : "bg-base-200/50"
                                                     }`}
                                                 >
                                                     <td className="px-4 py-3 text-sm font-bold text-base-content whitespace-nowrap">
-                                                        {formatDateShort(invoice.created)}
+                                                        {formatDateShort(
+                                                            invoice.created,
+                                                        )}
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="text-sm font-bold text-base-content">
-                                                            {invoice.number || "Invoice"}
+                                                            {invoice.number ||
+                                                                "Invoice"}
                                                         </div>
                                                         <div className="text-sm text-base-content/50">
-                                                            {getBillingPeriod(invoice.period_start, invoice.period_end)}
+                                                            {getBillingPeriod(
+                                                                invoice.period_start,
+                                                                invoice.period_end,
+                                                            )}
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3 text-sm font-black text-base-content">
                                                         {formatAmount(
-                                                            invoice.status === "paid" ? invoice.amount_paid : invoice.amount_due,
+                                                            invoice.status ===
+                                                                "paid"
+                                                                ? invoice.amount_paid
+                                                                : invoice.amount_due,
                                                             invoice.currency,
                                                         )}
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <BaselStatusPill color={invoiceStatusColor(invoice.status)}>
-                                                            {formatInvoiceStatus(invoice.status)}
+                                                        <BaselStatusPill
+                                                            color={invoiceStatusColor(
+                                                                invoice.status,
+                                                            )}
+                                                        >
+                                                            {formatInvoiceStatus(
+                                                                invoice.status,
+                                                            )}
                                                         </BaselStatusPill>
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         {invoice.invoice_pdf ? (
                                                             <a
-                                                                href={invoice.invoice_pdf}
+                                                                href={
+                                                                    invoice.invoice_pdf
+                                                                }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="text-sm font-bold text-primary hover:text-primary/70 flex items-center gap-1"
@@ -368,7 +438,9 @@ export function SubscriptionTab() {
                                                                 PDF
                                                             </a>
                                                         ) : (
-                                                            <span className="text-base-content/30 text-sm">{"\u2014"}</span>
+                                                            <span className="text-base-content/30 text-sm">
+                                                                {"\u2014"}
+                                                            </span>
                                                         )}
                                                     </td>
                                                 </tr>

@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import type { Firm } from "../../types";
-import { formatCurrency } from "../../types";
+import { PLACEMENT_TYPE_LABELS } from "../../types";
 import { firmStatusBadgeColor } from "../shared/status-color";
 import {
     formatStatus,
     firmInitials,
-    memberCountDisplay,
+    teamSizeDisplay,
+    foundedYearDisplay,
 } from "../shared/helpers";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import {
@@ -15,6 +15,7 @@ import {
     useGamification,
 } from "@splits-network/shared-gamification";
 import { BaselBadge } from "@splits-network/basel-ui";
+import { MarkdownRenderer } from "@splits-network/shared-ui";
 
 export function GridCard({
     firm,
@@ -34,65 +35,43 @@ export function GridCard({
         [firm.headquarters_city, firm.headquarters_state]
             .filter(Boolean)
             .join(", ") || null;
+    const foundedYear = foundedYearDisplay(firm.founded_year);
 
-    const hasPartnerSignal = firm.candidate_firm || firm.company_firm;
+    const specialties = firm.specialties || [];
+    const industries = firm.industries || [];
+    const placementTypes = firm.placement_types || [];
 
-    const stats = [
-        {
-            label: "Members",
-            value: String(firm.active_member_count || 0),
-            icon: "fa-duotone fa-regular fa-users",
-        },
-        {
-            label: "Placed",
-            value: String(firm.total_placements),
-            icon: "fa-duotone fa-regular fa-briefcase",
-        },
-        {
-            label: "Revenue",
-            value: formatCurrency(firm.total_revenue),
-            icon: "fa-duotone fa-regular fa-dollar-sign",
-        },
+    // Inline metadata — always show all 4, muted when empty
+    const metaItems = [
+        { icon: "fa-users", color: "text-primary", value: `${firm.active_member_count || 0} members`, muted: !firm.active_member_count, tooltip: "Active members" },
+        { icon: "fa-user-group", color: "text-secondary", value: teamSizeDisplay(firm.team_size_range), muted: !firm.team_size_range, tooltip: "Team size range" },
+        { icon: "fa-briefcase", color: "text-accent", value: `${firm.member_count || 0} total`, muted: !firm.member_count, tooltip: "Total members (including inactive)" },
+        { icon: "fa-store", color: "text-success", value: firm.marketplace_visible ? "Listed" : "Unlisted", muted: !firm.marketplace_visible, tooltip: "Marketplace visibility" },
     ];
 
     return (
         <article
             onClick={onSelect}
             className={[
-                "group cursor-pointer flex flex-col h-full bg-base-100 border border-base-300 border-l-4 transition-all hover:shadow-lg",
+                "group cursor-pointer flex flex-col bg-base-100 border border-base-300 border-l-4 transition-colors",
                 isSelected
-                    ? "border-l-primary border-primary"
-                    : "border-l-primary hover:border-primary/40",
+                    ? "border-primary border-l-primary bg-primary/5"
+                    : "border-l-primary hover:border-base-content/20",
             ].join(" ")}
         >
             {/* Header Band */}
-            <div className="bg-base-300 border-b border-base-300 px-6 pt-5 pb-4">
-                {/* Kicker row: industries on left, status on right */}
-                <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 truncate mr-2">
-                        {(firm.industries || []).slice(0, 2).join(" · ") ||
-                            "Recruiting Firm"}
-                    </p>
-                    <BaselBadge
-                        color={firmStatusBadgeColor(firm.status)}
-                        variant="soft"
-                        size="sm"
-                    >
-                        {formatStatus(firm.status)}
-                    </BaselBadge>
-                </div>
-
-                {/* Logo + Name block */}
-                <div className="flex items-end gap-4">
-                    <div className="relative shrink-0">
+            <div className="bg-base-300 px-5 pt-4 pb-4">
+                {/* Editorial block: Avatar + Industry kicker → Name */}
+                <div className="flex items-start gap-3">
+                    <div className="relative shrink-0 mt-0.5">
                         {firm.logo_url ? (
                             <img
                                 src={firm.logo_url}
                                 alt={`${firm.name} logo`}
-                                className="w-16 h-16 object-contain bg-base-100"
+                                className="w-12 h-12 object-contain bg-base-100"
                             />
                         ) : (
-                            <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none">
+                            <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
                                 {initials}
                             </div>
                         )}
@@ -102,181 +81,133 @@ export function GridCard({
                             </div>
                         )}
                     </div>
-                    <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary mb-0.5">
-                            Recruiting Firm
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold uppercase tracking-[0.15em] text-primary mb-0.5 truncate">
+                            {industries[0] || "Recruiting Firm"}
                         </p>
-                        <h3 className="text-2xl font-black tracking-tight leading-none text-base-content truncate group-hover:text-primary transition-colors">
+                        <h3 className="text-lg font-black tracking-tight leading-tight text-base-content truncate group-hover:text-primary transition-colors">
                             {firm.name}
                         </h3>
                     </div>
                 </div>
 
-                {/* Location meta */}
-                {location && (
-                    <div className="flex items-center gap-1.5 mt-3 text-sm text-base-content/40">
-                        <i className="fa-duotone fa-regular fa-location-dot text-xs" />
-                        {location}
-                    </div>
-                )}
-            </div>
-
-            {/* Card Body */}
-            <div className="flex-1 flex flex-col justify-between">
-                {/* Tagline */}
-                {firm.tagline && (
-                    <div className="px-6 py-5 border-b border-base-300">
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-2">
-                            About
-                        </p>
-                        <p className="text-sm text-base-content/70 leading-relaxed line-clamp-2">
-                            {firm.tagline}
-                        </p>
-                    </div>
-                )}
-
-                {/* Stats Row */}
-                <div className="border-b border-base-300">
-                    <div
-                        className="grid divide-x divide-base-300"
-                        style={{
-                            gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
-                        }}
-                    >
-                        {stats.map((stat, i) => {
-                            const iconStyles = [
-                                "bg-primary text-primary-content",
-                                "bg-secondary text-secondary-content",
-                                "bg-accent text-accent-content",
-                            ];
-                            const iconStyle = iconStyles[i % iconStyles.length];
-                            return (
-                                <div
-                                    key={stat.label}
-                                    className="flex items-center gap-2.5 px-3 py-4"
-                                >
-                                    <div
-                                        className={`w-7 h-7 flex items-center justify-center shrink-0 ${iconStyle}`}
-                                    >
-                                        <i className={`${stat.icon} text-xs`} />
-                                    </div>
-                                    <div>
-                                        <span className="text-sm font-black text-base-content leading-none block">
-                                            {stat.value}
-                                        </span>
-                                        <span className="text-xs font-semibold uppercase tracking-wider text-base-content/30 leading-none">
-                                            {stat.label}
-                                        </span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Specialties + Industries */}
-                <div className="px-6 py-5 border-b border-base-300 space-y-4">
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                            Specialties
-                        </p>
-                        {(firm.specialties || []).length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                                {(firm.specialties || [])
-                                    .slice(0, 4)
-                                    .map((spec) => (
-                                        <BaselBadge
-                                            key={spec}
-                                            color="primary"
-                                            variant="soft"
-                                            size="sm"
-                                        >
-                                            {spec}
-                                        </BaselBadge>
-                                    ))}
-                                {(firm.specialties || []).length > 4 && (
-                                    <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
-                                        +{(firm.specialties || []).length - 4}
-                                    </span>
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-base-content/30 italic">
-                                Not provided
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                            Industries
-                        </p>
-                        {(firm.industries || []).length > 0 ? (
-                            <div className="flex flex-wrap gap-1.5">
-                                {(firm.industries || [])
-                                    .slice(0, 3)
-                                    .map((ind) => (
-                                        <BaselBadge
-                                            key={ind}
-                                            variant="outline"
-                                            size="sm"
-                                        >
-                                            {ind}
-                                        </BaselBadge>
-                                    ))}
-                                {(firm.industries || []).length > 3 && (
-                                    <span className="px-2 py-0.5 text-xs font-bold text-base-content/40">
-                                        +{(firm.industries || []).length - 3}
-                                    </span>
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-base-content/30 italic">
-                                Not provided
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Partnership Badges */}
-                <div className="px-6 py-5 border-b border-base-300">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-3">
-                        Partnership
-                    </p>
-                    {hasPartnerSignal ? (
-                        <div className="flex flex-wrap gap-2">
-                            {firm.candidate_firm && (
-                                <span className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-primary-content">
-                                    <i className="fa-duotone fa-regular fa-handshake text-sm" />
-                                    Candidate Partners
-                                </span>
-                            )}
-                            {firm.company_firm && (
-                                <span className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-secondary text-secondary-content">
-                                    <i className="fa-duotone fa-regular fa-paper-plane text-sm" />
-                                    Company Partners
-                                </span>
-                            )}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-base-content/30 italic">
-                            No partnerships
-                        </p>
+                {/* Location + founded context row */}
+                <div className="flex items-center gap-3 mt-2.5 text-sm text-base-content/50">
+                    <span className={`flex items-center gap-1.5 truncate ${location ? "" : "text-base-content/30"}`}>
+                        <i className="fa-duotone fa-regular fa-location-dot text-xs text-secondary" />
+                        {location || "No location specified"}
+                    </span>
+                    {foundedYear && (
+                        <>
+                            <span className="text-base-content/20">|</span>
+                            <span className="flex items-center gap-1.5 shrink-0">
+                                <i className="fa-duotone fa-regular fa-calendar text-xs text-accent" />
+                                {foundedYear}
+                            </span>
+                        </>
                     )}
                 </div>
             </div>
 
-            {/* Footer: actions */}
+            {/* Inline metadata: members · team size · founded · marketplace */}
+            <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
+                {metaItems.map((item, i) => (
+                    <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
+                        <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
+                        <span className="truncate">{item.value}</span>
+                    </span>
+                ))}
+            </div>
+
+            {/* Tagline snippet */}
+            <div className="px-5 py-3 border-b border-base-300">
+                {firm.tagline ? (
+                    <div className="text-sm text-base-content/60 leading-relaxed line-clamp-2">
+                        <MarkdownRenderer content={firm.tagline} />
+                    </div>
+                ) : (
+                    <p className="text-sm text-base-content/30">No description provided</p>
+                )}
+            </div>
+
+            {/* Badge row: emphasis (soft-outline) + default (soft) */}
+            <div className="px-5 py-3 flex-1">
+                <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge
+                        color={firmStatusBadgeColor(firm.status)}
+                        variant="soft-outline"
+                        size="sm"
+                    >
+                        {formatStatus(firm.status)}
+                    </BaselBadge>
+                    {firm.marketplace_visible && (
+                        <BaselBadge color="success" variant="soft-outline" size="sm" icon="fa-store">
+                            Listed
+                        </BaselBadge>
+                    )}
+                    {firm.candidate_firm && (
+                        <BaselBadge color="primary" variant="soft-outline" size="sm" icon="fa-handshake">
+                            Split Partners
+                        </BaselBadge>
+                    )}
+                    {firm.company_firm && (
+                        <BaselBadge color="secondary" variant="soft-outline" size="sm" icon="fa-building">
+                            Direct Hire
+                        </BaselBadge>
+                    )}
+                    {specialties.slice(0, 3).map((spec) => (
+                        <BaselBadge key={spec} variant="soft" color="neutral" size="sm">
+                            {spec}
+                        </BaselBadge>
+                    ))}
+                    {specialties.length > 3 && (
+                        <span className="text-sm font-semibold text-base-content/40 self-center">
+                            +{specialties.length - 3} more
+                        </span>
+                    )}
+                    {industries.slice(0, 2).map((ind) => (
+                        <BaselBadge key={ind} variant="soft" color="neutral" size="sm">
+                            {ind}
+                        </BaselBadge>
+                    ))}
+                    {industries.length > 2 && (
+                        <span className="text-sm font-semibold text-base-content/40 self-center">
+                            +{industries.length - 2}
+                        </span>
+                    )}
+                    {placementTypes.slice(0, 2).map((pt) => (
+                        <BaselBadge key={pt} variant="soft" color="neutral" size="sm">
+                            {PLACEMENT_TYPE_LABELS[pt] || pt}
+                        </BaselBadge>
+                    ))}
+                    {!firm.candidate_firm && !firm.company_firm && specialties.length === 0 && industries.length === 0 && placementTypes.length === 0 && (
+                        <span className="text-sm text-base-content/30">No details listed</span>
+                    )}
+                </div>
+            </div>
+
+            {/* Footer: profile link + actions */}
             <div
-                className="mt-auto flex items-center justify-between gap-3 px-6 py-4 border-t border-base-300"
+                className="flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
-                <Link
-                    href={`/firms/${firm.slug}`}
-                    className="btn btn-sm btn-link gap-1"
-                >
-                    View Profile
-                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
-                </Link>
+                {firm.slug ? (
+                    <a
+                        href={`/firms/${firm.slug}`}
+                        className="text-sm font-semibold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
+                    >
+                        View Profile
+                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs" />
+                    </a>
+                ) : (
+                    <button
+                        onClick={onSelect}
+                        className="text-sm font-semibold text-primary hover:text-primary/70 transition-colors flex items-center gap-1"
+                    >
+                        View Details
+                        <i className="fa-duotone fa-regular fa-arrow-right text-xs" />
+                    </button>
+                )}
                 <FirmActionsToolbar
                     firm={firm}
                     variant="icon-only"

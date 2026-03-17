@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Splits Network — Swarm Recruiting</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #3b5ccc;
+    --gold: #f59e0b;
+    --teal: #14b8a6;
+    --accent: #ec4899;
+    --bg: #09090b;
+    --surface: #18181b;
+    --text: #fafafa;
+    --text-dim: #a1a1aa;
+    --red: #ef4444;
+    --green: #22c55e;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(59,92,204,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,92,204,0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .grid-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 30%, var(--bg) 80%);
+  }
+
+  /* Scenes */
+  .scene {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 10;
+    padding: 60px 50px;
+  }
+  .scene.active { opacity: 1; pointer-events: auto; }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed; bottom: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--gold));
+    z-index: 9999; transition: width 0.4s ease;
+  }
+
+  /* ===== SCENE 1: HOOK ===== */
+  .hook-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    opacity: 0;
+    margin-bottom: 40px;
+  }
+  .hook-label.show { animation: fadeSlideUp 0.6s ease forwards; }
+
+  .hook-headline {
+    font-size: 96px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.1;
+    opacity: 0;
+  }
+  .hook-headline.show { animation: fadeSlideUp 0.7s ease forwards; }
+  .hook-headline em {
+    font-style: normal;
+    color: var(--red);
+    text-decoration: line-through;
+    text-decoration-thickness: 6px;
+  }
+
+  .hook-sub {
+    font-size: 44px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 30px;
+    opacity: 0;
+    max-width: 900px;
+    line-height: 1.4;
+  }
+  .hook-sub.show { animation: fadeSlideUp 0.6s ease 0.1s forwards; }
+
+  /* ===== SCENE 2: SPLIT COMPARISON ===== */
+  .comparison {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .comparison-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    opacity: 0;
+  }
+  .comparison-label.show { animation: fadeIn 0.5s ease forwards; }
+
+  .comp-panel {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(24,24,27,0.7);
+    padding: 50px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  .comp-panel.show { animation: slideInLeft 0.6s ease forwards; }
+  .comp-panel.right.show { animation: slideInRight 0.6s ease forwards; }
+
+  .comp-panel.old { border-left: 4px solid var(--red); }
+  .comp-panel.new { border-left: 4px solid var(--green); }
+
+  .comp-panel-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .comp-panel.old .comp-panel-tag { color: var(--red); }
+  .comp-panel.new .comp-panel-tag { color: var(--green); }
+
+  .comp-panel-title {
+    font-size: 52px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .comp-panel-desc {
+    font-size: 36px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* ===== SCENE 3: RADAR / SWARM ===== */
+  .radar-container {
+    position: relative;
+    width: 700px;
+    height: 700px;
+    margin-bottom: 40px;
+  }
+
+  .radar-ring {
+    position: absolute;
+    border: 1px solid rgba(59,92,204,0.2);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+  }
+  .radar-ring.show { animation: radarRingIn 0.8s ease forwards; }
+  .radar-ring:nth-child(1) { width: 200px; height: 200px; }
+  .radar-ring:nth-child(2) { width: 400px; height: 400px; }
+  .radar-ring:nth-child(3) { width: 600px; height: 600px; }
+
+  .radar-sweep {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 300px; height: 2px;
+    background: linear-gradient(90deg, rgba(59,92,204,0.8), transparent);
+    transform-origin: left center;
+    opacity: 0;
+  }
+  .radar-sweep.show {
+    opacity: 1;
+    animation: radarSweep 3s linear infinite;
+  }
+
+  .radar-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px; height: 100px;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: white;
+    z-index: 5;
+    opacity: 0;
+  }
+  .radar-center.show { animation: fadeIn 0.5s ease forwards; }
+
+  .radar-dot {
+    position: absolute;
+    width: 18px; height: 18px;
+    background: var(--teal);
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 4;
+    opacity: 0;
+  }
+  .radar-dot.show {
+    animation: dotAppear 0.4s ease forwards;
+  }
+  .radar-dot::after {
+    content: '';
+    position: absolute; inset: -4px;
+    border: 1px solid var(--teal);
+    opacity: 0.5;
+    animation: dotPulse 2s ease infinite;
+  }
+
+  .radar-label {
+    font-size: 64px;
+    font-weight: 800;
+    text-align: center;
+    opacity: 0;
+    margin-top: 10px;
+  }
+  .radar-label.show { animation: fadeSlideUp 0.6s ease forwards; }
+  .radar-label span { color: var(--teal); }
+
+  .radar-sub {
+    font-size: 40px;
+    color: var(--text-dim);
+    text-align: center;
+    opacity: 0;
+    margin-top: 10px;
+  }
+  .radar-sub.show { animation: fadeSlideUp 0.6s ease 0.1s forwards; }
+
+  /* ===== SCENE 4: COUNTER / STATS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    width: 100%;
+    margin-bottom: 50px;
+  }
+
+  .stat-card {
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(24,24,27,0.8);
+    padding: 40px 30px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .stat-card.show { animation: fadeSlideUp 0.5s ease forwards; }
+
+  .stat-card .stat-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 80px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 30px;
+    color: var(--text-dim);
+    line-height: 1.3;
+  }
+
+  .stats-headline {
+    font-size: 64px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.2;
+    opacity: 0;
+  }
+  .stats-headline.show { animation: fadeSlideUp 0.6s ease forwards; }
+  .stats-headline span { color: var(--gold); }
+
+  /* ===== SCENE 5: SIDE BY SIDE TIMELINE ===== */
+  .timeline-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .timeline-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+
+  .timeline-header-cell {
+    text-align: center;
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0;
+  }
+  .timeline-header-cell.show { animation: fadeIn 0.5s ease forwards; }
+  .timeline-header-cell.old-col { color: var(--red); border-bottom: 2px solid var(--red); }
+  .timeline-header-cell.new-col { color: var(--teal); border-bottom: 2px solid var(--teal); }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 100px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .timeline-cell {
+    padding: 24px 30px;
+    display: flex;
+    align-items: center;
+    font-size: 34px;
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  .timeline-cell.show { animation: fadeSlideUp 0.4s ease forwards; }
+  .timeline-cell.old-col { color: var(--text-dim); }
+  .timeline-cell.new-col { color: var(--text); }
+  .timeline-cell .cell-icon {
+    margin-right: 14px;
+    font-size: 36px;
+    flex-shrink: 0;
+  }
+  .timeline-cell.old-col .cell-icon { color: var(--red); }
+  .timeline-cell.new-col .cell-icon { color: var(--teal); }
+
+  .timeline-divider {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* ===== SCENE 6: ZERO RISK ===== */
+  .risk-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 30px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    padding: 16px 36px;
+    margin-bottom: 50px;
+    opacity: 0;
+  }
+  .risk-badge.show { animation: fadeIn 0.5s ease forwards; }
+
+  .risk-headline {
+    font-size: 84px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.15;
+    opacity: 0;
+    margin-bottom: 40px;
+  }
+  .risk-headline.show { animation: fadeSlideUp 0.7s ease forwards; }
+  .risk-headline span { color: var(--teal); }
+
+  .risk-points {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .risk-point {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 40px;
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  .risk-point.show { animation: slideInLeft 0.5s ease forwards; }
+
+  .risk-point-icon {
+    width: 60px; height: 60px;
+    border: 1px solid var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 30px;
+    color: var(--teal);
+  }
+
+  /* ===== SCENE 7: CTA ===== */
+  .cta-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .cta-logo {
+    font-family: 'Inter', sans-serif;
+    font-size: 68px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    opacity: 0;
+  }
+  .cta-logo.show { animation: fadeIn 0.6s ease forwards; }
+  .cta-logo .logo-splits { color: var(--text); }
+  .cta-logo .logo-dot { color: var(--primary); }
+  .cta-logo .logo-network { color: var(--text-dim); }
+
+  .cta-tagline {
+    font-size: 56px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1.3;
+    opacity: 0;
+  }
+  .cta-tagline.show { animation: fadeSlideUp 0.7s ease forwards; }
+  .cta-tagline span { color: var(--primary); }
+
+  .cta-url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 24px 56px;
+    opacity: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-url.show { animation: fadeSlideUp 0.6s ease forwards; }
+  .cta-url::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(59,92,204,0.1);
+    animation: ctaPulse 2s ease infinite;
+  }
+
+  .cta-action {
+    font-size: 38px;
+    color: var(--text-dim);
+    text-align: center;
+    opacity: 0;
+  }
+  .cta-action.show { animation: fadeIn 0.5s ease forwards; }
+
+  /* ===== KEYFRAMES ===== */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes radarRingIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  @keyframes radarSweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes dotAppear {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.8); opacity: 0; }
+  }
+
+  @keyframes ctaPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes strikethrough {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  @keyframes countUp {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Scan line effect for radar scene */
+  .scan-line {
+    position: fixed;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59,92,204,0.3), transparent);
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .scan-line.show {
+    opacity: 1;
+    animation: scanDown 4s linear infinite;
+  }
+  @keyframes scanDown {
+    from { top: 0; }
+    to { top: 1920px; }
+  }
+
+  /* VS divider */
+  .vs-badge {
+    width: 80px; height: 80px;
+    background: var(--surface);
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-dim);
+    opacity: 0;
+    z-index: 5;
+  }
+  .vs-badge.show { animation: fadeIn 0.4s ease forwards; }
+
+  /* Single recruiter visual */
+  .single-recruiter-visual {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+  }
+
+  .lone-dot {
+    width: 60px; height: 60px;
+    background: var(--red);
+    opacity: 0;
+    position: relative;
+  }
+  .lone-dot.show { animation: fadeIn 0.5s ease forwards; }
+  .lone-dot::after {
+    content: '';
+    position: absolute; inset: -10px;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+
+  .lone-dot-label {
+    position: absolute;
+    bottom: 30px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    color: var(--text-dim);
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .lone-dot-label.show { animation: fadeIn 0.4s ease forwards; }
+
+  /* Scene 2B: Single recruiter waiting */
+  .waiting-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+  }
+
+  .waiting-bar {
+    width: 80%;
+    height: 12px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+  }
+  .waiting-bar.show { animation: fadeIn 0.4s ease forwards; }
+
+  .waiting-bar-fill {
+    height: 100%;
+    background: var(--red);
+    width: 0;
+    transition: width 3s ease;
+  }
+
+  .waiting-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 40px;
+    color: var(--red);
+    opacity: 0;
+  }
+  .waiting-text.show { animation: fadeIn 0.4s ease forwards; }
+
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="scan-line" id="scanLine"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- SCENE 1: HOOK -->
+<div class="scene" id="scene1">
+  <div class="hook-label" id="hookLabel">ATTENTION HIRING MANAGERS</div>
+  <div class="hook-headline" id="hookHeadline">
+    Your staffing firm gives you<br><em>one recruiter.</em>
+  </div>
+  <div class="hook-sub" id="hookSub">
+    One network. One pipeline. One bottleneck.
+  </div>
+</div>
+
+<!-- SCENE 2: OLD WAY -->
+<div class="scene" id="scene2">
+  <div class="comparison">
+    <div class="comparison-label" id="compLabel">THE OLD WAY</div>
+    <div class="comp-panel old" id="compOld">
+      <div class="comp-panel-tag">TRADITIONAL STAFFING</div>
+      <div class="comp-panel-title">1 Recruiter Assigned</div>
+      <div class="comp-panel-desc">Limited network. Limited candidates.<br>You wait on their timeline.</div>
+    </div>
+    <div class="single-recruiter-visual">
+      <div class="lone-dot" id="loneDot"></div>
+      <div class="lone-dot-label" id="loneDotLabel">← Your entire talent pipeline</div>
+    </div>
+    <div class="waiting-container">
+      <div class="waiting-bar" id="waitBar">
+        <div class="waiting-bar-fill" id="waitBarFill"></div>
+      </div>
+      <div class="waiting-text" id="waitText">WEEKS PASS...</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3: RADAR / SWARM -->
+<div class="scene" id="scene3">
+  <div class="comparison-label" id="radarIntro" style="margin-bottom: 30px;">NOW IMAGINE</div>
+  <div class="radar-container" id="radarContainer">
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-sweep" id="radarSweep"></div>
+    <div class="radar-center" id="radarCenter">YOUR<br>ROLE</div>
+    <!-- Dots added by JS -->
+  </div>
+  <div class="radar-label" id="radarLabel"><span>Hundreds</span> of recruiters.</div>
+  <div class="radar-sub" id="radarSub">All competing to fill your role.</div>
+</div>
+
+<!-- SCENE 4: STATS DASHBOARD -->
+<div class="scene" id="scene4">
+  <div class="stats-grid">
+    <div class="stat-card" id="stat1">
+      <div class="stat-number" id="statNum1">0x</div>
+      <div class="stat-label">More<br>Recruiters</div>
+    </div>
+    <div class="stat-card" id="stat2">
+      <div class="stat-number" id="statNum2">0x</div>
+      <div class="stat-label">Wider<br>Reach</div>
+    </div>
+    <div class="stat-card" id="stat3">
+      <div class="stat-number" id="statNum3">0x</div>
+      <div class="stat-label">Faster<br>Submissions</div>
+    </div>
+    <div class="stat-card" id="stat4">
+      <div class="stat-number" id="statNum4">0%</div>
+      <div class="stat-label">Upfront<br>Cost</div>
+    </div>
+  </div>
+  <div class="stats-headline" id="statsHeadline">
+    Competition drives <span>quality.</span>
+  </div>
+</div>
+
+<!-- SCENE 5: SIDE-BY-SIDE TIMELINE -->
+<div class="scene" id="scene5">
+  <div class="timeline-container">
+    <div class="timeline-divider"></div>
+    <div class="timeline-header">
+      <div class="timeline-header-cell old-col" id="tlHeaderOld">OLD WAY</div>
+      <div class="timeline-header-cell new-col" id="tlHeaderNew">SPLITS NETWORK</div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-cell old-col" id="tlR1C1">
+        <span class="cell-icon">✕</span> 1 recruiter assigned
+      </div>
+      <div class="timeline-cell new-col" id="tlR1C2">
+        <span class="cell-icon">✓</span> Hundreds compete
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-cell old-col" id="tlR2C1">
+        <span class="cell-icon">✕</span> Weeks to fill
+      </div>
+      <div class="timeline-cell new-col" id="tlR2C2">
+        <span class="cell-icon">✓</span> Candidates in days
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-cell old-col" id="tlR3C1">
+        <span class="cell-icon">✕</span> Limited talent pool
+      </div>
+      <div class="timeline-cell new-col" id="tlR3C2">
+        <span class="cell-icon">✓</span> Nationwide reach
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-cell old-col" id="tlR4C1">
+        <span class="cell-icon">✕</span> Retainers & fees
+      </div>
+      <div class="timeline-cell new-col" id="tlR4C2">
+        <span class="cell-icon">✓</span> Pay only when hired
+      </div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-cell old-col" id="tlR5C1">
+        <span class="cell-icon">✕</span> One perspective
+      </div>
+      <div class="timeline-cell new-col" id="tlR5C2">
+        <span class="cell-icon">✓</span> Specialists collaborate
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 6: ZERO RISK -->
+<div class="scene" id="scene6">
+  <div class="risk-badge" id="riskBadge">ZERO RISK MODEL</div>
+  <div class="risk-headline" id="riskHeadline">
+    You stay in <span>control.</span>
+  </div>
+  <div class="risk-points">
+    <div class="risk-point" id="rp1">
+      <div class="risk-point-icon">01</div>
+      <div>Post your role — recruiters compete</div>
+    </div>
+    <div class="risk-point" id="rp2">
+      <div class="risk-point-icon">02</div>
+      <div>Review candidates on your terms</div>
+    </div>
+    <div class="risk-point" id="rp3">
+      <div class="risk-point-icon">03</div>
+      <div>Only pay when someone gets hired</div>
+    </div>
+    <div class="risk-point" id="rp4">
+      <div class="risk-point-icon">04</div>
+      <div>Manage your pipeline, set your terms</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 7: CTA -->
+<div class="scene" id="scene7">
+  <div class="cta-container">
+    <div class="cta-logo" id="ctaLogo">
+      <span class="logo-splits">splits</span><span class="logo-dot">.</span><span class="logo-network">network</span>
+    </div>
+    <div class="cta-tagline" id="ctaTagline">
+      Stop waiting on <span>one recruiter.</span><br>Unleash the swarm.
+    </div>
+    <div class="cta-url" id="ctaUrl">splits.network</div>
+    <div class="cta-action" id="ctaAction">Post your first role today.</div>
+  </div>
+</div>
+
+<script>
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  function setProgress(pct) {
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+
+  function showScene(id) {
+    document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function show(id) {
+    document.getElementById(id).classList.add('show');
+  }
+
+  function animateCounter(el, target, suffix, duration) {
+    const start = performance.now();
+    const isFloat = target % 1 !== 0;
+    function update() {
+      const elapsed = performance.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      el.textContent = (isFloat ? (eased * target).toFixed(0) : current) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  // Radar dot positions (spread around center)
+  const dotPositions = [
+    { x: 38, y: 22 }, { x: 72, y: 18 }, { x: 85, y: 42 }, { x: 78, y: 68 },
+    { x: 55, y: 82 }, { x: 30, y: 78 }, { x: 15, y: 55 }, { x: 20, y: 35 },
+    { x: 60, y: 30 }, { x: 42, y: 65 }, { x: 68, y: 55 }, { x: 25, y: 48 },
+    { x: 50, y: 20 }, { x: 75, y: 35 }, { x: 65, y: 72 }, { x: 35, y: 58 },
+    { x: 82, y: 55 }, { x: 18, y: 68 }, { x: 48, y: 75 }, { x: 58, y: 45 },
+    { x: 32, y: 30 }, { x: 70, y: 48 }, { x: 45, y: 40 }, { x: 62, y: 62 },
+  ];
+
+  function createRadarDots() {
+    const container = document.getElementById('radarContainer');
+    dotPositions.forEach((pos, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'radar-dot';
+      dot.id = 'rDot' + i;
+      dot.style.left = pos.x + '%';
+      dot.style.top = pos.y + '%';
+      container.appendChild(dot);
+    });
+  }
+
+  async function runAnimation() {
+    createRadarDots();
+
+    // SCENE 1: HOOK (0-7s)
+    showScene('scene1');
+    setProgress(2);
+    await sleep(600);
+    show('hookLabel');
+    await sleep(1000);
+    show('hookHeadline');
+    setProgress(5);
+    await sleep(2500);
+    show('hookSub');
+    setProgress(10);
+    await sleep(3000);
+
+    // SCENE 2: OLD WAY (7-16s)
+    showScene('scene2');
+    setProgress(15);
+    await sleep(500);
+    show('compLabel');
+    await sleep(800);
+    show('compOld');
+    setProgress(20);
+    await sleep(2000);
+    show('loneDot');
+    await sleep(600);
+    show('loneDotLabel');
+    setProgress(25);
+    await sleep(2000);
+    show('waitBar');
+    await sleep(400);
+    document.getElementById('waitBarFill').style.width = '15%';
+    show('waitText');
+    setProgress(30);
+    await sleep(3000);
+
+    // SCENE 3: RADAR / SWARM (16-28s)
+    showScene('scene3');
+    show('scanLine');
+    setProgress(35);
+    await sleep(500);
+    show('radarIntro');
+    await sleep(1200);
+
+    // Show radar rings
+    const rings = document.querySelectorAll('.radar-ring');
+    for (let i = 0; i < rings.length; i++) {
+      rings[i].classList.add('show');
+      await sleep(400);
+    }
+    setProgress(40);
+
+    show('radarCenter');
+    await sleep(600);
+    show('radarSweep');
+    setProgress(45);
+
+    // Populate dots with staggered timing
+    for (let i = 0; i < dotPositions.length; i++) {
+      show('rDot' + i);
+      await sleep(120);
+    }
+    setProgress(50);
+
+    await sleep(1000);
+    show('radarLabel');
+    await sleep(600);
+    show('radarSub');
+    setProgress(55);
+    await sleep(2500);
+
+    // SCENE 4: STATS (28-37s)
+    document.getElementById('scanLine').classList.remove('show');
+    showScene('scene4');
+    setProgress(58);
+    await sleep(500);
+
+    show('stat1');
+    animateCounter(document.getElementById('statNum1'), 100, 'x', 1500);
+    await sleep(800);
+
+    show('stat2');
+    animateCounter(document.getElementById('statNum2'), 50, 'x', 1500);
+    setProgress(62);
+    await sleep(800);
+
+    show('stat3');
+    animateCounter(document.getElementById('statNum3'), 10, 'x', 1200);
+    await sleep(800);
+
+    show('stat4');
+    document.getElementById('statNum4').textContent = '0%';
+    setProgress(68);
+    await sleep(1500);
+
+    show('statsHeadline');
+    setProgress(72);
+    await sleep(3000);
+
+    // SCENE 5: SIDE-BY-SIDE (37-48s)
+    showScene('scene5');
+    setProgress(75);
+    await sleep(400);
+
+    show('tlHeaderOld');
+    show('tlHeaderNew');
+    await sleep(800);
+
+    const rows = [
+      ['tlR1C1', 'tlR1C2'],
+      ['tlR2C1', 'tlR2C2'],
+      ['tlR3C1', 'tlR3C2'],
+      ['tlR4C1', 'tlR4C2'],
+      ['tlR5C1', 'tlR5C2'],
+    ];
+
+    for (const [old, nw] of rows) {
+      show(old);
+      await sleep(300);
+      show(nw);
+      setProgress(75 + (rows.indexOf([old, nw]) + 1) * 2);
+      await sleep(700);
+    }
+    setProgress(82);
+    await sleep(2500);
+
+    // SCENE 6: ZERO RISK (48-56s)
+    showScene('scene6');
+    setProgress(85);
+    await sleep(500);
+    show('riskBadge');
+    await sleep(800);
+    show('riskHeadline');
+    setProgress(88);
+    await sleep(1500);
+
+    show('rp1');
+    await sleep(900);
+    show('rp2');
+    await sleep(900);
+    show('rp3');
+    await sleep(900);
+    show('rp4');
+    setProgress(93);
+    await sleep(2500);
+
+    // SCENE 7: CTA (56-65s)
+    showScene('scene7');
+    setProgress(95);
+    await sleep(600);
+    show('ctaLogo');
+    await sleep(1000);
+    show('ctaTagline');
+    setProgress(97);
+    await sleep(2000);
+    show('ctaUrl');
+    await sleep(1200);
+    show('ctaAction');
+    setProgress(100);
+    await sleep(3000);
+
+    window.__showDone = true;
+  }
+
+  runAnimation();
+</script>
+</body>
+</html>

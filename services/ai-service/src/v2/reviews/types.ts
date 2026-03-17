@@ -17,7 +17,17 @@ export interface AIReviewInput {
     candidate_id: string;
     job_id: string;
     resume_text?: string;
-    documents_count?: number; // Number of documents attached (for prompt context)
+    resume_data?: {
+        summary?: string;
+        experience?: any[];
+        education?: any[];
+        skills?: string[];
+        certifications?: string[];
+        total_years_experience?: number;
+        highest_degree?: string;
+    };
+    cover_letter?: string;
+    documents_count?: number;
     job_description: string;
     job_title: string;
     required_skills: string[];
@@ -47,6 +57,8 @@ export interface AIReviewResult {
     matched_skills: string[];
     missing_skills: string[];
     skills_match_percentage: number;
+    matched_requirements: string[];
+    missing_requirements: string[];
     required_years?: number;
     candidate_years?: number;
     meets_experience_requirement?: boolean;

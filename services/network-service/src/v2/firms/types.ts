@@ -13,6 +13,11 @@ export interface FirmFilters extends PaginationParams, SortParams {
     placement_types?: string[];
     geo_focus?: string[];
     candidate_firm?: boolean;
+    team_size_range?: string;
+    is_candidate_firm?: string;
+    is_company_firm?: string;
+    is_marketplace_visible?: string;
+    placement_type?: string;
 }
 
 export interface FirmUpdate {

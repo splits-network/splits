@@ -9,6 +9,7 @@ export interface RecruiterCode {
     code: string;
     label?: string;
     status: 'active' | 'inactive';
+    is_default: boolean;
     created_at: string;
     updated_at: string;
     deleted_at?: string;
@@ -33,6 +34,9 @@ export interface RecruiterCodeFilters {
     recruiter_id?: string;
     status?: 'active' | 'inactive';
     search?: string;
+    is_default?: string;
+    expiry_status?: string;
+    has_usage_limit?: string;
     page?: number;
     limit?: number;
     sort_by?: string;
@@ -41,6 +45,7 @@ export interface RecruiterCodeFilters {
 
 export interface CreateRecruiterCodeRequest {
     label?: string;
+    is_default?: boolean;
     expiry_date?: string;
     max_uses?: number;
     uses_remaining?: number;
@@ -49,6 +54,7 @@ export interface CreateRecruiterCodeRequest {
 export interface RecruiterCodeUpdate {
     label?: string;
     status?: 'active' | 'inactive';
+    is_default?: boolean;
     expiry_date?: string | null;
     max_uses?: number | null;
     uses_remaining?: number | null;

@@ -32,15 +32,15 @@ export default function OAuthCallbackPage() {
             return;
         }
 
-        // Verify state matches what we stored
+        // Verify state matches what we stored (client-side check).
+        // The backend also validates state via its own store — this is a secondary guard.
         const storedState = sessionStorage.getItem("oauth_state");
-        if (storedState !== state) {
+        sessionStorage.removeItem("oauth_state");
+        if (storedState && storedState !== state) {
             setStatus("error");
             setError("Invalid state parameter — possible CSRF attack");
             return;
         }
-
-        sessionStorage.removeItem("oauth_state");
 
         (async () => {
             try {

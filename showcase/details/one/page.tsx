@@ -163,7 +163,7 @@ export default function DetailsOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Header ──────────────────────────────────────── */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-20">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -173,22 +173,22 @@ export default function DetailsOne() {
                 <div className="relative  container mx-auto px-6 lg:px-12">
                     <div className="max-w-4xl">
                         {/* Breadcrumb */}
-                        <div className="detail-kicker flex items-center gap-2 text-sm text-neutral-content/40 mb-6 scroll-reveal fade-up">
+                        <div className="detail-kicker flex items-center gap-2 text-sm text-base-content/40 mb-6 scroll-reveal fade-up">
                             <a
                                 href="#"
-                                className="hover:text-neutral-content transition-colors"
+                                className="hover:text-base-content transition-colors"
                             >
                                 Jobs
                             </a>
                             <i className="fa-solid fa-chevron-right text-[8px]" />
                             <a
                                 href="#"
-                                className="hover:text-neutral-content transition-colors"
+                                className="hover:text-base-content transition-colors"
                             >
                                 {job.department}
                             </a>
                             <i className="fa-solid fa-chevron-right text-[8px]" />
-                            <span className="text-neutral-content/70">
+                            <span className="text-base-content/70">
                                 {job.title}
                             </span>
                         </div>
@@ -204,7 +204,7 @@ export default function DetailsOne() {
                                         {job.title}
                                     </span>
                                 </h1>
-                                <p className="detail-meta scroll-reveal fade-up text-lg text-neutral-content/60 mt-2">
+                                <p className="detail-meta scroll-reveal fade-up text-lg text-base-content/60 mt-2">
                                     {job.company}
                                 </p>
                             </div>
@@ -236,7 +236,7 @@ export default function DetailsOne() {
                             ].map((tag) => (
                                 <span
                                     key={tag.text}
-                                    className="detail-meta scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5 bg-neutral-content/10 text-sm"
+                                    className="detail-meta scroll-reveal fade-up flex items-center gap-1.5 px-3 py-1.5  text-sm"
                                 >
                                     <i
                                         className={`${tag.icon} text-xs text-secondary`}

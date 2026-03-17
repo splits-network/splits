@@ -28,10 +28,10 @@ export function TableView({
     ];
 
     return (
-        <div className="overflow-x-auto border-2 border-base-300 shadow-sm">
+        <div className="overflow-x-auto border-2 border-base-300">
             <table className="w-full" style={{ minWidth: 1000 }}>
                 <thead>
-                    <tr className="bg-neutral text-neutral-content">
+                    <tr className="bg-base-300 text-base-content">
                         {columns.map((h, i) => (
                             <th
                                 key={i}

@@ -155,7 +155,7 @@ function SearchPageInner() {
             {/* ══════════════════════════════════════════════════════════
                 HEADER
                ══════════════════════════════════════════════════════════ */}
-            <section className="relative bg-neutral text-neutral-content py-14 lg:py-18">
+            <section className="relative bg-base-300 text-base-content py-14 lg:py-18">
                 <div
                     className="absolute top-0 right-0 w-1/3 h-full bg-primary/10"
                     style={{
@@ -178,14 +178,13 @@ function SearchPageInner() {
                     {/* Search bar */}
                     <div className="scroll-reveal fade-up max-w-2xl">
                         <div className="relative">
-                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-neutral-content/40" />
                             <input
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 onKeyDown={handleSearchKeyDown}
                                 placeholder="Search candidates, jobs, companies, recruiters..."
-                                className="input w-full pl-12 pr-24 bg-neutral-content/10 border-neutral-content/10 text-neutral-content placeholder:text-neutral-content/30 focus:border-primary focus:outline-none h-14 text-lg"
+                                className="input w-full pl-12 pr-24 border-base-content/10 text-base-content placeholder:text-base-content/30 focus:border-primary focus:outline-none h-14 text-lg"
                                 autoFocus
                             />
                             <button
@@ -197,6 +196,7 @@ function SearchPageInner() {
                             >
                                 Search
                             </button>
+                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 " />
                         </div>
                     </div>
                 </div>
@@ -677,11 +677,11 @@ export default function SearchPage() {
         <Suspense
             fallback={
                 <main className="min-h-screen bg-base-100">
-                    <section className="bg-neutral text-neutral-content py-14 lg:py-18">
+                    <section className="bg-base-300 text-base-content py-14 lg:py-18">
                         <div className="container mx-auto px-6 lg:px-12">
-                            <div className="h-6 w-32 bg-neutral-content/10 mb-4 animate-pulse" />
-                            <div className="h-12 w-64 bg-neutral-content/10 mb-6 animate-pulse" />
-                            <div className="h-14 max-w-2xl bg-neutral-content/10 animate-pulse" />
+                            <div className="h-6 w-32 bg-base-content/10 mb-4 animate-pulse" />
+                            <div className="h-12 w-64 bg-base-content/10 mb-6 animate-pulse" />
+                            <div className="h-14 max-w-2xl bg-base-content/10 animate-pulse" />
                         </div>
                     </section>
                 </main>

@@ -4,14 +4,16 @@ import { DomainEvent } from '@splits-network/shared-types';
 import { AIReviewServiceV2 } from './v2/reviews/service';
 import { ResumeExtractionService } from './v2/resume-extraction/service';
 import { ResumeExtractionRepository } from './v2/resume-extraction/repository';
+import { CallPipelineService } from './v2/call-pipeline/service';
 import { EventPublisher, IEventPublisher } from './v2/shared/events';
 
 /**
  * Domain Event Consumer for AI Service
  *
  * Listens for:
- * - application.stage_changed / application.created → triggers AI reviews
+ * - application.stage_changed → triggers AI reviews (when new_stage is ai_review or gpt_review)
  * - document.processed → triggers structured resume metadata extraction
+ * - call.recording_ready → triggers generalized call AI pipeline
  */
 export class DomainEventConsumer {
     private connection: Connection | null = null;
@@ -24,6 +26,7 @@ export class DomainEventConsumer {
         private aiReviewService: AIReviewServiceV2,
         private resumeExtractionService: ResumeExtractionService,
         private resumeExtractionRepository: ResumeExtractionRepository,
+        private callPipeline: CallPipelineService,
         private eventPublisher: IEventPublisher | undefined,
         private logger: Logger
     ) { }
@@ -42,16 +45,17 @@ export class DomainEventConsumer {
             await this.channel.assertQueue(this.queue, { durable: true });
 
             // Bind to events we care about
-            // Listen for application stage changes (specifically when stage becomes 'ai_review')
+            // Listen for application stage changes (specifically when stage becomes ai_review or gpt_review)
             await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
-            await this.channel.bindQueue(this.queue, this.exchange, 'application.created');
             // Listen for processed documents to extract structured resume metadata
             await this.channel.bindQueue(this.queue, this.exchange, 'document.processed');
+            // Listen for completed call recordings to trigger generalized call AI pipeline
+            await this.channel.bindQueue(this.queue, this.exchange, 'call.recording_ready');
 
             this.logger.info({
                 exchange: this.exchange,
                 queue: this.queue,
-                bindings: ['application.stage_changed', 'application.created', 'document.processed']
+                bindings: ['application.stage_changed', 'document.processed', 'call.recording_ready']
             }, 'AI service connected to RabbitMQ and bound to events');
 
             await this.startConsuming();
@@ -126,14 +130,14 @@ export class DomainEventConsumer {
 
     private async handleEvent(event: DomainEvent): Promise<void> {
         switch (event.event_type) {
-            case 'application.created':
-                await this.handleApplicationCreated(event);
-                break;
             case 'application.stage_changed':
                 await this.handleApplicationStageChanged(event);
                 break;
             case 'document.processed':
                 await this.handleDocumentProcessed(event);
+                break;
+            case 'call.recording_ready':
+                await this.handleCallRecordingReady(event);
                 break;
             default:
                 this.logger.debug({ event_type: event.event_type }, 'Unhandled event type');
@@ -141,68 +145,21 @@ export class DomainEventConsumer {
     }
 
     /**
-     * Handle application.created events
-     * Trigger AI review if application is created with stage='ai_review'
-     */
-    private async handleApplicationCreated(event: DomainEvent): Promise<void> {
-        const { application_id, stage, candidate_id, job_id } = event.payload;
-
-        // Only process if created directly in ai_review stage
-        if (stage !== 'ai_review') {
-            this.logger.debug({
-                application_id,
-                stage
-            }, 'Application not in ai_review stage, skipping');
-            return;
-        }
-
-        this.logger.info({
-            application_id,
-            candidate_id,
-            job_id,
-            stage
-        }, 'New application created in ai_review stage, triggering AI review');
-
-        try {
-            // Enrich minimal data by fetching full application details from ATS
-            const enrichedInput = await this.aiReviewService.enrichApplicationData({
-                application_id,
-                candidate_id,
-                job_id,
-            });
-
-            await this.aiReviewService.createReview(enrichedInput);
-
-            this.logger.info({
-                application_id
-            }, 'AI review triggered successfully for new application');
-        } catch (error) {
-            this.logger.error({
-                error,
-                application_id,
-                candidate_id,
-                job_id
-            }, 'Failed to trigger AI review for new application');
-            throw error;
-        }
-    }
-
-    /**
      * Handle application.stage_changed events
-     * Trigger AI review when application transitions TO ai_review stage
+     * Trigger AI review when application transitions TO ai_review or gpt_review stage
      */
     private async handleApplicationStageChanged(event: DomainEvent): Promise<void> {
         // Support both old_stage (standard) and previous_stage (ATS domain consumer publishes with this)
         const { application_id, new_stage, candidate_id, job_id } = event.payload;
         const old_stage = event.payload.old_stage || event.payload.previous_stage;
 
-        // Only process when transitioning TO ai_review
-        if (new_stage !== 'ai_review') {
+        // Only process when transitioning TO ai_review or gpt_review
+        if (new_stage !== 'ai_review' && new_stage !== 'gpt_review') {
             this.logger.debug({
                 application_id,
                 old_stage,
                 new_stage
-            }, 'Not transitioning to ai_review, skipping');
+            }, 'Not transitioning to a review stage, skipping');
             return;
         }
 
@@ -212,7 +169,7 @@ export class DomainEventConsumer {
             job_id,
             old_stage,
             new_stage
-        }, 'Application transitioned to ai_review stage, triggering AI review');
+        }, 'Application transitioned to review stage, triggering AI review');
 
         try {
             // Enrich minimal data by fetching full application details from ATS
@@ -338,6 +295,27 @@ export class DomainEventConsumer {
             // Don't rethrow - structured extraction failure should not nack the message
             // The document was processed successfully, we just couldn't extract structured data
         }
+    }
+
+    /**
+     * Handle call.recording_ready events
+     * Trigger generalized call AI pipeline for transcription + summarization
+     */
+    private async handleCallRecordingReady(event: DomainEvent): Promise<void> {
+        const { call_id, recording_url, duration_seconds, file_size_bytes } = event.payload;
+
+        this.logger.info(
+            { call_id, duration_seconds, file_size_bytes },
+            'Call recording ready, starting AI pipeline'
+        );
+
+        // Pipeline handles its own errors (sets status to 'failed') — don't rethrow
+        await this.callPipeline.processRecording({
+            call_id,
+            recording_url,
+            duration_seconds,
+            file_size_bytes,
+        });
     }
 
     async close(): Promise<void> {

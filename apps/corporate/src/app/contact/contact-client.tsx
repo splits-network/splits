@@ -81,23 +81,53 @@ export default function ContactBaselClient() {
 
     const [formStatus, setFormStatus] = useState<FormStatus>("idle");
 
+    const [errorMessage, setErrorMessage] = useState("");
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormStatus("submitting");
+        setErrorMessage("");
 
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        setFormStatus("success");
+        try {
+            const messageWithSubject = formData.subject
+                ? `[${formData.subject}]\n\n${formData.message}`
+                : formData.message;
 
-        setTimeout(() => {
-            setFormData({
-                name: "",
-                email: "",
-                subject: "",
-                message: "",
-                topic: "general",
+            const response = await fetch("/api/v2/status-contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    topic: formData.topic,
+                    message: messageWithSubject,
+                }),
             });
-            setFormStatus("idle");
-        }, 3000);
+
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(
+                    data.error || "Failed to send message. Please try again.",
+                );
+            }
+
+            setFormStatus("success");
+            setTimeout(() => {
+                setFormData({
+                    name: "",
+                    email: "",
+                    subject: "",
+                    message: "",
+                    topic: "general",
+                });
+                setFormStatus("idle");
+            }, 3000);
+        } catch (err: any) {
+            setErrorMessage(
+                err.message || "Something went wrong. Please try again.",
+            );
+            setFormStatus("error");
+        }
     };
 
     const handleChange = (
@@ -113,7 +143,7 @@ export default function ContactBaselClient() {
             {/* ══════════════════════════════════════════════════════════
                 HERO — Clean editorial header
                ══════════════════════════════════════════════════════════ */}
-            <section className="bc-hero relative py-28 bg-neutral text-neutral-content overflow-hidden">
+            <section className="bc-hero relative py-28 bg-base-300 text-base-content overflow-hidden">
                 <div className="container mx-auto px-6 lg:px-12 relative ">
                     <div className="max-w-3xl">
                         <p className="bc-hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
@@ -173,6 +203,27 @@ export default function ContactBaselClient() {
                                             <p className="text-base-content/60">
                                                 Our team will respond shortly.
                                             </p>
+                                        </div>
+                                    ) : formStatus === "error" ? (
+                                        <div className="py-12 text-center">
+                                            <div className="w-16 h-16 bg-error text-error-content mx-auto mb-4 flex items-center justify-center">
+                                                <i className="fa-duotone fa-regular fa-triangle-exclamation text-3xl" />
+                                            </div>
+                                            <h3 className="text-2xl font-black tracking-tight mb-2">
+                                                Something went wrong
+                                            </h3>
+                                            <p className="text-base-content/60 mb-6">
+                                                {errorMessage}
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setFormStatus("idle")
+                                                }
+                                                className="btn btn-primary"
+                                            >
+                                                Try Again
+                                            </button>
                                         </div>
                                     ) : (
                                         <form
@@ -399,7 +450,10 @@ export default function ContactBaselClient() {
                 <div className="container mx-auto px-6">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
                         {METRICS.map((m, i) => (
-                            <div key={i} className="bc-metric-item scroll-reveal fade-up">
+                            <div
+                                key={i}
+                                className="bc-metric-item scroll-reveal fade-up"
+                            >
                                 <div className="text-3xl md:text-4xl font-black tracking-tight">
                                     {m.value}
                                 </div>

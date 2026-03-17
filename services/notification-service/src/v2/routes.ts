@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { registerNotificationRoutes } from './notifications/routes';
 import { registerTemplateRoutes } from './templates/routes';
+import { registerPreferenceRoutes } from './preferences/routes';
 import { IEventPublisher } from './shared/events';
 import { AdminNotificationRepository } from './admin/repository';
 import { AdminNotificationService } from './admin/service';
@@ -23,6 +24,11 @@ export async function registerV2Routes(app: FastifyInstance, config: RegisterCon
         supabaseUrl: config.supabaseUrl,
         supabaseKey: config.supabaseKey,
         eventPublisher: config.eventPublisher,
+    });
+
+    await registerPreferenceRoutes(app, {
+        supabaseUrl: config.supabaseUrl,
+        supabaseKey: config.supabaseKey,
     });
 
     // Admin routes (permissive, no access filtering)

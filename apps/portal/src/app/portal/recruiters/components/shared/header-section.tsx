@@ -1,92 +1,30 @@
+"use client";
+
+import { BaselPageHeader } from "@splits-network/basel-ui";
+import { useCompactHeaders } from "@/hooks/use-view-mode";
+
 interface HeaderSectionProps {
-    stats: {
-        total: number;
-        active: number;
-        avgPlacements: number;
-        topRated: number;
-    };
+    stats: { total: number; active: number; avgPlacements: number; topRated: number };
 }
 
 export function HeaderSection({ stats }: HeaderSectionProps) {
+    const { isCompact, toggleCompact, isLoaded } = useCompactHeaders();
+
     return (
-        <section className="relative bg-neutral text-neutral-content py-16 lg:py-20">
-            <div className="container mx-auto px-6 lg:px-12">
-                <div className="max-w-4xl">
-                    {/* Kicker */}
-                    <p className="hero-kicker text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-6 scroll-reveal fade-up">
-                        <i className="fa-duotone fa-regular fa-users mr-2" />
-                        Recruiter Network
-                    </p>
-
-                    {/* Headline */}
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up">
-                            Find your next
-                        </span>{" "}
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up text-primary">
-                            recruiting
-                        </span>{" "}
-                        <span className="hero-headline-word inline-block scroll-reveal fade-up">
-                            partner.
-                        </span>
-                    </h1>
-
-                    {/* Subtitle */}
-                    <p className="hero-subtitle text-lg text-neutral-content/60 leading-relaxed max-w-xl mb-10 scroll-reveal fade-up">
-                        Discover and connect with top recruiters in the
-                        marketplace. Search by specialty, industry, and
-                        track record.
-                    </p>
-
-                    {/* Stats */}
-                    <div className="header-stat-bar flex flex-wrap gap-8 mt-8 scroll-reveal fade-up">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-users text-primary-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">{stats.total}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Recruiters</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-accent flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-circle-check text-accent-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">{stats.active}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Active</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-secondary flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-chart-bar text-secondary-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">{stats.avgPlacements}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Avg. Placements</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-base-300 flex items-center justify-center">
-                                <i className="fa-duotone fa-regular fa-star text-base-content" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black">{stats.topRated}</div>
-                                <div className="text-xs uppercase tracking-wider opacity-60">Top Rated</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Diagonal clip-path accent */}
-            <div
-                className="absolute top-0 right-0 bottom-0 w-1/3 bg-primary/5 hidden lg:block"
-                style={{
-                    clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
-                }}
-            />
-        </section>
+        <BaselPageHeader
+            icon="fa-users"
+            kicker="Recruiter Network"
+            headline={[{ text: "Find your next" }, { text: "recruiting", highlight: true }, { text: "partner." }]}
+            subtitle="Discover and connect with top recruiters in the marketplace. Search by specialty, industry, and track record."
+            stats={[
+                { value: stats.total, label: "Recruiters", icon: "fa-users", color: "primary" },
+                { value: stats.active, label: "Active", icon: "fa-circle-check", color: "accent" },
+                { value: stats.avgPlacements, label: "Avg. Placements", icon: "fa-chart-bar", color: "secondary" },
+                { value: stats.topRated, label: "Top Rated", icon: "fa-star", color: "base" },
+            ]}
+            isCompact={isCompact}
+            onToggle={toggleCompact}
+            isLoaded={isLoaded}
+        />
     );
 }

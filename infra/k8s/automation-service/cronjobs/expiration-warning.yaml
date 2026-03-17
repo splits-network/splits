@@ -2,113 +2,120 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: expiration-warning
-  namespace: splits-network
-  labels:
-    app: automation-service
-    component: cron
-    feature: expiration-warning
-    managed-by: splits-network
-spec:
-  # Run every 6 hours
-  schedule: "0 */6 * * *"
-
-  # Keep history of successful/failed jobs for debugging
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 5
-
-  # Prevent overlapping runs - if previous job is still running, skip this execution
-  concurrencyPolicy: Forbid
-
-  # Suspend can be set to true to temporarily disable the cron job
-  suspend: false
-
-  jobTemplate:
-    metadata:
-      labels:
+    name: expiration-warning
+    namespace: splits-network
+    labels:
         app: automation-service
-        component: cron-job
+        component: cron
         feature: expiration-warning
-    spec:
-      # Retry failed jobs up to 2 times with exponential backoff
-      backoffLimit: 2
+        managed-by: splits-network
+spec:
+    # Run every 6 hours
+    schedule: "0 */6 * * *"
 
-      # Job must complete within 15 minutes or it will be terminated
-      activeDeadlineSeconds: 900
+    # Keep history of successful/failed jobs for debugging
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 5
 
-      template:
+    # Prevent overlapping runs - if previous job is still running, skip this execution
+    concurrencyPolicy: Forbid
+
+    # Suspend can be set to true to temporarily disable the cron job
+    suspend: false
+
+    jobTemplate:
         metadata:
-          labels:
-            app: automation-service
-            component: cron-job
-            feature: expiration-warning
-          annotations:
-            prometheus.io/scrape: "true"
-            prometheus.io/port: "9090"
-            prometheus.io/path: "/metrics"
+            labels:
+                app: automation-service
+                component: cron-job
+                feature: expiration-warning
         spec:
-          restartPolicy: OnFailure
+            # Retry failed jobs up to 2 times with exponential backoff
+            backoffLimit: 2
 
-          # Service account with permissions to access secrets
-          serviceAccountName: automation-service
+            # Job must complete within 15 minutes or it will be terminated
+            activeDeadlineSeconds: 900
 
-          containers:
-          - name: expiration-warning
-            image: splits-network/automation-service:latest
-            imagePullPolicy: Always
+            template:
+                metadata:
+                    labels:
+                        app: automation-service
+                        component: cron-job
+                        feature: expiration-warning
+                    annotations:
+                        prometheus.io/scrape: "true"
+                        prometheus.io/port: "9090"
+                        prometheus.io/path: "/metrics"
+                spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
+                    restartPolicy: OnFailure
 
-            # Execute the expiration warning job
-            command: ["node"]
-            args: ["dist/jobs/expiration-warning.js"]
+                    # Service account with permissions to access secrets
+                    serviceAccountName: automation-service
 
-            # Resource allocation
-            resources:
-              requests:
-                cpu: "50m"
-                memory: "128Mi"
-              limits:
-                cpu: "250m"
-                memory: "256Mi"
+                    containers:
+                        - name: expiration-warning
+                          image: splits-network/automation-service:latest
+                          imagePullPolicy: Always
 
-            # Environment variables
-            env:
-              # Node environment
-              - name: NODE_ENV
-                value: "production"
+                          # Execute the expiration warning job
+                          command: ["node"]
+                          args: ["dist/jobs/expiration-warning.js"]
 
-              # Supabase configuration
-              - name: SUPABASE_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: supabase-credentials
-                    key: url
+                          # Resource allocation
+                          resources:
+                              requests:
+                                  cpu: "50m"
+                                  memory: "128Mi"
+                              limits:
+                                  cpu: "250m"
+                                  memory: "256Mi"
 
-              - name: SUPABASE_SERVICE_ROLE_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: supabase-credentials
-                    key: service-role-key
+                          # Environment variables
+                          env:
+                              # Node environment
+                              - name: NODE_ENV
+                                value: "production"
 
-              # RabbitMQ configuration
-              - name: RABBITMQ_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: rabbitmq-credentials
-                    key: url
+                              # Supabase configuration
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-credentials
+                                        key: url
 
-              # Service metadata
-              - name: SERVICE_NAME
-                value: "automation-service"
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-credentials
+                                        key: service-role-key
 
-              - name: SERVICE_VERSION
-                value: "1.0.0"
+                              # RabbitMQ configuration
+                              - name: RABBITMQ_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: rabbitmq-credentials
+                                        key: url
 
-            # Security context
-            securityContext:
-              runAsNonRoot: true
-              runAsUser: 1000
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
-              capabilities:
-                drop:
-                  - ALL
+                              # Service metadata
+                              - name: SERVICE_NAME
+                                value: "automation-service"
+
+                              - name: SERVICE_VERSION
+                                value: "1.0.0"
+
+                          # Security context
+                          securityContext:
+                              runAsNonRoot: true
+                              runAsUser: 1000
+                              allowPrivilegeEscalation: false
+                              readOnlyRootFilesystem: false
+                              capabilities:
+                                  drop:
+                                      - ALL

@@ -2,16 +2,17 @@
 
 import { Fragment } from "react";
 import type { Firm } from "../../types";
-import { formatCurrency } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { firmStatusBadgeColor } from "../shared/status-color";
 import {
     formatStatus,
     createdAgo,
     memberCountDisplay,
+    teamSizeDisplay,
 } from "../shared/helpers";
 import { FirmDetailLoader } from "../shared/firm-detail-loader";
 import { FirmActionsToolbar } from "../shared/actions-toolbar";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
+import { BaselBadge } from "@splits-network/basel-ui";
 
 export function TableRow({
     firm,
@@ -59,11 +60,13 @@ export function TableRow({
 
                 {/* Status */}
                 <td className="px-4 py-3">
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-sm uppercase tracking-[0.15em] font-bold ${statusColor(firm.status)}`}
+                    <BaselBadge
+                        color={firmStatusBadgeColor(firm.status)}
+                        variant="soft"
+                        size="sm"
                     >
                         {formatStatus(firm.status)}
-                    </span>
+                    </BaselBadge>
                 </td>
 
                 {/* Members */}
@@ -71,14 +74,20 @@ export function TableRow({
                     {memberCountDisplay(firm)}
                 </td>
 
-                {/* Placements */}
-                <td className="px-4 py-3 text-sm font-bold text-base-content">
-                    {firm.total_placements}
+                {/* Team Size */}
+                <td className="px-4 py-3 text-sm text-base-content/70">
+                    {teamSizeDisplay(firm.team_size_range)}
                 </td>
 
-                {/* Revenue */}
-                <td className="px-4 py-3 text-sm font-bold text-primary">
-                    {formatCurrency(firm.total_revenue)}
+                {/* Marketplace */}
+                <td className="px-4 py-3">
+                    <BaselBadge
+                        color={firm.marketplace_visible ? "success" : "neutral"}
+                        variant="soft"
+                        size="sm"
+                    >
+                        {firm.marketplace_visible ? "Listed" : "Unlisted"}
+                    </BaselBadge>
                 </td>
 
                 {/* Created */}

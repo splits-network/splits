@@ -87,13 +87,13 @@ export default function FirmProfileClient({ firm }: FirmProfileClientProps) {
             return;
         }
         if (!contactUserId) {
-            toast.error("Unable to contact this firm right now.");
+            toast.error("Couldn't reach this firm. Try again.");
             return;
         }
         try {
             const conversationId = await startChatConversation(getToken, contactUserId);
             setConnected(true);
-            toast.success("Chat started! Send a message to request partnership.");
+            toast.success("Chat started. Send a message to begin.");
             window.location.href = `/portal/messages?conversation=${conversationId}`;
         } catch {
             toast.error("Failed to start conversation. Please try again.");

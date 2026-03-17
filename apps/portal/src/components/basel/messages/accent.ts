@@ -8,7 +8,7 @@ export const ACCENT = [
     { bg: "bg-primary", text: "text-primary", border: "border-primary", bgLight: "bg-primary/10", textOnBg: "text-primary-content" },
     { bg: "bg-secondary", text: "text-secondary", border: "border-secondary", bgLight: "bg-secondary/10", textOnBg: "text-secondary-content" },
     { bg: "bg-accent", text: "text-accent", border: "border-accent", bgLight: "bg-accent/10", textOnBg: "text-accent-content" },
-    { bg: "bg-neutral", text: "text-neutral", border: "border-neutral", bgLight: "bg-neutral/10", textOnBg: "text-neutral-content" },
+    { bg: "bg-neutral", text: "text-neutral", border: "border-neutral", bgLight: "bg-neutral/10", textOnBg: "text-base-content" },
 ] as const;
 
 export type AccentClasses = (typeof ACCENT)[number];

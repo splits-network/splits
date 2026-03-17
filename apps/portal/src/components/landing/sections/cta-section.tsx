@@ -15,7 +15,7 @@ export function CTASection() {
             <section
                 ref={sectionRef}
                 id="pricing"
-                className="py-24 bg-neutral text-neutral-content overflow-hidden relative"
+                className="py-24 bg-base-300 text-base-content overflow-hidden relative"
             >
                 {/* Subtle background pattern */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -55,7 +55,7 @@ export function CTASection() {
                         </Link>
                     </div>
 
-                    <p className="scroll-reveal fade-in text-sm max-w-xl mx-auto text-neutral-content/60">
+                    <p className="scroll-reveal fade-in text-sm max-w-xl mx-auto text-base-content/60">
                         Join recruiters and companies building transparent
                         partnerships on Splits Network.
                     </p>

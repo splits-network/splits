@@ -2,7 +2,8 @@
 
 import type { Invitation } from "../../types";
 import { getDisplayStatus } from "../../types";
-import { statusColor, statusBorder } from "../shared/status-color";
+import { statusColorName, statusBorder } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     getInitials,
     isRecentInvitation,
@@ -78,14 +79,9 @@ export function SplitItem({
                         </>
                     )}
                 </span>
-                <span
-                    className={`text-sm uppercase tracking-[0.15em] font-bold px-2 py-0.5 ${statusColor(invitation)}`}
-                >
-                    <i
-                        className={`fa-duotone fa-regular ${status.icon} mr-1`}
-                    />
+                <BaselBadge color={statusColorName(invitation)} size="xs" variant="soft" icon={status.icon}>
                     {status.label}
-                </span>
+                </BaselBadge>
             </div>
             {candidate?.location && (
                 <div className="flex items-center gap-3 mt-1 pl-10">

@@ -219,7 +219,7 @@ export default function RoleListItem({
                         className={`badge badge-xs ${
                             item.status === "active"
                                 ? "badge-success"
-                                : "badge-neutral"
+                                : "badge-primary"
                         }`}
                     >
                         {item.status}

@@ -12,6 +12,7 @@ import { firmStatusBadgeColor } from "../shared/status-color";
 import { formatStatus, memberCountDisplay } from "../shared/helpers";
 import { BaselBadge } from "@splits-network/basel-ui";
 import TransferOwnershipModal from "../modals/transfer-ownership-modal";
+import SuspendFirmModal from "../modals/suspend-firm-modal";
 import { FirmProfileWizard } from "../modals/firm-profile-wizard";
 
 interface SettingsSectionProps {
@@ -23,6 +24,7 @@ interface SettingsSectionProps {
 export function SettingsSection({ firm, members, onRefresh }: SettingsSectionProps) {
     const { profile } = useUserProfile();
     const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showSuspendModal, setShowSuspendModal] = useState(false);
     const [showEditWizard, setShowEditWizard] = useState(false);
 
     // Check if current user is the firm owner or admin
@@ -47,7 +49,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                     </div>
                     <button
                         className="btn btn-sm btn-primary"
-                        style={{ borderRadius: 0 }}
+
                         onClick={() => setShowEditWizard(true)}
                     >
                         <i className="fa-duotone fa-regular fa-pen-to-square mr-2" />
@@ -63,7 +65,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-base-300">
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Firm ID
                         </p>
                         <p className="font-bold text-sm font-mono truncate">
@@ -71,7 +73,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Status
                         </p>
                         <BaselBadge color={firmStatusBadgeColor(firm.status)} variant="soft" size="sm">
@@ -79,7 +81,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </BaselBadge>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Created
                         </p>
                         <p className="font-bold text-sm">
@@ -87,7 +89,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Members
                         </p>
                         <p className="font-bold text-sm">
@@ -95,19 +97,19 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Total Placements
                         </p>
                         <p className="font-bold text-sm">
-                            {firm.total_placements}
+                            {firm.placement_stats?.total_placements ?? 0}
                         </p>
                     </div>
                     <div className="bg-base-100 p-4">
-                        <p className="text-sm uppercase tracking-[0.2em] text-base-content/40 mb-1">
+                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-1">
                             Total Revenue
                         </p>
                         <p className="font-bold text-sm">
-                            {formatCurrency(firm.total_revenue)}
+                            {formatCurrency(firm.placement_stats?.total_revenue ?? 0)}
                         </p>
                     </div>
                 </div>
@@ -133,7 +135,7 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                     </p>
                     <button
                         className="btn btn-sm btn-warning btn-outline"
-                        style={{ borderRadius: 0 }}
+
                         onClick={() => setShowTransferModal(true)}
                     >
                         <i className="fa-duotone fa-regular fa-arrow-right-arrow-left mr-2" />
@@ -142,26 +144,31 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                 </div>
             )}
 
-            {/* Section 4: Danger Zone */}
-            <div className="border-2 border-error/20 p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
-                    Danger Zone
-                </h3>
-                <p className="text-sm text-base-content/60 mb-4">
-                    Suspending a firm will disable all member access and pause
-                    active placements. This action can be reversed.
-                </p>
-                <button
-                    className="btn btn-sm btn-error btn-outline"
-                    style={{ borderRadius: 0 }}
-                    disabled
-                >
-                    <i className="fa-duotone fa-regular fa-ban mr-2" />
-                    {firm.status === "active"
-                        ? "Suspend Firm"
-                        : "Activate Firm"}
-                </button>
-            </div>
+            {/* Section 4: Danger Zone (owner only) */}
+            {isOwner && (
+                <div className="border-2 border-error/20 p-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-error mb-4">
+                        Danger Zone
+                    </h3>
+                    <p className="text-sm text-base-content/60 mb-4">
+                        {firm.status === "active"
+                            ? "Suspending a firm will disable all member access and pause active placements. This action can be reversed."
+                            : "This firm is currently suspended. Reactivating will restore member access and resume normal operations."}
+                    </p>
+                    <button
+                        className={`btn btn-sm ${firm.status === "active" ? "btn-error btn-outline" : "btn-success btn-outline"}`}
+
+                        onClick={() => setShowSuspendModal(true)}
+                    >
+                        <i
+                            className={`fa-duotone fa-regular ${firm.status === "active" ? "fa-ban" : "fa-check-circle"} mr-2`}
+                        />
+                        {firm.status === "active"
+                            ? "Suspend Firm"
+                            : "Activate Firm"}
+                    </button>
+                </div>
+            )}
 
             {/* Edit Profile Wizard */}
             <FirmProfileWizard
@@ -186,6 +193,23 @@ export function SettingsSection({ firm, members, onRefresh }: SettingsSectionPro
                         }}
                         firmId={firm.id}
                         members={members}
+                    />
+                )}
+            </ModalPortal>
+
+            {/* Suspend/Activate Firm Modal */}
+            <ModalPortal>
+                {showSuspendModal && (
+                    <SuspendFirmModal
+                        isOpen={showSuspendModal}
+                        onClose={() => setShowSuspendModal(false)}
+                        onSuccess={() => {
+                            setShowSuspendModal(false);
+                            onRefresh();
+                        }}
+                        firmId={firm.id}
+                        firmName={firm.name}
+                        currentStatus={firm.status as "active" | "suspended"}
                     />
                 )}
             </ModalPortal>
@@ -224,7 +248,7 @@ function AdminTakeRateSection({
                 admin_take_rate: takeRate,
             });
 
-            toast.success("Admin take rate updated");
+            toast.success("Take rate updated.");
             onSaved();
         } catch (err: any) {
             const message =
@@ -280,7 +304,7 @@ function AdminTakeRateSection({
                         <button
                             type="submit"
                             className="btn btn-sm btn-primary"
-                            style={{ borderRadius: 0 }}
+    
                             disabled={saving || !hasChanges}
                         >
                             <ButtonLoading

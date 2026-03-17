@@ -16,12 +16,14 @@ import {
     CandidateDeclinedData,
     OpportunityExpiredData,
 } from '../../templates/recruiter-submission';
+import type { EmailSource } from '../../templates/base';
 
 export class RecruiterSubmissionEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -37,8 +39,12 @@ export class RecruiterSubmissionEmailService {
             userId?: string;
             applicationId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId ?? null,
@@ -46,7 +52,7 @@ export class RecruiterSubmissionEmailService {
             subject,
             template: 'custom',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,
@@ -55,7 +61,7 @@ export class RecruiterSubmissionEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -106,6 +112,7 @@ export class RecruiterSubmissionEmailService {
                 jobTitle: data.jobTitle,
                 companyName: data.companyName,
             },
+            source: 'candidate',
         });
     }
 
@@ -174,6 +181,7 @@ export class RecruiterSubmissionEmailService {
                 jobTitle: data.jobTitle,
                 companyName: data.companyName,
             },
+            source: 'candidate',
         });
     }
 }

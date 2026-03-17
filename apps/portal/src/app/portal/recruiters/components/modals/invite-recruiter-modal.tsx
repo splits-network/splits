@@ -49,7 +49,6 @@ export default function InviteRecruiterModal({
     const [permissions, setPermissions] = useState<RecruiterCompanyPermissions>({
         ...DEFAULT_PERMISSIONS,
     });
-    const [relationshipType, setRelationshipType] = useState<"recruiter" | "sourcer">("recruiter");
     const [message, setMessage] = useState("");
     const [agreeTerms, setAgreeTerms] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,11 +58,11 @@ export default function InviteRecruiterModal({
 
     const handleSubmit = async () => {
         if (!selectedCompanyId) {
-            toast.error("Please select a company");
+            toast.error("Select a company to continue.");
             return;
         }
         if (!agreeTerms) {
-            toast.error("Please acknowledge the agreement");
+            toast.error("Acknowledge the agreement to continue.");
             return;
         }
 
@@ -71,7 +70,7 @@ export default function InviteRecruiterModal({
             setIsSubmitting(true);
             const token = await getToken();
             if (!token) {
-                toast.error("Not authenticated");
+                toast.error("Sign in to continue.");
                 return;
             }
 
@@ -79,7 +78,7 @@ export default function InviteRecruiterModal({
             await client.post("/recruiter-companies/invite", {
                 company_id: selectedCompanyId,
                 recruiter_id: recruiter.id,
-                relationship_type: relationshipType,
+                relationship_type: "recruiter",
                 permissions,
                 message: message.trim() || undefined,
             });
@@ -100,7 +99,7 @@ export default function InviteRecruiterModal({
 
     const handleNext = () => {
         if (currentStep === 1 && !selectedCompanyId) {
-            toast.error("Please select a company before continuing");
+            toast.error("Select a company to continue.");
             return;
         }
         setCurrentStep((s) => Math.min(s + 1, 3));
@@ -254,7 +253,7 @@ export default function InviteRecruiterModal({
             {currentStep === 1 && (
                 <div>
                     <h4 className="text-lg font-black tracking-tight mb-1">
-                        Configure Relationship
+                        Configure Permissions
                     </h4>
                     <p className="text-sm text-base-content/50 mb-6">
                         Select the company and configure what{" "}
@@ -295,57 +294,6 @@ export default function InviteRecruiterModal({
                                 ))}
                             </select>
                         )}
-                    </fieldset>
-
-                    {/* Relationship Type */}
-                    <fieldset className="fieldset mb-6">
-                        <legend className="fieldset-legend font-bold uppercase text-sm tracking-wider">
-                            Relationship Type
-                        </legend>
-                        <div className="flex gap-3">
-                            <label
-                                className={`flex-1 flex items-center gap-3 p-3 border cursor-pointer transition-all ${
-                                    relationshipType === "recruiter"
-                                        ? "border-primary bg-primary/5"
-                                        : "border-base-300 bg-base-200"
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="relationship_type"
-                                    className="radio radio-primary radio-sm"
-                                    checked={relationshipType === "recruiter"}
-                                    onChange={() => setRelationshipType("recruiter")}
-                                />
-                                <div>
-                                    <p className="text-sm font-bold">Recruiter</p>
-                                    <p className="text-sm text-base-content/50">
-                                        Full recruiting partner
-                                    </p>
-                                </div>
-                            </label>
-                            <label
-                                className={`flex-1 flex items-center gap-3 p-3 border cursor-pointer transition-all ${
-                                    relationshipType === "sourcer"
-                                        ? "border-primary bg-primary/5"
-                                        : "border-base-300 bg-base-200"
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="relationship_type"
-                                    className="radio radio-primary radio-sm"
-                                    checked={relationshipType === "sourcer"}
-                                    onChange={() => setRelationshipType("sourcer")}
-                                />
-                                <div>
-                                    <p className="text-sm font-bold">Sourcer</p>
-                                    <p className="text-sm text-base-content/50">
-                                        Candidate sourcing only
-                                    </p>
-                                </div>
-                            </label>
-                        </div>
                     </fieldset>
 
                     {/* Permissions */}
@@ -397,10 +345,6 @@ export default function InviteRecruiterModal({
                         <div className="flex items-center gap-2 text-sm">
                             <i className="fa-duotone fa-regular fa-building w-5 text-center text-base-content/40" />
                             <span>{selectedCompanyName}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                            <i className="fa-duotone fa-regular fa-handshake w-5 text-center text-base-content/40" />
-                            <span className="capitalize">{relationshipType}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <i className="fa-duotone fa-regular fa-shield-check w-5 text-center text-base-content/40" />

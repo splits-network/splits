@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: livekit-egress
+    namespace: splits-network
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: livekit-egress
+    template:
+        metadata:
+            labels:
+                app: livekit-egress
+        spec:
+            containers:
+                - name: livekit-egress
+                  image: livekit/egress:v1.8
+                  env:
+                      - name: LIVEKIT_API_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: livekit-secrets
+                                key: livekit-api-key
+                      - name: LIVEKIT_API_SECRET
+                        valueFrom:
+                            secretKeyRef:
+                                name: livekit-secrets
+                                key: livekit-api-secret
+                      - name: EGRESS_CONFIG_BODY
+                        value: |
+                            {
+                                "api_key": "$(LIVEKIT_API_KEY)",
+                                "api_secret": "$(LIVEKIT_API_SECRET)",
+                                "ws_url": "ws://livekit-server:80",
+                                "redis": {
+                                    "address": "redis:6379"
+                                },
+                                "temp_path": "/tmp/egress"
+                            }
+                  volumeMounts:
+                      - name: egress-tmp
+                        mountPath: /tmp/egress
+                  resources:
+                      requests:
+                          cpu: 1000m
+                          memory: 1Gi
+                      limits:
+                          cpu: 4000m
+                          memory: 8Gi
+            volumes:
+                - name: egress-tmp
+                  emptyDir:
+                      sizeLimit: 10Gi

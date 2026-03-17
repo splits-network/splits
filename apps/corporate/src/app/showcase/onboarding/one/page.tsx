@@ -85,7 +85,7 @@ export default function OnboardingOne() {
     return (
         <main
             ref={mainRef}
-            className="min-h-screen bg-neutral text-neutral-content flex"
+            className="min-h-screen bg-base-300 text-base-content flex"
         >
             {/* Left Panel - Branding */}
             <div className="hidden lg:flex lg:w-2/5 flex-col justify-between p-12 relative">
@@ -100,7 +100,7 @@ export default function OnboardingOne() {
                         <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center font-black text-lg">
                             S
                         </div>
-                        <p className="text-sm font-semibold text-neutral-content/40 mt-3">
+                        <p className="text-sm font-semibold text-base-content/40 mt-3">
                             Splits Network
                         </p>
                     </div>
@@ -109,7 +109,7 @@ export default function OnboardingOne() {
                         <br />
                         <span className="text-primary">Start earning.</span>
                     </h2>
-                    <p className="text-sm text-neutral-content/40 leading-relaxed max-w-sm">
+                    <p className="text-sm text-base-content/40 leading-relaxed max-w-sm">
                         Set up your recruiter profile in minutes. We will match
                         you with companies and roles that fit your expertise.
                     </p>
@@ -120,10 +120,10 @@ export default function OnboardingOne() {
                     {steps.map((step) => (
                         <div
                             key={step.id}
-                            className={`onboard-step-indicator scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${currentStep === step.id ? "bg-neutral-content/10" : currentStep > step.id ? "opacity-60" : "opacity-30"}`}
+                            className={`onboard-step-indicator scroll-reveal fade-up flex items-center gap-3 px-4 py-3 transition-all ${currentStep === step.id ? "" : currentStep > step.id ? "opacity-60" : "opacity-30"}`}
                         >
                             <div
-                                className={`w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0 ${currentStep > step.id ? "bg-success text-success-content" : currentStep === step.id ? "bg-primary text-primary-content" : "bg-neutral-content/10"}`}
+                                className={`w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0 ${currentStep > step.id ? "bg-success text-success-content" : currentStep === step.id ? "bg-primary text-primary-content" : ""}`}
                             >
                                 {currentStep > step.id ? (
                                     <i className="fa-solid fa-check" />

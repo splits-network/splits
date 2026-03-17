@@ -5,7 +5,6 @@
 
 import { ApplicationRepository } from './repository';
 import { ApplicationFilters, ApplicationUpdate } from './types';
-import { autoAssignRecruiter } from './recruiter-auto-assign';
 import { IEventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
@@ -119,7 +118,9 @@ export class ApplicationServiceV2 {
 
         // Auto-resolve candidate_id from clerkUserId if not provided
         let candidateId = data.candidate_id;
-        let recruiterId = data.candidate_recruiter_id;
+        let candidateRecruiterId = data.candidate_recruiter_id || null;
+        let companyRecruiterId: string | null = null;
+        let applicationSource = data.application_source || 'direct';
         let identityUserId = undefined;
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
@@ -129,45 +130,70 @@ export class ApplicationServiceV2 {
             candidateId = userContext.candidateId;
         }
 
-        if (!recruiterId && userContext?.recruiterId) {
-            recruiterId = userContext.recruiterId;
-        }
-
-        // If still no recruiterId, look up existing recruiter-candidate relationship
-        if (!recruiterId && candidateId) {
-            const activeRecruiter = await this.repository.findActiveRecruiterForCandidate(candidateId);
-            if (activeRecruiter && activeRecruiter.status === 'active') {
-                recruiterId = activeRecruiter.id;
-            }
-        }
-
         if (!candidateId || !userContext?.identityUserId) {
             throw new Error('Candidate ID & Identity User ID is required and could not be resolved from user context');
         }
 
-        // Enforce can_submit_candidates permission for company jobs
-        if (recruiterId) {
-            const { data: job } = await this.repository.getSupabase()
-                .from('jobs')
-                .select('company_id, source_firm_id')
-                .eq('id', data.job_id)
-                .single();
+        // Fetch the job to determine context (company job vs firm job)
+        const { data: job } = await this.repository.getSupabase()
+            .from('jobs')
+            .select('company_id, source_firm_id')
+            .eq('id', data.job_id)
+            .single();
 
-            if (job?.company_id && !job?.source_firm_id) {
-                // Company job: check recruiter has can_submit_candidates permission
+        if (!job) {
+            throw new Error(`Job ${data.job_id} not found`);
+        }
+
+        const isCompanyJob = !!job.company_id && !job.source_firm_id;
+        const isRecruiterUser = !!userContext.recruiterId;
+
+        if (isRecruiterUser && userContext.recruiterId) {
+            // Determine if this recruiter is a company recruiter for this job's company
+            let isCompanyRecruiter = false;
+            if (isCompanyJob && job.company_id) {
                 const { data: relationship } = await this.repository.getSupabase()
                     .from('recruiter_companies')
                     .select('permissions')
-                    .eq('recruiter_id', recruiterId)
+                    .eq('recruiter_id', userContext.recruiterId)
                     .eq('company_id', job.company_id)
                     .eq('status', 'active')
                     .maybeSingle();
 
-                if (!relationship?.permissions?.can_submit_candidates) {
+                isCompanyRecruiter = !!relationship;
+
+                // Check can_submit_candidates permission if relationship exists
+                if (relationship && !relationship.permissions?.can_submit_candidates) {
                     throw new Error('Forbidden: You do not have permission to submit candidates for this company');
                 }
             }
+
+            if (isCompanyRecruiter) {
+                // Company recruiter submitting: set company_recruiter_id on application
+                companyRecruiterId = userContext.recruiterId;
+                applicationSource = 'company_recruiter';
+                // candidate_recruiter_id stays NULL — candidate picks their own later
+                candidateRecruiterId = null;
+            } else {
+                // Non-company recruiter: must have active RTR with candidate
+                const { data: rtrRelationship } = await this.repository.getSupabase()
+                    .from('recruiter_candidates')
+                    .select('id')
+                    .eq('recruiter_id', userContext.recruiterId)
+                    .eq('candidate_id', candidateId)
+                    .eq('status', 'active')
+                    .eq('consent_given', true)
+                    .maybeSingle();
+
+                if (!rtrRelationship) {
+                    throw new Error('Forbidden: You must have an active representation agreement (RTR) with this candidate before submitting them');
+                }
+
+                candidateRecruiterId = userContext.recruiterId;
+                applicationSource = 'recruiter';
+            }
         }
+        // If candidate is applying directly, candidateRecruiterId comes from data.candidate_recruiter_id (their choice, default null)
 
         // Extract document-related fields that shouldn't be persisted to applications table
         const { document_ids, ...applicationData } = data;
@@ -175,13 +201,15 @@ export class ApplicationServiceV2 {
         // Determine initial stage:
         // - recruiter_proposed: Recruiter submitted on behalf of candidate
         // - ai_review: Direct candidate application (no recruiter)
-        const hasRecruiter = !!recruiterId;
+        const hasRecruiter = !!candidateRecruiterId || !!companyRecruiterId;
         const initialStage = data.stage || (hasRecruiter ? 'recruiter_proposed' : 'ai_review');
 
         const application = await this.repository.createApplication({
             ...applicationData,
             candidate_id: candidateId,
-            candidate_recruiter_id: recruiterId,
+            candidate_recruiter_id: candidateRecruiterId,
+            company_recruiter_id: companyRecruiterId,
+            application_source: applicationSource,
             stage: initialStage,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -206,13 +234,15 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: application.id,
             action: 'created',
-            performed_by_user_id: identityUserId || 'system',
+            performed_by_user_id: identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: hasRecruiter ? 'recruiter' : 'candidate',
             new_value: {
                 stage: application.stage,
                 job_id: application.job_id,
                 candidate_id: candidateId,
-                recruiter_id: recruiterId || null,
+                candidate_recruiter_id: candidateRecruiterId || null,
+                company_recruiter_id: companyRecruiterId || null,
+                application_source: applicationSource,
             },
             metadata: {
                 has_recruiter: hasRecruiter,
@@ -228,7 +258,9 @@ export class ApplicationServiceV2 {
                     application_id: application.id,
                     job_id: application.job_id,
                     candidate_id: candidateId,
-                    recruiter_id: recruiterId || null,
+                    candidate_recruiter_id: candidateRecruiterId || null,
+                    company_recruiter_id: companyRecruiterId || null,
+                    application_source: applicationSource,
                     has_recruiter: hasRecruiter,
                     stage: application.stage,
                     created_by: identityUserId,
@@ -307,7 +339,9 @@ export class ApplicationServiceV2 {
                     .eq('status', 'active')
                     .maybeSingle();
 
-                if (!relationship?.permissions?.can_advance_candidates) {
+                // Only block if an explicit relationship exists with can_advance_candidates denied.
+                // No relationship = open marketplace job, recruiter can advance freely.
+                if (relationship && !relationship.permissions?.can_advance_candidates) {
                     throw new Error('Forbidden: You do not have permission to advance candidates for this company');
                 }
             }
@@ -357,7 +391,7 @@ export class ApplicationServiceV2 {
             await this.repository.createAuditLog({
                 application_id: id,
                 action: 'stage_changed',
-                performed_by_user_id: userContext.identityUserId || 'system',
+                performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
                 performed_by_role: userRole || this.resolveRole(userContext),
                 old_value: { stage: currentApplication.stage },
                 new_value: { stage: updates.stage },
@@ -376,7 +410,7 @@ export class ApplicationServiceV2 {
             try {
                 // Stage changed event - other services listen and react to stages they care about
                 if (updates.stage) {
-                    await this.eventPublisher.publish('application.stage_changed', {
+                    const stageChangedPayload: Record<string, any> = {
                         application_id: id,
                         job_id: updatedApplication.job_id,
                         candidate_id: updatedApplication.candidate_id,
@@ -384,7 +418,17 @@ export class ApplicationServiceV2 {
                         old_stage: currentApplication.stage,
                         new_stage: updates.stage,
                         changed_by: userContext.identityUserId,
-                    });
+                    };
+
+                    // Enrich with financial data for offer stage transitions
+                    if (updates.stage === 'offer') {
+                        const job = currentApplication.job;
+                        stageChangedPayload.salary = updatedApplication.salary || null;
+                        stageChangedPayload.fee_percentage = job?.fee_percentage || null;
+                        stageChangedPayload.guarantee_days = job?.guarantee_days ?? 90;
+                    }
+
+                    await this.eventPublisher.publish('application.stage_changed', stageChangedPayload);
                 }
 
                 // Generic update event
@@ -604,7 +648,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: data.application_id,
             action: 'ai_review_completed',
-            performed_by_user_id: 'system',
+            performed_by_user_id: '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'system',
             old_value: { stage: 'ai_review' },
             new_value: { stage: 'ai_reviewed' },
@@ -662,7 +706,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'returned_to_draft',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: userContext.recruiterId ? 'recruiter' : 'candidate',
             old_value: { stage: application.stage },
             new_value: { stage: 'draft' },
@@ -716,7 +760,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: isRetrigger ? 'ai_review_retriggered' : 'ai_review_started',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: this.resolveRole(userContext),
             old_value: { stage: application.stage },
             new_value: { stage: 'ai_review' },
@@ -782,7 +826,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'submitted',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { stage: application.stage },
             new_value: { stage: nextStage },
@@ -890,7 +934,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: application.id,
             action: 'recruiter_proposed',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'recruiter',
             new_value: {
                 stage: 'recruiter_proposed',
@@ -950,7 +994,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'proposal_accepted',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { stage: 'recruiter_proposed' },
             new_value: { stage: 'draft' },
@@ -1006,7 +1050,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'offer_accepted',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { accepted_by_candidate: false },
             new_value: { accepted_by_candidate: true },
@@ -1067,7 +1111,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'hired',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'company',
             old_value: { stage: application.stage },
             new_value: {
@@ -1077,8 +1121,22 @@ export class ApplicationServiceV2 {
             },
         });
 
-        // Publish stage changed event
+        // Publish stage changed event enriched with financial data
         if (this.eventPublisher) {
+            // Look up job for fee_percentage and guarantee_days
+            const job = await this.repository.getJobById(application.job_id);
+            const feePercentage = job?.fee_percentage || null;
+            const guaranteeDays = job?.guarantee_days ?? 90;
+            const startDate = body.start_date || new Date().toISOString().split('T')[0];
+
+            // Compute guarantee expiration from start_date + guarantee_days
+            let guaranteeExpiresAt: string | null = null;
+            if (guaranteeDays > 0) {
+                const expirationDate = new Date(startDate);
+                expirationDate.setDate(expirationDate.getDate() + guaranteeDays);
+                guaranteeExpiresAt = expirationDate.toISOString().split('T')[0];
+            }
+
             await this.eventPublisher.publish('application.stage_changed', {
                 application_id: applicationId,
                 job_id: application.job_id,
@@ -1087,6 +1145,12 @@ export class ApplicationServiceV2 {
                 old_stage: application.stage,
                 new_stage: 'hired',
                 changed_by: userContext.identityUserId,
+                salary: body.salary,
+                start_date: startDate,
+                fee_percentage: feePercentage,
+                placement_fee: feePercentage ? Math.round((body.salary * feePercentage) / 100) : null,
+                guarantee_days: guaranteeDays,
+                guarantee_expires_at: guaranteeExpiresAt,
             });
         }
 
@@ -1097,13 +1161,12 @@ export class ApplicationServiceV2 {
      * Request pre-screen for an application
      * Company requests a company recruiter to screen a candidate before proceeding.
      *
-     * Selection logic (3-tier):
-     * 1. Job already has company_recruiter_id → use that recruiter
-     * 2. Job has no company recruiter but company has recruiters → pick from company pool
-     * 3. Company has no recruiters → pick from platform pool, create recruiter_companies relationship
+     * Selection logic:
+     * 1. Application already has company_recruiter_id → use that recruiter
+     * 2. Company user explicitly picks a recruiter → use that
+     * 3. Auto-assign from company recruiter pool
      *
-     * The recruiter is set as company_recruiter_id on the JOB (not candidate_recruiter_id
-     * on the application) to preserve correct split economics.
+     * The recruiter is set as company_recruiter_id on the APPLICATION (per-application attribution).
      */
     async requestPrescreen(
         applicationId: string,
@@ -1117,56 +1180,47 @@ export class ApplicationServiceV2 {
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
 
-        // Check if job already has a company recruiter assigned
-        const { data: job } = await this.supabase
-            .from('jobs')
-            .select('id, company_recruiter_id')
-            .eq('id', application.job_id)
-            .single();
-
-        if (!job) {
-            throw new Error('Job not found');
-        }
-
         let assignedRecruiterId: string;
         let autoAssign = false;
-        let createdCompanyRelationship = false;
 
-        if (job.company_recruiter_id) {
-            // Tier 1: Job already has a company recruiter
-            assignedRecruiterId = job.company_recruiter_id;
+        if (application.company_recruiter_id) {
+            // Application already has a company recruiter assigned
+            assignedRecruiterId = application.company_recruiter_id;
         } else if (body.recruiter_id) {
-            // Tier 2: Company user explicitly picked a recruiter
+            // Company user explicitly picked a recruiter
             assignedRecruiterId = body.recruiter_id;
         } else {
-            // Auto-assign: try company recruiters first, then platform pool
+            // Auto-assign from company recruiter pool
             autoAssign = true;
-            const result = await autoAssignRecruiter(this.supabase, body.company_id);
-            if (!result) {
-                throw new Error('No available recruiters for auto-assignment');
+            const { data: companyRecruiters } = await this.supabase
+                .from('recruiter_companies')
+                .select('recruiter_id, recruiter:recruiters!inner(status)')
+                .eq('company_id', body.company_id)
+                .eq('status', 'active');
+
+            const activeRecruiterIds = (companyRecruiters || [])
+                .filter((rc: any) => rc.recruiter?.status === 'active')
+                .map((rc: any) => rc.recruiter_id);
+
+            if (activeRecruiterIds.length === 0) {
+                throw new Error('No available company recruiters for auto-assignment');
             }
-            assignedRecruiterId = result.recruiterId;
-            createdCompanyRelationship = result.createdRelationship;
+
+            // Pick first available (simple selection — can be enhanced later)
+            assignedRecruiterId = activeRecruiterIds[0];
         }
 
-        // Set company_recruiter_id on the JOB (not candidate_recruiter_id on application)
-        if (!job.company_recruiter_id) {
-            await this.supabase
-                .from('jobs')
-                .update({ company_recruiter_id: assignedRecruiterId, updated_at: new Date().toISOString() })
-                .eq('id', application.job_id);
-        }
-
-        // Move application to screen stage (do NOT set candidate_recruiter_id)
+        // Set company_recruiter_id on the APPLICATION
         const updated = await this.repository.updateApplication(applicationId, {
             stage: 'screen',
+            company_recruiter_id: assignedRecruiterId,
         });
 
         // Create audit log entry
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'prescreen_requested',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'company',
             new_value: {
                 stage: 'screen',
@@ -1176,7 +1230,6 @@ export class ApplicationServiceV2 {
             metadata: {
                 company_id: body.company_id,
                 has_message: !!body.message,
-                created_company_relationship: createdCompanyRelationship,
             },
         });
 
@@ -1230,7 +1283,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'proposal_declined',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: 'candidate',
             old_value: { stage: 'recruiter_proposed' },
             new_value: {
@@ -1290,7 +1343,7 @@ export class ApplicationServiceV2 {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'reactivated',
-            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_user_id: userContext.identityUserId || '00000000-0000-0000-0000-000000000000',
             performed_by_role: userContext.isPlatformAdmin ? 'admin' : 'recruiter',
             old_value: { expired_at: application.expired_at },
             new_value: { expired_at: null },

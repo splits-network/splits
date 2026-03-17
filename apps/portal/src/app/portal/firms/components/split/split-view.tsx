@@ -26,7 +26,7 @@ export function SplitView({
             >
                 {/* Left list -- hidden on mobile when a firm is selected */}
                 <div
-                    className={`w-full md:w-1/5 border-r-2 border-base-300 overflow-y-auto ${
+                    className={`w-full md:w-1/4 border-r-2 border-base-300 overflow-y-auto ${
                         selectedId ? "hidden md:block" : "block"
                     }`}
                 >
@@ -43,7 +43,7 @@ export function SplitView({
                 {/* Right detail -- MobileDetailOverlay handles mobile portal */}
                 <MobileDetailOverlay
                     isOpen={!!selectedFirm}
-                    className="md:w-4/5 w-full bg-base-100"
+                    className="md:w-3/4 w-full bg-base-100"
                 >
                     {selectedFirm ? (
                         <FirmDetailLoader

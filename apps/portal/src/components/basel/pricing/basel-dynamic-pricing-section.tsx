@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { BaselPricingCardGrid } from "./basel-pricing-card-grid";
 import { BaselBillingToggle } from "./basel-billing-toggle";
 import type { Plan } from "@/components/pricing/types";
+import { apiClient } from "@/lib/api-client";
 
 interface BaselDynamicPricingSectionProps {
     showBillingToggle?: boolean;
@@ -32,23 +33,7 @@ export function BaselDynamicPricingSection({
                 setLoading(true);
                 setError(null);
 
-                const response = await fetch(
-                    "/api/v2/plans?status=active&limit=50",
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    },
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        `Failed to fetch plans: ${response.status} ${response.statusText}`,
-                    );
-                }
-
-                const result = await response.json();
+                const result = await apiClient.get("/public/plans?status=active&limit=50");
 
                 if (result?.data) {
                     const activePlans = (result.data || [])

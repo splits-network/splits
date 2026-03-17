@@ -10,12 +10,12 @@ interface UseApplicationActionsOptions {
 }
 
 interface UseApplicationActionsReturn {
-    submitToAiReview: (id: string) => Promise<void>;
-    submitApplication: (id: string) => Promise<void>;
-    returnToDraft: (id: string) => Promise<void>;
-    backToDraft: (id: string) => Promise<void>;
-    withdraw: (id: string) => Promise<void>;
-    acceptOffer: (id: string) => Promise<void>;
+    submitToAiReview: (id: string) => Promise<boolean>;
+    submitApplication: (id: string) => Promise<boolean>;
+    returnToDraft: (id: string) => Promise<boolean>;
+    backToDraft: (id: string) => Promise<boolean>;
+    withdraw: (id: string) => Promise<boolean>;
+    acceptOffer: (id: string) => Promise<boolean>;
     declineProposal: (id: string, reason: string, details?: string) => Promise<void>;
     loading: string | null;
     error: string | null;
@@ -44,12 +44,14 @@ export function useApplicationActions(
         try {
             const client = await getClient();
             await client.post(`/applications/${id}/trigger-ai-review`, {});
-            toast.success("Application submitted for AI review");
+            toast.success("Application submitted for AI review.");
             options?.onSuccess?.();
+            return true;
         } catch (err: any) {
             const msg = err?.message || "Failed to submit for AI review";
             setError(msg);
             toast.error(msg);
+            return false;
         } finally {
             setLoading(null);
         }
@@ -64,10 +66,12 @@ export function useApplicationActions(
             await client.post(`/applications/${id}/submit`, {});
             toast.success("Application submitted successfully");
             options?.onSuccess?.();
+            return true;
         } catch (err: any) {
             const msg = err?.message || "Failed to submit application";
             setError(msg);
             toast.error(msg);
+            return false;
         } finally {
             setLoading(null);
         }
@@ -80,12 +84,14 @@ export function useApplicationActions(
         try {
             const client = await getClient();
             await client.post(`/applications/${id}/return-to-draft`, {});
-            toast.success("Application returned to draft");
+            toast.success("Application returned to draft.");
             options?.onSuccess?.();
+            return true;
         } catch (err: any) {
             const msg = err?.message || "Failed to return to draft";
             setError(msg);
             toast.error(msg);
+            return false;
         } finally {
             setLoading(null);
         }
@@ -106,12 +112,14 @@ export function useApplicationActions(
                 visibility: "shared",
                 message_text: "Candidate moved application back to draft for edits",
             });
-            toast.success("Application moved to draft");
+            toast.success("Application moved to draft.");
             options?.onSuccess?.();
+            return true;
         } catch (err: any) {
             const msg = err?.message || "Failed to move to draft";
             setError(msg);
             toast.error(msg);
+            return false;
         } finally {
             setLoading(null);
         }
@@ -132,12 +140,14 @@ export function useApplicationActions(
                 visibility: "shared",
                 message_text: "Candidate withdrew application",
             });
-            toast.success("Application withdrawn");
+            toast.success("Application withdrawn.");
             options?.onSuccess?.();
+            return true;
         } catch (err: any) {
             const msg = err?.message || "Failed to withdraw application";
             setError(msg);
             toast.error(msg);
+            return false;
         } finally {
             setLoading(null);
         }
@@ -152,10 +162,12 @@ export function useApplicationActions(
             await client.post(`/applications/${id}/accept-offer`, {});
             toast.success("Offer accepted!");
             options?.onSuccess?.();
+            return true;
         } catch (err: any) {
             const msg = err?.message || "Failed to accept offer";
             setError(msg);
             toast.error(msg);
+            return false;
         } finally {
             setLoading(null);
         }
@@ -186,7 +198,7 @@ export function useApplicationActions(
                 }
             }
 
-            toast.success("Proposal declined");
+            toast.success("Proposal declined.");
             options?.onSuccess?.();
         } catch (err: any) {
             const msg = err?.message || "Failed to decline proposal";

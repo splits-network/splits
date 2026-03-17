@@ -3,23 +3,23 @@
  * Uses DaisyUI semantic tokens only.
  */
 
+import type { BaselSemanticColor } from "@splits-network/basel-ui";
 import type { Invitation } from "../../types";
 
 export type ViewMode = "table" | "grid" | "split";
 
-/** Invitation status -> DaisyUI semantic badge/text classes */
-export function statusColor(invitation: Invitation): string {
+/** Invitation status -> BaselSemanticColor for use with BaselBadge */
+export function statusColorName(invitation: Invitation): BaselSemanticColor {
     const isExpired =
         invitation.invitation_expires_at &&
         new Date(invitation.invitation_expires_at) < new Date();
 
-    if (invitation.consent_given) return "bg-success/15 text-success";
-    if (invitation.declined_at) return "bg-error/15 text-error";
+    if (invitation.consent_given) return "success";
+    if (invitation.declined_at) return "error";
     if (invitation.status === "terminated" || invitation.status === "cancelled")
-        return "bg-base-content/15 text-base-content/50";
-    if (invitation.status === "expired" || isExpired)
-        return "bg-warning/15 text-warning";
-    return "bg-info/15 text-info";
+        return "neutral";
+    if (invitation.status === "expired" || isExpired) return "warning";
+    return "info";
 }
 
 /** Invitation status -> DaisyUI badge class for PanelHeader */

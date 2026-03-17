@@ -1,7 +1,8 @@
 "use client";
 
 import type { CompanyInvitation } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { statusColorName } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
 import {
     formatStatus,
     createdAgo,
@@ -61,11 +62,9 @@ export function SplitItem({
                 <span className="text-sm font-mono font-bold tracking-wider text-base-content/70">
                     {invitation.invite_code}
                 </span>
-                <span
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(invitation.status)}`}
-                >
+                <BaselBadge color={statusColorName(invitation.status)} size="xs" variant="soft">
                     {formatStatus(invitation.status)}
-                </span>
+                </BaselBadge>
             </div>
 
             {/* Row 4: days left + tags */}

@@ -18,6 +18,8 @@ import { SpeedMenu, type SpeedDialAction } from "@splits-network/basel-ui";
 
 const BACK_TO_DRAFT_STAGES = [
     "ai_review",
+    "gpt_review",
+    "ai_failed",
     "ai_reviewed",
     "recruiter_request",
     "recruiter_review",
@@ -25,7 +27,7 @@ const BACK_TO_DRAFT_STAGES = [
     "rejected",
 ];
 
-const SUBMITTABLE_STAGES = ["draft", "ai_reviewed"];
+const SUBMITTABLE_STAGES = ["draft", "ai_reviewed", "ai_failed"];
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
 
@@ -63,20 +65,29 @@ export default function ActionsToolbar({
     // Decline modal state
     const [showDeclineModal, setShowDeclineModal] = useState(false);
 
+    // Optimistic stage override — hides buttons immediately after action succeeds
+    const [optimisticStage, setOptimisticStage] = useState<string | null>(null);
+    const stage = optimisticStage ?? item.stage;
+
+    // Reset optimistic stage when item.stage changes (parent re-fetched)
+    useEffect(() => {
+        setOptimisticStage(null);
+    }, [item.stage]);
+
     // Application actions hook
     const actions = useApplicationActions({ onSuccess: onStageChange });
 
     // Derived state
     const recruiterUserId = item.recruiter?.user?.id;
-    const canEdit = item.stage === "draft";
-    const canBackToDraft = BACK_TO_DRAFT_STAGES.includes(item.stage);
-    const canSubmit = SUBMITTABLE_STAGES.includes(item.stage);
-    const canWithdraw = WITHDRAWABLE_STAGES.includes(item.stage);
-    const isProposal = item.stage === "recruiter_proposed";
+    const canEdit = stage === "draft" || stage === "ai_failed";
+    const canBackToDraft = BACK_TO_DRAFT_STAGES.includes(stage);
+    const canSubmit = SUBMITTABLE_STAGES.includes(stage);
+    const canWithdraw = WITHDRAWABLE_STAGES.includes(stage);
+    const isProposal = stage === "recruiter_proposed";
     const isOffer =
-        item.stage === "offer" && !item.accepted_by_candidate;
+        stage === "offer" && !item.accepted_by_candidate;
     const hasAcceptedOffer =
-        item.stage === "offer" && !!item.accepted_by_candidate;
+        stage === "offer" && !!item.accepted_by_candidate;
     const isJobClosed = ["closed", "filled", "cancelled"].includes(
         item.job?.status || "",
     );
@@ -138,7 +149,7 @@ export default function ActionsToolbar({
             router.push(`/portal/messages?conversationId=${conversationId}`);
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Failed to start chat");
+            toast.error(err?.message || "Couldn't start conversation. Try again.");
         } finally {
             setStartingChat(false);
         }
@@ -146,30 +157,30 @@ export default function ActionsToolbar({
 
     // Submit handler
     const handleSubmit = async () => {
-        if (item.stage === "draft") {
-            await actions.submitToAiReview(item.id);
-        } else if (item.stage === "ai_reviewed") {
-            await actions.submitApplication(item.id);
+        if (stage === "draft" || stage === "ai_failed") {
+            const ok = await actions.submitToAiReview(item.id);
+            if (ok) setOptimisticStage("ai_review");
+        } else if (stage === "ai_reviewed") {
+            const ok = await actions.submitApplication(item.id);
+            if (ok) setOptimisticStage("recruiter_review");
         }
     };
 
     // Back to draft handler
     const handleBackToDraft = async () => {
-        if (item.stage === "ai_reviewed") {
-            await actions.returnToDraft(item.id);
+        let ok: boolean;
+        if (stage === "ai_reviewed") {
+            ok = await actions.returnToDraft(item.id);
         } else {
-            await actions.backToDraft(item.id);
+            ok = await actions.backToDraft(item.id);
         }
+        if (ok) setOptimisticStage("draft");
     };
 
     // Withdraw handler
     const handleWithdraw = async () => {
-        await actions.withdraw(item.id);
-    };
-
-    // Accept offer handler
-    const handleAcceptOffer = async () => {
-        await actions.acceptOffer(item.id);
+        const ok = await actions.withdraw(item.id);
+        if (ok) setOptimisticStage("withdrawn");
     };
 
     // Decline proposal handler
@@ -179,8 +190,9 @@ export default function ActionsToolbar({
 
     // Get submit button label based on stage
     const getSubmitLabel = () => {
-        if (item.stage === "draft") return "Submit for Review";
-        if (item.stage === "ai_reviewed") return "Submit";
+        if (stage === "draft") return "Submit for Review";
+        if (stage === "ai_failed") return "Resubmit for Review";
+        if (stage === "ai_reviewed") return "Submit";
         return "Submit";
     };
 
@@ -326,29 +338,21 @@ export default function ActionsToolbar({
                         </button>
                     )}
 
-                    {/* Accept Offer */}
+                    {/* Review Offer */}
                     {isOffer && (
                         <button
                             className={`btn btn-success ${getSizeClass()} gap-2`}
                             style={{ borderRadius: 0 }}
-                            disabled={isLoading}
                             onClick={() =>
-                                handleConfirmClick(
-                                    "accept-offer",
-                                    handleAcceptOffer,
+                                router.push(
+                                    `/portal/applications/${item.id}/offer`,
                                 )
                             }
-                            title="Accept this offer"
+                            title="Review and accept this offer"
                         >
-                            {actions.loading === "accept-offer" ? (
-                                <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                                <i className="fa-duotone fa-regular fa-check" />
-                            )}
+                            <i className="fa-duotone fa-regular fa-file-signature" />
                             <span className="hidden md:inline">
-                                {confirmAction === "accept-offer"
-                                    ? "Confirm?"
-                                    : "Accept Offer"}
+                                Review Offer
                             </span>
                         </button>
                     )}
@@ -507,21 +511,12 @@ export default function ActionsToolbar({
 
     if (isOffer) {
         speedDialActions.push({
-            key: "accept-offer",
-            icon:
-                confirmAction === "accept-offer"
-                    ? "fa-duotone fa-regular fa-check-double"
-                    : "fa-duotone fa-regular fa-check",
-            label:
-                confirmAction === "accept-offer"
-                    ? "Confirm?"
-                    : "Accept Offer",
+            key: "review-offer",
+            icon: "fa-duotone fa-regular fa-file-signature",
+            label: "Review Offer",
             variant: "btn-success",
-            loading: actions.loading === "accept-offer",
-            disabled: isLoading,
-            keepOpen: confirmAction !== "accept-offer",
             onClick: () =>
-                handleConfirmClick("accept-offer", handleAcceptOffer),
+                router.push(`/portal/applications/${item.id}/offer`),
         });
     }
 

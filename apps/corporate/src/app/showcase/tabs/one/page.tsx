@@ -1,32 +1,96 @@
 "use client";
 
 import { useState, useRef } from "react";
-import {BaselTabBar, BaselVerticalTabBar, useScrollReveal } from "@splits-network/basel-ui";
+import {
+    BaselTabBar,
+    BaselVerticalTabBar,
+    useScrollReveal,
+} from "@splits-network/basel-ui";
 /* ─── Sample Data ─────────────────────────────────────────────────────────── */
 
 const DETAIL_TABS = [
-    { value: "overview", label: "Overview", icon: "fa-duotone fa-regular fa-clipboard" },
-    { value: "candidate", label: "Candidate", icon: "fa-duotone fa-regular fa-user" },
-    { value: "role", label: "Role", icon: "fa-duotone fa-regular fa-briefcase" },
-    { value: "resume", label: "Resume", icon: "fa-duotone fa-regular fa-file-user" },
-    { value: "documents", label: "Documents", icon: "fa-duotone fa-regular fa-file" },
-    { value: "ai_review", label: "AI Analysis", icon: "fa-duotone fa-regular fa-brain" },
-    { value: "notes", label: "Notes", icon: "fa-duotone fa-regular fa-comments" },
-    { value: "timeline", label: "Timeline", icon: "fa-duotone fa-regular fa-timeline" },
+    {
+        value: "overview",
+        label: "Overview",
+        icon: "fa-duotone fa-regular fa-clipboard",
+    },
+    {
+        value: "candidate",
+        label: "Candidate",
+        icon: "fa-duotone fa-regular fa-user",
+    },
+    {
+        value: "role",
+        label: "Role",
+        icon: "fa-duotone fa-regular fa-briefcase",
+    },
+    {
+        value: "resume",
+        label: "Resume",
+        icon: "fa-duotone fa-regular fa-file-user",
+    },
+    {
+        value: "documents",
+        label: "Documents",
+        icon: "fa-duotone fa-regular fa-file",
+    },
+    {
+        value: "ai_review",
+        label: "AI Analysis",
+        icon: "fa-duotone fa-regular fa-brain",
+    },
+    {
+        value: "notes",
+        label: "Notes",
+        icon: "fa-duotone fa-regular fa-comments",
+    },
+    {
+        value: "timeline",
+        label: "Timeline",
+        icon: "fa-duotone fa-regular fa-timeline",
+    },
 ];
 
 const PROFILE_TABS = [
     { value: "about", label: "About", icon: "fa-duotone fa-regular fa-user" },
-    { value: "experience", label: "Experience", icon: "fa-duotone fa-regular fa-briefcase" },
-    { value: "reviews", label: "Reviews", icon: "fa-duotone fa-regular fa-star" },
+    {
+        value: "experience",
+        label: "Experience",
+        icon: "fa-duotone fa-regular fa-briefcase",
+    },
+    {
+        value: "reviews",
+        label: "Reviews",
+        icon: "fa-duotone fa-regular fa-star",
+    },
 ];
 
 const SETTINGS_TABS = [
-    { value: "general", label: "General", icon: "fa-duotone fa-regular fa-gear" },
-    { value: "notifications", label: "Notifications", icon: "fa-duotone fa-regular fa-bell" },
-    { value: "privacy", label: "Privacy", icon: "fa-duotone fa-regular fa-shield" },
-    { value: "billing", label: "Billing", icon: "fa-duotone fa-regular fa-credit-card" },
-    { value: "integrations", label: "Integrations", icon: "fa-duotone fa-regular fa-plug" },
+    {
+        value: "general",
+        label: "General",
+        icon: "fa-duotone fa-regular fa-gear",
+    },
+    {
+        value: "notifications",
+        label: "Notifications",
+        icon: "fa-duotone fa-regular fa-bell",
+    },
+    {
+        value: "privacy",
+        label: "Privacy",
+        icon: "fa-duotone fa-regular fa-shield",
+    },
+    {
+        value: "billing",
+        label: "Billing",
+        icon: "fa-duotone fa-regular fa-credit-card",
+    },
+    {
+        value: "integrations",
+        label: "Integrations",
+        icon: "fa-duotone fa-regular fa-plug",
+    },
 ];
 
 const TAB_CONTENT: Record<string, { title: string; body: string }> = {
@@ -138,7 +202,11 @@ function ProfileTabsDemo() {
 
     return (
         <div>
-            <BaselTabBar tabs={PROFILE_TABS} active={active} onChange={setActive} />
+            <BaselTabBar
+                tabs={PROFILE_TABS}
+                active={active}
+                onChange={setActive}
+            />
             <TabContentPanel tabKey={active} />
         </div>
     );
@@ -149,7 +217,11 @@ function SettingsTabsDemo() {
 
     return (
         <div>
-            <BaselTabBar tabs={SETTINGS_TABS} active={active} onChange={setActive} />
+            <BaselTabBar
+                tabs={SETTINGS_TABS}
+                active={active}
+                onChange={setActive}
+            />
             <TabContentPanel tabKey={active} />
         </div>
     );
@@ -184,7 +256,7 @@ export default function TabsShowcasePage() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* ── Hero ────────────────────────────────────────────────── */}
-            <header className="relative bg-neutral text-neutral-content border-l-4 border-l-primary">
+            <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
@@ -198,7 +270,7 @@ export default function TabsShowcasePage() {
                     <h1 className="text-4xl lg:text-5xl font-black tracking-tight leading-none mb-4">
                         Tabs
                     </h1>
-                    <p className="text-base text-neutral-content/60 max-w-xl leading-relaxed">
+                    <p className="text-base text-base-content/60 max-w-xl leading-relaxed">
                         Responsive tab navigation with scroll indicators, badge
                         counts, and variant layouts. Handles overflow gracefully
                         across all breakpoints.
@@ -232,19 +304,38 @@ export default function TabsShowcasePage() {
                         <ul className="space-y-2 text-sm text-base-content/60">
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Use <code className="text-xs bg-base-300 px-1.5 py-0.5">BaselTabBar</code> from <code className="text-xs bg-base-300 px-1.5 py-0.5">@splits-network/basel-ui</code>
+                                Use{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    BaselTabBar
+                                </code>{" "}
+                                from{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    @splits-network/basel-ui
+                                </code>
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Scroll arrows auto-show via <code className="text-xs bg-base-300 px-1.5 py-0.5">ResizeObserver</code> + scroll listener
+                                Scroll arrows auto-show via{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    ResizeObserver
+                                </code>{" "}
+                                + scroll listener
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Hidden scrollbar with <code className="text-xs bg-base-300 px-1.5 py-0.5">scrollbar-width: none</code> + webkit pseudo
+                                Hidden scrollbar with{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    scrollbar-width: none
+                                </code>{" "}
+                                + webkit pseudo
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Badge counts render as <code className="text-xs bg-base-300 px-1.5 py-0.5">bg-primary/15 text-primary</code> inline chips
+                                Badge counts render as{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    bg-primary/15 text-primary
+                                </code>{" "}
+                                inline chips
                             </li>
                         </ul>
                     </div>
@@ -274,11 +365,16 @@ export default function TabsShowcasePage() {
                         <ul className="space-y-2 text-sm text-base-content/60">
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Same <code className="text-xs bg-base-300 px-1.5 py-0.5">BaselTabBar</code> component as scrollable tabs, just fewer items
+                                Same{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    BaselTabBar
+                                </code>{" "}
+                                component as scrollable tabs, just fewer items
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Best for 2-4 tabs. Allows horizontal swipe on narrow screens to prevent overflow
+                                Best for 2-4 tabs. Allows horizontal swipe on
+                                narrow screens to prevent overflow
                             </li>
                         </ul>
                     </div>
@@ -312,9 +408,9 @@ export default function TabsShowcasePage() {
                             Vertical Sidebar Tabs
                         </h2>
                         <p className="text-sm text-base-content/50 leading-relaxed max-w-lg">
-                            Settings-style layout with sidebar navigation.
-                            Stays vertical on all breakpoints with
-                            border-left accent on the active item.
+                            Settings-style layout with sidebar navigation. Stays
+                            vertical on all breakpoints with border-left accent
+                            on the active item.
                         </p>
                     </div>
                     <VerticalTabsDemo />
@@ -326,19 +422,35 @@ export default function TabsShowcasePage() {
                         <ul className="space-y-2 text-sm text-base-content/60">
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Use <code className="text-xs bg-base-300 px-1.5 py-0.5">BaselVerticalTabBar</code> from <code className="text-xs bg-base-300 px-1.5 py-0.5">@splits-network/basel-ui</code>
+                                Use{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    BaselVerticalTabBar
+                                </code>{" "}
+                                from{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    @splits-network/basel-ui
+                                </code>
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Active indicator is <code className="text-xs bg-base-300 px-1.5 py-0.5">border-l-4 border-primary</code>
+                                Active indicator is{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    border-l-4 border-primary
+                                </code>
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Sidebar stacks above content on mobile, side-by-side on <code className="text-xs bg-base-300 px-1.5 py-0.5">sm:</code> and up
+                                Sidebar stacks above content on mobile,
+                                side-by-side on{" "}
+                                <code className="text-xs bg-base-300 px-1.5 py-0.5">
+                                    sm:
+                                </code>{" "}
+                                and up
                             </li>
                             <li className="flex items-start gap-2">
                                 <i className="fa-duotone fa-regular fa-check text-primary mt-0.5 shrink-0" />
-                                Best for full-page settings and account pages with 4+ sections
+                                Best for full-page settings and account pages
+                                with 4+ sections
                             </li>
                         </ul>
                     </div>

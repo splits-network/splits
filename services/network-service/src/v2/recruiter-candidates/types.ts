@@ -8,6 +8,8 @@ export interface RecruiterCandidateFilters extends PaginationParams, SortParams 
     recruiter_id?: string;
     candidate_id?: string;
     status?: string;
+    consent_status?: string;
+    expiry_status?: string;
     include?: string;
 }
 

@@ -29,9 +29,9 @@ function DocumentsLoading() {
             <div className="bg-neutral py-10 sm:py-16 lg:py-20">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-12">
                     <div className="max-w-4xl">
-                        <div className="h-4 w-32 bg-neutral-content/10 mb-6" />
-                        <div className="h-12 w-80 bg-neutral-content/10 mb-4" />
-                        <div className="h-6 w-64 bg-neutral-content/10" />
+                        <div className="h-4 w-32  mb-6" />
+                        <div className="h-12 w-80  mb-4" />
+                        <div className="h-6 w-64 " />
                     </div>
                 </div>
             </div>
@@ -301,7 +301,7 @@ function DocumentsContent() {
     return (
         <main ref={mainRef} className="">
             {/* ── EDITORIAL HERO ── */}
-            <section className="relative bg-neutral text-neutral-content py-10 sm:py-16 lg:py-20">
+            <section className="relative bg-base-300 text-base-content py-10 sm:py-16 lg:py-20">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-12">
                     <div className="max-w-4xl">
                         <p className="scroll-reveal fade-up text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-secondary mb-4 sm:mb-6">
@@ -320,7 +320,7 @@ function DocumentsContent() {
                             </span>
                         </h1>
 
-                        <p className="scroll-reveal fade-up text-base sm:text-lg text-neutral-content/70 leading-relaxed max-w-xl mb-4">
+                        <p className="scroll-reveal fade-up text-base sm:text-lg text-base-content/70 leading-relaxed max-w-xl mb-4">
                             {/* COPY: hero body paragraph */}
                             Your resumes, cover letters, and portfolios in one
                             place. Upload once, attach to any application, and
@@ -350,6 +350,30 @@ function DocumentsContent() {
                         </span>
                     </div>
                 )}
+
+                {/* ── PRIMARY RESUME PROMPT ── */}
+                {!loading &&
+                    documents.some((d) => d.document_type === "resume") &&
+                    !documents.some((d) => isPrimaryResume(d)) && (
+                        <div className="border-l-4 border-warning bg-warning/5 p-5 sm:p-6 mb-8 flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="w-10 h-10 bg-warning/10 flex items-center justify-center shrink-0">
+                                <i className="fa-duotone fa-regular fa-star text-warning text-lg" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-base-content mb-1">
+                                    Set a primary resume
+                                </p>
+                                <p className="text-sm text-base-content/60 leading-relaxed">
+                                    Your primary resume auto-attaches to new
+                                    applications, powers smarter job matching,
+                                    and gives recruiters immediate access to
+                                    your qualifications. Click &ldquo;Set
+                                    Primary&rdquo; on your strongest resume
+                                    below.
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
                     {/* LEFT COLUMN — Upload + Tabs + Cards */}

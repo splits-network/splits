@@ -83,6 +83,143 @@ export class JobsEventConsumer {
         }
     }
 
+    async handleJobUpdated(event: DomainEvent): Promise<void> {
+        try {
+            const { jobId, updatedFields, updatedBy } = event.payload;
+
+            // Only notify for significant field changes
+            const significantFields = ['title', 'salary_min', 'salary_max', 'fee_percentage', 'location', 'status'];
+            const hasSignificantChange = updatedFields?.some((f: string) => significantFields.includes(f));
+            if (!hasSignificantChange) return;
+
+            this.logger.info({ jobId, updatedFields }, 'Handling job updated notification');
+
+            const job = await this.dataLookup.getJob(jobId);
+            if (!job) return;
+
+            const recipients = await this.resolveJobStakeholders(job);
+
+            for (const recipient of recipients) {
+                if (recipient.user_id === updatedBy) continue;
+                await this.emailService.sendJobFieldsUpdated(recipient.email, {
+                    jobTitle: job.title,
+                    companyName: job.company?.name || 'your company',
+                    updatedFields: updatedFields.filter((f: string) => significantFields.includes(f)),
+                    jobUrl: `${this.portalUrl}/portal/jobs/${job.id}`,
+                    userId: recipient.user_id || undefined,
+                });
+            }
+
+            this.logger.info(
+                { jobId, recipientCount: recipients.length },
+                'Job updated notifications sent successfully'
+            );
+        } catch (error) {
+            this.logger.error({ error, event_payload: event.payload }, 'Failed to send job updated notification');
+            throw error;
+        }
+    }
+
+    async handleJobDeleted(event: DomainEvent): Promise<void> {
+        try {
+            const { jobId, deletedBy } = event.payload;
+            this.logger.info({ jobId }, 'Handling job deleted notification');
+
+            const job = await this.dataLookup.getJob(jobId);
+            if (!job) return;
+
+            const recipients = await this.resolveJobStakeholders(job);
+
+            for (const recipient of recipients) {
+                if (recipient.user_id === deletedBy) continue;
+                await this.emailService.sendJobDeleted(recipient.email, {
+                    jobTitle: job.title,
+                    companyName: job.company?.name || 'your company',
+                    userId: recipient.user_id || undefined,
+                });
+            }
+
+            this.logger.info(
+                { jobId, recipientCount: recipients.length },
+                'Job deleted notifications sent successfully'
+            );
+        } catch (error) {
+            this.logger.error({ error, event_payload: event.payload }, 'Failed to send job deleted notification');
+            throw error;
+        }
+    }
+
+    private async resolveJobStakeholders(
+        job: { id: string; company_id: string; company?: { identity_organization_id: string | null } }
+    ): Promise<Array<{ email: string; name: string; user_id: string | null }>> {
+        const recipients: Array<{ email: string; name: string; user_id: string | null }> = [];
+        const seenUserIds = new Set<string>();
+
+        // Company admin contacts
+        if (job.company?.identity_organization_id) {
+            const adminContacts = await this.contactLookup.getCompanyAdminContacts(job.company.identity_organization_id);
+            for (const admin of adminContacts) {
+                if (admin.user_id && !seenUserIds.has(admin.user_id)) {
+                    seenUserIds.add(admin.user_id);
+                    recipients.push(admin);
+                }
+            }
+        }
+
+        // Recruiters with active candidates on this job
+        try {
+            const activeRecruiters = await this.dataLookup.getActiveRecruitersForJob(job.id);
+            for (const rec of activeRecruiters) {
+                if (rec.user_id && !seenUserIds.has(rec.user_id)) {
+                    seenUserIds.add(rec.user_id);
+                    recipients.push(rec);
+                }
+            }
+        } catch (error) {
+            this.logger.error({ error, jobId: job.id }, 'Failed to resolve active recruiters for job (non-fatal)');
+        }
+
+        return recipients;
+    }
+
+    async handleJobRecommendationCreated(event: DomainEvent): Promise<void> {
+        try {
+            const { job_id, candidate_id, message } = event.payload;
+
+            this.logger.info({ job_id, candidate_id }, 'Handling job recommendation notification');
+
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
+
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (!candidateContact) {
+                throw new Error(`Candidate contact not found: ${candidate_id}`);
+            }
+
+            await this.emailService.sendJobRecommendation(candidateContact.email, {
+                candidateName: candidateContact.name,
+                jobTitle: job.title,
+                companyName: job.company?.name || 'a company',
+                message: message || undefined,
+                jobUrl: `${this.portalUrl}/portal/jobs/${job_id}`,
+                userId: candidateContact.user_id || undefined,
+            });
+
+            this.logger.info(
+                { job_id, candidate_id, recipient: candidateContact.email },
+                'Job recommendation notification sent successfully'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send job recommendation notification'
+            );
+            throw error;
+        }
+    }
+
     async handleJobStatusChanged(event: DomainEvent): Promise<void> {
         try {
             const { jobId, previousStatus, newStatus } = event.payload;

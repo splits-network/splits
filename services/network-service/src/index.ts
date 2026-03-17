@@ -5,6 +5,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { EventPublisherV2, OutboxPublisher, OutboxWorker } from './v2/shared/events';
 import { registerV2Routes } from './v2/routes';
+import { registerV3Routes } from './v3/routes';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -137,6 +138,9 @@ async function main() {
         supabaseKey,
         eventPublisher: outboxPublisher,
     });
+
+    // Register V3 routes
+    registerV3Routes(app, supabaseClient, outboxPublisher);
 
     // Register standardized health check with dependency monitoring
     registerHealthCheck(app, {

@@ -173,6 +173,7 @@ export interface MarketplaceRecruiterDTO {
     success_rate?: number;
     average_time_to_hire?: number;
     reputation_score?: number;
+    plan_tier?: string;
     created_at: string;
 }
 
@@ -222,7 +223,7 @@ export interface MarketplaceSearchFilters {
     search?: string; // Text search in name, tagline, bio
     page?: number;
     limit?: number;
-    sort_by?: 'reputation_score' | 'total_placements' | 'created_at' | 'years_experience';
+    sort_by?: 'reputation_score' | 'total_placements' | 'created_at' | 'years_experience' | 'plan_tier';
     sort_order?: 'asc' | 'desc';
 }
 

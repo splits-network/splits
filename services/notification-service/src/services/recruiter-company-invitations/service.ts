@@ -11,12 +11,14 @@ import {
     recruiterCompanyAcceptedEmail,
     recruiterCompanyDeclinedEmail
 } from '../../templates/recruiter-company-invitations';
+import type { EmailSource } from '../../templates/base';
 
 export class RecruiterCompanyInvitationsEmailService {
     constructor(
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -28,8 +30,12 @@ export class RecruiterCompanyInvitationsEmailService {
             eventType: string;
             recipientUserId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.recipientUserId, 'email', null);
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.recipientUserId ?? null,
@@ -37,7 +43,7 @@ export class RecruiterCompanyInvitationsEmailService {
             subject,
             template: 'recruiter_company_invitation',
             payload: options.payload ?? null,
-            channel: 'email',
+            channel: effectiveChannel,
             status: 'pending',
             read: false,
             dismissed: false,
@@ -46,7 +52,7 @@ export class RecruiterCompanyInvitationsEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,

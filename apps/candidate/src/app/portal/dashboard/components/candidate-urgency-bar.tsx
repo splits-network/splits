@@ -15,6 +15,7 @@ interface CandidateUrgencyBarProps {
     unreadNotifications: number;
     profileCompletion: number;
     hasResume: boolean;
+    hasPrimaryResume: boolean;
 }
 
 export default function CandidateUrgencyBar({
@@ -24,6 +25,7 @@ export default function CandidateUrgencyBar({
     unreadNotifications,
     profileCompletion,
     hasResume,
+    hasPrimaryResume,
 }: CandidateUrgencyBarProps) {
     const items = useUrgencyItems({
         applications,
@@ -32,6 +34,7 @@ export default function CandidateUrgencyBar({
         unreadNotifications,
         profileCompletion,
         hasResume,
+        hasPrimaryResume,
     });
 
     if (items.length === 0) return null;

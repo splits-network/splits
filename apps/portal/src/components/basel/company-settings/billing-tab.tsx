@@ -1,6 +1,6 @@
 "use client";
 
-import { BaselEmptyState } from "@splits-network/basel-ui";
+import { BaselAlertBox } from "@splits-network/basel-ui";
 import { useCompanyBillingStatus } from "@/hooks/use-company-billing-status";
 import { ReadinessChecklist, OrientationStrip } from "./billing/billing-orientation";
 import { BillingProfileCard } from "./billing/billing-profile-card";
@@ -39,30 +39,27 @@ export function BillingTab({ company }: BillingTabProps) {
         );
     }
 
-    if (billingStatus === "not_started") {
-        return (
-            <div className="space-y-4">
-                <ReadinessChecklist
-                    profileConfigured={false}
-                    paymentMethodConfigured={false}
-                />
-                <OrientationStrip />
-                <BillingProfileCard
-                    companyId={company.id}
-                    profile={null}
-                    status="not_started"
-                    onRefresh={refreshBilling}
-                />
-            </div>
-        );
-    }
-
-    const profileConfigured = !!billingProfile;
+    const profileConfigured = billingStatus !== "not_started" && !!billingProfile;
     const paymentMethodConfigured = readiness?.has_payment_method ?? false;
     const bothConfigured = profileConfigured && paymentMethodConfigured;
 
     return (
         <div className="space-y-4">
+            {/* Contextual explanation — always visible */}
+            <BaselAlertBox variant="info" title="How placement billing works">
+                Splits Network is commission-based — you only pay when a recruiter successfully fills
+                one of your roles. There are no upfront fees or subscriptions. Your billing profile and
+                payment method are used to process placement invoices when a hire is confirmed.
+            </BaselAlertBox>
+
+            {/* Action-required warning — shown when billing is incomplete */}
+            {!bothConfigured && (
+                <BaselAlertBox variant="warning" title="Billing setup required to post live roles">
+                    Your roles cannot go live until billing setup is complete. Complete the steps below
+                    to start receiving candidates from recruiters on the platform.
+                </BaselAlertBox>
+            )}
+
             <ReadinessChecklist
                 profileConfigured={profileConfigured}
                 paymentMethodConfigured={paymentMethodConfigured}

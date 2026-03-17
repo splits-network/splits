@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { loadConfig } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 
 const logger = createLogger("SearchService");
 
@@ -58,6 +59,8 @@ app.get("/health", async (request, reply) => {
 app.register(registerV2Routes, {
     supabase,
 });
+
+registerV3Routes(app, { supabase });
 
 async function startServer() {
     try {

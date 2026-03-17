@@ -8,6 +8,7 @@ import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupPr
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
+import { registerV3Routes } from "./v3/routes";
 import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
 import { DomainEventConsumer } from "./v2/shared/domain-consumer";
 import { ReputationRepository, ReputationService, ReputationEventConsumer, CompanyReputationRepository, CompanyReputationService } from "./v2/reputation";
@@ -143,6 +144,11 @@ async function main() {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey,
             eventPublisher: outboxPublisher,
+        });
+
+        registerV3Routes(app, {
+            supabase: supabaseClient,
+            eventPublisher: outboxPublisher || undefined,
         });
 
         // Register standardized health check

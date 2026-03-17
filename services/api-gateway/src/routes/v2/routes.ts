@@ -22,6 +22,8 @@ import { registerOnboardingRoutes } from './onboarding';
 import { registerIntegrationRoutes } from './integrations';
 import { registerMatchingRoutes } from './matching';
 import { registerGamificationRoutes } from './gamification';
+import { registerCallRoutes } from './calls';
+import { registerSupportRoutes } from './support';
 import { EventPublisher } from '../../events/event-publisher';
 
 export function registerV2GatewayRoutes(
@@ -50,6 +52,8 @@ export function registerV2GatewayRoutes(
     registerIntegrationRoutes(app, services);
     registerMatchingRoutes(app, services);
     registerGamificationRoutes(app, services);
+    registerCallRoutes(app, services);
+    registerSupportRoutes(app, services);
     registerStatusRoutes(app, options?.eventPublisher || null);
 
     if (options?.redis && options?.supabase) {

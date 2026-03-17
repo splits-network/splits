@@ -81,13 +81,18 @@ export function StepCompensation({ formData, onChange, mode = "create" }: StepCo
                 </fieldset>
             </div>
 
-            <div className="flex items-center justify-between border-2 border-base-300 p-4">
-                <span className="font-bold text-sm uppercase tracking-wider">
+            <div className={`flex items-center justify-between border-2 p-4 transition-colors ${
+                formData.show_salary_range
+                    ? "border-success bg-success/5"
+                    : "border-base-300"
+            }`}>
+                <span className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                    <i className={`fa-duotone fa-regular fa-eye text-sm ${formData.show_salary_range ? "text-success" : "text-base-content/40"}`} />
                     Show Salary to Candidates
                 </span>
                 <input
                     type="checkbox"
-                    className="toggle toggle-primary"
+                    className="toggle toggle-success"
                     checked={formData.show_salary_range}
                     onChange={(e) => onChange({ show_salary_range: e.target.checked })}
                 />
@@ -182,13 +187,18 @@ export function StepCompensation({ formData, onChange, mode = "create" }: StepCo
                 </select>
             </fieldset>
 
-            <div className="flex items-center justify-between border-2 border-base-300 p-4">
-                <span className="font-bold text-sm uppercase tracking-wider">
+            <div className={`flex items-center justify-between border-2 p-4 transition-colors ${
+                formData.open_to_relocation
+                    ? "border-info bg-info/5"
+                    : "border-base-300"
+            }`}>
+                <span className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                    <i className={`fa-duotone fa-regular fa-plane text-sm ${formData.open_to_relocation ? "text-info" : "text-base-content/40"}`} />
                     Open to Relocation
                 </span>
                 <input
                     type="checkbox"
-                    className="toggle toggle-primary"
+                    className="toggle toggle-info"
                     checked={formData.open_to_relocation}
                     onChange={(e) => onChange({ open_to_relocation: e.target.checked })}
                 />

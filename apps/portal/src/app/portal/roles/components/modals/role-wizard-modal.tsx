@@ -6,6 +6,8 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
 import { BaselWizardModal, BaselAlertBox } from "@splits-network/basel-ui";
+import { useCompanyBillingStatus } from "@/hooks/use-company-billing-status";
+import { useFirmBillingStatus } from "@/hooks/use-firm-billing-status";
 import { StepBasicInfo } from "@/app/portal/roles/components/wizards/wizard-steps/step-basic-info";
 import { StepCompensation } from "@/app/portal/roles/components/wizards/wizard-steps/step-compensation";
 import { StepDescriptions } from "@/app/portal/roles/components/wizards/wizard-steps/step-descriptions";
@@ -31,6 +33,8 @@ const INITIAL_FORM: FormData = {
     location: "",
     department: "",
     status: "draft",
+    is_early_access: false,
+    is_priority: false,
     activates_at: "",
     closes_at: "",
     salary_min: "",
@@ -87,11 +91,23 @@ export default function RoleWizardModal({
         status: "draft",
     });
 
+    // Billing readiness checks
+    const selectedCompanyId = roleSource === "company" ? (formData.company_id || null) : null;
+    const selectedFirmId = roleSource === "firm" ? (formData.source_firm_id || null) : null;
+    const { status: companyBillingStatus, loading: companyBillingLoading } = useCompanyBillingStatus(selectedCompanyId);
+    const { status: firmBillingStatus, loading: firmBillingLoading } = useFirmBillingStatus(selectedFirmId);
+
     // Derived state
     const hasFirms = userFirms.length > 0;
     const hasBothOptions = isRecruiterWithCompanyAccess && hasFirms;
     const isOffPlatform = isRecruiter && hasFirms && roleSource === "firm";
     const showCompanySelect = isAdmin || (isRecruiterWithCompanyAccess && companies.length > 1);
+
+    // Billing is ready if the selected entity has completed billing setup
+    const billingReady = isOffPlatform
+        ? firmBillingStatus === "ready"
+        : !selectedCompanyId || companyBillingStatus === "ready";
+    const billingLoading = isOffPlatform ? firmBillingLoading : companyBillingLoading;
 
     // ── Load existing job data (edit mode) ──
 
@@ -103,11 +119,20 @@ export default function RoleWizardModal({
                 const token = await getToken();
                 if (!token) throw new Error("Authentication required");
                 const client = createAuthenticatedClient(token);
-                const response = await client.get<{ data: any }>(`/jobs/${jobId}`, { params: { include: "requirements,pre_screen_questions" } });
+                const response = await client.get<{ data: any }>(`/jobs/${jobId}/view/editor`);
                 const job = response.data;
+                const jobSkills = job.skills || [];
+                // Detect if this is a firm (off-platform) job
+                const isFirmJob = !!job.source_firm_id && !job.company_id;
+                if (isFirmJob) {
+                    setRoleSource("firm");
+                }
+
                 setFormData({
                     title: job.title || "", company_id: job.company_id || "", location: job.location || "",
                     department: job.department || "", status: job.status || "draft",
+                    source_firm_id: job.source_firm_id || undefined,
+                    is_early_access: job.is_early_access || false, is_priority: job.is_priority || false,
                     activates_at: job.activates_at ? new Date(job.activates_at).toISOString().slice(0, 16) : "",
                     closes_at: job.closes_at ? new Date(job.closes_at).toISOString().slice(0, 16) : "",
                     salary_min: job.salary_min?.toString() || "", salary_max: job.salary_max?.toString() || "",
@@ -122,19 +147,9 @@ export default function RoleWizardModal({
                         question: q.question, question_type: q.question_type, is_required: q.is_required,
                         options: q.options, disclaimer: q.disclaimer || "",
                     })) || [],
-                    required_skills: [], preferred_skills: [],
+                    required_skills: jobSkills.filter((js: any) => js.is_required && js.skill).map((js: any) => js.skill),
+                    preferred_skills: jobSkills.filter((js: any) => !js.is_required && js.skill).map((js: any) => js.skill),
                 });
-                try {
-                    const skillsResponse = await client.get<{ data: Array<{ skill_id: string; skill: SkillOption; is_required: boolean }> }>(`/job-skills?job_id=${jobId}`);
-                    const jobSkills = skillsResponse.data || [];
-                    setFormData(prev => ({
-                        ...prev,
-                        required_skills: jobSkills.filter(js => js.is_required && js.skill).map(js => js.skill),
-                        preferred_skills: jobSkills.filter(js => !js.is_required && js.skill).map(js => js.skill),
-                    }));
-                } catch (skillsErr) {
-                    console.error("Failed to load job skills:", skillsErr);
-                }
             } catch (err: any) {
                 console.error("Failed to load job:", err);
                 setError("Could not load role data. Close and reopen to try again.");
@@ -177,7 +192,7 @@ export default function RoleWizardModal({
                         setCompanies(creatableCompanies);
                         hasCompanyAccess = creatableCompanies.length > 0;
                         setIsRecruiterWithCompanyAccess(hasCompanyAccess);
-                        if (creatableCompanies.length === 1) {
+                        if (creatableCompanies.length === 1 && mode !== "edit") {
                             setFormData((prev) => ({ ...prev, company_id: creatableCompanies[0].id }));
                         }
                     } catch (err: any) {
@@ -188,7 +203,7 @@ export default function RoleWizardModal({
                         const firmsResponse = await client.get<{ data: Array<{ id: string; name: string }> }>("/firms/my-firms");
                         const firms = (firmsResponse.data || []).map((f) => ({ id: f.id, name: f.name }));
                         setUserFirms(firms);
-                        if (firms.length > 0 && !hasCompanyAccess) {
+                        if (firms.length > 0 && !hasCompanyAccess && mode !== "edit") {
                             setRoleSource("firm");
                             setFormData((prev) => ({ ...prev, source_firm_id: firms[0].id }));
                         }
@@ -202,7 +217,7 @@ export default function RoleWizardModal({
                             const companyResponse = await client.get<{ data: Company[]; pagination: any }>(`/companies`, { params: { filters: { organizationId }, limit: 1 } });
                             const comps = companyResponse.data || [];
                             setCompanies(comps);
-                            if (comps.length > 0) setFormData((prev) => ({ ...prev, company_id: comps[0].id }));
+                            if (comps.length > 0 && mode !== "edit") setFormData((prev) => ({ ...prev, company_id: comps[0].id }));
                         } catch (err: any) {
                             if (err.message?.includes("404") || err.message?.includes("not found")) {
                                 setError("No company found for your organization.");
@@ -250,7 +265,7 @@ export default function RoleWizardModal({
             if (!formData.title.trim()) { setError("A job title is required to continue."); return; }
             if (!formData.company_id && !isOffPlatform) { setError("Select a company to continue."); return; }
             if (isOffPlatform && !formData.source_firm_id) { setError("Select a firm to continue."); return; }
-            if (formData.status === "early" && !formData.activates_at) { setError("An activation date is required for Early Access status."); return; }
+            if (formData.is_early_access && !formData.activates_at) { setError("An activation date is required when Early Access is enabled."); return; }
         }
         setError(null);
         setCurrentStep((prev) => Math.min(prev + 1, WIZARD_STEPS.length - 1));
@@ -300,7 +315,8 @@ export default function RoleWizardModal({
             if (formData.activates_at) payload.activates_at = new Date(formData.activates_at).toISOString();
             if (formData.closes_at) payload.closes_at = new Date(formData.closes_at).toISOString();
             Object.assign(payload, {
-                status: formData.status, employment_type: formData.employment_type,
+                status: billingReady ? formData.status : "draft", is_early_access: formData.is_early_access, is_priority: formData.is_priority,
+                employment_type: formData.employment_type,
                 open_to_relocation: formData.open_to_relocation, show_salary_range: formData.show_salary_range,
                 guarantee_days: formData.guarantee_days,
                 pre_screen_questions: formData.pre_screen_questions.filter((q) => q.question.trim()).map((q) => ({
@@ -340,7 +356,8 @@ export default function RoleWizardModal({
                 ...formData.preferred_requirements.filter((r) => r.trim()).map((description) => ({ type: "preferred" as const, description })),
             ];
             if (mode === "edit") {
-                await client.put(`/job-requirements/job/${targetJobId}/bulk-replace`, {
+                await client.post("/job-requirements/actions/bulk-replace", {
+                    job_id: targetJobId,
                     requirements: requirements.map((req, i) => ({ requirement_type: req.type, description: req.description, sort_order: i })),
                 });
             } else if (requirements.length > 0) {
@@ -355,7 +372,7 @@ export default function RoleWizardModal({
                 ...formData.preferred_skills.map(s => ({ skill_id: s.id, is_required: false })),
             ];
             if (allSkills.length > 0 || mode === "edit") {
-                await client.put(`/job-skills/job/${targetJobId}/bulk-replace`, { skills: allSkills });
+                await client.post("/job-skills/actions/bulk-replace", { job_id: targetJobId, skills: allSkills });
             }
 
             onClose();
@@ -372,7 +389,7 @@ export default function RoleWizardModal({
         } finally {
             setSubmitting(false);
         }
-    }, [formData, isOffPlatform, mode, jobId, onClose, onSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [formData, isOffPlatform, billingReady, mode, jobId, onClose, onSuccess]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Render ──
 
@@ -413,19 +430,47 @@ export default function RoleWizardModal({
             ) : (
                 <>
                     {currentStep === 0 && (
-                        <StepBasicInfo
-                            formData={formData}
-                            onChange={handleChange}
-                            companies={companies}
-                            userFirms={userFirms}
-                            roleSource={roleSource}
-                            onRoleSourceChange={setRoleSource}
-                            isOffPlatform={isOffPlatform}
-                            hasBothOptions={hasBothOptions}
-                            showCompanySelect={showCompanySelect}
-                            mode={mode}
-                            isRecruiter={!!isRecruiter}
-                        />
+                        <>
+                            {!billingReady && !billingLoading && (selectedCompanyId || selectedFirmId) && (
+                                <BaselAlertBox variant="warning" title="Payment Setup Required" className="mb-5">
+                                    <p className="mb-2">
+                                        Your {isOffPlatform ? "firm" : "company"} has not completed payment setup.
+                                        Splits Network is commission-based — you are only charged a placement fee when a recruiter
+                                        successfully fills your role. There are no upfront costs or subscriptions.
+                                    </p>
+                                    <p className="mb-3">
+                                        To post live roles, you need to configure your billing profile and payment method.
+                                        You can still save this role as a <strong>draft</strong> and activate it later.
+                                    </p>
+                                    <a
+                                        href={isOffPlatform
+                                            ? `/portal/firms/${selectedFirmId}?tab=billing`
+                                            : "/portal/company/settings?tab=billing"
+                                        }
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-warning btn-sm"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-credit-card mr-1" />
+                                        Set Up Billing
+                                    </a>
+                                </BaselAlertBox>
+                            )}
+                            <StepBasicInfo
+                                formData={formData}
+                                onChange={handleChange}
+                                companies={companies}
+                                userFirms={userFirms}
+                                roleSource={roleSource}
+                                onRoleSourceChange={setRoleSource}
+                                isOffPlatform={isOffPlatform}
+                                hasBothOptions={hasBothOptions}
+                                showCompanySelect={showCompanySelect}
+                                mode={mode}
+                                isRecruiter={!!isRecruiter}
+                                billingReady={billingReady}
+                            />
+                        </>
                     )}
                     {currentStep === 1 && <StepCompensation formData={formData} onChange={handleChange} mode={mode} />}
                     {currentStep === 2 && <StepDescriptions formData={formData} onChange={handleChange} />}

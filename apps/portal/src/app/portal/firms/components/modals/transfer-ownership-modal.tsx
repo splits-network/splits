@@ -61,7 +61,7 @@ export default function TransferOwnershipModal({
                 newOwnerRecruiterId: selectedRecruiterId,
             });
 
-            toast.success("Ownership transferred successfully");
+            toast.success("Ownership transferred.");
             onSuccess();
         } catch (err: any) {
             const message =
@@ -120,7 +120,7 @@ export default function TransferOwnershipModal({
                                             setConfirmed(false);
                                         }}
                                         className="select w-full"
-                                        style={{ borderRadius: 0 }}
+
                                         disabled={loading}
                                     >
                                         <option value="">Select a member</option>
@@ -167,7 +167,7 @@ export default function TransferOwnershipModal({
                     <button
                         type="button"
                         className="btn btn-ghost"
-                        style={{ borderRadius: 0 }}
+
                         onClick={onClose}
                         disabled={loading}
                     >
@@ -176,7 +176,7 @@ export default function TransferOwnershipModal({
                     <button
                         type="submit"
                         className="btn btn-warning"
-                        style={{ borderRadius: 0 }}
+
                         disabled={
                             loading ||
                             !selectedRecruiterId ||

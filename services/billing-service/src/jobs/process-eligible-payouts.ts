@@ -73,6 +73,7 @@ async function main() {
             organizationIds: [],
             orgWideOrganizationIds: [],
             companyIds: [],
+            firmIds: [],
             roles: ['platform_admin'],
             isPlatformAdmin: true,
             error: '',

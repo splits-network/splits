@@ -1,6 +1,6 @@
 # /api:audit - Audit Service for V2 Compliance
 
-**Description:** Audit an existing service's V2 routes for compliance with established patterns
+**Description:** Audit an existing service's V2 routes for compliance and identify what needs migration to V3
 
 ## Usage
 
@@ -29,7 +29,9 @@
 6. Events published for all mutations
 7. Validation in service layer (not routes)
 8. Soft delete (not hard delete)
+9. Identify routes that should be views in V3 (joins, shaped responses)
+10. Identify routes that should be actions in V3 (state transitions, side effects)
 
 ## Execution
 
-Spawn the `api` agent to audit. It will read all V2 files in the service and report compliance issues.
+Spawn the `api` agent to audit. It will read all V2 files in the service, report compliance issues, and recommend which resources are ready for V3 migration.

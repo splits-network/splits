@@ -18,6 +18,8 @@ import { AdminPageHeader } from "../components";
 type ApplicationStage =
     | "draft"
     | "ai_review"
+    | "gpt_review"
+    | "ai_failed"
     | "ai_reviewed"
     | "recruiter_request"
     | "recruiter_proposed"
@@ -74,6 +76,16 @@ const STAGE_CONFIG: Record<
         icon: "fa-robot",
         label: "AI Review",
     },
+    gpt_review: {
+        color: "badge-info",
+        icon: "fa-robot",
+        label: "GPT Review",
+    },
+    ai_failed: {
+        color: "badge-error",
+        icon: "fa-triangle-exclamation",
+        label: "Review Failed",
+    },
     ai_reviewed: {
         color: "badge-info",
         icon: "fa-robot",
@@ -96,7 +108,7 @@ const STAGE_CONFIG: Record<
     },
     screen: { color: "badge-info", icon: "fa-filter", label: "Screen" },
     submitted: {
-        color: "badge-neutral",
+        color: "badge-primary",
         icon: "fa-inbox",
         label: "Submitted",
     },
@@ -191,12 +203,10 @@ export default function ApplicationsAdminPage() {
                 `/applications/${applicationId}/trigger-ai-review`,
                 {},
             );
-            toast.success("AI review retriggered successfully");
+            toast.success("AI review retriggered.");
             refresh();
         } catch (err: any) {
-            toast.error(
-                err?.message || "Failed to retrigger AI review",
-            );
+            toast.error(err?.message || "Failed to retrigger AI review");
         } finally {
             setRetriggeringId(null);
         }
@@ -205,9 +215,7 @@ export default function ApplicationsAdminPage() {
     function StageBadge({ stage }: { stage: ApplicationStage }) {
         const config = STAGE_CONFIG[stage];
         return (
-            <span
-                className={`badge ${config?.color || "badge-ghost"} gap-1`}
-            >
+            <span className={`badge ${config?.color || "badge-ghost"} gap-1`}>
                 <i
                     className={`fa-duotone fa-regular ${config?.icon || "fa-circle-question"} text-xs`}
                 ></i>
@@ -220,6 +228,7 @@ export default function ApplicationsAdminPage() {
     const stageCounts = useMemo(() => {
         const counts: Record<string, number> = {
             ai_review: 0,
+            gpt_review: 0,
             submitted: 0,
             interview: 0,
             offer: 0,
@@ -243,11 +252,17 @@ export default function ApplicationsAdminPage() {
             />
 
             {/* Stats */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            <div className="grid grid-cols-3 md:grid-cols-7 gap-4">
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
                     <div className="stat-title text-sm">AI Review</div>
                     <div className="stat-value text-xl text-info">
                         {loading ? "..." : stageCounts.ai_review}
+                    </div>
+                </div>
+                <div className="stat bg-base-100 shadow rounded-lg p-4">
+                    <div className="stat-title text-sm">GPT Review</div>
+                    <div className="stat-value text-xl text-info">
+                        {loading ? "..." : stageCounts.gpt_review}
                     </div>
                 </div>
                 <div className="stat bg-base-100 shadow rounded-lg p-4">
@@ -305,22 +320,18 @@ export default function ApplicationsAdminPage() {
                     <option value="">All Stages</option>
                     <option value="draft">Draft</option>
                     <option value="ai_review">AI Review</option>
+                    <option value="gpt_review">GPT Review</option>
+                    <option value="ai_failed">Review Failed</option>
                     <option value="ai_reviewed">AI Reviewed</option>
-                    <option value="recruiter_request">
-                        Recruiter Request
-                    </option>
+                    <option value="recruiter_request">Recruiter Request</option>
                     <option value="recruiter_proposed">
                         Recruiter Proposed
                     </option>
-                    <option value="recruiter_review">
-                        Recruiter Review
-                    </option>
+                    <option value="recruiter_review">Recruiter Review</option>
                     <option value="screen">Screen</option>
                     <option value="submitted">Submitted</option>
                     <option value="company_review">Company Review</option>
-                    <option value="company_feedback">
-                        Company Feedback
-                    </option>
+                    <option value="company_feedback">Company Feedback</option>
                     <option value="interview">Interview</option>
                     <option value="offer">Offer</option>
                     <option value="hired">Hired</option>
@@ -468,8 +479,12 @@ export default function ApplicationsAdminPage() {
                                                     >
                                                         <i className="fa-duotone fa-regular fa-eye"></i>
                                                     </Link>
-                                                    {app.stage ===
-                                                        "ai_review" && (
+                                                    {(app.stage ===
+                                                        "ai_review" ||
+                                                        app.stage ===
+                                                            "gpt_review" ||
+                                                        app.stage ===
+                                                            "ai_failed") && (
                                                         <button
                                                             className="btn btn-xs btn-warning"
                                                             title="Retrigger AI Review"

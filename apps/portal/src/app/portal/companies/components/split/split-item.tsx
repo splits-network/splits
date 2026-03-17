@@ -1,7 +1,13 @@
 "use client";
 
 import type { Company, CompanyRelationship, CompanyTab } from "../../types";
-import { statusColor } from "../shared/status-color";
+import { BaselBadge } from "@splits-network/basel-ui";
+import {
+    relationshipStatusBadge,
+    relationshipTypeBadge,
+    sizeBadge,
+    stageBadge,
+} from "../shared/company-badges";
 import {
     companyName,
     companyId,
@@ -9,8 +15,8 @@ import {
     companyLocation,
     addedAgo,
     extractRelationship,
-    formatStatus,
 } from "../shared/helpers";
+import { statusBorder } from "../shared/status-color";
 import { LevelBadge, useGamification } from "@splits-network/shared-gamification";
 import CompanyActionsToolbar from "../shared/actions-toolbar";
 
@@ -39,17 +45,22 @@ export function SplitItem({
         ? (item as Company)
         : ({ ...(item as CompanyRelationship).company, created_at: (item as CompanyRelationship).created_at } as Company);
 
+    const size = sizeBadge((item as Company).company_size ?? (company as Company).company_size);
+    const stage = stageBadge((item as Company).stage ?? (company as Company).stage);
+    const relStatus = relationshipStatusBadge(relationship?.status);
+    const relType = relationshipTypeBadge(relationship?.relationship_type);
+
     return (
         <div
             onClick={onSelect}
-            className={`relative cursor-pointer px-6 py-4 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
+            className={`relative cursor-pointer px-4 py-2.5 border-b border-base-200 hover:bg-base-200/50 transition-colors border-l-4 ${
                 isSelected
                     ? "bg-primary/5 border-l-primary"
-                    : "bg-base-100 border-transparent"
+                    : `bg-base-100 ${statusBorder(relationship?.status)}`
             }`}
         >
             {/* Row 1: name + time */}
-            <div className="flex items-start justify-between gap-2 mb-1">
+            <div className="flex items-center justify-between gap-2">
                 <h4 className="font-bold text-sm tracking-tight truncate text-base-content flex items-center gap-1.5">
                     {name}
                     {level && <LevelBadge level={level} size="sm" />}
@@ -59,47 +70,40 @@ export function SplitItem({
                 </span>
             </div>
 
-            {/* Row 2: industry */}
-            {industry && (
-                <div className="text-sm font-semibold text-base-content/60 mb-1 truncate">
-                    {industry}
-                </div>
-            )}
-
-            {/* Row 3: location + status */}
-            <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="text-sm text-base-content/50 truncate">
-                    {location ? (
-                        <>
-                            <i className="fa-duotone fa-regular fa-location-dot mr-1" />
-                            {location}
-                        </>
-                    ) : null}
-                </div>
-                {relationship && (
-                    <span
-                        className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold flex-shrink-0 ${statusColor(relationship.status)}`}
-                    >
-                        {formatStatus(relationship.status)}
-                    </span>
-                )}
+            {/* Row 2: industry + location */}
+            <div className="flex items-center justify-between gap-2 mt-0.5">
+                <span className="text-sm text-base-content/60 truncate">
+                    {industry || <span className="text-base-content/30">No industry</span>}
+                </span>
+                <span className="text-sm text-base-content/40 flex-shrink-0 truncate max-w-[40%]">
+                    <i className="fa-duotone fa-regular fa-location-dot mr-0.5" />
+                    {location || <span className="text-base-content/30">No location</span>}
+                </span>
             </div>
 
-            {/* Row 4: size or relationship info */}
-            {isMarketplace && (
-                <div className="flex items-center gap-3 mt-1">
-                    <span className="text-sm font-bold text-base-content/70">
-                        {(item as Company).company_size || "Size N/A"}
-                    </span>
-                </div>
-            )}
-            {!isMarketplace && relationship && (
-                <div className="flex items-center gap-3 mt-1">
-                    <span className="text-sm font-bold text-base-content/70 capitalize">
-                        {relationship.relationship_type}
-                    </span>
-                </div>
-            )}
+            {/* Row 4: badge bar */}
+            <div className="flex flex-wrap items-center gap-1 mt-1.5 pr-10">
+                {relStatus && (
+                    <BaselBadge color={relStatus.color} size="xs" variant="soft">
+                        {relStatus.label}
+                    </BaselBadge>
+                )}
+                {relType && (
+                    <BaselBadge color={relType.color} size="xs" variant="outline">
+                        {relType.label}
+                    </BaselBadge>
+                )}
+                {size && (
+                    <BaselBadge color={size.color} size="xs">
+                        {size.label}
+                    </BaselBadge>
+                )}
+                {stage && (
+                    <BaselBadge color={stage.color} size="xs" variant="outline">
+                        {stage.label}
+                    </BaselBadge>
+                )}
+            </div>
 
             {/* Actions */}
             <div className="absolute bottom-2 right-2" onClick={(e) => e.stopPropagation()}>

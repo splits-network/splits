@@ -7,6 +7,7 @@ type Callback = (data: unknown) => void;
 
 type RealtimeContextValue = {
     subscribe: (channel: string, callback: Callback) => () => void;
+    send: (message: Record<string, unknown>) => void;
     connected: boolean;
 };
 
@@ -133,8 +134,14 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         };
     }, []);
 
+    const send = useCallback((message: Record<string, unknown>) => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify(message));
+        }
+    }, []);
+
     return (
-        <RealtimeContext.Provider value={{ subscribe, connected }}>
+        <RealtimeContext.Provider value={{ subscribe, send, connected }}>
             {children}
         </RealtimeContext.Provider>
     );

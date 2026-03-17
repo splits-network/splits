@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import type { EmailSource } from '../../templates/base';
 import {
     weeklyActivityDigestEmail,
     WeeklyDigestData,
@@ -12,6 +13,15 @@ import {
     RecruiterReminderData,
     candidateMatchDigestEmail,
     CandidateMatchDigestData,
+    recruiterAftercareEmail,
+    getRecruiterAftercareSubject,
+    RecruiterAftercareData,
+    candidateAftercareEmail,
+    getCandidateAftercareSubject,
+    CandidateAftercareData,
+    companyAftercareEmail,
+    getCompanyAftercareSubject,
+    CompanyAftercareData,
 } from '../../templates/engagement';
 
 export class EngagementEmailService {
@@ -19,6 +29,7 @@ export class EngagementEmailService {
         private resend: Resend,
         private repository: NotificationRepository,
         private fromEmail: string,
+        private candidateFromEmail: string,
         private logger: Logger
     ) { }
 
@@ -30,8 +41,12 @@ export class EngagementEmailService {
             eventType: string;
             userId?: string;
             payload?: Record<string, any>;
+            source?: EmailSource;
         }
     ): Promise<void> {
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', 'engagement');
+        if (!effectiveChannel) return;
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -40,7 +55,7 @@ export class EngagementEmailService {
             template: 'custom',
             payload: options.payload,
             status: 'pending',
-            channel: 'email',
+            channel: effectiveChannel,
             read: false,
             dismissed: false,
             priority: 'low',
@@ -49,7 +64,7 @@ export class EngagementEmailService {
 
         try {
             const { data, error } = await this.resend.emails.send({
-                from: this.fromEmail,
+                from: options.source === 'candidate' ? this.candidateFromEmail : this.fromEmail,
                 to,
                 subject,
                 html,
@@ -125,6 +140,7 @@ export class EngagementEmailService {
         await this.sendEmail(email, 'Keep your profile up to date', html, {
             eventType: 'engagement.candidate_reminder',
             userId: data.userId,
+            source: 'candidate',
             payload: {
                 candidateName: data.candidateName,
                 daysSinceActivity: data.daysSinceActivity,
@@ -145,6 +161,7 @@ export class EngagementEmailService {
         await this.sendEmail(email, subject, html, {
             eventType: 'engagement.candidate_match_digest',
             userId: data.userId,
+            source: 'candidate',
             payload: {
                 candidateName: data.candidateName,
                 totalNewMatches: data.totalNewMatches,
@@ -166,6 +183,66 @@ export class EngagementEmailService {
                 recruiterName: data.recruiterName,
                 daysSinceActivity: data.daysSinceActivity,
                 pendingApplications: data.pendingApplications,
+            },
+        });
+    }
+
+    async sendRecruiterAftercare(
+        email: string,
+        data: RecruiterAftercareData & { userId?: string; placementId: string }
+    ): Promise<void> {
+        const html = recruiterAftercareEmail(data);
+        const subject = getRecruiterAftercareSubject(data);
+
+        await this.sendEmail(email, subject, html, {
+            eventType: `aftercare.recruiter_${data.milestone}`,
+            userId: data.userId,
+            payload: {
+                placementId: data.placementId,
+                milestone: data.milestone,
+                candidateName: data.candidateName,
+                companyName: data.companyName,
+            },
+        });
+    }
+
+    async sendCandidateAftercare(
+        email: string,
+        data: CandidateAftercareData & { userId?: string; placementId: string }
+    ): Promise<void> {
+        const html = candidateAftercareEmail(data);
+        const subject = getCandidateAftercareSubject(data);
+        if (!html || !subject) return;
+
+        await this.sendEmail(email, subject, html, {
+            eventType: `aftercare.candidate_${data.milestone}`,
+            userId: data.userId,
+            source: 'candidate',
+            payload: {
+                placementId: data.placementId,
+                milestone: data.milestone,
+                candidateName: data.candidateName,
+                companyName: data.companyName,
+            },
+        });
+    }
+
+    async sendCompanyAftercare(
+        email: string,
+        data: CompanyAftercareData & { userId?: string; placementId: string }
+    ): Promise<void> {
+        const html = companyAftercareEmail(data);
+        const subject = getCompanyAftercareSubject(data);
+        if (!html || !subject) return;
+
+        await this.sendEmail(email, subject, html, {
+            eventType: `aftercare.company_${data.milestone}`,
+            userId: data.userId,
+            payload: {
+                placementId: data.placementId,
+                milestone: data.milestone,
+                candidateName: data.candidateName,
+                companyName: data.companyName,
             },
         });
     }

@@ -144,7 +144,7 @@ export default function PricingOne() {
     return (
         <main ref={mainRef} className="min-h-screen bg-base-100">
             {/* Header */}
-            <section className="relative bg-neutral text-neutral-content py-16 lg:py-24">
+            <section className="relative bg-base-300 text-base-content py-16 lg:py-24">
                 <div
                     className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
                     style={{
@@ -166,7 +166,7 @@ export default function PricingOne() {
                             pricing.
                         </span>
                     </h1>
-                    <p className="pricing-desc text-base text-neutral-content/50 max-w-xl mx-auto scroll-reveal fade-up">
+                    <p className="pricing-desc text-base text-base-content/50 max-w-xl mx-auto scroll-reveal fade-up">
                         Start free. Upgrade when you are ready. No hidden fees,
                         no surprises.
                     </p>
@@ -174,7 +174,7 @@ export default function PricingOne() {
                     {/* Billing Toggle */}
                     <div className="pricing-toggle scroll-reveal fade-up flex items-center justify-center gap-4 mt-8">
                         <span
-                            className={`text-sm font-semibold ${billing === "monthly" ? "text-neutral-content" : "text-neutral-content/40"}`}
+                            className={`text-sm font-semibold ${billing === "monthly" ? "text-base-content" : "text-base-content/40"}`}
                         >
                             Monthly
                         </span>
@@ -191,7 +191,7 @@ export default function PricingOne() {
                             }
                         />
                         <span
-                            className={`text-sm font-semibold ${billing === "annual" ? "text-neutral-content" : "text-neutral-content/40"}`}
+                            className={`text-sm font-semibold ${billing === "annual" ? "text-base-content" : "text-base-content/40"}`}
                         >
                             Annual
                         </span>
@@ -346,12 +346,12 @@ export default function PricingOne() {
             </section>
 
             {/* CTA */}
-            <section className="pricing-section scroll-reveal fade-up bg-neutral text-neutral-content py-16 lg:py-20">
+            <section className="pricing-section scroll-reveal fade-up bg-base-300 text-base-content py-16 lg:py-20">
                 <div className="container mx-auto px-6 lg:px-12 text-center">
                     <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
                         Ready to grow your pipeline?
                     </h2>
-                    <p className="text-neutral-content/50 max-w-lg mx-auto mb-8">
+                    <p className="text-base-content/50 max-w-lg mx-auto mb-8">
                         Join 2,400+ recruiters earning split fees on the
                         marketplace. Start for free, no credit card required.
                     </p>

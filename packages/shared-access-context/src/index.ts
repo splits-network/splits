@@ -4,6 +4,7 @@ export interface AccessContext {
     identityUserId: string | null;
     candidateId: string | null;
     recruiterId: string | null;
+    firmIds: string[];
     organizationIds: string[];
     orgWideOrganizationIds: string[];
     companyIds: string[];
@@ -47,6 +48,7 @@ const EMPTY_CONTEXT: AccessContext = {
     identityUserId: null,
     candidateId: null,
     recruiterId: null,
+    firmIds: [],
     organizationIds: [],
     orgWideOrganizationIds: [],
     companyIds: [],
@@ -141,10 +143,24 @@ export async function resolveAccessContext(
         const recruiterId = recruiterRole?.role_entity_id || null;
         const candidateId = candidateRole?.role_entity_id || null;
 
+        // Resolve firm membership for recruiter users
+        let firmIds: string[] = [];
+        if (recruiterId) {
+            const { data: firmMembers } = await supabase
+                .from('firm_members')
+                .select('firm_id')
+                .eq('recruiter_id', recruiterId)
+                .eq('status', 'active');
+            firmIds = [...new Set(
+                (firmMembers || []).map(fm => fm.firm_id).filter(Boolean) as string[]
+            )];
+        }
+
         return {
             identityUserId,
             candidateId,
             recruiterId,
+            firmIds,
             organizationIds,
             orgWideOrganizationIds,
             companyIds,
@@ -173,4 +189,6 @@ interface EntityRoleRow {
     role_name: string;
     role_entity_id: string | null;
 }
+
+export { EntitlementChecker } from './entitlement-checker';
 
