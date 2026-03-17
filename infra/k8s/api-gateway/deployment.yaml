@@ -132,6 +132,8 @@ spec:
                         value: "http://support-service:80"
                       - name: ONBOARDING_SERVICE_URL
                         value: "http://onboarding-service:3023"
+                      - name: HEALTH_MONITOR_SERVICE_URL
+                        value: "http://health-monitor:3012"
                   resources:
                       requests:
                           cpu: 200m

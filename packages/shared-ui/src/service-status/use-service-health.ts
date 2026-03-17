@@ -50,7 +50,7 @@ export function useServiceHealth(options?: {
 
     const fetchSystemHealth = useCallback(async () => {
         try {
-            const response = await fetch(`${getGatewayBaseUrl()}/api/v3/system-health`, {
+            const response = await fetch(`${getGatewayBaseUrl()}/api/v3/public/system-health`, {
                 cache: "no-store",
                 signal: AbortSignal.timeout(10000),
             });

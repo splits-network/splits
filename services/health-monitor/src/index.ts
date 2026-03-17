@@ -19,6 +19,7 @@ import { IncidentManager } from "./incident-manager";
 import { NotificationManager } from "./notification-manager";
 import { EventPublisher } from "./event-publisher";
 import { MonitorLoop } from "./monitor-loop";
+import { registerHealthRoutes } from "./routes";
 
 async function main() {
     const baseConfig = loadBaseConfig("health-monitor");
@@ -126,6 +127,14 @@ async function main() {
         dryRun,
     );
     monitorLoop.start();
+
+    // Register V3 API routes for system health, incidents, and status contact
+    registerHealthRoutes(app, {
+        redis,
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey,
+        eventPublisher,
+    });
 
     // Register health check for the health-monitor itself
     registerHealthCheck(app, {

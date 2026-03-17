@@ -192,7 +192,7 @@ export function CompanyOperations({
                                             return (
                                                 <Link
                                                     key={activity.id || i}
-                                                    href={`/portal/applications/${activity.id}`}
+                                                    href={`/portal/applications?applicationId=${activity.id}`}
                                                     className="block"
                                                 >
                                                     <div className="flex items-center gap-3 py-3 border-b border-base-300 hover:bg-base-300/50 transition-colors">
