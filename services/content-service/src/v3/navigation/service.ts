@@ -45,7 +45,7 @@ export class NavigationService {
     return this.repository.upsert({
       app: input.app,
       location: input.location,
-      items: input.items,
+      config: input.config,
     });
   }
 

@@ -77,7 +77,7 @@ export function OnboardingPage() {
     // ── Loading state ──
     if (initStatus === "loading") {
         return (
-            <div className="fixed inset-0 z-50 bg-neutral flex items-center justify-center">
+            <div className="fixed inset-0 z-50 bg-neutral text-neutral-content flex items-center justify-center">
                 <SplashLoading message={initMessage} />
             </div>
         );
@@ -86,7 +86,7 @@ export function OnboardingPage() {
     // ── Error state ──
     if (initStatus === "error") {
         return (
-            <div className="fixed inset-0 z-50 bg-neutral flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 bg-neutral text-neutral-content flex items-center justify-center p-4">
                 <div className="w-full max-w-md bg-base-100 p-8">
                     <div className="flex flex-col items-center text-center">
                         <div className="w-16 h-16 bg-error/10 flex items-center justify-center mb-4">

@@ -3,7 +3,7 @@ import type { CtaBlock } from "@splits-network/shared-types";
 const bgMap: Record<string, { bg: string; text: string }> = {
     primary: { bg: "bg-primary", text: "text-primary-content" },
     secondary: { bg: "bg-secondary", text: "text-secondary-content" },
-    neutral: { bg: "bg-neutral", text: "text-base-content" },
+    neutral: { bg: "bg-neutral", text: "text-neutral-content" },
     "base-100": { bg: "bg-base-100", text: "text-base-content" },
 };
 

@@ -562,7 +562,7 @@ export function Sidebar() {
                                             className={`w-8 h-8 flex items-center justify-center ${
                                                 isItemActive
                                                     ? "bg-primary text-primary-content"
-                                                    : "text-base-content/40"
+                                                    : "text-neutral-content/40"
                                             }`}
                                         >
                                             <i
@@ -572,8 +572,8 @@ export function Sidebar() {
                                         <span
                                             className={`text-[8px] font-black uppercase tracking-wider ${
                                                 isItemActive
-                                                    ? "text-base-content"
-                                                    : "text-base-content/40"
+                                                    ? "text-neutral-content"
+                                                    : "text-neutral-content/40"
                                             }`}
                                         >
                                             {item.label}
@@ -606,10 +606,10 @@ export function Sidebar() {
                                     className="flex flex-col items-center gap-1 px-2 py-1 cursor-pointer list-none"
                                     title="More options"
                                 >
-                                    <div className="w-8 h-8 flex items-center justify-center text-base-content/40">
+                                    <div className="w-8 h-8 flex items-center justify-center text-neutral-content/40">
                                         <i className="fa-duotone fa-regular fa-ellipsis text-lg" />
                                     </div>
-                                    <span className="text-[8px] font-black uppercase tracking-wider text-base-content/40">
+                                    <span className="text-[8px] font-black uppercase tracking-wider text-neutral-content/40">
                                         More
                                     </span>
                                 </summary>
@@ -637,7 +637,7 @@ export function Sidebar() {
                                                             item.href,
                                                         )
                                                             ? "text-primary"
-                                                            : "text-base-content/60"
+                                                            : "text-neutral-content/60"
                                                     }
                                                 `}
                                             >

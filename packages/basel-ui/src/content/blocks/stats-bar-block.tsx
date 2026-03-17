@@ -1,7 +1,7 @@
 import type { StatsBarBlock } from "@splits-network/shared-types";
 
 const bgMap: Record<string, { bg: string; text: string }> = {
-    neutral: { bg: "bg-neutral", text: "text-base-content" },
+    neutral: { bg: "bg-neutral", text: "text-neutral-content" },
     "base-100": { bg: "bg-base-100", text: "text-base-content" },
     "base-200": { bg: "bg-base-200", text: "text-base-content" },
 };

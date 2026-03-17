@@ -450,7 +450,7 @@ export function PricingContent() {
 
                 <div className="relative  flex items-center h-full px-6 lg:px-12">
                     <div className="scroll-reveal fade-up container mx-auto">
-                        <p className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.95] text-base-content max-w-3xl">
+                        <p className="text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.95] text-neutral-content max-w-3xl">
                             Invest in your tier.{" "}
                             <span className="text-warning">
                                 Compound your returns.
@@ -535,7 +535,7 @@ export function PricingContent() {
                                 <div className="text-4xl font-black mb-2 text-warning">
                                     15-25%
                                 </div>
-                                <div className="text-sm font-bold uppercase tracking-wider text-base-content/60">
+                                <div className="text-sm font-bold uppercase tracking-wider text-neutral-content/60">
                                     of first-year salary, set per role
                                 </div>
                             </div>
@@ -629,11 +629,11 @@ export function PricingContent() {
                             <span className="inline-block px-4 py-1 text-sm font-bold uppercase tracking-[0.2em] mb-4 bg-secondary text-secondary-content">
                                 Common Questions
                             </span>
-                            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-[0.95] text-base-content">
+                            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-[0.95] text-neutral-content">
                                 Pricing{" "}
                                 <span className="text-secondary">Answered</span>
                             </h2>
-                            <p className="mt-4 text-base text-base-content/50 leading-relaxed">
+                            <p className="mt-4 text-base text-neutral-content/50 leading-relaxed">
                                 Everything you need to know about plans,
                                 billing, upgrades, and how the split model
                                 works.
@@ -674,7 +674,7 @@ export function PricingContent() {
             {/* ═══════════════════════════════════════════════════════════════
                 CTA — Full-bleed dark, editorial split with roomy cards
                ═══════════════════════════════════════════════════════════════ */}
-            <section className="pricing-cta relative py-28 overflow-hidden bg-neutral">
+            <section className="pricing-cta relative py-28 overflow-hidden bg-neutral ">
                 {/* Subtle diagonal accent */}
                 <div
                     className="absolute inset-0 bg-primary/5 pointer-events-none hidden lg:block"
@@ -689,11 +689,11 @@ export function PricingContent() {
                         <span className="inline-block px-4 py-1 text-sm font-bold uppercase tracking-[0.2em] mb-6 bg-primary text-primary-content">
                             Begin Here
                         </span>
-                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.92] mb-6 text-base-content">
+                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.92] mb-6 text-neutral-content">
                             One Network. Three Ways{" "}
                             <span className="text-primary">In.</span>
                         </h2>
-                        <p className="text-lg text-base-content/70 max-w-xl leading-relaxed">
+                        <p className="text-lg text-neutral-content/70 max-w-xl leading-relaxed">
                             Pick the path that fits your role in the ecosystem.
                             Every account starts in minutes.
                         </p>
@@ -706,10 +706,10 @@ export function PricingContent() {
                             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-primary">
                                 <i className="fa-duotone fa-regular fa-user-tie text-2xl text-primary-content" />
                             </div>
-                            <h3 className="font-black text-xl uppercase mb-3 text-base-content">
+                            <h3 className="font-black text-xl uppercase mb-3 text-neutral-content">
                                 Recruiters
                             </h3>
-                            <p className="text-sm mb-8 text-base-content/60 leading-relaxed">
+                            <p className="text-sm mb-8 text-neutral-content/60 leading-relaxed">
                                 Access the split-fee marketplace and start
                                 submitting candidates today.
                             </p>
@@ -726,10 +726,10 @@ export function PricingContent() {
                             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-warning">
                                 <i className="fa-duotone fa-regular fa-building text-2xl text-warning-content" />
                             </div>
-                            <h3 className="font-black text-xl uppercase mb-3 text-base-content">
+                            <h3 className="font-black text-xl uppercase mb-3 text-neutral-content">
                                 Companies
                             </h3>
-                            <p className="text-sm mb-8 text-base-content/60 leading-relaxed">
+                            <p className="text-sm mb-8 text-neutral-content/60 leading-relaxed">
                                 Post roles at no cost. Pay only when you hire.
                             </p>
                             <a
@@ -745,10 +745,10 @@ export function PricingContent() {
                             <div className="w-16 h-16 mb-6 flex items-center justify-center bg-secondary">
                                 <i className="fa-duotone fa-regular fa-user text-2xl text-secondary-content" />
                             </div>
-                            <h3 className="font-black text-xl uppercase mb-3 text-base-content">
+                            <h3 className="font-black text-xl uppercase mb-3 text-neutral-content">
                                 Candidates
                             </h3>
-                            <p className="text-sm mb-8 text-base-content/60 leading-relaxed">
+                            <p className="text-sm mb-8 text-neutral-content/60 leading-relaxed">
                                 Create a free profile. Let specialized
                                 recruiters find you the right fit.
                             </p>
@@ -763,7 +763,7 @@ export function PricingContent() {
 
                     <div className="scroll-reveal fade-in">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <p className="text-sm text-base-content/50">
+                            <p className="text-sm text-neutral-content/50">
                                 No credit card required for Starter. Upgrade or
                                 cancel anytime.
                             </p>

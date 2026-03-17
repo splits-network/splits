@@ -19,7 +19,7 @@ export const ACCENT: readonly AccentClasses[] = [
     { bg: "bg-success", text: "text-success", border: "border-success", bgLight: "bg-success/10", textOnBg: "text-success-content" },
     { bg: "bg-warning", text: "text-warning", border: "border-warning", bgLight: "bg-warning/10", textOnBg: "text-warning-content" },
     { bg: "bg-error", text: "text-error", border: "border-error", bgLight: "bg-error/10", textOnBg: "text-error-content" },
-    { bg: "bg-neutral", text: "text-neutral", border: "border-neutral", bgLight: "bg-neutral/10", textOnBg: "text-base-content" },
+    { bg: "bg-neutral", text: "text-neutral", border: "border-neutral", bgLight: "bg-neutral/10", textOnBg: "text-neutral-content" },
 ] as const;
 
 /** Get accent class bundle by cycling index. */

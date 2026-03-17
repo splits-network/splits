@@ -42,7 +42,7 @@ export function MobileDock({ items, moreItems }: MobileDockProps) {
                                 className={`w-8 h-8 flex items-center justify-center ${
                                     active
                                         ? "bg-primary text-primary-content"
-                                        : "text-base-content/40"
+                                        : "text-neutral-content/40"
                                 }`}
                             >
                                 <i className={`${item.icon} text-sm`} />
@@ -50,8 +50,8 @@ export function MobileDock({ items, moreItems }: MobileDockProps) {
                             <span
                                 className={`text-[8px] font-black uppercase tracking-wider ${
                                     active
-                                        ? "text-base-content"
-                                        : "text-base-content/40"
+                                        ? "text-neutral-content"
+                                        : "text-neutral-content/40"
                                 }`}
                             >
                                 {item.label}
@@ -68,10 +68,10 @@ export function MobileDock({ items, moreItems }: MobileDockProps) {
                         className="flex flex-col items-center gap-1 px-2 py-1 cursor-pointer"
                         title="More options"
                     >
-                        <div className="w-8 h-8 flex items-center justify-center text-base-content/40">
+                        <div className="w-8 h-8 flex items-center justify-center text-neutral-content/40">
                             <i className="fa-duotone fa-regular fa-ellipsis text-lg" />
                         </div>
-                        <span className="text-[8px] font-black uppercase tracking-wider text-base-content/40">
+                        <span className="text-[8px] font-black uppercase tracking-wider text-neutral-content/40">
                             More
                         </span>
                     </div>

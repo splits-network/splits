@@ -63,8 +63,9 @@ export async function getHeaderNav(): Promise<HeaderNavConfig | null> {
             { next: { revalidate: 300 } }
         );
         if (!res.ok) return null;
-        const json: { data: ContentNavigation } = await res.json();
-        return json.data.config as HeaderNavConfig;
+        const json: { data: ContentNavigation[] } = await res.json();
+        if (!json.data?.length) return null;
+        return json.data[0].config as HeaderNavConfig;
     } catch {
         return null;
     }
@@ -77,8 +78,9 @@ export async function getFooterNav(): Promise<FooterNavConfig | null> {
             { next: { revalidate: 300 } }
         );
         if (!res.ok) return null;
-        const json: { data: ContentNavigation } = await res.json();
-        return json.data.config as FooterNavConfig;
+        const json: { data: ContentNavigation[] } = await res.json();
+        if (!json.data?.length) return null;
+        return json.data[0].config as FooterNavConfig;
     } catch {
         return null;
     }

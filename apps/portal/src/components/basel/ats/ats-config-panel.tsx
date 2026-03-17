@@ -146,16 +146,16 @@ export default function ATSConfigPanel({
                 {/* Header */}
                 <div className="bg-neutral px-6 py-5 flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-base-content/60">
+                        <p className="text-sm font-bold tracking-[0.2em] uppercase text-neutral-content/60">
                             Integrations
                         </p>
-                        <h2 className="text-lg font-black text-base-content mt-0.5">
+                        <h2 className="text-lg font-black text-neutral-content mt-0.5">
                             ATS Connections
                         </h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="btn btn-ghost btn-sm btn-circle text-base-content hover:"
+                        className="btn btn-ghost btn-sm btn-circle text-neutral-content hover:"
                     >
                         <i className="fa-solid fa-xmark text-lg" />
                     </button>

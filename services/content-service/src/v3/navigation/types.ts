@@ -15,7 +15,7 @@ export interface NavigationListParams {
 export interface UpsertNavigationInput {
   app: string;
   location: string;
-  items: any[];
+  config: Record<string, any>;
 }
 
 // --- JSON Schemas ---
@@ -33,11 +33,11 @@ export const listQuerySchema = {
 
 export const upsertSchema = {
   type: 'object',
-  required: ['app', 'location', 'items'],
+  required: ['app', 'location', 'config'],
   properties: {
     app: { type: 'string', minLength: 1, maxLength: 100 },
     location: { type: 'string', minLength: 1, maxLength: 100 },
-    items: { type: 'array' },
+    config: { type: 'object' },
   },
   additionalProperties: false,
 };
