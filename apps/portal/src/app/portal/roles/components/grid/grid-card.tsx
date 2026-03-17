@@ -3,7 +3,7 @@
 import type { Job } from "../../types";
 import { formatJobLevel, COMMUTE_TYPE_LABELS } from "../../types";
 import { statusBadgeColor, statusBorder } from "../shared/status-color";
-import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import {
     salaryDisplay,
@@ -18,7 +18,6 @@ import {
 } from "../shared/helpers";
 import RoleActionsToolbar from "../shared/actions-toolbar";
 import { SaveBookmark } from "@/components/save-bookmark";
-import { useGamification } from "@splits-network/shared-gamification";
 import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function GridCard({
@@ -35,8 +34,6 @@ export function GridCard({
     onUpdateItem?: (id: string, patch: Partial<Job>) => void;
 }) {
     const { isRecruiter } = useUserProfile();
-    const { getLevel } = useGamification();
-    const companyLevel = job.company_id ? getLevel(job.company_id) : undefined;
     const name = companyName(job);
     const salary = salaryDisplay(job);
     const level = formatJobLevel(job.job_level);
@@ -111,12 +108,6 @@ export function GridCard({
 
             {/* Inline metadata: salary · fee · payout · applicants */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
-                {companyLevel && (
-                    <>
-                        <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
-                        <span className="text-base-content/20">&middot;</span>
-                    </>
-                )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
