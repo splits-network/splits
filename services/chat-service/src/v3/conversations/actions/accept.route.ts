@@ -6,15 +6,21 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { IEventPublisher } from '../../../v2/shared/events';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant, findOtherParticipant } from './participant-helper';
+import { AcceptActionRepository } from './accept.repository';
+import { AcceptActionService } from './accept.service';
 import { idParamSchema } from '../types';
 
 export function registerAcceptAction(
   app: FastifyInstance,
   supabase: SupabaseClient,
+  eventPublisher?: IEventPublisher,
   chatEventPublisher?: IChatEventPublisher,
 ) {
+  const repository = new AcceptActionRepository(supabase);
+  const service = new AcceptActionService(repository, supabase, eventPublisher, chatEventPublisher);
+
   app.post('/api/v3/chat/conversations/:id/actions/accept', {
     schema: { params: idParamSchema },
   }, async (request, reply) => {
@@ -23,19 +29,7 @@ export function registerAcceptAction(
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
     }
     const { id } = request.params as { id: string };
-    const { userId } = await resolveAndValidateParticipant(supabase, clerkUserId, id);
-
-    await supabase
-      .from('chat_conversation_participants')
-      .update({ request_state: 'accepted', updated_at: new Date().toISOString() })
-      .eq('conversation_id', id)
-      .eq('user_id', userId);
-
-    const other = await findOtherParticipant(supabase, id, userId);
-    if (other) {
-      await chatEventPublisher?.conversationAccepted(other.user_id, { conversationId: id, acceptedBy: userId });
-    }
-
-    return reply.send({ data: { message: 'Conversation accepted' } });
+    const data = await service.accept(id, clerkUserId);
+    return reply.send({ data });
   });
 }

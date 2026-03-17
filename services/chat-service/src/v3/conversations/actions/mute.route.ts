@@ -7,8 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { IEventPublisher } from '../../../v2/shared/events';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from './participant-helper';
+import { MuteActionRepository } from './mute.repository';
+import { MuteActionService } from './mute.service';
 import { idParamSchema } from '../types';
 
 const bodySchema = {
@@ -23,8 +25,12 @@ const bodySchema = {
 export function registerMuteAction(
   app: FastifyInstance,
   supabase: SupabaseClient,
+  eventPublisher?: IEventPublisher,
   chatEventPublisher?: IChatEventPublisher,
 ) {
+  const repository = new MuteActionRepository(supabase);
+  const service = new MuteActionService(repository, supabase, eventPublisher, chatEventPublisher);
+
   app.post('/api/v3/chat/conversations/:id/actions/mute', {
     schema: { params: idParamSchema, body: bodySchema },
   }, async (request, reply) => {
@@ -34,17 +40,7 @@ export function registerMuteAction(
     }
     const { id } = request.params as { id: string };
     const { muted } = request.body as { muted: boolean };
-    const { userId } = await resolveAndValidateParticipant(supabase, clerkUserId, id);
-
-    const now = new Date().toISOString();
-    await supabase
-      .from('chat_conversation_participants')
-      .update({ muted_at: muted ? now : null, updated_at: now })
-      .eq('conversation_id', id)
-      .eq('user_id', userId);
-
-    await chatEventPublisher?.conversationUpdated(userId, { conversationId: id, muted });
-
-    return reply.send({ data: { message: muted ? 'Conversation muted' : 'Conversation unmuted' } });
+    const data = await service.mute(id, muted, clerkUserId);
+    return reply.send({ data });
   });
 }

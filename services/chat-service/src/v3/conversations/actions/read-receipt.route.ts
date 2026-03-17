@@ -8,7 +8,8 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from './participant-helper';
+import { ReadReceiptActionRepository } from './read-receipt.repository';
+import { ReadReceiptActionService } from './read-receipt.service';
 import { idParamSchema } from '../types';
 
 const bodySchema = {
@@ -24,6 +25,9 @@ export function registerReadReceiptAction(
   supabase: SupabaseClient,
   chatEventPublisher?: IChatEventPublisher,
 ) {
+  const repository = new ReadReceiptActionRepository(supabase);
+  const service = new ReadReceiptActionService(repository, supabase, chatEventPublisher);
+
   app.post('/api/v3/chat/conversations/:id/actions/read-receipt', {
     schema: { params: idParamSchema, body: bodySchema },
   }, async (request, reply) => {
@@ -33,21 +37,7 @@ export function registerReadReceiptAction(
     }
     const { id } = request.params as { id: string };
     const body = request.body as { lastReadMessageId?: string };
-    const { userId } = await resolveAndValidateParticipant(supabase, clerkUserId, id);
-
-    const { error } = await supabase.rpc('chat_mark_read', {
-      p_conversation_id: id,
-      p_user_id: userId,
-      p_last_read_message_id: body.lastReadMessageId ?? null,
-    });
-    if (error) throw error;
-
-    await chatEventPublisher?.readReceipt(id, {
-      conversationId: id,
-      userId,
-      lastReadMessageId: body.lastReadMessageId ?? null,
-    });
-
-    return reply.send({ data: { message: 'Read receipt updated' } });
+    const data = await service.markRead(id, body.lastReadMessageId ?? null, clerkUserId);
+    return reply.send({ data });
   });
 }

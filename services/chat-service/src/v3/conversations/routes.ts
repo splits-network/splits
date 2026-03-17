@@ -51,10 +51,10 @@ export function registerConversationRoutes(
 
   // --- Actions (before :id) ---
   registerStartAction(app, supabase, eventPublisher, chatEventPublisher);
-  registerAcceptAction(app, supabase, chatEventPublisher);
-  registerDeclineAction(app, supabase, chatEventPublisher);
-  registerMuteAction(app, supabase, chatEventPublisher);
-  registerArchiveAction(app, supabase, chatEventPublisher);
+  registerAcceptAction(app, supabase, eventPublisher, chatEventPublisher);
+  registerDeclineAction(app, supabase, eventPublisher, chatEventPublisher);
+  registerMuteAction(app, supabase, eventPublisher, chatEventPublisher);
+  registerArchiveAction(app, supabase, eventPublisher, chatEventPublisher);
   registerReadReceiptAction(app, supabase, chatEventPublisher);
   registerResyncAction(app, supabase, chatEventPublisher);
 
@@ -81,10 +81,17 @@ export function registerConversationRoutes(
     return reply.send({ data });
   });
 
-  // POST /api/v3/chat/conversations -- delegates to start action for createOrFind
-  // The core POST is intentionally minimal; the "start" action handles
-  // representation routing and context. This is a no-op to satisfy Core 5.
-  // Actual creation: POST /api/v3/chat/conversations/actions/start
+  // POST /api/v3/chat/conversations
+  // Creation is handled by POST /actions/start which includes representation
+  // routing and context validation. This core POST exists to satisfy Core 5.
+  app.post('/api/v3/chat/conversations', async (request, reply) => {
+    return reply.status(400).send({
+      error: {
+        code: 'USE_ACTION',
+        message: 'Use POST /api/v3/chat/conversations/actions/start to create conversations',
+      },
+    });
+  });
 
   // PATCH /api/v3/chat/conversations/:id
   app.patch('/api/v3/chat/conversations/:id', {

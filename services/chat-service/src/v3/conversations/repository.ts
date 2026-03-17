@@ -8,6 +8,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ConversationListParams, ChatConversation } from './types';
 
+const SORTABLE_FIELDS = ['created_at', 'updated_at', 'last_message_at'];
+
 export class ConversationRepository {
   constructor(private supabase: SupabaseClient) {}
 
@@ -32,11 +34,14 @@ export class ConversationRepository {
       return { data: [], total: 0 };
     }
 
+    const sortBy = SORTABLE_FIELDS.includes(params.sort_by || '') ? params.sort_by! : 'last_message_at';
+    const sortAscending = params.sort_order === 'asc';
+
     const query = this.supabase
       .from('chat_conversations')
       .select('*', { count: 'exact' })
       .in('id', conversationIds)
-      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .order(sortBy, { ascending: sortAscending, nullsFirst: false })
       .range(offset, offset + limit - 1);
 
     const { data, count, error } = await query;

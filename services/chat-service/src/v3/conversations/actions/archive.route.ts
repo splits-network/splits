@@ -7,8 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { IEventPublisher } from '../../../v2/shared/events';
 import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from './participant-helper';
+import { ArchiveActionRepository } from './archive.repository';
+import { ArchiveActionService } from './archive.service';
 import { idParamSchema } from '../types';
 
 const bodySchema = {
@@ -23,8 +25,12 @@ const bodySchema = {
 export function registerArchiveAction(
   app: FastifyInstance,
   supabase: SupabaseClient,
+  eventPublisher?: IEventPublisher,
   chatEventPublisher?: IChatEventPublisher,
 ) {
+  const repository = new ArchiveActionRepository(supabase);
+  const service = new ArchiveActionService(repository, supabase, eventPublisher, chatEventPublisher);
+
   app.post('/api/v3/chat/conversations/:id/actions/archive', {
     schema: { params: idParamSchema, body: bodySchema },
   }, async (request, reply) => {
@@ -34,17 +40,7 @@ export function registerArchiveAction(
     }
     const { id } = request.params as { id: string };
     const { archived } = request.body as { archived: boolean };
-    const { userId } = await resolveAndValidateParticipant(supabase, clerkUserId, id);
-
-    const now = new Date().toISOString();
-    await supabase
-      .from('chat_conversation_participants')
-      .update({ archived_at: archived ? now : null, updated_at: now })
-      .eq('conversation_id', id)
-      .eq('user_id', userId);
-
-    await chatEventPublisher?.conversationUpdated(userId, { conversationId: id, archived });
-
-    return reply.send({ data: { message: archived ? 'Conversation archived' : 'Conversation unarchived' } });
+    const data = await service.archive(id, archived, clerkUserId);
+    return reply.send({ data });
   });
 }
