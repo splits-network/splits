@@ -3,11 +3,14 @@ import { NotificationLog, NotificationLogInsert } from '@splits-network/shared-t
 import { Logger } from '@splits-network/shared-logging';
 import { EmailEntitlementGate, type NotificationChannel } from './helpers/email-entitlement-gate';
 import { PreferenceGate } from './helpers/preference-gate';
+import { PushSender } from './services/push-sender';
+import type { PushPayload } from './v3/push/types';
 
 export class NotificationRepository {
     private supabase: SupabaseClient;
     private _emailGate: EmailEntitlementGate | null = null;
     private _preferenceGate: PreferenceGate | null = null;
+    private _pushSender: PushSender | null = null;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey, {
@@ -23,6 +26,31 @@ export class NotificationRepository {
     /** Initialize the user preference gate (called once at startup) */
     initPreferenceGate(logger: Logger): void {
         this._preferenceGate = new PreferenceGate(this.supabase, logger);
+    }
+
+    /** Initialize the push sender (called once at startup) */
+    initPushSender(logger: Logger): void {
+        this._pushSender = new PushSender(this.supabase, logger);
+    }
+
+    /**
+     * Send a push notification to a user if their preferences allow it.
+     * Runs independently of the email/in_app channel resolution chain.
+     */
+    async sendPushNotification(
+        recipientUserId: string | null | undefined,
+        category: string | null | undefined,
+        payload: PushPayload,
+    ): Promise<void> {
+        if (!this._pushSender?.isConfigured || !recipientUserId) return;
+
+        // Check push preference
+        if (this._preferenceGate) {
+            const enabled = await this._preferenceGate.isPushEnabled(recipientUserId, category);
+            if (!enabled) return;
+        }
+
+        await this._pushSender.sendToUser(recipientUserId, payload);
     }
 
     /** Check whether email is allowed for a user and resolve the effective channel */
@@ -81,6 +109,25 @@ export class NotificationRepository {
             .single();
 
         if (error) throw error;
+
+        // Fire push notification as a parallel side-effect (non-blocking)
+        this.sendPushNotification(
+            log.recipient_user_id,
+            log.category,
+            {
+                title: log.subject || 'Splits Network',
+                body: (log.payload as any)?.body || undefined,
+                icon: '/icons/icon-192x192.png',
+                badge: '/icons/badge-72x72.png',
+                tag: log.category || undefined,
+                renotify: true,
+                data: {
+                    url: log.action_url || undefined,
+                    notificationId: data.id,
+                },
+            },
+        ).catch(() => {}); // Never let push failure block notification creation
+
         return data;
     }
 

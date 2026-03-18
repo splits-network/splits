@@ -34,6 +34,7 @@ export class PreferenceRepository {
           category,
           email_enabled: update.email_enabled ?? true,
           in_app_enabled: update.in_app_enabled ?? true,
+          push_enabled: update.push_enabled ?? true,
         },
         { onConflict: 'user_id,category' },
       )
@@ -46,13 +47,14 @@ export class PreferenceRepository {
 
   async bulkUpsert(
     userId: string,
-    updates: Array<{ category: string; email_enabled: boolean; in_app_enabled: boolean }>,
+    updates: Array<{ category: string; email_enabled: boolean; in_app_enabled: boolean; push_enabled: boolean }>,
   ): Promise<any[]> {
     const rows = updates.map((u) => ({
       user_id: userId,
       category: u.category,
       email_enabled: u.email_enabled,
       in_app_enabled: u.in_app_enabled,
+      push_enabled: u.push_enabled,
     }));
 
     const { data, error } = await this.supabase

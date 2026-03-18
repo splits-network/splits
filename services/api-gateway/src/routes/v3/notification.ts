@@ -30,6 +30,12 @@ const notificationV3Routes: V3RouteConfig[] = [
   { path: '/notification-preferences', method: 'GET', auth: 'required' },
   { path: '/notification-preferences/:category', method: 'PATCH', auth: 'required' },
 
+  // ── Push Notifications ─────────────────────────────────────────
+  { path: '/push/vapid-key', method: 'GET', auth: 'optional' },
+  { path: '/push/subscriptions', method: 'POST', auth: 'required' },
+  { path: '/push/subscriptions', method: 'DELETE', auth: 'required' },
+  { path: '/push/subscriptions', method: 'GET', auth: 'required' },
+
   // ── Templates Core CRUD ────────────────────────────────────────
   { resource: 'templates', auth: 'required' },
 
