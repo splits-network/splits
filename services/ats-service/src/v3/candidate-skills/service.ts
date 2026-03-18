@@ -30,7 +30,6 @@ export class CandidateSkillService {
     return this.repository.create({
       candidate_id: input.candidate_id,
       skill_id: input.skill_id,
-      proficiency_level: input.proficiency_level || null,
     });
   }
 
@@ -41,7 +40,7 @@ export class CandidateSkillService {
 
   async bulkReplace(
     candidateId: string,
-    skills: Array<{ skill_id: string; proficiency_level?: string }>,
+    skills: Array<{ skill_id: string }>,
     clerkUserId: string
   ) {
     await this.assertAccess(clerkUserId);

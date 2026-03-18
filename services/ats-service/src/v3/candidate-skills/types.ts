@@ -7,7 +7,6 @@
 export interface CreateCandidateSkillInput {
   candidate_id: string;
   skill_id: string;
-  proficiency_level?: string;
 }
 
 export interface CandidateSkillListParams {
@@ -15,7 +14,7 @@ export interface CandidateSkillListParams {
 }
 
 export interface BulkReplaceCandidateSkillsInput {
-  skills: Array<{ skill_id: string; proficiency_level?: string }>;
+  skills: Array<{ skill_id: string }>;
 }
 
 // --- JSON Schemas ---
@@ -35,7 +34,6 @@ export const createSchema = {
   properties: {
     candidate_id: { type: 'string', format: 'uuid' },
     skill_id: { type: 'string', format: 'uuid' },
-    proficiency_level: { type: 'string', maxLength: 50 },
   },
   additionalProperties: false,
 };
@@ -51,7 +49,6 @@ export const bulkReplaceSchema = {
         required: ['skill_id'],
         properties: {
           skill_id: { type: 'string', format: 'uuid' },
-          proficiency_level: { type: 'string', maxLength: 50 },
         },
         additionalProperties: false,
       },
