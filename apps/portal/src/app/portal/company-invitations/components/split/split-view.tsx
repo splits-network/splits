@@ -39,7 +39,6 @@ export function SplitView({
             emptyIcon="fa-handshake"
             emptyTitle="Select a Connection"
             emptyDescription="Click a connection on the left to view details"
-            initialListWidth={33}
             onMobileClose={() => {
                 const selected = invitations.find((i) => i.id === selectedId);
                 if (selected) onSelect(selected);

@@ -40,8 +40,6 @@ export default function SplitView({
             )}
             emptyIcon="fa-hand-pointer"
             emptyTitle="Select a recruiter to view details"
-            initialListWidth={38}
-            mobileBreakpoint="lg"
             onMobileClose={() => {
                 if (selectedRecruiter) onSelect(selectedRecruiter);
             }}

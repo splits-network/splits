@@ -3,6 +3,7 @@ import { ConnectionRepository } from '../connections/repository';
 import { TokenRefreshService } from '../calendar/token-refresh';
 import { GmailClient, GmailMessage } from './gmail-client';
 import { MicrosoftMailClient, MicrosoftMailMessage } from './microsoft-mail-client';
+import { sanitizeEmailBody } from './sanitize';
 import type { EmailMessage, EmailThread, EmailListResponse, EmailListItem } from '@splits-network/shared-types';
 
 /* ── Unified send params ─────────────────────────────────────────────── */
@@ -268,7 +269,7 @@ export class EmailService {
             isRead: !(msg.labelIds?.includes('UNREAD') ?? false),
             hasAttachments: msg.payload.parts?.some(p => p.mimeType?.startsWith('application/') || p.mimeType?.startsWith('image/')) ?? false,
             bodyText,
-            bodyHtml,
+            bodyHtml: sanitizeEmailBody(bodyHtml),
         };
     }
 
@@ -285,7 +286,7 @@ export class EmailService {
             isRead: msg.isRead,
             hasAttachments: msg.hasAttachments,
             bodyText: msg.body.contentType === 'Text' ? msg.body.content : undefined,
-            bodyHtml: msg.body.contentType === 'HTML' ? msg.body.content : undefined,
+            bodyHtml: msg.body.contentType === 'HTML' ? sanitizeEmailBody(msg.body.content) : undefined,
             webLink: msg.webLink,
         };
     }

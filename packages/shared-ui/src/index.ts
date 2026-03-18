@@ -1,6 +1,7 @@
 export { MarkdownEditor, type MarkdownEditorProps, markdownToolbarCommands } from './markdown/markdown-editor';
 export { MarkdownRenderer, type MarkdownRendererProps, markdownRenderConfig } from './markdown/markdown-renderer';
 export { JsonLd } from './seo/json-ld';
+export { sanitizeEmailHtml, sanitizeCalendarHtml } from './html-sanitizer';
 
 // Browse components
 export { BrowseLayout } from './browse/browse-layout';

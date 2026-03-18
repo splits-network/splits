@@ -44,7 +44,6 @@ export function SplitView({
             )}
             emptyIcon="fa-hand-pointer"
             emptyTitle="Select a match to view details"
-            initialListWidth={40}
             onMobileClose={() => {
                 const selected = matches.find((m) => m.id === selectedId);
                 if (selected) onSelect(selected);
