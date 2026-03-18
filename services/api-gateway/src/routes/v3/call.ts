@@ -10,9 +10,14 @@ import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const callV3Routes: V3RouteConfig[] = [
-  // ── Calls Stats & Tags (before CRUD to avoid :id collision) ───
+  // ── Public Routes (no auth, before :id to avoid collision) ───
+  { path: '/calls/exchange-token', method: 'POST', auth: 'none' },
+
+  // ── Calls Stats, Tags & Preferences (before CRUD to avoid :id collision)
   { path: '/calls/stats', method: 'GET', auth: 'required' },
   { path: '/calls/tags', method: 'GET', auth: 'required' },
+  { path: '/calls/calendar-preferences', method: 'GET', auth: 'required' },
+  { path: '/calls/calendar-preferences', method: 'PUT', auth: 'required' },
 
   // ── Calls Core CRUD ────────────────────────────────────────────
   { resource: 'calls', auth: 'required' },
@@ -27,6 +32,10 @@ const callV3Routes: V3RouteConfig[] = [
   { path: '/calls/:callId/entities', method: 'GET', auth: 'required' },
   { path: '/calls/:callId/entities', method: 'POST', auth: 'required' },
   { path: '/calls/:callId/entities/:id', method: 'DELETE', auth: 'required' },
+
+  // ── Call Notes ────────────────────────────────────────────────
+  { path: '/calls/:id/notes', method: 'GET', auth: 'required' },
+  { path: '/calls/:id/notes', method: 'POST', auth: 'required' },
 
   // ── Call Lifecycle Actions ───────────────────────────────────
   { path: '/calls/:id/token', method: 'POST', auth: 'required' },
