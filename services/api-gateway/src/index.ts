@@ -510,11 +510,14 @@ async function main() {
             return;
         }
 
-        // Skip auth for call magic-link token exchange (video app uses magic links without Clerk auth)
-        if (request.method === 'POST' && (
-            request.url.startsWith('/api/v2/calls/exchange-token') ||
-            request.url.startsWith('/api/v3/calls/exchange-token')
-        )) {
+        // Skip auth for all V3 public routes (no auth required by design)
+        if (request.url.startsWith('/api/v3/public/')) {
+            return;
+        }
+
+        // Skip auth for V2 call magic-link token exchange (video app uses magic links without Clerk auth)
+        // V3: migrated to /api/v3/public/calls/exchange-token (covered by blanket v3 public skip above)
+        if (request.method === 'POST' && request.url.startsWith('/api/v2/calls/exchange-token')) {
             return;
         }
 

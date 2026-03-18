@@ -10,7 +10,7 @@ export async function exchangeToken(token: string): Promise<ExchangeResult> {
     let response: Response;
 
     try {
-        response = await fetch(`${API_URL}/api/v3/calls/exchange-token`, {
+        response = await fetch(`${API_URL}/api/v3/public/calls/exchange-token`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token }),

@@ -1,5 +1,5 @@
 /**
- * POST /api/v3/calls/exchange-token — Public token exchange (no auth)
+ * POST /api/v3/public/calls/exchange-token — Public token exchange (no auth)
  *
  * Exchanges a magic-link access token for a LiveKit JWT and call details.
  * Used by the video app join flow.
@@ -28,7 +28,7 @@ export function registerExchangeTokenRoute(
   supabase: SupabaseClient,
   livekit: LiveKitConfig,
 ) {
-  app.post('/api/v3/calls/exchange-token', {
+  app.post('/api/v3/public/calls/exchange-token', {
     schema: { body: bodySchema },
   }, async (request, reply) => {
     const { token } = request.body as { token: string };

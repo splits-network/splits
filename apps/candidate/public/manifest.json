@@ -1,0 +1,16 @@
+{
+  "name": "Applicant Network",
+  "short_name": "Applicant",
+  "description": "Find your next career opportunity",
+  "display": "browser",
+  "start_url": "/portal/dashboard",
+  "theme_color": "#233876",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/applicant-icon.png",
+      "sizes": "180x179",
+      "type": "image/png"
+    }
+  ]
+}

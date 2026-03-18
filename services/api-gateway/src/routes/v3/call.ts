@@ -11,7 +11,7 @@ import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const callV3Routes: V3RouteConfig[] = [
   // ── Public Routes (no auth, before :id to avoid collision) ───
-  { path: '/calls/exchange-token', method: 'POST', auth: 'none' },
+  { path: '/public/calls/exchange-token', method: 'POST', auth: 'none' },
 
   // ── Calls Stats, Tags & Preferences (before CRUD to avoid :id collision)
   { path: '/calls/stats', method: 'GET', auth: 'required' },

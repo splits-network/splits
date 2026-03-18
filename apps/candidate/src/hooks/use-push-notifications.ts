@@ -11,10 +11,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
-import {
-    createAuthenticatedClient,
-    createUnauthenticatedClient,
-} from "@/lib/api-client";
+import { ApiClient, createAuthenticatedClient } from "@/lib/api-client";
 
 type PushPermission = "default" | "granted" | "denied";
 
@@ -65,8 +62,8 @@ export function usePushNotifications(): UsePushNotificationsReturn {
 
         setIsLoading(true);
         try {
-            // Get VAPID public key from backend
-            const publicClient = createUnauthenticatedClient();
+            // Get VAPID public key from backend (no auth needed)
+            const publicClient = new ApiClient();
             const vapidResponse = await publicClient.get("/public/push/vapid-key");
             const vapidPublicKey = vapidResponse.data?.vapidPublicKey;
             if (!vapidPublicKey) throw new Error("Push not configured");
