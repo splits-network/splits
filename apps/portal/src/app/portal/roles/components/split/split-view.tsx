@@ -42,7 +42,6 @@ export function SplitView({
             )}
             emptyIcon="fa-hand-pointer"
             emptyTitle="Select a role to view details"
-            initialListWidth={33}
             onMobileClose={() => {
                 const selected = jobs.find((j) => j.id === selectedId);
                 if (selected) onSelect(selected);

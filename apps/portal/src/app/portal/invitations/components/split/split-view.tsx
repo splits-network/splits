@@ -39,7 +39,6 @@ export function SplitView({
             emptyIcon="fa-hand-pointer"
             emptyTitle="Select an Invitation"
             emptyDescription="Click an invitation on the left to view details"
-            initialListWidth={40}
             onMobileClose={() => {
                 const selected = invitations.find((i) => i.id === selectedId);
                 if (selected) onSelect(selected);

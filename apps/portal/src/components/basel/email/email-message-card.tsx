@@ -3,10 +3,13 @@
 /**
  * Single email message card — expand/collapse body, sender info,
  * to/cc, reply action. Used within email-thread-detail.
+ *
+ * Email HTML is sanitized via DOMPurify to prevent XSS from external senders.
  */
 
 import { useState } from "react";
 import type { EmailMessage } from "@splits-network/shared-types";
+import { sanitizeEmailHtml } from "@splits-network/shared-ui";
 
 interface EmailMessageCardProps {
     message: EmailMessage;
@@ -113,7 +116,7 @@ export default function EmailMessageCard({
                             <div
                                 className="prose prose-sm max-w-none"
                                 dangerouslySetInnerHTML={{
-                                    __html: message.bodyHtml,
+                                    __html: sanitizeEmailHtml(message.bodyHtml),
                                 }}
                             />
                         ) : (

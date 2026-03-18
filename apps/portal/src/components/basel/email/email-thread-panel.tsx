@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { sanitizeEmailHtml } from "@splits-network/shared-ui";
 import type {
     OAuthConnectionPublic,
     EmailMessage,
@@ -416,9 +417,11 @@ export default function EmailThreadPanel({
                                         <div
                                             className="prose prose-sm max-w-none"
                                             dangerouslySetInnerHTML={{
-                                                __html: msg.bodyHtml.substring(
-                                                    0,
-                                                    3000,
+                                                __html: sanitizeEmailHtml(
+                                                    msg.bodyHtml.substring(
+                                                        0,
+                                                        3000,
+                                                    ),
                                                 ),
                                             }}
                                         />

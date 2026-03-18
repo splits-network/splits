@@ -33,7 +33,6 @@ export function SplitView({ jobs, selectedId, onSelect }: SplitViewProps) {
             )}
             emptyIcon="fa-hand-pointer"
             emptyTitle="Select a job to view details"
-            initialListWidth={40}
             onMobileClose={() => {
                 const selected = jobs.find((j) => j.id === selectedId);
                 if (selected) onSelect(selected);

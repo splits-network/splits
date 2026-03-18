@@ -72,23 +72,6 @@ export function GridCard({
         >
             {/* Header Band */}
             <div className="relative bg-base-300 px-5 pt-4 pb-4">
-                {/* Kicker row: status + modifier badges */}
-                <div className="flex items-center gap-2 flex-wrap mb-3">
-                    <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} variant="soft" size="sm">
-                        {formatStatus(status)}
-                    </BaselBadge>
-
-                    {recruiter.plan_tier && (
-                        <PlanBadge tier={recruiter.plan_tier as PlanTier} />
-                    )}
-
-                    {isNew(recruiter) && (
-                        <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
-                            New
-                        </BaselBadge>
-                    )}
-                </div>
-
                 {/* Editorial block: Avatar + Firm kicker → Name → Location */}
                 <div className="flex items-start gap-3">
                     <BaselAvatar
@@ -148,8 +131,22 @@ export function GridCard({
             </div>
 
             {/* Tags: partnership + specialties + industries */}
-            <div className="px-5 py-3 border-b border-base-300">
+            <div className="px-5 py-3">
                 <div className="flex flex-wrap gap-1.5">
+                    <BaselBadge color={status === "active" ? "success" : status === "pending" ? "warning" : status === "suspended" ? "error" : "neutral"} variant="soft" size="sm">
+                        {formatStatus(status)}
+                    </BaselBadge>
+
+                    {recruiter.plan_tier && (
+                        <PlanBadge tier={recruiter.plan_tier as PlanTier} />
+                    )}
+
+                    {isNew(recruiter) && (
+                        <BaselBadge color="warning" variant="soft" size="sm" icon="fa-sparkles">
+                            New
+                        </BaselBadge>
+                    )}
+
                     {recruiter.company_recruiter && (
                         <BaselBadge color="primary" size="sm" icon="fa-building">
                             Company
@@ -188,7 +185,7 @@ export function GridCard({
 
             {/* Footer: profile link + actions */}
             <div
-                className="mt-auto flex items-center justify-between gap-3 px-5 py-3"
+                className="mt-auto flex items-center justify-between gap-3 px-5 py-3 border-t border-base-300"
                 onClick={(e) => e.stopPropagation()}
             >
                 <Link

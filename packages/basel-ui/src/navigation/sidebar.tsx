@@ -303,13 +303,13 @@ export function BaselSidebar({
     const sidebarContent = (
         <aside
             ref={containerRef as React.RefObject<HTMLElement>}
-            className={`${width} h-full bg-base-300 text-base-content flex flex-col border-t-4 border-r-4 border-primary ${className || ""}`}
+            className={`${width} h-full bg-base-300 text-base-content flex flex-col border-t-2 border-r-2 border-primary ${className || ""}`}
         >
             {/* Brand slot */}
             {brand && <div className="sidebar-brand p-5 pb-3">{brand}</div>}
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 py-2 overflow-y-auto border-r-4 border-primary">
+            <nav className="flex-1 px-3 py-2 overflow-y-auto">
                 {sections.map((section, sIdx) => (
                     <div key={section.title || `section-${sIdx}`}>
                         {section.title && (

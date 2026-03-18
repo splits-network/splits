@@ -48,7 +48,6 @@ export function SplitView({
             emptyIcon="fa-building"
             emptyTitle="Select a Company"
             emptyDescription="Click a company on the left to view their profile"
-            initialListWidth={33}
             onMobileClose={() => {
                 const selected = items.find((i) => {
                     const id = "company_id" in i ? i.company_id : i.id;

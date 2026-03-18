@@ -11,6 +11,7 @@ import {
     isInterviewEvent,
     parseInterviewSummary,
 } from "./calendar-context";
+import { sanitizeCalendarHtml } from "@splits-network/shared-ui";
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 
@@ -256,7 +257,7 @@ export default function CalendarEventDetail() {
                         <div
                             className="text-sm text-base-content/70 whitespace-pre-wrap"
                             dangerouslySetInnerHTML={{
-                                __html: selectedEvent.description,
+                                __html: sanitizeCalendarHtml(selectedEvent.description),
                             }}
                         />
                     </div>

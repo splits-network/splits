@@ -38,7 +38,6 @@ export function SplitView({
             )}
             emptyIcon="fa-hand-pointer"
             emptyTitle="Select an application to view details"
-            initialListWidth={40}
             onMobileClose={() => {
                 const selected = applications.find((a) => a.id === selectedId);
                 if (selected) onSelect(selected);

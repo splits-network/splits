@@ -42,7 +42,6 @@ export function SplitView({
             emptyIcon="fa-user"
             emptyTitle="Select a Candidate"
             emptyDescription="Click a candidate on the left to view their profile"
-            initialListWidth={33}
             onMobileClose={() => {
                 const selected = candidates.find((c) => c.id === selectedId);
                 if (selected) onSelect(selected);

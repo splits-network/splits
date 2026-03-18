@@ -2,6 +2,7 @@
 
 @import "tailwindcss";
 @plugin "daisyui";
+@source "../../../../packages/basel-ui/src/**/*.tsx";
 
 @import "./themes/light.css";
 @import "./themes/dark.css";
