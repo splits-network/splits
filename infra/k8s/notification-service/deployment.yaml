@@ -63,6 +63,12 @@ spec:
                         value: "noreply@updates.applicant.network"
                       - name: PORTAL_URL
                         value: "${PORTAL_URL}"
+                      - name: VAPID_PUBLIC_KEY
+                        value: "${VAPID_PUBLIC_KEY}"
+                      - name: VAPID_PRIVATE_KEY
+                        value: "${VAPID_PRIVATE_KEY}"
+                      - name: VAPID_SUBJECT
+                        value: "mailto:support@splits.network"
                   resources:
                       requests:
                           cpu: 100m

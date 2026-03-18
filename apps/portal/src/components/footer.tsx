@@ -19,33 +19,27 @@ const DEFAULT_FOOTER_SECTIONS: FooterSection[] = [
     {
         title: "Platform",
         links: [
-            { label: "Features", href: "/features" },
             { label: "Pricing", href: "/pricing" },
-            { label: "How It Works", href: "/how-it-works" },
-            { label: "Transparency", href: "/transparency" },
-            { label: "Integrations", href: "/integration-partners" },
-            { label: "Updates", href: "/updates" },
+            { label: "About Us", href: "/about" },
+            { label: "Blog", href: "/blog" },
+            { label: "Partners", href: "/partners" },
         ],
     },
     {
         title: "Company",
         links: [
-            { label: "About Us", href: "/about" },
             { label: "Careers", href: "/careers" },
-            { label: "Blog", href: "/blog" },
             { label: "Press", href: "/press" },
             { label: "Brand Kit", href: "/brand" },
-            { label: "Partners", href: "/partners" },
+            { label: "Contact Us", href: "/contact" },
         ],
     },
     {
         title: "Resources",
         links: [
-            { label: "Help Center", href: "#" },
-            { label: "Contact Us", href: "/contact" },
             { label: "Documentation", href: "/documentation" },
+            { label: "Help Center", href: "#" },
             { label: "API Reference", href: "#" },
-            { label: "System Status", href: "/status" },
         ],
     },
     {

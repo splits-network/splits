@@ -17,21 +17,14 @@ const publicRoutes = [
     '/blog',
     '/brand',
     '/careers',
+    '/contact',
     '/cookie-policy',
     '/documentation',
-    '/features',
-    '/for-companies',
-    '/for-recruiters',
-    '/how-it-works',
-    '/integration-partners',
     '/partners',
     '/press',
     '/pricing',
     '/privacy-policy',
-    '/status',
     '/terms-of-service',
-    '/transparency',
-    '/updates',
 ];
 
 const documentationRoutes = [
@@ -74,11 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
     const routes = [...publicRoutes, ...documentationRoutes, ...pressArticleRoutes];
     const corePages = new Set([
-        "/features",
         "/pricing",
-        "/how-it-works",
-        "/for-recruiters",
-        "/for-companies",
         "/about",
     ]);
     const legalPages = new Set([
@@ -88,7 +77,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
     const weeklyPages = new Set([
         "/blog",
-        "/updates",
         "/press",
     ]);
     const yearlyPages = new Set([
@@ -122,15 +110,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 ? 1
                 : legalPages.has(path)
                     ? 0.3
-                    : path === "/status"
-                        ? 0.4
-                        : corePages.has(path)
-                            ? 0.9
-                            : path.startsWith("/press/")
-                                ? 0.6
-                                : path.startsWith("/documentation")
-                                    ? 0.7
-                                    : 0.7,
+                    : corePages.has(path)
+                        ? 0.9
+                        : path.startsWith("/press/")
+                            ? 0.6
+                            : path.startsWith("/documentation")
+                                ? 0.7
+                                : 0.7,
     }));
 
     // Fetch dynamic CMS pages from database

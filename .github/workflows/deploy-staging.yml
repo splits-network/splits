@@ -407,6 +407,8 @@ jobs:
                   export LIVEKIT_TURN_DOMAIN="turn.staging.splits.network"
                   export LIVEKIT_EXTERNAL_IP="172.182.197.128"
                   export LIVEKIT_LB_RESOURCE_GROUP="MC_rg-ww-platform-staging-wu3_aks-ww-platform-staging-wu3_westus3"
+                  export VAPID_PUBLIC_KEY="${{ secrets.VAPID_PUBLIC_KEY }}"
+                  export VAPID_PRIVATE_KEY="${{ secrets.VAPID_PRIVATE_KEY }}"
 
                   # Normalize legacy replica placeholders to envsubst-compatible format
                   find infra/k8s -name deployment.yaml -exec sed -i 's/\${REPLICAS:-2}/\${REPLICAS}/g' {} +
