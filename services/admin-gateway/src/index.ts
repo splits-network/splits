@@ -3,6 +3,7 @@ import {
     loadDatabaseConfig,
     loadRedisConfig,
     getEnvOrThrow,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import {
@@ -12,7 +13,6 @@ import {
 } from "@splits-network/shared-fastify";
 import rateLimit from "@fastify/rate-limit";
 import Redis from "ioredis";
-import { createClient } from "@supabase/supabase-js";
 import { AdminAuthMiddleware } from "./auth";
 import { registerAdminRoutes } from "./routes";
 import { setupRealtimeServer } from "./realtime";
@@ -60,7 +60,7 @@ async function main() {
         password: redisConfig.password || undefined,
     });
 
-    const supabase = createClient(dbConfig.supabaseUrl, supabaseServiceRoleKey);
+    const supabase = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseServiceRoleKey });
 
     const authMiddleware = new AdminAuthMiddleware(
         adminClerkSecretKey,

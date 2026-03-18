@@ -2,8 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { createClient } from "@supabase/supabase-js";
-import { loadConfig, loadRedisConfig } from "@splits-network/shared-config";
+import { loadConfig, loadRedisConfig, createSupabaseClient } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { CacheManager } from "./cache/cache-manager";
 import { CacheInvalidator } from "./cache/invalidation";
@@ -22,13 +21,10 @@ const logger = createLogger("AnalyticsService");
 const config = loadConfig();
 
 // Initialize Supabase client (using public schema - access analytics via RPC)
-const supabase: any = createClient(
-    process.env.SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-    {
-        auth: { persistSession: false },
-    },
-);
+const supabase: any = createSupabaseClient({
+    url: process.env.SUPABASE_URL || "",
+    key: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+});
 
 const redisConfig = loadRedisConfig();
 

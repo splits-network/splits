@@ -2,6 +2,7 @@ import {
     loadBaseConfig,
     loadDatabaseConfig,
     loadRabbitMQConfig,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
@@ -9,7 +10,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
-import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
 import { CallScheduler } from "./v2/scheduler";
 import { SchedulerRepository } from "./v2/scheduler-repository";
 import * as Sentry from "@sentry/node";
@@ -109,16 +110,9 @@ async function main() {
     );
     await eventPublisher.connect();
 
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseClient = createClient(
-        dbConfig.supabaseUrl,
-        supabaseKey,
-    );
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
-    const outboxWorker = new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger);
-    outboxWorker.start();
-    logger.info('Outbox worker started - events will be durably delivered');
 
     const livekitApiKey = process.env.LIVEKIT_API_KEY || '';
     const livekitApiSecret = process.env.LIVEKIT_API_SECRET || '';
@@ -165,7 +159,6 @@ async function main() {
     process.on("SIGTERM", async () => {
         logger.info("SIGTERM received, shutting down gracefully");
         scheduler.stop();
-        outboxWorker.stop();
         await eventPublisher.close();
         await app.close();
         process.exit(0);
@@ -180,7 +173,6 @@ async function main() {
             Sentry.captureException(err as Error);
             await Sentry.flush(2000);
         }
-        outboxWorker.stop();
         await eventPublisher.close();
         process.exit(1);
     }

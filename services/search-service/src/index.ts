@@ -1,7 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { createClient } from "@supabase/supabase-js";
-import { loadConfig } from "@splits-network/shared-config";
+import { loadConfig, createSupabaseClient } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
@@ -12,13 +11,10 @@ const logger = createLogger("SearchService");
 const config = loadConfig();
 
 // Initialize Supabase client
-const supabase: any = createClient(
-    process.env.SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-    {
-        auth: { persistSession: false },
-    },
-);
+const supabase: any = createSupabaseClient({
+    url: process.env.SUPABASE_URL || "",
+    key: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+});
 
 // Initialize Fastify server
 const app = Fastify({

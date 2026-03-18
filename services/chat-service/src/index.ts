@@ -3,6 +3,7 @@ import {
     loadDatabaseConfig,
     loadRabbitMQConfig,
     loadRedisConfig,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
@@ -10,7 +11,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
-import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
 import { ChatEventPublisher } from "./v3/shared/chat-event-publisher";
 import { JobQueue } from "@splits-network/shared-job-queue";
 import Redis from "ioredis";
@@ -118,17 +119,10 @@ async function main() {
     await eventPublisher.connect();
 
     // Create Supabase client for outbox
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseClient = createClient(
-        dbConfig.supabaseUrl,
-        supabaseKey,
-    );
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
-    const outboxWorker = new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger);
-    outboxWorker.start();
-    logger.info('📤 Outbox worker started - events will be durably delivered');
 
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
@@ -174,7 +168,6 @@ async function main() {
 
     process.on("SIGTERM", async () => {
         logger.info("SIGTERM received, shutting down gracefully");
-        outboxWorker.stop();
         await chatEventPublisher.close();
         await eventPublisher.close();
         await app.close();
@@ -190,7 +183,6 @@ async function main() {
             Sentry.captureException(err as Error);
             await Sentry.flush(2000);
         }
-        outboxWorker.stop();
         await chatEventPublisher.close();
         await eventPublisher.close();
         process.exit(1);

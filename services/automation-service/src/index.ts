@@ -2,6 +2,7 @@ import {
     loadBaseConfig,
     loadDatabaseConfig,
     loadRabbitMQConfig,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
@@ -9,7 +10,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
-import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
 import { DomainEventConsumer } from "./v2/shared/domain-consumer";
 import { ReputationRepository, ReputationService, ReputationEventConsumer, CompanyReputationRepository, CompanyReputationService } from "./v2/reputation";
 
@@ -29,7 +30,6 @@ async function main() {
     let domainConsumer: DomainEventConsumer | null = null;
     let reputationConsumer: ReputationEventConsumer | null = null;
     let outboxPublisher: OutboxPublisher | null = null;
-    let outboxWorker: OutboxWorker | null = null;
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -78,11 +78,7 @@ async function main() {
         await v2EventPublisher.connect();
 
         // Create Supabase client (needed for outbox + health check + domain consumer)
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabaseClient = createClient(
-            dbConfig.supabaseUrl,
-            supabaseKey
-        );
+        const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
         // Import access context resolver for domain consumer
         const { resolveAccessContext } = await import('./v2/shared/access');
@@ -105,9 +101,6 @@ async function main() {
 
         // Set up transactional outbox for durable event delivery
         outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
-        outboxWorker = new OutboxWorker(supabaseClient, v2EventPublisher!, baseConfig.serviceName, logger);
-        outboxWorker.start();
-        logger.info('📤 Outbox worker started - events will be durably delivered');
 
         // Initialize reputation event consumer for reputation recalculation
         const reputationRepository = new ReputationRepository(
@@ -175,7 +168,6 @@ async function main() {
             );
             try {
                 await app.close();
-                outboxWorker?.stop();
                 if (v2EventPublisher) {
                     await v2EventPublisher.close();
                 }
@@ -199,7 +191,6 @@ async function main() {
             "Automation service started",
         );
     } catch (error) {
-        outboxWorker?.stop();
         if (v2EventPublisher) {
             try {
                 await v2EventPublisher.close();

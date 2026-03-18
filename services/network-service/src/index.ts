@@ -1,9 +1,9 @@
-import { loadBaseConfig, loadDatabaseConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, createSupabaseClient } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { EventPublisherV2, OutboxPublisher, OutboxWorker } from './v2/shared/events';
+import { EventPublisherV2, OutboxPublisher } from './v2/shared/events';
 import { registerV2Routes } from './v2/routes';
 import { registerV3Routes } from './v3/routes';
 import * as Sentry from '@sentry/node';
@@ -113,24 +113,16 @@ async function main() {
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
-        outboxWorker.stop();
         await v2EventPublisher.close();
         await app.close();
         process.exit(0);
     });
 
     // Create Supabase client (needed for outbox + health checks)
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseClient = createClient(
-        dbConfig.supabaseUrl,
-        supabaseKey
-    );
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
-    const outboxWorker = new OutboxWorker(supabaseClient, v2EventPublisher, baseConfig.serviceName, logger);
-    outboxWorker.start();
-    logger.info('📤 Outbox worker started - events will be durably delivered');
 
     // Register V2 routes
     await registerV2Routes(app, {
