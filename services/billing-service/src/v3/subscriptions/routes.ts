@@ -9,6 +9,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { SubscriptionRepository } from './repository';
 import { SubscriptionService } from './service';
+import { registerMySubscriptionView } from './views/my-subscription.route';
 import {
   CreateSubscriptionInput,
   UpdateSubscriptionInput,
@@ -31,6 +32,9 @@ export function registerSubscriptionRoutes(
   supabase: SupabaseClient,
   eventPublisher?: IEventPublisher
 ) {
+  // Register views before all routes
+  registerMySubscriptionView(app, supabase);
+
   const repository = new SubscriptionRepository(supabase);
   const service = new SubscriptionService(repository, supabase, eventPublisher);
 

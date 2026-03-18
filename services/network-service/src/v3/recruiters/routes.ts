@@ -52,6 +52,8 @@ export function registerRecruiterRoutes(
   app.get('/api/v3/recruiters', {
     schema: { querystring: listQuerySchema },
   }, async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
     const result = await service.getAll(request.query as RecruiterListParams);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
@@ -60,6 +62,8 @@ export function registerRecruiterRoutes(
   app.get('/api/v3/recruiters/:id', {
     schema: { params: idParamSchema },
   }, async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
     const { id } = request.params as { id: string };
     const data = await service.getById(id);
     return reply.send({ data });

@@ -7,12 +7,14 @@ import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
 import { InvitationRepository } from './repository';
+import { InvitationDetailViewRepository } from './views/detail.repository';
 import { MembershipRepository } from '../memberships/repository';
 import { UserRepository } from '../users/repository';
 import { CreateInvitationInput, UpdateInvitationInput, InvitationListParams } from './types';
 
 export class InvitationService {
   private accessResolver: AccessContextResolver;
+  private detailViewRepository: InvitationDetailViewRepository;
 
   constructor(
     private repository: InvitationRepository,
@@ -22,6 +24,7 @@ export class InvitationService {
     private eventPublisher?: IEventPublisher
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
+    this.detailViewRepository = new InvitationDetailViewRepository(supabase);
   }
 
   async getAll(params: InvitationListParams, clerkUserId: string) {
@@ -55,7 +58,8 @@ export class InvitationService {
   }
 
   async getPreview(id: string) {
-    const invitation = await this.repository.findById(id);
+    // Preview needs joined org data — use detail view repository
+    const invitation = await this.detailViewRepository.findById(id);
     if (!invitation) throw new NotFoundError('Invitation', id);
 
     return {

@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CompanyReputationRepository } from './repository';
 import { CompanyReputationService } from './service';
+import { registerCompanyReputationListView } from './views/list.route';
 import { CompanyReputationListParams, listQuerySchema, companyIdParamSchema } from './types';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
@@ -20,6 +21,9 @@ export function registerCompanyReputationRoutes(
 ) {
   const repository = new CompanyReputationRepository(supabase);
   const service = new CompanyReputationService(repository, supabase);
+
+  // --- Views (before parameterized routes to avoid collision) ---
+  registerCompanyReputationListView(app, supabase);
 
   // GET /api/v3/company-reputation — list
   app.get('/api/v3/company-reputation', {

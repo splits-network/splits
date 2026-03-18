@@ -13,8 +13,11 @@ import {
 import { getCryptoService } from "@splits-network/shared-config/src/crypto";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
+// V2 legacy routes — only register resources that still serve /api/v2/ paths
+import { registerProviderRoutes as registerV2ProviderRoutes } from "./v2/providers/routes";
+import { registerConnectionRoutes as registerV2ConnectionRoutes } from "./v2/connections/routes";
+import { registerATSRoutes as registerV2ATSRoutes } from "./v2/ats/routes";
 import {
     EventPublisher,
     OutboxPublisher,
@@ -133,10 +136,24 @@ async function main() {
     const crypto = await getCryptoService();
     logger.info("Encryption service initialized from Vault");
 
-    await registerV2Routes(app, {
+    // V2 legacy routes — only register resources that still serve /api/v2/ paths
+    // Calendar, email, LinkedIn, call-calendar routes now registered via V3 (shared SupabaseClient)
+    await registerV2ProviderRoutes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        rabbitMqUrl: rabbitConfig.url,
+    });
+
+    await registerV2ConnectionRoutes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey,
+        eventPublisher: outboxPublisher,
+        logger,
+        crypto,
+    });
+
+    await registerV2ATSRoutes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey,
         eventPublisher: outboxPublisher,
         logger,
         crypto,

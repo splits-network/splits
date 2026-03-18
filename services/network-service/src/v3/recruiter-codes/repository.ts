@@ -16,7 +16,7 @@ function generateCode(): string {
   return code;
 }
 
-const SELECT_CLAUSE = '*, recruiter:recruiters!inner(id, user:users!recruiters_user_id_fkey!inner(name, email))';
+const SELECT_CLAUSE = '*';
 
 export class RecruiterCodeRepository {
   constructor(private supabase: SupabaseClient) {}

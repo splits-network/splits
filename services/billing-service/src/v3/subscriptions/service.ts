@@ -9,6 +9,7 @@ import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
 import { SubscriptionRepository, SubscriptionScopeFilters } from './repository';
+import { MySubscriptionRepository } from './views/my-subscription.repository';
 import { SubscriptionStripeOperations } from './stripe-operations';
 import {
   CreateSubscriptionInput,
@@ -21,6 +22,7 @@ import {
 export class SubscriptionService {
   private accessResolver: AccessContextResolver;
   private stripeOps: SubscriptionStripeOperations;
+  private mySubscriptionRepo: MySubscriptionRepository;
 
   constructor(
     private repository: SubscriptionRepository,
@@ -29,6 +31,7 @@ export class SubscriptionService {
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
     this.stripeOps = new SubscriptionStripeOperations(supabase);
+    this.mySubscriptionRepo = new MySubscriptionRepository(supabase);
   }
 
   async getAll(params: SubscriptionListParams, clerkUserId: string) {
@@ -63,7 +66,8 @@ export class SubscriptionService {
     const context = await this.accessResolver.resolve(clerkUserId);
     if (!context.identityUserId) throw new BadRequestError('Unable to resolve user');
 
-    const subscription = await this.repository.findByUserId(context.identityUserId);
+    // Uses view repository for plan join
+    const subscription = await this.mySubscriptionRepo.findByUserId(context.identityUserId);
     if (!subscription) throw new NotFoundError('Subscription', 'active');
     return subscription;
   }

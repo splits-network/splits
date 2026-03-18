@@ -1,5 +1,9 @@
 /**
- * Leaderboards V3 Repository — Read-only
+ * Leaderboards V3 Repository — Core CRUD (read-only)
+ *
+ * DEPRECATED: Leaderboards are now served as views.
+ * See views/public-listing.repository.ts for the active implementation.
+ * This file is kept for any internal service references.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -33,22 +37,6 @@ export class LeaderboardRepository {
 
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase.from('leaderboard_entries').select('*').eq('id', id).maybeSingle();
-    if (error) throw error;
-    return data;
-  }
-
-  async findEntityRank(entityType: string, entityId: string, period: string, metric: string): Promise<any | null> {
-    const { data, error } = await this.supabase
-      .from('leaderboard_entries')
-      .select('*')
-      .eq('entity_type', entityType)
-      .eq('entity_id', entityId)
-      .eq('period', period)
-      .eq('metric', metric)
-      .order('period_start', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
     if (error) throw error;
     return data;
   }

@@ -1,0 +1,64 @@
+/**
+ * Application Notes "with-author" View Repository
+ *
+ * Joins application_notes with users to include author info.
+ * Used by the frontend for note display with creator name/email.
+ */
+
+import { SupabaseClient } from '@supabase/supabase-js';
+import { ApplicationNoteListParams } from '../types';
+
+const NOTE_WITH_AUTHOR_SELECT = '*, created_by:users!created_by_user_id(id, name, email)';
+
+export class WithAuthorNoteRepository {
+  constructor(private supabase: SupabaseClient) {}
+
+  async findAll(
+    params: ApplicationNoteListParams,
+    scopeFilters?: {
+      application_ids?: string[];
+      allowed_visibilities?: string[];
+    }
+  ): Promise<{ data: any[]; total: number }> {
+    const page = params.page || 1;
+    const limit = Math.min(params.limit || 50, 100);
+    const offset = (page - 1) * limit;
+
+    let query = this.supabase
+      .from('application_notes')
+      .select(NOTE_WITH_AUTHOR_SELECT, { count: 'exact' });
+
+    if (scopeFilters?.application_ids) {
+      if (scopeFilters.application_ids.length === 0) {
+        return { data: [], total: 0 };
+      }
+      query = query.in('application_id', scopeFilters.application_ids);
+    }
+    if (scopeFilters?.allowed_visibilities && scopeFilters.allowed_visibilities.length > 0) {
+      query = query.in('visibility', scopeFilters.allowed_visibilities);
+    }
+
+    if (params.application_id) query = query.eq('application_id', params.application_id);
+    if (params.note_type) query = query.eq('note_type', params.note_type);
+    if (params.visibility) query = query.eq('visibility', params.visibility);
+    if (params.in_response_to_id) query = query.eq('in_response_to_id', params.in_response_to_id);
+
+    query = query.order('created_at', { ascending: true });
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
+    if (error) throw error;
+    return { data: data || [], total: count || 0 };
+  }
+
+  async findById(id: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('application_notes')
+      .select(NOTE_WITH_AUTHOR_SELECT)
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
+}

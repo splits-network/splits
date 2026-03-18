@@ -12,7 +12,7 @@ export class CompanySkillRepository {
   async findByCompanyId(companyId: string): Promise<any[]> {
     const { data, error } = await this.supabase
       .from('company_skills')
-      .select('*, skill:skills(*)')
+      .select('*')
       .eq('company_id', companyId)
       .order('created_at', { ascending: true });
 
@@ -24,7 +24,7 @@ export class CompanySkillRepository {
     const { data, error } = await this.supabase
       .from('company_skills')
       .upsert(record)
-      .select('*, skill:skills(*)')
+      .select('*')
       .single();
 
     if (error) throw error;
@@ -61,7 +61,7 @@ export class CompanySkillRepository {
     const { data, error } = await this.supabase
       .from('company_skills')
       .insert(rows)
-      .select('*, skill:skills(*)');
+      .select('*');
 
     if (error) throw error;
     return data || [];

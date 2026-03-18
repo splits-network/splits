@@ -65,12 +65,12 @@ export class DocumentService {
     const document = await this.repository.findById(id);
     if (!document) throw new NotFoundError('Document', id);
 
-    // Generate signed download URL (matches V2 behavior)
+    // Generate signed download URL using raw DB column names
     let download_url: string | null = null;
-    if (document.storage_bucket && document.file_path) {
+    if (document.bucket_name && document.storage_path) {
       const { data } = await this.supabase.storage
-        .from(document.storage_bucket)
-        .createSignedUrl(document.file_path, 3600);
+        .from(document.bucket_name)
+        .createSignedUrl(document.storage_path, 3600);
       if (data?.signedUrl) {
         download_url = data.signedUrl;
       }

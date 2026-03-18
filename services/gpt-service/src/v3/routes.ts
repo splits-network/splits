@@ -25,7 +25,7 @@ export function registerV3Routes(app: FastifyInstance, deps: V3RouteDeps) {
   const { supabase, gptConfig, eventPublisher, logger, clerkWebhookSecret } = deps;
 
   // Session listing / CRUD routes (existing)
-  registerGptActionRoutes(app, supabase);
+  registerGptActionRoutes(app, supabase, eventPublisher);
   registerOAuthSessionRoutes(app, supabase);
 
   // OAuth2 auth flow routes (authorize, token, refresh, revoke)

@@ -142,6 +142,55 @@ export async function handleDocumentProcessed(
 }
 
 /**
+ * Handle resume analysis request from gpt-service (via RabbitMQ event).
+ * Replaces the previous HTTP call pattern.
+ */
+export async function handleResumeAnalyzeRequested(
+  event: DomainEvent,
+  config: DomainConsumerConfig,
+): Promise<void> {
+  const {
+    analysis_id, candidate_id, job_id,
+    resume_text, job_description, job_title,
+    job_location, clerk_user_id, resume_source,
+  } = event.payload;
+
+  config.logger.info(
+    { analysis_id, candidate_id, job_id },
+    'Resume analysis requested via event, triggering AI review',
+  );
+
+  // Let ai-service enrich with requirements from DB
+  const enrichedInput = await config.aiReviewService.enrichApplicationData({
+    application_id: analysis_id,
+    candidate_id,
+    job_id,
+    resume_text,
+    job_description,
+    job_title,
+    job_location,
+  });
+
+  const review = await config.aiReviewService.createReview(enrichedInput);
+
+  if (config.eventPublisher) {
+    await config.eventPublisher.publish('gpt.action.resume_analyzed', {
+      analysis_id,
+      candidate_id,
+      job_id,
+      fit_score: review?.fit_score,
+      clerk_user_id,
+      resume_source,
+    });
+  }
+
+  config.logger.info(
+    { analysis_id, fit_score: review?.fit_score },
+    'Resume analysis completed via event handler',
+  );
+}
+
+/**
  * Trigger call AI pipeline (transcription + summarization).
  */
 export async function handleCallRecordingReady(

@@ -338,12 +338,12 @@ export default function StepReview({
                         {submitting ? (
                             <>
                                 <span className="loading loading-spinner loading-sm" />
-                                Submitting for Review...
+                                Getting Your AI Review...
                             </>
                         ) : (
                             <>
                                 <i className="fa-duotone fa-regular fa-paper-plane" />
-                                Submit for AI Review
+                                Get Your AI Review
                             </>
                         )}
                     </button>

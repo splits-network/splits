@@ -8,19 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { PlacementListParams } from './types';
 
-export interface PlacementScopeFilters {
-  candidate_id?: string;
-  recruiter_id?: string;
-  organization_ids?: string[];
-}
-
 export class PlacementRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  async findAll(
-    params: PlacementListParams,
-    scopeFilters?: PlacementScopeFilters
-  ): Promise<{ data: any[]; total: number }> {
+  async findAll(params: PlacementListParams): Promise<{ data: any[]; total: number }> {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     const offset = (page - 1) * limit;
@@ -29,31 +20,7 @@ export class PlacementRepository {
       .from('placements')
       .select('*', { count: 'exact' });
 
-    // Role-based scoping (set by service layer)
-    if (scopeFilters?.candidate_id) {
-      query = query.eq('candidate_id', scopeFilters.candidate_id);
-    }
-    if (scopeFilters?.recruiter_id) {
-      query = query.or(
-        `candidate_recruiter_id.eq.${scopeFilters.recruiter_id},` +
-        `company_recruiter_id.eq.${scopeFilters.recruiter_id},` +
-        `job_owner_recruiter_id.eq.${scopeFilters.recruiter_id},` +
-        `candidate_sourcer_recruiter_id.eq.${scopeFilters.recruiter_id},` +
-        `company_sourcer_recruiter_id.eq.${scopeFilters.recruiter_id}`
-      );
-    }
-    if (scopeFilters?.organization_ids && scopeFilters.organization_ids.length > 0) {
-      // Find job IDs belonging to the user's organizations (can't use nested filter without join)
-      const { data: orgJobs } = await this.supabase
-        .from('jobs')
-        .select('id, company:companies!inner(identity_organization_id)')
-        .in('company.identity_organization_id', scopeFilters.organization_ids);
-      const jobIds = (orgJobs || []).map((j: any) => j.id);
-      if (jobIds.length === 0) return { data: [], total: 0 };
-      query = query.in('job_id', jobIds);
-    }
-
-    // User-supplied filters
+    // User-supplied filters only — no role-based scoping
     query = this.applyFilters(query, params);
 
     // Sorting

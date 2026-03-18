@@ -17,6 +17,7 @@ import {
     createCallSchema,
     updateCallSchema,
 } from "./types";
+import { registerMyCallsView } from "./views/my-calls.route";
 
 export function registerCallRoutes(
     app: FastifyInstance,
@@ -25,6 +26,9 @@ export function registerCallRoutes(
 ) {
     const repository = new CallRepository(supabase);
     const service = new CallService(repository, supabase, eventPublisher);
+
+    // Register views before parameterized CRUD routes
+    registerMyCallsView(app, supabase);
 
     // Register lifecycle routes (start, end, cancel, reschedule, decline)
     if (eventPublisher) {

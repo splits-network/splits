@@ -23,8 +23,7 @@ export default clerkMiddleware(async (auth, request) => {
         path.startsWith('/sign-in') ||
         path.startsWith('/sign-up') ||
         path.startsWith('/sso-callback') ||
-        path.startsWith('/api/v3/') ||
-        path.startsWith('/api/v2/');
+        path.startsWith('/api/v3/');
 
     if (isPublicRoute) {
         return response;

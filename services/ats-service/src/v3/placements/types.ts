@@ -30,7 +30,6 @@ export interface PlacementListParams {
   status?: string;
   job_id?: string;
   candidate_id?: string;
-  include?: string;
   salary_range?: string;
   fee_range?: string;
   fee_amount_range?: string;
@@ -52,7 +51,6 @@ export const listQuerySchema = {
     status: { type: 'string', enum: ['hired', 'active', 'completed', 'failed'] },
     job_id: { type: 'string', format: 'uuid' },
     candidate_id: { type: 'string', format: 'uuid' },
-    include: { type: 'string' },
     salary_range: { type: 'string', enum: ['under_50k', '50k_100k', '100k_150k', '150k_200k', 'over_200k'] },
     fee_range: { type: 'string', enum: ['under_15', '15_20', '20_25', 'over_25'] },
     fee_amount_range: { type: 'string', enum: ['under_10k', '10k_25k', '25k_50k', 'over_50k'] },

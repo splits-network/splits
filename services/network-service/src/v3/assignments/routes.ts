@@ -7,6 +7,8 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { AssignmentRepository } from './repository';
 import { AssignmentService } from './service';
+import { registerAssignmentListView } from './views/list.route';
+import { registerAssignmentDetailView } from './views/detail.route';
 import {
   AssignmentListParams, AssignmentUpdate, CreateAssignmentInput,
   listQuerySchema, createSchema, updateSchema, idParamSchema,
@@ -25,6 +27,10 @@ export function registerAssignmentRoutes(
 ) {
   const repository = new AssignmentRepository(supabase);
   const service = new AssignmentService(repository, supabase, eventPublisher);
+
+  // --- Views (before :id to avoid collision) ---
+  registerAssignmentListView(app, supabase);
+  registerAssignmentDetailView(app, supabase);
 
   // GET /api/v3/assignments — list
   app.get('/api/v3/assignments', {

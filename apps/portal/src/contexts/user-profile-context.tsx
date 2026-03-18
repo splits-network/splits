@@ -98,7 +98,7 @@ export interface Subscription {
 }
 
 /**
- * User profile data returned from /api/v2/users/me
+ * User profile data returned from /api/v3/users/me
  */
 export interface UserProfile {
     id: string;

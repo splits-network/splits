@@ -8,17 +8,25 @@
  * - application.stage_changed -> triggers AI review (ai_review / gpt_review stages)
  * - document.processed -> extracts structured resume metadata
  * - call.recording_ready -> triggers call AI pipeline (transcription + summarization)
+ * - resume.analyze.requested -> GPT resume analysis (replaces HTTP call from gpt-service)
  */
 
 import * as amqp from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { DomainConsumerConfig, handleStageChanged, handleDocumentProcessed, handleCallRecordingReady } from './event-handlers';
+import {
+  DomainConsumerConfig,
+  handleStageChanged,
+  handleDocumentProcessed,
+  handleCallRecordingReady,
+  handleResumeAnalyzeRequested,
+} from './event-handlers';
 
 const SUBSCRIBED_EVENTS = [
   'application.stage_changed',
   'document.processed',
   'call.recording_ready',
+  'resume.analyze.requested',
 ] as const;
 
 export class DomainEventConsumer {
@@ -90,6 +98,9 @@ export class DomainEventConsumer {
         break;
       case 'call.recording_ready':
         await handleCallRecordingReady(event, this.config);
+        break;
+      case 'resume.analyze.requested':
+        await handleResumeAnalyzeRequested(event, this.config);
         break;
       default:
         this.logger.debug({ event_type: event.event_type }, 'Unhandled event type');

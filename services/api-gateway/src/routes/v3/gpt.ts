@@ -10,6 +10,10 @@ import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const gptV3Routes: V3RouteConfig[] = [
+  // ── GPT Action Routes (before parameterized routes) ────────────
+  { path: '/gpt/actions/submit-application', method: 'POST', auth: 'required' },
+  { path: '/gpt/actions/analyze-resume', method: 'POST', auth: 'required' },
+
   // ── GPT Actions ────────────────────────────────────────────────
   { path: '/gpt/jobs/search', method: 'GET', auth: 'required' },
   { path: '/gpt/jobs/:id', method: 'GET', auth: 'required' },

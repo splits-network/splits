@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Please provide more detail in your message.' }, { status: 400 });
     }
 
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+    const apiGatewayUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
     const ipAddress =
         request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
         request.headers.get('x-real-ip') ||
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     };
 
     try {
-        const response = await fetch(`${apiBase}/v2/status-contact`, {
+        const response = await fetch(`${apiGatewayUrl}/api/v3/public/status-contact`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

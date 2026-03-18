@@ -12,6 +12,7 @@ export class DiscountRepository {
       .from('subscription_discounts')
       .select('*')
       .eq('subscription_id', subscriptionId)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -32,7 +33,7 @@ export class DiscountRepository {
   async deleteDiscount(subscriptionId: string): Promise<void> {
     const { error } = await this.supabase
       .from('subscription_discounts')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('subscription_id', subscriptionId);
 
     if (error) throw error;

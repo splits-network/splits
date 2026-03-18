@@ -30,6 +30,7 @@ import { registerPerkRoutes } from './perks/routes';
 import { registerCompanyPerkRoutes } from './company-perks/routes';
 import { registerCultureTagRoutes } from './culture-tags/routes';
 import { registerCompanyCultureTagRoutes } from './company-culture-tags/routes';
+import { registerAdminRoutes } from './admin/routes';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;
@@ -59,4 +60,5 @@ export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config)
   registerCompanyPerkRoutes(app, config.supabase);
   registerCultureTagRoutes(app, config.supabase);
   registerCompanyCultureTagRoutes(app, config.supabase);
+  registerAdminRoutes(app, config.supabase);
 }

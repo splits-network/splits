@@ -12,6 +12,7 @@ import { IEventPublisher } from '../../v2/shared/events';
 import { JobRepository } from './repository';
 import { JobAuthorizationHelper } from './authorization';
 import { JobActivityService } from './activity/service';
+import { ScopedJobListRepository, ScopedJobListParams } from './views/scoped-list.repository';
 import { CreateJobInput, UpdateJobInput, JobListParams } from './types';
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
@@ -27,6 +28,7 @@ export class JobService {
   private accessResolver: AccessContextResolver;
   private entitlementChecker: EntitlementChecker;
   private auth: JobAuthorizationHelper;
+  private scopedListRepository: ScopedJobListRepository;
 
   constructor(
     private repository: JobRepository,
@@ -37,15 +39,22 @@ export class JobService {
     this.accessResolver = new AccessContextResolver(supabase);
     this.entitlementChecker = new EntitlementChecker(supabase);
     this.auth = new JobAuthorizationHelper(supabase);
+    this.scopedListRepository = new ScopedJobListRepository(supabase);
   }
 
   async getAll(params: JobListParams, clerkUserId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
-    const scopedParams = { ...params };
+    const scopedParams: ScopedJobListParams = { ...params };
 
     if (context.isPlatformAdmin) {
-      // Admins see everything
-    } else if (context.recruiterId && context.roles.includes('recruiter')) {
+      // Admins see everything — use flat CRUD repo
+      const { data, total } = await this.repository.findAll(params);
+      const page = params.page || 1;
+      const limit = Math.min(params.limit || 25, 100);
+      return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
+    }
+
+    if (context.recruiterId && context.roles.includes('recruiter')) {
       if (!scopedParams.status) {
         scopedParams.visible_statuses = ['active'];
         scopedParams.owner_recruiter_id = context.recruiterId;
@@ -66,7 +75,8 @@ export class JobService {
       }
     }
 
-    const { data, total } = await this.repository.findAll(scopedParams);
+    // Non-admin scoped queries use the scoped view repository
+    const { data, total } = await this.scopedListRepository.findAll(scopedParams);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };

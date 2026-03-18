@@ -1,28 +1,18 @@
 /**
- * Badges V3 Service — Read-only
+ * Badges V3 Service — Read-only Core CRUD
+ *
+ * Pure data access. Auth is enforced at the gateway level.
+ * No access control, no enrichment — that belongs in views.
  */
 
-import { SupabaseClient } from "@supabase/supabase-js";
-import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError } from "@splits-network/shared-fastify";
 import { BadgeRepository } from "./repository";
 import { BadgeListParams } from "./types";
 
 export class BadgeService {
-    private accessResolver: AccessContextResolver;
+    constructor(private repository: BadgeRepository) {}
 
-    constructor(
-        private repository: BadgeRepository,
-        private supabase: SupabaseClient,
-    ) {
-        this.accessResolver = new AccessContextResolver(supabase);
-    }
-
-    async getAll(
-        params: BadgeListParams,
-        clerkUserId: string,
-    ) {
-        await this.accessResolver.resolve(clerkUserId);
+    async getAll(params: BadgeListParams) {
         const { data, total } = await this.repository.findAll(params);
         const page = params.page || 1;
         const limit = Math.min(params.limit || 25, 100);
@@ -37,11 +27,7 @@ export class BadgeService {
         };
     }
 
-    async getById(
-        id: string,
-        clerkUserId: string,
-    ) {
-        await this.accessResolver.resolve(clerkUserId);
+    async getById(id: string) {
         const badge = await this.repository.findById(id);
         if (!badge) throw new NotFoundError("Badge", id);
         return badge;

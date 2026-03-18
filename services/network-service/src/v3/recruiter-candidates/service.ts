@@ -28,8 +28,7 @@ export class RecruiterCandidateService {
     const limit = Math.min(params.limit || 25, 100);
     if (scopeFilters === null) return { data: [], pagination: { total: 0, page, limit, total_pages: 0 } };
     const { data, total } = await this.repository.findAll(params, scopeFilters);
-    const enriched = data.map((row: any) => this.enrichRelationship(row));
-    return { data: enriched, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
+    return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
   async getById(id: string) {
@@ -210,14 +209,6 @@ export class RecruiterCandidateService {
     const updated = await this.repository.update(id, { status: 'terminated' });
     await this.eventPublisher?.publish('candidate.invitation_cancelled', { relationship_id: updated!.id, recruiter_id: updated!.recruiter_id, candidate_id: updated!.candidate_id }, 'network-service');
     return updated;
-  }
-
-  private enrichRelationship(row: any): any {
-    let daysUntilExpiry: number | undefined;
-    if (row.relationship_end_date) {
-      daysUntilExpiry = Math.ceil((new Date(row.relationship_end_date).getTime() - Date.now()) / 86400000);
-    }
-    return { ...row, recruiter_name: row.recruiter?.user?.name ?? null, recruiter_email: row.recruiter?.user?.email ?? null, days_until_expiry: daysUntilExpiry };
   }
 
   private async buildScopeFilters(clerkUserId: string) {

@@ -9,7 +9,8 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
 import { IEventPublisher } from '../../v2/shared/events';
-import { PlacementRepository, PlacementScopeFilters } from './repository';
+import { PlacementRepository } from './repository';
+import { ScopedPlacementListRepository, PlacementScopeFilters } from './views/scoped-list.repository';
 import { CreatePlacementInput, UpdatePlacementInput, PlacementListParams } from './types';
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
@@ -21,6 +22,7 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 
 export class PlacementService {
   private accessResolver: AccessContextResolver;
+  private scopedListRepository: ScopedPlacementListRepository;
 
   constructor(
     private repository: PlacementRepository,
@@ -28,15 +30,22 @@ export class PlacementService {
     private eventPublisher?: IEventPublisher
   ) {
     this.accessResolver = new AccessContextResolver(supabase);
+    this.scopedListRepository = new ScopedPlacementListRepository(supabase);
   }
 
   async getAll(params: PlacementListParams, clerkUserId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
-    const scopeFilters: PlacementScopeFilters = {};
 
     if (context.isPlatformAdmin) {
-      // Admins see everything
-    } else if (context.candidateId) {
+      // Admins see everything — use flat CRUD repo
+      const { data, total } = await this.repository.findAll(params);
+      const page = params.page || 1;
+      const limit = Math.min(params.limit || 25, 100);
+      return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
+    }
+
+    const scopeFilters: PlacementScopeFilters = {};
+    if (context.candidateId) {
       scopeFilters.candidate_id = context.candidateId;
     } else if (context.recruiterId) {
       scopeFilters.recruiter_id = context.recruiterId;
@@ -46,7 +55,8 @@ export class PlacementService {
       return { data: [], pagination: { total: 0, page: 1, limit: 25, total_pages: 0 } };
     }
 
-    const { data, total } = await this.repository.findAll(params, scopeFilters);
+    // Non-admin scoped queries use the scoped view repository
+    const { data, total } = await this.scopedListRepository.findAll(params, scopeFilters);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };

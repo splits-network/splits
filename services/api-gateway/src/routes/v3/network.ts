@@ -19,8 +19,8 @@ const networkV3Routes: V3RouteConfig[] = [
   { path: '/recruiters/:id/view/profile', method: 'GET', auth: 'none' },
 
   // ── Recruiters Core CRUD ──
-  { path: '/recruiters', method: 'GET', auth: 'optional' },
-  { path: '/recruiters/:id', method: 'GET', auth: 'optional' },
+  { path: '/recruiters', method: 'GET', auth: 'required' },
+  { path: '/recruiters/:id', method: 'GET', auth: 'required' },
   { path: '/recruiters', method: 'POST', auth: 'required' },
   { path: '/recruiters/:id', method: 'PATCH', auth: 'required' },
   { path: '/recruiters/:id', method: 'DELETE', auth: 'required' },
@@ -29,6 +29,7 @@ const networkV3Routes: V3RouteConfig[] = [
   { resource: 'recruiter-candidates', auth: 'required' },
 
   // ── Recruiter Candidates Views ──────────────────────────────────
+  { path: '/recruiter-candidates/views/list', method: 'GET', auth: 'required' },
   { path: '/recruiter-candidates/views/list-for-candidate', method: 'GET', auth: 'required' },
   { path: '/recruiter-candidates/:id/view/detail', method: 'GET', auth: 'required' },
 
@@ -55,6 +56,7 @@ const networkV3Routes: V3RouteConfig[] = [
   { path: '/recruiter-companies/:id/terminate', method: 'PATCH', auth: 'required' },
 
   // ── Company Invitations ─────────────────────────────────────────
+  { path: '/company-invitations/views/list', method: 'GET', auth: 'required' },
   { path: '/company-invitations', method: 'GET', auth: 'required' },
   { path: '/company-invitations/:id/view/detail', method: 'GET', auth: 'required' },
   { path: '/company-invitations/:id', method: 'GET', auth: 'required' },
@@ -70,6 +72,7 @@ const networkV3Routes: V3RouteConfig[] = [
   { resource: 'recruiter-codes', auth: 'required' },
 
   // ── Recruiter Codes Views & Actions ─────────────────────────────
+  { path: '/recruiter-codes/views/list', method: 'GET', auth: 'required' },
   { path: '/recruiter-codes/:id/view/detail', method: 'GET', auth: 'required' },
   { path: '/recruiter-codes/lookup', method: 'GET', auth: 'none' },
   { path: '/recruiter-codes/default', method: 'GET', auth: 'required' },
@@ -80,10 +83,12 @@ const networkV3Routes: V3RouteConfig[] = [
   { resource: 'firms', auth: 'required' },
 
   // ── Firms Views ─────────────────────────────────────────────────
+  { path: '/firms/views/list', method: 'GET', auth: 'required' },
   { path: '/firms/my-firm', method: 'GET', auth: 'required' },
   { path: '/firms/my-firms', method: 'GET', auth: 'required' },
   { path: '/firms/by-slug/:slug', method: 'GET', auth: 'required' },
   { path: '/firms/:id/view/detail', method: 'GET', auth: 'required' },
+  { path: '/firms/:firmId/views/members', method: 'GET', auth: 'required' },
 
   // ── Public Firms ────────────────────────────────────────────────
   { path: '/public/firms', method: 'GET', auth: 'none' },
@@ -106,11 +111,22 @@ const networkV3Routes: V3RouteConfig[] = [
   { path: '/firms/:firmId/invitations/:invitationId', method: 'DELETE', auth: 'required' },
   { path: '/firms/:firmId/invitations/:invitationId/resend', method: 'POST', auth: 'required' },
 
+  // ── Assignments Views ───────────────────────────────────────────
+  { path: '/assignments/views/list', method: 'GET', auth: 'required' },
+  { path: '/assignments/:id/view/detail', method: 'GET', auth: 'required' },
+
   // ── Assignments Core CRUD ───────────────────────────────────────
   { resource: 'assignments', auth: 'required' },
 
+  // ── Reputation Views ──────────────────────────────────────────
+  { path: '/reputation/views/list', method: 'GET', auth: 'required' },
+
   // ── Reputation Core CRUD ────────────────────────────────────────
   { resource: 'reputation', auth: 'required' },
+
+  // ── Company Reputation Views ──────────────────────────────────
+  { path: '/company-reputation/views/list', method: 'GET', auth: 'required' },
+  { path: '/company-reputation/:companyId/view/detail', method: 'GET', auth: 'required' },
 
   // ── Company Reputation ──────────────────────────────────────────
   { path: '/company-reputation', method: 'GET', auth: 'required' },

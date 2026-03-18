@@ -202,7 +202,14 @@ export class ApplicationNoteService {
 
   // --- Public API ---
 
-  async getAll(params: ApplicationNoteListParams, clerkUserId: string) {
+  /**
+   * Resolve scope filters for note visibility.
+   * Shared by CRUD list and view endpoints.
+   */
+  async resolveScopeFilters(
+    params: ApplicationNoteListParams,
+    clerkUserId: string
+  ): Promise<{ application_ids?: string[]; allowed_visibilities?: string[] }> {
     const context = await this.accessResolver.resolve(clerkUserId);
 
     const scopeFilters: {
@@ -210,7 +217,6 @@ export class ApplicationNoteService {
       allowed_visibilities?: string[];
     } = {};
 
-    // Determine visibility scope
     if (params.application_id) {
       scopeFilters.allowed_visibilities = await this.getAllowedVisibilities(context, params.application_id);
     } else {
@@ -220,6 +226,12 @@ export class ApplicationNoteService {
       }
       scopeFilters.allowed_visibilities = this.getDefaultVisibilitiesForRole(context);
     }
+
+    return scopeFilters;
+  }
+
+  async getAll(params: ApplicationNoteListParams, clerkUserId: string) {
+    const scopeFilters = await this.resolveScopeFilters(params, clerkUserId);
 
     const { data, total } = await this.repository.findAll(params, scopeFilters);
     const page = params.page || 1;

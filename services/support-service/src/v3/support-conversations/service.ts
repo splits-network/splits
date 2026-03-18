@@ -8,6 +8,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NotFoundError, BadRequestError } from "@splits-network/shared-fastify";
 import { SupportConversationRepository } from "./repository";
+import { SupportMessageRepository } from "./messages/repository";
 import {
     SupportConversationListParams,
     CreateSupportConversationInput,
@@ -17,12 +18,16 @@ import { IEventPublisher } from "../../v2/shared/events";
 import { SupportEventPublisher } from "../shared/support-event-publisher";
 
 export class SupportConversationService {
+    private messageRepository: SupportMessageRepository;
+
     constructor(
         private repository: SupportConversationRepository,
         private supabase: SupabaseClient,
         private eventPublisher?: IEventPublisher,
         private supportEventPublisher?: SupportEventPublisher,
-    ) {}
+    ) {
+        this.messageRepository = new SupportMessageRepository(supabase);
+    }
 
     async getAll(params: SupportConversationListParams) {
         const { data, total } = await this.repository.findAll(params);
@@ -117,7 +122,7 @@ export class SupportConversationService {
         limit: number = 50,
         before?: string,
     ) {
-        return this.repository.listMessages(conversationId, limit, before);
+        return this.messageRepository.listByConversation(conversationId, limit, before);
     }
 
     async sendVisitorMessage(
@@ -125,15 +130,17 @@ export class SupportConversationService {
         senderId: string | null,
         body: string,
     ) {
-        const message = await this.repository.addMessage(
+        const message = await this.messageRepository.create(
             conversationId,
             "visitor",
             senderId,
             body,
         );
+        // Update conversation timestamp and status
         await this.repository.update(conversationId, {
             status: "waiting_on_admin",
-        });
+            last_message_at: new Date().toISOString(),
+        } as any);
 
         if (this.supportEventPublisher) {
             await this.supportEventPublisher.publishToConversation(
@@ -156,7 +163,12 @@ export class SupportConversationService {
         return message;
     }
 
-    async linkSession(sessionId: string, clerkUserId: string) {
-        await this.repository.linkSessionToUser(sessionId, clerkUserId);
+    /** @deprecated Use POST /actions/link-session instead */
+    async linkSession(_sessionId: string, _clerkUserId: string) {
+        // Moved to LinkSessionService action — this stub exists for
+        // backward compatibility during V2→V3 transition
+        const { LinkSessionService } = await import('./actions/link-session.service');
+        const linkService = new LinkSessionService(this.supabase);
+        await linkService.linkSession(_sessionId, _clerkUserId);
     }
 }

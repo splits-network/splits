@@ -9,6 +9,7 @@ import { JobSkillService } from './service';
 import { CreateJobSkillInput, JobSkillListParams,
   listQuerySchema, createSchema, deleteParamsSchema } from './types';
 import { registerBulkReplaceAction } from './actions/bulk-replace.route';
+import { registerWithDetailsView } from './views/with-details.route';
 
 export function registerJobSkillRoutes(
   app: FastifyInstance,
@@ -17,7 +18,8 @@ export function registerJobSkillRoutes(
   const repository = new JobSkillRepository(supabase);
   const service = new JobSkillService(repository);
 
-  // Register action before parameterized routes
+  // Register views and actions before parameterized routes
+  registerWithDetailsView(app, supabase);
   registerBulkReplaceAction(app, supabase);
 
   // GET /api/v3/job-skills — list (requires job_id)

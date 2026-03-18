@@ -7,6 +7,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { ReputationRepository } from './repository';
 import { ReputationService } from './service';
+import { registerReputationListView } from './views/list.route';
 import { ReputationListParams, ReputationUpdate, listQuerySchema, createSchema, updateSchema, idParamSchema } from './types';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
@@ -22,6 +23,9 @@ export function registerReputationRoutes(
 ) {
   const repository = new ReputationRepository(supabase);
   const service = new ReputationService(repository, supabase, eventPublisher);
+
+  // --- Views (before :id to avoid collision) ---
+  registerReputationListView(app, supabase);
 
   // GET /api/v3/reputation — list
   app.get('/api/v3/reputation', {

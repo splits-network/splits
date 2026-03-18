@@ -1,42 +1,23 @@
 /**
  * Assignments V3 Repository — Pure Data Layer
  *
- * NO role logic. Scope filters passed from service.
+ * Flat select('*') only. NO joins, NO enrichment.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AssignmentListParams } from './types';
 
-interface ScopeFilters {
-  recruiter_id?: string;
-  organization_ids?: string[];
-}
-
 export class AssignmentRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  async findAll(
-    params: AssignmentListParams,
-    scopeFilters?: ScopeFilters
-  ): Promise<{ data: any[]; total: number }> {
+  async findAll(params: AssignmentListParams): Promise<{ data: any[]; total: number }> {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     const offset = (page - 1) * limit;
 
     let query = this.supabase
       .from('role_assignments')
-      .select(`
-        *,
-        recruiter:recruiters(id, name, email),
-        job:jobs(id, title, company:companies!inner(id, name, identity_organization_id))
-      `, { count: 'exact' });
-
-    if (scopeFilters?.recruiter_id) {
-      query = query.eq('recruiter_id', scopeFilters.recruiter_id);
-    }
-    if (scopeFilters?.organization_ids?.length) {
-      query = query.in('job.company.identity_organization_id', scopeFilters.organization_ids);
-    }
+      .select('*', { count: 'exact' });
 
     if (params.status) query = query.eq('status', params.status);
     if (params.recruiter_id) query = query.eq('recruiter_id', params.recruiter_id);
@@ -55,11 +36,7 @@ export class AssignmentRepository {
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('role_assignments')
-      .select(`
-        *,
-        recruiter:recruiters(id, name, email),
-        job:jobs(id, title, company:companies(id, name))
-      `)
+      .select('*')
       .eq('id', id)
       .maybeSingle();
 

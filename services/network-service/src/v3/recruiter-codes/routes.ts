@@ -12,6 +12,7 @@ import {
   listQuerySchema, createSchema, updateSchema, lookupQuerySchema, logUsageSchema, logListQuerySchema, idParamSchema,
 } from './types';
 import { registerRecruiterCodeDetailView } from './views/detail.route';
+import { registerRecruiterCodeListView } from './views/list.route';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -68,6 +69,7 @@ export function registerRecruiterCodeRoutes(
   });
 
   // --- Views (before :id to avoid collision) ---
+  registerRecruiterCodeListView(app, supabase);
   registerRecruiterCodeDetailView(app, supabase);
 
   // --- Core CRUD ---

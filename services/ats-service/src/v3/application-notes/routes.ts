@@ -7,6 +7,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { ApplicationNoteRepository } from './repository';
 import { ApplicationNoteService } from './service';
+import { registerWithAuthorView } from './views/with-author.route';
 import {
   CreateApplicationNoteInput,
   UpdateApplicationNoteInput,
@@ -24,6 +25,9 @@ export function registerApplicationNoteRoutes(
 ) {
   const repository = new ApplicationNoteRepository(supabase);
   const service = new ApplicationNoteService(repository, supabase, eventPublisher);
+
+  // Register views before :id routes
+  registerWithAuthorView(app, supabase, eventPublisher);
 
   // GET /api/v3/application-notes — list
   app.get('/api/v3/application-notes', {

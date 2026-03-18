@@ -19,7 +19,8 @@ export class ImageRepository {
 
     let query = this.supabase
       .from('content_images')
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .is('deleted_at', null);
 
     if (params.search) {
       query = query.or(`name.ilike.%${params.search}%,alt_text.ilike.%${params.search}%`);
@@ -38,6 +39,7 @@ export class ImageRepository {
       .from('content_images')
       .select('*')
       .eq('id', id)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -59,7 +61,7 @@ export class ImageRepository {
   async delete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from('content_images')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;

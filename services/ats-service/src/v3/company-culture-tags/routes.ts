@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CompanyCultureTagRepository } from './repository';
 import { CompanyCultureTagService } from './service';
+import { registerWithDetailsView } from './views/with-details.route';
 import {
   CreateCompanyCultureTagInput,
   BulkReplaceCompanyCultureTagsInput,
@@ -19,6 +20,9 @@ import {
 export function registerCompanyCultureTagRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CompanyCultureTagRepository(supabase);
   const service = new CompanyCultureTagService(repository, supabase);
+
+  // Register views before parameterized routes
+  registerWithDetailsView(app, supabase);
 
   // GET /api/v3/company-culture-tags?company_id=
   app.get('/api/v3/company-culture-tags', {

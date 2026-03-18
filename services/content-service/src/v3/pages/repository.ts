@@ -19,7 +19,8 @@ export class PageRepository {
 
     let query = this.supabase
       .from('content_pages')
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .is('deleted_at', null);
 
     if (params.status) query = query.eq('status', params.status);
     if (params.app) query = query.eq('app', params.app);
@@ -40,6 +41,7 @@ export class PageRepository {
       .from('content_pages')
       .select('*')
       .eq('id', id)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -51,6 +53,7 @@ export class PageRepository {
       .from('content_pages')
       .select('*')
       .eq('slug', slug)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -83,7 +86,7 @@ export class PageRepository {
   async delete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from('content_pages')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;

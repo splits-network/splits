@@ -14,6 +14,10 @@ const supportV3Routes: V3RouteConfig[] = [
   { path: '/tickets/views/mine', method: 'GET', auth: 'required' },
   { path: '/tickets/views/counts', method: 'GET', auth: 'required' },
 
+  // ── Tickets Actions (before :id) ──────────────────────────────
+  { path: '/tickets/:id/actions/reply', method: 'POST', auth: 'required' },
+  { path: '/tickets/:id/actions/claim', method: 'POST', auth: 'required' },
+
   // ── Tickets ────────────────────────────────────────────────────
   { path: '/tickets', method: 'GET', auth: 'required' },
   { path: '/tickets', method: 'POST', auth: 'optional' },
@@ -23,6 +27,9 @@ const supportV3Routes: V3RouteConfig[] = [
   // ── Support Conversations Views & Actions (before CRUD to avoid :id collision) ──
   { path: '/support/conversations/mine', method: 'GET', auth: 'optional' },
   { path: '/support/conversations/link-session', method: 'POST', auth: 'optional' },
+  { path: '/support/conversations/actions/link-session', method: 'POST', auth: 'optional' },
+  { path: '/support/conversations/:id/view/admin-detail', method: 'GET', auth: 'required' },
+  { path: '/support/conversations/:id/actions/claim', method: 'POST', auth: 'required' },
   { path: '/support/conversations/:id/messages', method: 'GET', auth: 'optional' },
   { path: '/support/conversations/:id/messages', method: 'POST', auth: 'optional' },
 

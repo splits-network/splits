@@ -1,7 +1,7 @@
 /**
  * Reputation V3 Repository — Pure Data Layer
  *
- * NO role logic. Scope filters passed in from service layer.
+ * Flat select('*') only. NO joins, NO enrichment.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -17,7 +17,8 @@ export class ReputationRepository {
 
     let query = this.supabase
       .from('recruiter_reputation')
-      .select('*, recruiter:recruiters(id, name, email)', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .is('deleted_at', null);
 
     if (params.recruiter_id) {
       query = query.eq('recruiter_id', params.recruiter_id);
@@ -36,8 +37,9 @@ export class ReputationRepository {
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('recruiter_reputation')
-      .select('*, recruiter:recruiters(id, name, email)')
+      .select('*')
       .eq('id', id)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -49,6 +51,7 @@ export class ReputationRepository {
       .from('recruiter_reputation')
       .select('*')
       .eq('recruiter_id', recruiterId)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -84,7 +87,7 @@ export class ReputationRepository {
   async delete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from('recruiter_reputation')
-      .delete()
+      .update({ deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;
