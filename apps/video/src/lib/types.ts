@@ -22,6 +22,11 @@ export interface CallParticipant {
 export interface CallEntityLink {
     entity_type: CallEntityType;
     entity_id: string;
+    /** Enriched fields from exchange-token (optional for backward compat) */
+    name?: string;
+    subtitle?: string | null;
+    logo_url?: string | null;
+    details?: Record<string, string | null>;
 }
 
 export interface CallDetail {

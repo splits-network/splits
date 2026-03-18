@@ -92,6 +92,10 @@ export function registerExchangeTokenRoute(
     at.ttl = '4h';
     const livekitToken = await at.toJwt();
 
+    // Enrich entity links with names/details from their source tables
+    const entityLinks = call.entity_links || [];
+    const enrichedEntities = await enrichEntityLinks(supabase, entityLinks);
+
     // Map participants for frontend
     const mappedCall = {
       ...call,
@@ -103,9 +107,129 @@ export function registerExchangeTokenRoute(
           email: p.user.email || '',
         } : { name: '', avatar_url: null, email: '' },
       })),
-      entity_links: call.entity_links || [],
+      entity_links: enrichedEntities,
     };
 
     return reply.send({ data: { livekit_token: livekitToken, call: mappedCall } });
   });
+}
+
+interface EnrichedEntityLink {
+  entity_type: string;
+  entity_id: string;
+  name: string;
+  subtitle: string | null;
+  logo_url: string | null;
+  details: Record<string, string | null>;
+}
+
+/**
+ * Enrich entity links with display data from their source tables.
+ * Gracefully falls back to minimal data if a lookup fails.
+ */
+async function enrichEntityLinks(
+  supabase: SupabaseClient,
+  links: { entity_type: string; entity_id: string }[],
+): Promise<EnrichedEntityLink[]> {
+  return Promise.all(
+    links.map(async (link): Promise<EnrichedEntityLink> => {
+      try {
+        switch (link.entity_type) {
+          case 'job': {
+            const { data } = await supabase
+              .from('jobs')
+              .select('title, company:companies(name, logo_url)')
+              .eq('id', link.entity_id)
+              .maybeSingle();
+            const company = data?.company as any;
+            return {
+              entity_type: link.entity_type,
+              entity_id: link.entity_id,
+              name: data?.title || 'Job',
+              subtitle: company?.name || null,
+              logo_url: company?.logo_url || null,
+              details: {},
+            };
+          }
+          case 'company': {
+            const { data } = await supabase
+              .from('companies')
+              .select('name, logo_url, industry')
+              .eq('id', link.entity_id)
+              .maybeSingle();
+            return {
+              entity_type: link.entity_type,
+              entity_id: link.entity_id,
+              name: data?.name || 'Company',
+              subtitle: data?.industry || null,
+              logo_url: data?.logo_url || null,
+              details: {},
+            };
+          }
+          case 'candidate': {
+            const { data } = await supabase
+              .from('candidates')
+              .select('name, email, current_title')
+              .eq('id', link.entity_id)
+              .maybeSingle();
+            return {
+              entity_type: link.entity_type,
+              entity_id: link.entity_id,
+              name: data?.name || 'Candidate',
+              subtitle: data?.current_title || null,
+              logo_url: null,
+              details: { email: data?.email ?? null },
+            };
+          }
+          case 'application': {
+            const { data } = await supabase
+              .from('applications')
+              .select('candidate:candidates(name), job:jobs(title)')
+              .eq('id', link.entity_id)
+              .maybeSingle();
+            const candidate = data?.candidate as any;
+            const job = data?.job as any;
+            return {
+              entity_type: link.entity_type,
+              entity_id: link.entity_id,
+              name: candidate?.name || 'Application',
+              subtitle: job?.title || null,
+              logo_url: null,
+              details: {},
+            };
+          }
+          case 'firm': {
+            const { data } = await supabase
+              .from('firms')
+              .select('name, logo_url')
+              .eq('id', link.entity_id)
+              .maybeSingle();
+            return {
+              entity_type: link.entity_type,
+              entity_id: link.entity_id,
+              name: data?.name || 'Firm',
+              subtitle: null,
+              logo_url: data?.logo_url || null,
+              details: {},
+            };
+          }
+          default:
+            return buildFallback(link);
+        }
+      } catch {
+        return buildFallback(link);
+      }
+    }),
+  );
+}
+
+function buildFallback(link: { entity_type: string; entity_id: string }): EnrichedEntityLink {
+  return {
+    entity_type: link.entity_type,
+    entity_id: link.entity_id,
+    name: link.entity_type.charAt(0).toUpperCase() + link.entity_type.slice(1),
+    subtitle: null,
+    logo_url: null,
+    details: {},
+  };
 }
