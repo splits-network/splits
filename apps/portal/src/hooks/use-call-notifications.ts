@@ -18,6 +18,7 @@ const POLL_INTERVAL_MS = 10_000;
 const TOAST_EVENT_TYPES = new Set([
     "call.instant",
     "call.starting_soon",
+    "call.scheduled",
     "call.participant.joined",
     "call.declined",
 ]);

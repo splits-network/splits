@@ -13,6 +13,7 @@ import { InAppNotification } from "@/lib/notifications";
 type CallToastType =
     | "instant_call"
     | "starting_soon"
+    | "scheduled_call"
     | "participant_joined"
     | "decline";
 
@@ -27,6 +28,7 @@ function getToastType(notification: InAppNotification): CallToastType | null {
     if (
         toastType === "instant_call" ||
         toastType === "starting_soon" ||
+        toastType === "scheduled_call" ||
         toastType === "participant_joined" ||
         toastType === "decline"
     ) {
@@ -35,12 +37,15 @@ function getToastType(notification: InAppNotification): CallToastType | null {
     return null;
 }
 
-function getAutoHideSeconds(type: CallToastType): number {
+/** Returns auto-hide duration in seconds, or null for persistent toasts */
+function getAutoHideSeconds(type: CallToastType): number | null {
     switch (type) {
         case "instant_call":
-            return 30;
+            return null; // Persistent — user must dismiss
         case "starting_soon":
-            return 60;
+            return null; // Persistent — user must dismiss
+        case "scheduled_call":
+            return null; // Persistent — user must dismiss
         case "participant_joined":
             return 5;
         case "decline":
@@ -54,6 +59,8 @@ function getAlertClass(type: CallToastType): string {
             return "alert-error";
         case "starting_soon":
             return "alert-warning";
+        case "scheduled_call":
+            return "alert-info";
         case "participant_joined":
             return "alert-info";
         case "decline":
@@ -67,6 +74,8 @@ function getIcon(type: CallToastType): string {
             return "fa-phone-arrow-down-left";
         case "starting_soon":
             return "fa-clock";
+        case "scheduled_call":
+            return "fa-calendar-check";
         case "participant_joined":
             return "fa-user-plus";
         case "decline":
@@ -87,6 +96,13 @@ export default function CallToast({
         if (!toastType) return;
 
         const duration = getAutoHideSeconds(toastType);
+
+        // Persistent toasts — no auto-dismiss
+        if (duration === null) {
+            setTimeLeft(null);
+            return;
+        }
+
         setTimeLeft(duration);
 
         const interval = setInterval(() => {
@@ -193,6 +209,24 @@ function CallToastActions({
                     >
                         <i className="fa-duotone fa-regular fa-video" />
                         Join
+                    </button>
+                </>
+            );
+        case "scheduled_call":
+            return (
+                <>
+                    <button
+                        className="btn btn-sm btn-ghost"
+                        onClick={onDismiss}
+                    >
+                        Dismiss
+                    </button>
+                    <button
+                        className="btn btn-sm btn-primary"
+                        onClick={onJoin}
+                    >
+                        <i className="fa-duotone fa-regular fa-calendar-check" />
+                        View
                     </button>
                 </>
             );

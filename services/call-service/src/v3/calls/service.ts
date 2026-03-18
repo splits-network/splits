@@ -167,6 +167,15 @@ export class CallService {
                 title: call.title,
                 created_by: resolvedUserId,
                 scheduled_at: call.scheduled_at,
+                agenda: input.agenda || null,
+                participants: resolvedParticipants.map((p) => ({
+                    user_id: p.user_id,
+                    role: p.role,
+                })),
+                entity_links: (input.entity_links || []).map((el) => ({
+                    entity_type: el.entity_type,
+                    entity_id: el.entity_id,
+                })),
             },
             "call-service",
         );
