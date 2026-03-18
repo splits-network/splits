@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui";
+@source "../../../../packages/basel-ui/src";
+@source "../../../../packages/shared-ui/src";
 
 @import "./themes/light.css";
 @import "./themes/dark.css";

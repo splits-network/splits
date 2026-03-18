@@ -118,7 +118,7 @@ async function assertCompanyAccess(
 
   if (context.recruiterId) {
     const { data: assignments } = await supabase
-      .from('role_assignments').select('job_id').eq('recruiter_user_id', context.recruiterId).eq('status', 'active');
+      .from('role_assignments').select('job_id').eq('recruiter_id', context.recruiterId);
     if (assignments && assignments.length > 0) {
       const jobIds = assignments.map((row: any) => row.job_id);
       const { data: jobs } = await supabase.from('jobs').select('id, company_id').in('id', jobIds);
