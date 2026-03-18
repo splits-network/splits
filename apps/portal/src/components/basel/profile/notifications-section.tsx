@@ -12,6 +12,7 @@ interface EffectivePreference {
     icon: string;
     email_enabled: boolean;
     in_app_enabled: boolean;
+    push_enabled: boolean;
     unsubscribable: boolean;
     email_entitled: boolean;
 }
@@ -80,6 +81,7 @@ export function NotificationsSection() {
                         category: p.category,
                         email_enabled: p.email_enabled,
                         in_app_enabled: p.in_app_enabled,
+                        push_enabled: p.push_enabled,
                     })),
                 });
             } catch (err: any) {
@@ -93,7 +95,7 @@ export function NotificationsSection() {
 
     const togglePreference = (
         category: string,
-        field: "email_enabled" | "in_app_enabled",
+        field: "email_enabled" | "in_app_enabled" | "push_enabled",
     ) => {
         const updated = preferences.map((p) =>
             p.category === category ? { ...p, [field]: !p[field] } : p,
@@ -157,6 +159,7 @@ export function NotificationsSection() {
             <div className="flex items-center justify-end gap-8 pr-2 text-sm font-semibold text-base-content/40 uppercase tracking-wider">
                 <span className="w-14 text-center">Email</span>
                 <span className="w-14 text-center">In-App</span>
+                <span className="w-14 text-center">Push</span>
             </div>
 
             {/* Groups */}
@@ -199,11 +202,12 @@ function PreferenceRow({
     emailEntitled: boolean;
     onToggle: (
         category: string,
-        field: "email_enabled" | "in_app_enabled",
+        field: "email_enabled" | "in_app_enabled" | "push_enabled",
     ) => void;
 }) {
     const emailDisabled = pref.unsubscribable || !emailEntitled;
     const inAppDisabled = pref.unsubscribable;
+    const pushDisabled = pref.unsubscribable;
 
     return (
         <div className="flex items-center gap-4 px-4 py-3 hover:bg-base-200/50 transition-colors">
@@ -262,6 +266,19 @@ function PreferenceRow({
                     disabled={inAppDisabled}
                     onChange={() =>
                         onToggle(pref.category, "in_app_enabled")
+                    }
+                />
+            </div>
+
+            {/* Push toggle */}
+            <div className="w-14 flex justify-center">
+                <input
+                    type="checkbox"
+                    className="toggle toggle-sm toggle-primary"
+                    checked={pref.push_enabled}
+                    disabled={pushDisabled}
+                    onChange={() =>
+                        onToggle(pref.category, "push_enabled")
                     }
                 />
             </div>

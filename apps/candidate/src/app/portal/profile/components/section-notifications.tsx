@@ -12,6 +12,7 @@ interface EffectivePreference {
     icon: string;
     email_enabled: boolean;
     in_app_enabled: boolean;
+    push_enabled: boolean;
     unsubscribable: boolean;
 }
 
@@ -85,6 +86,7 @@ export function SectionNotifications() {
                         category: p.category,
                         email_enabled: p.email_enabled,
                         in_app_enabled: p.in_app_enabled,
+                        push_enabled: p.push_enabled,
                     })),
                 });
             } catch (err: any) {
@@ -98,7 +100,7 @@ export function SectionNotifications() {
 
     const togglePreference = (
         category: string,
-        field: "email_enabled" | "in_app_enabled",
+        field: "email_enabled" | "in_app_enabled" | "push_enabled",
     ) => {
         const updated = preferences.map((p) =>
             p.category === category ? { ...p, [field]: !p[field] } : p,
@@ -148,6 +150,7 @@ export function SectionNotifications() {
             <div className="flex items-center justify-end gap-8 pr-2 text-sm font-semibold text-base-content/40 uppercase tracking-wider">
                 <span className="w-14 text-center">Email</span>
                 <span className="w-14 text-center">In-App</span>
+                <span className="w-14 text-center">Push</span>
             </div>
 
             {CANDIDATE_GROUPS.map((group) => (
@@ -164,8 +167,7 @@ export function SectionNotifications() {
                             const pref = prefMap.get(cat);
                             if (!pref) return null;
 
-                            const emailDisabled = pref.unsubscribable;
-                            const inAppDisabled = pref.unsubscribable;
+                            const channelDisabled = pref.unsubscribable;
 
                             return (
                                 <div
@@ -196,7 +198,7 @@ export function SectionNotifications() {
                                             type="checkbox"
                                             className="toggle toggle-sm toggle-primary"
                                             checked={pref.email_enabled}
-                                            disabled={emailDisabled}
+                                            disabled={channelDisabled}
                                             onChange={() =>
                                                 togglePreference(
                                                     cat,
@@ -211,11 +213,26 @@ export function SectionNotifications() {
                                             type="checkbox"
                                             className="toggle toggle-sm toggle-primary"
                                             checked={pref.in_app_enabled}
-                                            disabled={inAppDisabled}
+                                            disabled={channelDisabled}
                                             onChange={() =>
                                                 togglePreference(
                                                     cat,
                                                     "in_app_enabled",
+                                                )
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="w-14 flex justify-center">
+                                        <input
+                                            type="checkbox"
+                                            className="toggle toggle-sm toggle-primary"
+                                            checked={pref.push_enabled}
+                                            disabled={channelDisabled}
+                                            onChange={() =>
+                                                togglePreference(
+                                                    cat,
+                                                    "push_enabled",
                                                 )
                                             }
                                         />

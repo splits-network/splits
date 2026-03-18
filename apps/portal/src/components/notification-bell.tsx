@@ -12,6 +12,7 @@ import {
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useNotificationTabIndicator } from "@/hooks/use-notification-tab-indicator";
+import { PushPermissionBanner } from "@/components/notifications/push-permission-banner";
 
 /* ─── Category to DaisyUI semantic color mapping ─────────────────────────── */
 
@@ -372,6 +373,9 @@ export default function NotificationBell() {
                         </Link>
                     </div>
                 </div>
+
+                {/* Push notification opt-in banner */}
+                <PushPermissionBanner />
 
                 {/* Notification List */}
                 <div className="max-h-[400px] overflow-y-auto">

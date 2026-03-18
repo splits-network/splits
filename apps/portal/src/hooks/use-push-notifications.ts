@@ -116,9 +116,10 @@ export function usePushNotifications(): UsePushNotificationsReturn {
                 const token = await getToken();
                 if (token) {
                     const client = createAuthenticatedClient(token);
-                    await client.delete("/push/subscriptions", {
-                        endpoint: subscription.endpoint,
-                    });
+                    await client.post(
+                        "/push/subscriptions/actions/unsubscribe",
+                        { endpoint: subscription.endpoint },
+                    );
                 }
 
                 // Unsubscribe from browser
