@@ -298,8 +298,11 @@ export class ApplicationRepository {
     }
 
     async findApplication(id: string, clerkUserId?: string, include?: string): Promise<any | null> {
-        // Build select clause with optional includes
-        const selectClause = this.buildSelectClause(include);
+        // Internal service calls (e.g. domain consumer) only need flat columns — skip joins
+        // to avoid PostgREST schema cache issues with newer FK constraints
+        const selectClause = clerkUserId === 'internal-service'
+            ? '*'
+            : this.buildSelectClause(include);
 
         const { data, error } = await this.supabase
             .from('applications')
@@ -308,7 +311,6 @@ export class ApplicationRepository {
             .single();
 
         if (error) {
-            if (error.code === 'PGRST116') return null;
             if (error.code === 'PGRST116') return null;
             throw error;
         }
