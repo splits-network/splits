@@ -1,11 +1,10 @@
-import { loadBaseConfig, loadDatabaseConfig, loadMultiClerkConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadMultiClerkConfig, loadRabbitMQConfig, loadRedisConfig, createSupabaseClient } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import Redis from 'ioredis';
-import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
@@ -670,10 +669,7 @@ async function main() {
     services.register('health-monitor', process.env.HEALTH_MONITOR_SERVICE_URL || 'http://localhost:3012');
 
     // Initialize Supabase client for system health and site notifications
-    const supabase = createClient(
-        dbConfig.supabaseUrl,
-        supabaseKey,
-    );
+    const supabase = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
     // Register V2 proxy routes (legacy)
     registerV2GatewayRoutes(app, services, { eventPublisher, redis, supabase });

@@ -2,6 +2,7 @@ import {
     loadBaseConfig,
     loadDatabaseConfig,
     loadRabbitMQConfig,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import {
@@ -13,7 +14,7 @@ import {
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { EventPublisher, OutboxPublisher, OutboxWorker } from "./v2/shared/events";
+import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
 import { DomainEventConsumer } from "./v3/shared/domain-consumer";
@@ -140,17 +141,10 @@ async function main() {
     );
 
     // Create Supabase client (needed for outbox + health check)
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseClient = createClient(
-        dbConfig.supabaseUrl,
-        supabaseKey
-    );
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = eventPublisher ? new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger) : null;
-    const outboxWorker = eventPublisher ? new OutboxWorker(supabaseClient, eventPublisher, baseConfig.serviceName, logger) : null;
-    outboxWorker?.start();
-    if (outboxWorker) logger.info('📤 Outbox worker started - events will be durably delivered');
 
     // Initialize AI review service (needed for domain consumer)
     const aiReviewService = new AIReviewServiceV2(
@@ -235,7 +229,6 @@ async function main() {
         logger.info("SIGTERM received, shutting down ai-service gracefully");
         try {
             await app.close();
-            outboxWorker?.stop();
             if (domainConsumer) {
                 await domainConsumer.close();
             }

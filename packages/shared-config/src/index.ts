@@ -13,6 +13,10 @@ try {
 // use: import { VaultClient } from '@splits-network/shared-config/src/vault';
 // For encryption: import { getCryptoService } from '@splits-network/shared-config/src/crypto';
 
+// Singleton Supabase client factory — use in all backend services
+export { createSupabaseClient } from './supabase';
+export type { CreateSupabaseClientOptions } from './supabase';
+
 export interface BaseConfig {
     nodeEnv: string;
     port: number;

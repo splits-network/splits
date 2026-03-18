@@ -3,6 +3,7 @@ import {
     loadDatabaseConfig,
     loadRedisConfig,
     loadRabbitMQConfig,
+    createSupabaseClient,
 } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
@@ -90,10 +91,9 @@ async function main() {
     });
 
     // Register V3 routes (coexist with V2)
-    const { createClient } = await import('@supabase/supabase-js');
     const { SupportEventPublisher: V2SupportEventPublisher } = await import('./v2/support/events');
     const { SupportEventPublisher: V3SupportEventPublisher } = await import('./v3/shared/support-event-publisher');
-    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
     // V2 publisher used by V2 routes (unchanged)
     const supportEventPublisher = new V2SupportEventPublisher(redisConfig, app.log as any);
     // V3 publisher used by V3 routes

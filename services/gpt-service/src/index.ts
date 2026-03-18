@@ -3,6 +3,7 @@ import {
     loadDatabaseConfig,
     loadRabbitMQConfig,
     loadGptConfig,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import {
@@ -98,8 +99,7 @@ async function main() {
     });
 
     // Register V3 routes
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
     registerV3Routes(app, {
         supabase: supabaseClient,
         gptConfig,

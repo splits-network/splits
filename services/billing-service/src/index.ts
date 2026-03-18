@@ -1,4 +1,4 @@
-import { loadBaseConfig, loadDatabaseConfig, loadStripeConfig, loadRabbitMQConfig, getEnvOrThrow } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadStripeConfig, loadRabbitMQConfig, getEnvOrThrow, createSupabaseClient } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
@@ -6,12 +6,11 @@ import swaggerUi from '@fastify/swagger-ui';
 import { registerWebhookRoutes } from './routes/webhooks/routes';
 import { registerV2Routes } from './v2/routes';
 import { registerV3Routes } from './v3/routes';
-import { EventPublisher as V2EventPublisher, OutboxPublisher, OutboxWorker } from './v2/shared/events';
+import { EventPublisher as V2EventPublisher, OutboxPublisher } from './v2/shared/events';
 import { BillingEventConsumer } from './events/placement-consumer';
 import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
 import { PlacementSnapshotService } from './v2/placement-snapshot/service';
 import { WebhookServiceV2 } from './v2/webhooks/service';
-import { createClient } from '@supabase/supabase-js';
 import { WebhookEventRepository } from './v2/webhook-events/repository';
 import * as Sentry from '@sentry/node';
 
@@ -141,17 +140,11 @@ async function main() {
     }
 
     // Initialize placement snapshot domain and event consumer
-    const supabase = createClient(
-        dbConfig.supabaseUrl,
-        supabaseKey
-    );
+    const supabase = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
     const snapshotRepository = new PlacementSnapshotRepository(supabase);
 
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
-    const outboxWorker = new OutboxWorker(supabase, v2EventPublisher, baseConfig.serviceName, logger);
-    outboxWorker.start();
-    logger.info('📤 Outbox worker started - events will be durably delivered');
 
     // Register V2 routes (plans, subscriptions, payouts, splits-rates)
     const v2Services = await registerV2Routes(app, {
@@ -225,7 +218,6 @@ async function main() {
 
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down billing service');
-        outboxWorker.stop();
         await billingEventConsumer.close();
         await v2EventPublisher.close();
         await app.close();

@@ -2,6 +2,7 @@ import {
     loadBaseConfig,
     loadDatabaseConfig,
     loadRabbitMQConfig,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import {
@@ -16,7 +17,6 @@ import swaggerUi from "@fastify/swagger-ui";
 import {
     EventPublisher,
     OutboxPublisher,
-    OutboxWorker,
 } from "./v2/shared/events";
 import { registerV2Routes } from "./v2/routes";
 import { registerV3Routes } from "./v3/routes";
@@ -127,22 +127,12 @@ async function main() {
     }
 
     // Create Supabase client
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabaseClient = createClient(dbConfig.supabaseUrl, supabaseKey);
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
     // Set up transactional outbox
     const outboxPublisher = eventPublisher
         ? new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger)
         : null;
-    const outboxWorker = eventPublisher
-        ? new OutboxWorker(
-              supabaseClient,
-              eventPublisher,
-              baseConfig.serviceName,
-              logger,
-          )
-        : null;
-    outboxWorker?.start();
 
     // Initialize core services
     const matchRepository = new MatchRepository(
@@ -244,7 +234,6 @@ async function main() {
         logger.info("SIGTERM received, shutting down matching-service");
         try {
             await app.close();
-            outboxWorker?.stop();
             if (v3DomainConsumer) await v3DomainConsumer.close();
             if (domainConsumer) await domainConsumer.close();
             if (eventPublisher) await eventPublisher.close();

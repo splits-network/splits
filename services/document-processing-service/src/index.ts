@@ -1,7 +1,7 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { createLogger } from "@splits-network/shared-logging";
+import { createSupabaseClient } from "@splits-network/shared-config";
 import * as amqp from "amqplib";
-import { createClient } from "@supabase/supabase-js";
 
 // V2 Architecture imports
 import { DocumentRepositoryV2 } from "./v2/documents/repository";
@@ -24,10 +24,10 @@ async function buildServer(): Promise<FastifyInstance> {
     });
 
     // Initialize Supabase client
-    const supabase = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+    const supabase = createSupabaseClient({
+        url: process.env.SUPABASE_URL!,
+        key: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    });
 
     // Initialize V2 architecture
     const documentRepository = new DocumentRepositoryV2(supabase);
@@ -67,10 +67,10 @@ async function main() {
 
     try {
         // Initialize Supabase client
-        const supabase = createClient(
-            process.env.SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        );
+        const supabase = createSupabaseClient({
+            url: process.env.SUPABASE_URL!,
+            key: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        });
         const repository = new DocumentRepositoryV2(supabase);
 
         // Start HTTP server
