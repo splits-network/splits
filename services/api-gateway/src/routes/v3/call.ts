@@ -27,6 +27,13 @@ const callV3Routes: V3RouteConfig[] = [
   { path: '/calls/:callId/entities', method: 'GET', auth: 'required' },
   { path: '/calls/:callId/entities', method: 'POST', auth: 'required' },
   { path: '/calls/:callId/entities/:id', method: 'DELETE', auth: 'required' },
+
+  // ── Call Lifecycle Actions ───────────────────────────────────
+  { path: '/calls/:id/start', method: 'POST', auth: 'required' },
+  { path: '/calls/:id/end', method: 'POST', auth: 'required' },
+  { path: '/calls/:id/cancel', method: 'POST', auth: 'required' },
+  { path: '/calls/:id/reschedule', method: 'POST', auth: 'required' },
+  { path: '/calls/:id/decline', method: 'POST', auth: 'required' },
 ];
 
 export function registerCallV3Routes(app: FastifyInstance, services: ServiceRegistry) {
