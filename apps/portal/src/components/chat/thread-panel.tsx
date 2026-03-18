@@ -249,7 +249,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                 `/chat/conversations/${conversationId}/messages`,
                 {
                     body: draft.trim(),
-                    clientMessageId: crypto.randomUUID(),
+                    client_message_id: crypto.randomUUID(),
                 },
             );
             setDraft("");

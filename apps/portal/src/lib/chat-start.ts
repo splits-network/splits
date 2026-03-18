@@ -46,6 +46,6 @@ export async function sendChatMessage(
     const client = createAuthenticatedClient(token);
     await client.post(`/chat/conversations/${conversationId}/messages`, {
         body,
-        clientMessageId: crypto.randomUUID(),
+        client_message_id: crypto.randomUUID(),
     });
 }
