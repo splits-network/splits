@@ -1,10 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import {
-    BaselChartCard,
-    BaselSectionHeading,
-} from "@splits-network/basel-ui";
+import { BaselChartCard, BaselSectionHeading } from "@splits-network/basel-ui";
 import { ChartLoadingState } from "@splits-network/shared-ui";
 import { RadarChart } from "@splits-network/shared-charts";
 import { CommissionDonutChart } from "@/components/basel/dashboard/charts/commission-donut-chart";
@@ -22,9 +19,9 @@ const PipelineFunnelChart = dynamic(
 
 const PlacementTrendChart = dynamic(
     () =>
-        import(
-            "@/components/basel/dashboard/charts/placement-trend-chart"
-        ).then((m) => ({ default: m.PlacementTrendChart })),
+        import("@/components/basel/dashboard/charts/placement-trend-chart").then(
+            (m) => ({ default: m.PlacementTrendChart }),
+        ),
     { loading: () => <ChartLoadingState height={200} /> },
 );
 
@@ -81,7 +78,7 @@ export function RecruiterCharts({
             />
 
             {/* Row 1: 3 equal columns — Funnel, Placement Trend, Earnings */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <BaselChartCard
                     title="Candidate Funnel"
                     subtitle="Candidates by pipeline stage"
