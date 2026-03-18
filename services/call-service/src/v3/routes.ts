@@ -12,10 +12,13 @@ import { registerStatsRoutes } from './stats/routes';
 import { registerArtifactRoutes } from './artifacts/routes';
 import { registerParticipantRoutes } from './participants/routes';
 import { registerCallRoutes } from './calls/routes';
+import { registerTokenRoute } from './calls/actions/token.route';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;
   eventPublisher?: IEventPublisher;
+  livekitApiKey?: string;
+  livekitApiSecret?: string;
 }
 
 export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config) {
@@ -24,4 +27,12 @@ export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config)
   registerArtifactRoutes(app, config.supabase, config.eventPublisher);
   registerParticipantRoutes(app, config.supabase, config.eventPublisher);
   registerCallRoutes(app, config.supabase, config.eventPublisher);
+
+  // Token action (requires LiveKit credentials)
+  if (config.livekitApiKey && config.livekitApiSecret) {
+    registerTokenRoute(app, config.supabase, {
+      apiKey: config.livekitApiKey,
+      apiSecret: config.livekitApiSecret,
+    });
+  }
 }

@@ -66,14 +66,24 @@ export default function UpcomingCallsWidget({
                 <LoadingSkeleton />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {calls.map((call) => (
+                    {calls.map((call) => {
+                        const hoursUntil = (new Date(call.scheduled_at).getTime() - Date.now()) / 3_600_000;
+                        const borderColor = hoursUntil <= 1 ? "border-l-accent" : hoursUntil <= 24 ? "border-l-warning" : "border-l-primary";
+                        return (
                         <div
                             key={call.id}
-                            className="border-2 border-base-300 border-l-4 border-l-primary p-5 flex flex-col gap-2"
+                            className={`border-2 border-base-300 border-l-4 ${borderColor} p-5 flex flex-col gap-2`}
                         >
-                            <h4 className="text-base font-bold tracking-tight text-base-content line-clamp-2">
-                                {getCallDisplayTitle(call)}
-                            </h4>
+                            <div className="flex items-start justify-between gap-2">
+                                <h4 className="text-base font-bold tracking-tight text-base-content line-clamp-2">
+                                    {getCallDisplayTitle(call)}
+                                </h4>
+                                {hoursUntil <= 1 && hoursUntil > 0 && (
+                                    <span className="badge badge-accent badge-sm shrink-0 font-bold uppercase tracking-wider">
+                                        Soon
+                                    </span>
+                                )}
+                            </div>
 
                             <div className="flex items-center gap-2 text-sm text-base-content/60">
                                 <i className="fa-duotone fa-regular fa-calendar-clock" />
@@ -98,7 +108,8 @@ export default function UpcomingCallsWidget({
                                 </Link>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

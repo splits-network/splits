@@ -29,6 +29,7 @@ const callV3Routes: V3RouteConfig[] = [
   { path: '/calls/:callId/entities/:id', method: 'DELETE', auth: 'required' },
 
   // ── Call Lifecycle Actions ───────────────────────────────────
+  { path: '/calls/:id/token', method: 'POST', auth: 'required' },
   { path: '/calls/:id/start', method: 'POST', auth: 'required' },
   { path: '/calls/:id/end', method: 'POST', auth: 'required' },
   { path: '/calls/:id/cancel', method: 'POST', auth: 'required' },
