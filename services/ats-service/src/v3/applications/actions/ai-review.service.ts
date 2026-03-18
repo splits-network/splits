@@ -52,9 +52,10 @@ export class AIReviewService {
         ...(isRetrigger && { retrigger: true }) },
     });
 
-    await this.eventPublisher?.publish('application.ai_review.triggered', {
+    await this.eventPublisher?.publish('application.stage_changed', {
       application_id: id, candidate_id: application.candidate_id,
-      job_id: application.job_id, triggeredBy: context.identityUserId,
+      job_id: application.job_id, old_stage: application.stage,
+      new_stage: 'ai_review', changed_by: context.identityUserId,
       retrigger: isRetrigger,
     }, 'ats-service');
   }
