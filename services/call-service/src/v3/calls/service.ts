@@ -96,6 +96,58 @@ export class CallService {
             ai_analysis_enabled: input.ai_analysis_enabled ?? false,
         });
 
+        // Insert participants (ensure creator is always included as host)
+        const participants = input.participants || [];
+        const creatorIncluded = participants.some(
+            (p) => p.user_id === resolvedUserId,
+        );
+        const allParticipants = creatorIncluded
+            ? participants
+            : [
+                  { user_id: resolvedUserId, role: "host" as const },
+                  ...participants,
+              ];
+
+        if (allParticipants.length > 0) {
+            const { error: pErr } = await this.supabase
+                .from("call_participants")
+                .insert(
+                    allParticipants.map((p) => ({
+                        call_id: call.id,
+                        user_id: p.user_id,
+                        role: p.role,
+                    })),
+                );
+            if (pErr) throw pErr;
+        }
+
+        // Insert entity links if provided
+        if (input.entity_links && input.entity_links.length > 0) {
+            const { error: elErr } = await this.supabase
+                .from("call_entity_links")
+                .insert(
+                    input.entity_links.map((el) => ({
+                        call_id: call.id,
+                        entity_type: el.entity_type,
+                        entity_id: el.entity_id,
+                    })),
+                );
+            if (elErr) throw elErr;
+        }
+
+        // Insert tags if provided
+        if (input.tags && input.tags.length > 0) {
+            const { error: tagErr } = await this.supabase
+                .from("call_tag_links")
+                .insert(
+                    input.tags.map((slug) => ({
+                        call_id: call.id,
+                        tag_slug: slug,
+                    })),
+                );
+            if (tagErr) throw tagErr;
+        }
+
         await this.eventPublisher?.publish(
             "call.created",
             {
