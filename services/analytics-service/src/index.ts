@@ -51,6 +51,25 @@ app.register(cors, {
     credentials: true,
 });
 
+// Parse text/plain as JSON (used by sendBeacon heartbeat to avoid CORS preflight)
+app.addContentTypeParser(
+    'text/plain',
+    { parseAs: 'string' },
+    (req, body, done) => {
+        try {
+            const str = (body as string).trim();
+            if (!str) {
+                done(null, undefined);
+                return;
+            }
+            done(null, JSON.parse(str));
+        } catch (err: any) {
+            err.statusCode = 400;
+            done(err, undefined);
+        }
+    }
+);
+
 // Register Swagger
 app.register(swagger, {
     swagger: {

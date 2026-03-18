@@ -141,6 +141,8 @@ async function main() {
     registerV3Routes(app, {
         supabase: supabaseClient,
         eventPublisher: outboxPublisher,
+        livekitApiKey,
+        livekitApiSecret,
     });
 
     // ── Scheduler ─────────────────────────────────────────────────────

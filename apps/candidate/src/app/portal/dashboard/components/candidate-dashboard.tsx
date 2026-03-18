@@ -186,32 +186,32 @@ export default function CandidateDashboard({
                         label="Response Rate"
                         value={loading ? "--" : `${stats.responseRate}%`}
                         icon="fa-duotone fa-regular fa-chart-line-up"
-                        color="primary"
+                        color="info"
                     />
                     <BaselKpiCard
                         label="Interviews"
                         value={loading ? "--" : stats.interviews.toLocaleString()}
                         icon="fa-duotone fa-regular fa-calendar-check"
-                        color="primary"
+                        color="warning"
                     />
                     <BaselKpiCard
                         label="Offers"
                         value={loading ? "--" : stats.offers.toLocaleString()}
                         icon="fa-duotone fa-regular fa-trophy"
-                        color="success"
+                        color="accent"
                     />
                     <BaselKpiCard
                         label="Active Recruiters"
                         value={loading ? "--" : stats.active_relationships.toLocaleString()}
                         icon="fa-duotone fa-regular fa-users"
-                        color="primary"
+                        color="secondary"
                     />
                     {level ? (
                         <BaselKpiCard
                             label="Level"
                             value={`${level.current_level}`}
                             icon="fa-solid fa-star"
-                            color="primary"
+                            color="success"
                         />
                     ) : (
                         <BaselKpiCard
@@ -281,7 +281,7 @@ export default function CandidateDashboard({
                         <BaselChartCard
                             title="Application Pipeline"
                             subtitle={`${stats.activeApplications} active · conversion funnel`}
-                            accentColor="primary"
+                            accentColor="info"
                             compact
                             className="h-full"
                         >
@@ -296,7 +296,7 @@ export default function CandidateDashboard({
                             title="Job Search Momentum"
                             subtitle="Your search health score"
                             icon="fa-duotone fa-regular fa-gauge-high"
-                            accentColor="primary"
+                            accentColor="secondary"
                             compact
                             className="h-full"
                         >
@@ -363,7 +363,7 @@ export default function CandidateDashboard({
                         <BaselChartCard
                             title="Application Status"
                             subtitle={`${stats.activeApplications} active`}
-                            accentColor="primary"
+                            accentColor="accent"
                             compact
                             className="h-full"
                         >
@@ -379,7 +379,7 @@ export default function CandidateDashboard({
                         <BaselChartCard
                             title="Your Activity"
                             subtitle={`${recentActivityCount} last 30 days`}
-                            accentColor="primary"
+                            accentColor="success"
                             compact
                             className="h-full"
                         >
@@ -551,8 +551,8 @@ function RecruiterCard({ activeRecruiters, presence, loading }: RecruiterCardPro
                 </div>
             ) : (
                 <div className="py-6">
-                    <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                        <i className="fa-duotone fa-regular fa-user-tie text-2xl text-primary/40" />
+                    <div className="w-14 h-14 bg-secondary/10 flex items-center justify-center mx-auto mb-4">
+                        <i className="fa-duotone fa-regular fa-user-tie text-2xl text-secondary/40" />
                     </div>
                     <p className="text-sm font-bold text-base-content text-center">
                         You don&apos;t have a recruiter yet
@@ -563,7 +563,7 @@ function RecruiterCard({ activeRecruiters, presence, loading }: RecruiterCardPro
                     </p>
                     <Link
                         href="/marketplace"
-                        className="btn btn-primary btn-sm w-full mt-4"
+                        className="btn btn-secondary btn-sm w-full mt-4"
                         style={{ borderRadius: 0 }}
                     >
                         <i className="fa-duotone fa-regular fa-search" />

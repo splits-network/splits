@@ -10,16 +10,25 @@ interface MatchPreviewWidgetProps {
     loading: boolean;
 }
 
+function getMatchBorderColor(score: number | null | undefined): string {
+    if (!score) return "border-l-base-300";
+    if (score >= 80) return "border-l-success";
+    if (score >= 60) return "border-l-secondary";
+    if (score >= 40) return "border-l-info";
+    return "border-l-base-300";
+}
+
 function MatchPreviewCard({ match }: { match: EnrichedMatch }) {
     const job = match.job;
     const company = job?.companies;
     const scoreLabel = getMatchScoreLabel(match.match_score);
     const companyName = company?.name || "Company not listed";
+    const borderColor = getMatchBorderColor(match.match_score);
 
     return (
         <Link
             href={`/jobs/${match.job_id}`}
-            className="group flex flex-col bg-base-100 border-2 border-base-200 p-5 transition-all hover:border-primary/30 min-w-[260px] shrink-0"
+            className={`group flex flex-col bg-base-100 border-2 border-base-200 border-l-4 ${borderColor} p-5 transition-all hover:border-primary/30 min-w-[260px] shrink-0`}
         >
             {scoreLabel && (
                 <span
@@ -67,8 +76,8 @@ function LoadingSkeleton() {
 function EmptyState() {
     return (
         <div className="text-center py-8">
-            <div className="w-12 h-12 bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <i className="fa-duotone fa-regular fa-radar text-xl text-primary/30" />
+            <div className="w-12 h-12 bg-secondary/10 flex items-center justify-center mx-auto mb-3">
+                <i className="fa-duotone fa-regular fa-radar text-xl text-secondary/40" />
             </div>
             <p className="text-sm font-semibold text-base-content/60">
                 Matches are being generated

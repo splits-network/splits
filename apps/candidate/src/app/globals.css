@@ -2,7 +2,9 @@
 
 @import "tailwindcss";
 @plugin "daisyui";
-@source "../../../../packages/basel-ui/src/**/*.tsx";
+@source "../../../../packages/basel-ui/src";
+@source "../../../../packages/shared-ui/src";
+@source "../../../../packages/chat-ui/src";
 
 @import "./themes/light.css";
 @import "./themes/dark.css";

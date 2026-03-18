@@ -126,6 +126,25 @@ async function main() {
         }
     );
 
+    // Parse text/plain as JSON (used by sendBeacon heartbeat to avoid CORS preflight)
+    app.addContentTypeParser(
+        'text/plain',
+        { parseAs: 'string' },
+        (req, body, done) => {
+            try {
+                const str = (body as string).trim();
+                if (!str) {
+                    done(null, undefined);
+                    return;
+                }
+                done(null, JSON.parse(str));
+            } catch (err: any) {
+                err.statusCode = 400;
+                done(err, undefined);
+            }
+        }
+    );
+
     // Allow multipart/form-data requests to pass through without parsing
     // This is needed for proxying file uploads to downstream services (document-service)
     // The downstream services have their own multipart parsing configured
