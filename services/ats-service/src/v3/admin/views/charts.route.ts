@@ -11,8 +11,8 @@ import { periodQuerySchema } from '../types';
 export function registerAdminChartsView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new AdminChartsRepository(supabase);
 
-  // GET /admin/chart-data?period=30d
-  app.get('/admin/chart-data', {
+  // GET /v3/admin/chart-data?period=30d
+  app.get('/v3/admin/chart-data', {
     schema: { querystring: periodQuerySchema },
   }, async (request, reply) => {
     const { period } = request.query as { period?: string };

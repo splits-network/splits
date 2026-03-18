@@ -11,14 +11,14 @@ import { periodQuerySchema } from '../types';
 export function registerAdminStatsViews(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new AdminStatsRepository(supabase);
 
-  // GET /admin/counts — cross-resource totals
-  app.get('/admin/counts', async (_request, reply) => {
+  // GET /v3/admin/counts — cross-resource totals
+  app.get('/v3/admin/counts', async (_request, reply) => {
     const data = await repository.getCounts();
     return reply.send({ data });
   });
 
-  // GET /admin/stats?period=30d — sparklines, trends, funnel
-  app.get('/admin/stats', {
+  // GET /v3/admin/stats?period=30d — sparklines, trends, funnel
+  app.get('/v3/admin/stats', {
     schema: { querystring: periodQuerySchema },
   }, async (request, reply) => {
     const { period } = request.query as { period?: string };

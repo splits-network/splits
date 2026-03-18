@@ -16,8 +16,8 @@ import {
 export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new AdminListsRepository(supabase);
 
-  // GET /admin/applications — list with job + candidate joins
-  app.get('/admin/applications', {
+  // GET /v3/admin/applications — list with job + candidate joins
+  app.get('/v3/admin/applications', {
     schema: { querystring: adminApplicationsQuerySchema },
   }, async (request, reply) => {
     const params = request.query as AdminListParams;
@@ -25,8 +25,8 @@ export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseC
     return reply.send(result);
   });
 
-  // GET /admin/candidates — flat list with search
-  app.get('/admin/candidates', {
+  // GET /v3/admin/candidates — flat list with search
+  app.get('/v3/admin/candidates', {
     schema: { querystring: adminListQuerySchema },
   }, async (request, reply) => {
     const params = request.query as AdminListParams;
@@ -34,8 +34,8 @@ export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseC
     return reply.send(result);
   });
 
-  // GET /admin/assignments — list with job join
-  app.get('/admin/assignments', {
+  // GET /v3/admin/assignments — list with job join
+  app.get('/v3/admin/assignments', {
     schema: { querystring: adminListQuerySchema },
   }, async (request, reply) => {
     const params = request.query as AdminListParams;
@@ -43,8 +43,8 @@ export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseC
     return reply.send(result);
   });
 
-  // GET /admin/placements — flat list with search + state filter
-  app.get('/admin/placements', {
+  // GET /v3/admin/placements — flat list with search + state filter
+  app.get('/v3/admin/placements', {
     schema: { querystring: adminPlacementsQuerySchema },
   }, async (request, reply) => {
     const params = request.query as AdminListParams;

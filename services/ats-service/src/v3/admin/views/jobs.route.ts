@@ -16,8 +16,8 @@ function buildPagination(total: number, page: number, limit: number) {
 export function registerAdminJobsView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new AdminJobsRepository(supabase);
 
-  // GET /admin/jobs — list with company join
-  app.get('/admin/jobs', {
+  // GET /v3/admin/jobs — list with company join
+  app.get('/v3/admin/jobs', {
     schema: { querystring: adminJobsQuerySchema },
   }, async (request, reply) => {
     const params = request.query as AdminListParams;
@@ -27,8 +27,8 @@ export function registerAdminJobsView(app: FastifyInstance, supabase: SupabaseCl
     return reply.send({ data, pagination: buildPagination(total, page, limit) });
   });
 
-  // GET /admin/jobs/:id
-  app.get('/admin/jobs/:id', {
+  // GET /v3/admin/jobs/:id
+  app.get('/v3/admin/jobs/:id', {
     schema: { params: idParamSchema },
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
@@ -36,8 +36,8 @@ export function registerAdminJobsView(app: FastifyInstance, supabase: SupabaseCl
     return reply.send({ data });
   });
 
-  // PATCH /admin/jobs/:id/status
-  app.patch('/admin/jobs/:id/status', {
+  // PATCH /v3/admin/jobs/:id/status
+  app.patch('/v3/admin/jobs/:id/status', {
     schema: { params: idParamSchema },
   }, async (request, reply) => {
     const { id } = request.params as { id: string };
@@ -51,8 +51,8 @@ export function registerAdminJobsView(app: FastifyInstance, supabase: SupabaseCl
     return reply.send({ data });
   });
 
-  // GET /admin/job-counts-by-status
-  app.get('/admin/job-counts-by-status', async (_request, reply) => {
+  // GET /v3/admin/job-counts-by-status
+  app.get('/v3/admin/job-counts-by-status', async (_request, reply) => {
     const data = await repository.getCountsByStatus();
     return reply.send({ data });
   });
