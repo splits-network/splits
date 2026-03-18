@@ -16,9 +16,16 @@ export async function startChatConversation(
         throw new Error("Not authenticated");
     }
     const client = createAuthenticatedClient(token);
+    // Strip null/undefined values — V3 schema rejects non-UUID strings
+    const cleanContext: Record<string, string> = {};
+    if (context) {
+        for (const [key, value] of Object.entries(context)) {
+            if (value) cleanContext[key] = value;
+        }
+    }
     const response: any = await client.post("/chat/conversations/actions/start", {
         participantUserId,
-        context: context || {},
+        context: cleanContext,
     });
     const conversation = response?.data;
     if (!conversation?.id) {

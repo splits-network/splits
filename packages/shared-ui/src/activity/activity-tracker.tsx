@@ -74,7 +74,7 @@ export function ActivityTracker({
             if (navigator.sendBeacon) {
                 navigator.sendBeacon(
                     url,
-                    new Blob([payload], { type: "application/json" }),
+                    new Blob([payload], { type: "text/plain" }),
                 );
             } else {
                 fetch(url, {
