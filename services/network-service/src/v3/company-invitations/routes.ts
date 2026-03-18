@@ -12,6 +12,7 @@ import {
   listQuerySchema, createSchema, completeRelationshipSchema, lookupQuerySchema, idParamSchema,
 } from './types';
 import { registerCompanyInvitationDetailView } from './views/detail.route';
+import { registerCompanyInvitationListView } from './views/list.route';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -51,6 +52,7 @@ export function registerCompanyInvitationRoutes(
   });
 
   // --- Views (before :id routes) ---
+  registerCompanyInvitationListView(app, supabase);
   registerCompanyInvitationDetailView(app, supabase);
 
   // --- Core CRUD ---

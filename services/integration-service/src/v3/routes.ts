@@ -10,7 +10,12 @@ import { IEventPublisher } from '../v2/shared/events';
 import { registerProviderRoutes } from './providers/routes';
 import { registerConnectionRoutes } from './connections/routes';
 import { registerATSIntegrationRoutes } from './ats-integrations/routes';
+import { registerATSActionRoutes } from './ats-integrations/actions/sync.route';
 import { registerCalendarWebhookRoutes } from './calendar/webhook-routes';
+import { registerCalendarRoutes } from './calendar/routes';
+import { registerCallCalendarRoutes } from './calendar/call-calendar-routes';
+import { registerEmailRoutes } from './email/routes';
+import { registerLinkedInRoutes } from './linkedin/routes';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;
@@ -33,6 +38,43 @@ export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config)
       logger: config.logger,
       crypto: config.crypto,
       webhookBaseUrl: config.webhookBaseUrl || process.env.WEBHOOK_BASE_URL || '',
+    });
+
+    // Calendar, email, LinkedIn, call-calendar routes
+    registerCalendarRoutes(app, {
+      supabase: config.supabase,
+      eventPublisher: config.eventPublisher,
+      logger: config.logger,
+      crypto: config.crypto,
+    });
+
+    registerCallCalendarRoutes(app, {
+      supabase: config.supabase,
+      eventPublisher: config.eventPublisher,
+      logger: config.logger,
+      crypto: config.crypto,
+    });
+
+    registerEmailRoutes(app, {
+      supabase: config.supabase,
+      eventPublisher: config.eventPublisher,
+      logger: config.logger,
+      crypto: config.crypto,
+    });
+
+    registerLinkedInRoutes(app, {
+      supabase: config.supabase,
+      eventPublisher: config.eventPublisher,
+      logger: config.logger,
+      crypto: config.crypto,
+    });
+
+    // ATS integration action routes (sync, sync-logs, stats, push-candidate)
+    registerATSActionRoutes(app, {
+      supabase: config.supabase,
+      eventPublisher: config.eventPublisher,
+      logger: config.logger,
+      crypto: config.crypto,
     });
   }
 }

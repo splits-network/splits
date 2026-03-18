@@ -7,6 +7,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { DocumentRepository } from './repository';
 import { DocumentService } from './service';
+import { registerFriendlyListView } from './views/friendly-list.route';
 import {
   DocumentListParams,
   UpdateDocumentInput,
@@ -22,6 +23,9 @@ export function registerDocumentRoutes(
 ) {
   const repository = new DocumentRepository(supabase);
   const service = new DocumentService(repository, supabase, eventPublisher);
+
+  // Register views BEFORE parameterized routes
+  registerFriendlyListView(app, supabase);
 
   // GET /api/v3/documents — list
   app.get('/api/v3/documents', {

@@ -1,13 +1,9 @@
 /**
- * Memberships V3 Repository — Pure data layer
- *
- * NO role logic. Scope filtering set by service layer.
+ * Memberships V3 Repository — Pure CRUD (flat select('*') only)
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { MembershipListParams } from './types';
-
-const MEMBERSHIP_SELECT = '*, users(*), organizations(*), companies(*), roles!memberships_role_name_fkey(*)';
 
 export class MembershipRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -22,7 +18,7 @@ export class MembershipRepository {
 
     let query = this.supabase
       .from('memberships')
-      .select(MEMBERSHIP_SELECT, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .is('deleted_at', null);
 
     // Role-based scoping
@@ -57,7 +53,7 @@ export class MembershipRepository {
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('memberships')
-      .select(MEMBERSHIP_SELECT)
+      .select('*')
       .eq('id', id)
       .is('deleted_at', null)
       .maybeSingle();
@@ -70,7 +66,7 @@ export class MembershipRepository {
     const { data, error } = await this.supabase
       .from('memberships')
       .insert(record)
-      .select(MEMBERSHIP_SELECT)
+      .select('*')
       .single();
 
     if (error) throw error;
@@ -82,7 +78,7 @@ export class MembershipRepository {
       .from('memberships')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
-      .select(MEMBERSHIP_SELECT)
+      .select('*')
       .single();
 
     if (error) {

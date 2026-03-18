@@ -19,6 +19,8 @@ import {
     updateSchema,
     idParamSchema,
 } from "./types";
+import { registerTicketReplyAction } from "./actions/reply.route";
+import { registerTicketClaimAction } from "./actions/claim.route";
 
 export function registerTicketRoutes(
     app: FastifyInstance,
@@ -27,6 +29,10 @@ export function registerTicketRoutes(
 ) {
     const repository = new TicketRepository(supabase);
     const service = new TicketService(repository, supabase, eventPublisher);
+
+    // Register action routes BEFORE parameterized routes
+    registerTicketReplyAction(app, supabase, eventPublisher);
+    registerTicketClaimAction(app, supabase, eventPublisher);
 
     // GET /api/v3/tickets/views/mine — visitor's own tickets (optional auth)
     app.get("/api/v3/tickets/views/mine", async (request, reply) => {
@@ -86,13 +92,24 @@ export function registerTicketRoutes(
         },
     );
 
-    // GET /api/v3/tickets/:id
+    // GET /api/v3/tickets/:id — requires auth
     app.get(
         "/api/v3/tickets/:id",
         {
             schema: { params: idParamSchema },
         },
         async (request, reply) => {
+            const clerkUserId = request.headers["x-clerk-user-id"] as string;
+            if (!clerkUserId) {
+                return reply
+                    .status(401)
+                    .send({
+                        error: {
+                            code: "AUTH_REQUIRED",
+                            message: "Authentication required",
+                        },
+                    });
+            }
             const { id } = request.params as { id: string };
             const data = await service.getById(id);
             return reply.send({ data });

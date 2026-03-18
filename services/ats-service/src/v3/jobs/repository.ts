@@ -41,27 +41,7 @@ export class JobRepository {
       .from('jobs')
       .select(selectFields, { count: 'exact' });
 
-    // Role-based scoping (set by service layer, not from query params)
-    if (params.scoped_company_ids && params.scoped_company_ids.length > 0) {
-      query = query.in('company_id', params.scoped_company_ids);
-    }
-    if (params.visible_statuses && params.visible_statuses.length > 0) {
-      if (params.owner_recruiter_id) {
-        // Recruiters see public statuses OR their own jobs regardless of status
-        query = query.or(
-          `status.in.(${params.visible_statuses.join(',')}),job_owner_recruiter_id.eq.${params.owner_recruiter_id}`
-        );
-      } else {
-        query = query.in('status', params.visible_statuses);
-      }
-    }
-
-    // Exclude early access for non-partner tier (set by service layer)
-    if (params.exclude_early_access) {
-      query = query.eq('is_early_access', false);
-    }
-
-    // Filters
+    // User-supplied filters only — no role-based scoping
     if (params.status) query = query.eq('status', params.status);
     if (params.employment_type) query = query.eq('employment_type', params.employment_type);
     if (params.company_id) query = query.eq('company_id', params.company_id);

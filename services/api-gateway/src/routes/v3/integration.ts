@@ -28,6 +28,12 @@ const integrationV3Routes: V3RouteConfig[] = [
   { path: '/integrations/ats/:id', method: 'PATCH', auth: 'required' },
   { path: '/integrations/ats/:id', method: 'DELETE', auth: 'required' },
 
+  // ── ATS Integration Actions ──────────────────────────────────────
+  { path: '/integrations/ats/:id/sync', method: 'POST', auth: 'required' },
+  { path: '/integrations/ats/:id/sync-logs', method: 'GET', auth: 'required' },
+  { path: '/integrations/ats/:id/stats', method: 'GET', auth: 'required' },
+  { path: '/integrations/ats/:id/push-candidate', method: 'POST', auth: 'required' },
+
   // ── Email ────────────────────────────────────────────────────────
   { path: '/integrations/email/:connectionId/messages', method: 'GET', auth: 'required' },
   { path: '/integrations/email/:connectionId/messages/:messageId', method: 'GET', auth: 'required' },

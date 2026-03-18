@@ -6,7 +6,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError, ForbiddenError } from "@splits-network/shared-fastify";
 import { GptActionsRepository } from "./repository";
-import { JobSearchParams } from "./types";
+import { JobSearchParams, ApplicationListParams } from "./types";
 
 export class GptActionsService {
     private accessResolver: AccessContextResolver;
@@ -48,14 +48,31 @@ export class GptActionsService {
 
     async getApplications(
         clerkUserId: string,
-        includeInactive: boolean = false,
+        params: ApplicationListParams,
     ) {
         const context = await this.accessResolver.resolve(clerkUserId);
         if (!context.candidateId)
             throw new ForbiddenError("Candidate profile not found");
-        return this.repository.getApplicationsByCandidate(
+
+        const page = params.page || 1;
+        const limit = Math.min(params.limit || 25, 100);
+        const includeInactive = params.include_inactive === "true";
+
+        const { data, total } = await this.repository.getApplicationsByCandidate(
             context.candidateId,
             includeInactive,
+            page,
+            limit,
         );
+
+        return {
+            data,
+            pagination: {
+                total,
+                page,
+                limit,
+                total_pages: Math.ceil(total / limit),
+            },
+        };
     }
 }

@@ -771,18 +771,20 @@ export class ApplicationServiceV2 {
             },
         });
 
-        // Publish event for AI service to process (non-blocking)
+        // Publish stage_changed event for AI service to process (non-blocking)
         if (this.eventPublisher) {
             try {
-                await this.eventPublisher.publish('application.ai_review.triggered', {
+                await this.eventPublisher.publish('application.stage_changed', {
                     application_id: applicationId,
                     candidate_id: application.candidate_id,
                     job_id: application.job_id,
-                    triggeredBy: userContext.identityUserId,
+                    old_stage: application.stage,
+                    new_stage: 'ai_review',
+                    changed_by: userContext.identityUserId,
                     retrigger: isRetrigger,
                 });
             } catch (error) {
-                console.error('Failed to publish application.ai_review.triggered event:', error);
+                console.error('Failed to publish application.stage_changed event:', error);
             }
         }
     }

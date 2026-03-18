@@ -8,6 +8,7 @@ import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { BadRequestError, NotFoundError } from "@splits-network/shared-fastify";
 import { IEventPublisher } from "../../v2/shared/events";
 import { CallRepository } from "./repository";
+import { getCreatorTier } from "./subscription-helper";
 import { CreateCallInput, UpdateCallInput, CallListParams } from "./types";
 
 export class CallService {
@@ -26,9 +27,7 @@ export class CallService {
         clerkUserId: string,
     ) {
         await this.accessResolver.resolve(clerkUserId);
-        const userId = await this.repository.resolveUserId(clerkUserId);
-        if (!userId) throw new BadRequestError("Could not resolve user");
-        const { data, total } = await this.repository.findAll(params, userId);
+        const { data, total } = await this.repository.findAll(params);
         const page = params.page || 1;
         const limit = Math.min(params.limit || 25, 100);
         return {
@@ -70,7 +69,7 @@ export class CallService {
         }
 
         if (input.transcription_enabled || input.ai_analysis_enabled) {
-            const tier = await this.repository.getCreatorTier(resolvedUserId);
+            const tier = await getCreatorTier(this.supabase, resolvedUserId);
             if (input.transcription_enabled && tier === "starter") {
                 throw new BadRequestError(
                     "Transcription requires a Pro or Partner subscription",

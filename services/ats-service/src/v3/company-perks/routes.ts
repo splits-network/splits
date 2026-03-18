@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CompanyPerkRepository } from './repository';
 import { CompanyPerkService } from './service';
+import { registerWithDetailsView } from './views/with-details.route';
 import {
   CreateCompanyPerkInput,
   BulkReplaceCompanyPerksInput,
@@ -19,6 +20,9 @@ import {
 export function registerCompanyPerkRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CompanyPerkRepository(supabase);
   const service = new CompanyPerkService(repository, supabase);
+
+  // Register views before parameterized routes
+  registerWithDetailsView(app, supabase);
 
   // GET /api/v3/company-perks?company_id=
   app.get('/api/v3/company-perks', {

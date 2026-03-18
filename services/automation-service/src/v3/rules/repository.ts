@@ -15,7 +15,7 @@ export class RuleRepository {
     const limit = Math.min(params.limit || 25, 100);
     const offset = (page - 1) * limit;
 
-    let query = this.supabase.from('automation_rules').select('*', { count: 'exact' });
+    let query = this.supabase.from('automation_rules').select('*', { count: 'exact' }).is('deleted_at', null);
     if (params.rule_type) query = query.eq('rule_type', params.rule_type);
     if (params.status) query = query.eq('status', params.status);
 
@@ -29,7 +29,7 @@ export class RuleRepository {
   }
 
   async findById(id: string): Promise<any | null> {
-    const { data, error } = await this.supabase.from('automation_rules').select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.supabase.from('automation_rules').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
     if (error) throw error;
     return data;
   }
@@ -48,7 +48,8 @@ export class RuleRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.supabase.from('automation_rules').delete().eq('id', id);
+    const { error } = await this.supabase.from('automation_rules')
+      .update({ deleted_at: new Date().toISOString() }).eq('id', id);
     if (error) throw error;
   }
 }

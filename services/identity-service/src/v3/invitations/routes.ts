@@ -22,6 +22,7 @@ import {
   acceptSchema,
   idParamSchema,
 } from './types';
+import { registerInvitationDetailView } from './views/detail.route';
 
 export function registerInvitationRoutes(
   app: FastifyInstance,
@@ -34,6 +35,9 @@ export function registerInvitationRoutes(
   const service = new InvitationService(
     repository, userRepository, membershipRepository, supabase, eventPublisher
   );
+
+  // Register views before parameterized CRUD routes
+  registerInvitationDetailView(app, supabase);
 
   // GET /api/v3/invitations — list
   app.get('/api/v3/invitations', {

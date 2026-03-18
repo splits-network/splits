@@ -32,7 +32,7 @@ export class FirmRepository {
     const { data, error, count } = await query;
     if (error) throw error;
 
-    return { data: await this.enrichWithMemberStats(data || []), total: count || 0 };
+    return { data: data || [], total: count || 0 };
   }
 
   async findById(id: string): Promise<any | null> {
@@ -94,9 +94,7 @@ export class FirmRepository {
     const limit = Math.min(params.limit || 50, 100);
     const offset = (page - 1) * limit;
 
-    let query = this.supabase.from('firm_members').select(`
-      *, recruiter:recruiters!inner(id, user_id, status, user:users!recruiters_user_id_fkey(id, name, email))
-    `, { count: 'exact' }).eq('firm_id', firmId);
+    let query = this.supabase.from('firm_members').select('*', { count: 'exact' }).eq('firm_id', firmId);
 
     if (params.status) query = query.eq('status', params.status);
     if (params.role) query = query.eq('role', params.role);
@@ -303,22 +301,4 @@ export class FirmRepository {
     return data?.owner_user_id || null;
   }
 
-  private async enrichWithMemberStats(firms: any[]): Promise<any[]> {
-    if (firms.length === 0) return firms;
-    const firmIds = firms.map(t => t.id);
-    const { data: memberCounts } = await this.supabase.from('firm_members').select('firm_id, status').in('firm_id', firmIds);
-    const statsMap = new Map<string, { member_count: number; active_member_count: number }>();
-    for (const m of memberCounts || []) {
-      const s = statsMap.get(m.firm_id) || { member_count: 0, active_member_count: 0 };
-      s.member_count++;
-      if (m.status === 'active') s.active_member_count++;
-      statsMap.set(m.firm_id, s);
-    }
-    for (const firm of firms) {
-      const s = statsMap.get(firm.id) || { member_count: 0, active_member_count: 0 };
-      firm.member_count = s.member_count;
-      firm.active_member_count = s.active_member_count;
-    }
-    return firms;
-  }
 }

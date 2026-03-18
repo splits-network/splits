@@ -16,6 +16,7 @@ import {
 } from './types';
 import { registerRecruiterCandidateDetailView } from './views/detail.route';
 import { registerListForCandidateView } from './views/list-for-candidate.route';
+import { registerRecruiterCandidateListView } from './views/list.route';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -75,6 +76,7 @@ export function registerRecruiterCandidateRoutes(
   });
 
   // --- Views (before :id to avoid collision) ---
+  registerRecruiterCandidateListView(app, supabase);
   registerListForCandidateView(app, supabase);
   registerRecruiterCandidateDetailView(app, supabase);
 

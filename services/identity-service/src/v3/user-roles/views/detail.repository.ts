@@ -1,0 +1,55 @@
+/**
+ * User Role Detail View Repository
+ * GET /api/v3/user-roles/:id/view/detail
+ *
+ * Returns user role with joined user and role data.
+ */
+
+import { SupabaseClient } from '@supabase/supabase-js';
+
+const DETAIL_SELECT = '*, users(*), roles!user_roles_role_name_fkey(*)';
+
+export class UserRoleDetailViewRepository {
+  constructor(private supabase: SupabaseClient) {}
+
+  async findById(id: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('user_roles')
+      .select(DETAIL_SELECT)
+      .eq('id', id)
+      .is('deleted_at', null)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async findAll(params: {
+    page?: number;
+    limit?: number;
+    user_id?: string;
+    role_name?: string;
+    sort_by?: string;
+    sort_order?: string;
+  }): Promise<{ data: any[]; total: number }> {
+    const page = params.page || 1;
+    const limit = Math.min(params.limit || 25, 100);
+    const offset = (page - 1) * limit;
+
+    let query = this.supabase
+      .from('user_roles')
+      .select(DETAIL_SELECT, { count: 'exact' })
+      .is('deleted_at', null);
+
+    if (params.user_id) query = query.eq('user_id', params.user_id);
+    if (params.role_name) query = query.eq('role_name', params.role_name);
+
+    const sortBy = params.sort_by || 'created_at';
+    const ascending = params.sort_order?.toLowerCase() === 'asc';
+    query = query.order(sortBy, { ascending }).range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
+    if (error) throw error;
+    return { data: data || [], total: count || 0 };
+  }
+}

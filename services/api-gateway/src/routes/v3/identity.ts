@@ -25,14 +25,26 @@ const identityV3Routes: V3RouteConfig[] = [
   { path: '/users/:id', method: 'PATCH', auth: 'required' },
   { path: '/users/:id', method: 'DELETE', auth: 'required' },
 
+  // ── User Roles Views (before CRUD to avoid :id collision) ──────
+  { path: '/user-roles/views/detail', method: 'GET', auth: 'required' },
+  { path: '/user-roles/:id/view/detail', method: 'GET', auth: 'required' },
+
   // ── User Roles Core CRUD ────────────────────────────────────────
   { resource: 'user-roles', auth: 'required' },
 
   // ── Organizations Core CRUD ─────────────────────────────────────
   { resource: 'organizations', auth: 'required' },
 
+  // ── Memberships Views (before CRUD to avoid :id collision) ─────
+  { path: '/memberships/views/detail', method: 'GET', auth: 'required' },
+  { path: '/memberships/:id/view/detail', method: 'GET', auth: 'required' },
+
   // ── Memberships Core CRUD ───────────────────────────────────────
   { resource: 'memberships', auth: 'required' },
+
+  // ── Invitations Views (before CRUD to avoid :id collision) ─────
+  { path: '/invitations/views/detail', method: 'GET', auth: 'required' },
+  { path: '/invitations/:id/view/detail', method: 'GET', auth: 'required' },
 
   // ── Invitations Core CRUD ───────────────────────────────────────
   { resource: 'invitations', auth: 'required' },

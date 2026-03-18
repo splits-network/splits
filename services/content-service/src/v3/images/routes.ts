@@ -1,5 +1,7 @@
 /**
- * Content Images V3 Routes — list, get, update, delete (admin-only)
+ * Content Images V3 Routes — list, get, update, delete
+ *
+ * Auth is enforced at the gateway level (auth: 'required').
  * POST/upload is multipart and remains in V2.
  */
 
@@ -20,29 +22,15 @@ export function registerImageRoutes(
     supabase: SupabaseClient,
 ) {
     const repository = new ImageRepository(supabase);
-    const service = new ImageService(repository, supabase);
+    const service = new ImageService(repository);
 
     // GET /api/v3/content-images — list
     app.get(
         "/api/v3/content-images",
-        {
-            schema: { querystring: listQuerySchema },
-        },
+        { schema: { querystring: listQuerySchema } },
         async (request, reply) => {
-            const clerkUserId = request.headers["x-clerk-user-id"] as string;
-            if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
-            }
             const result = await service.getAll(
                 request.query as ImageListParams,
-                clerkUserId,
             );
             return reply.send({
                 data: result.data,
@@ -54,23 +42,10 @@ export function registerImageRoutes(
     // GET /api/v3/content-images/:id
     app.get(
         "/api/v3/content-images/:id",
-        {
-            schema: { params: idParamSchema },
-        },
+        { schema: { params: idParamSchema } },
         async (request, reply) => {
-            const clerkUserId = request.headers["x-clerk-user-id"] as string;
-            if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
-            }
             const { id } = request.params as { id: string };
-            const data = await service.getById(id, clerkUserId);
+            const data = await service.getById(id);
             return reply.send({ data });
         },
     );
@@ -78,26 +53,12 @@ export function registerImageRoutes(
     // PATCH /api/v3/content-images/:id
     app.patch(
         "/api/v3/content-images/:id",
-        {
-            schema: { params: idParamSchema, body: updateSchema },
-        },
+        { schema: { params: idParamSchema, body: updateSchema } },
         async (request, reply) => {
-            const clerkUserId = request.headers["x-clerk-user-id"] as string;
-            if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
-            }
             const { id } = request.params as { id: string };
             const data = await service.update(
                 id,
                 request.body as UpdateImageInput,
-                clerkUserId,
             );
             return reply.send({ data });
         },
@@ -106,23 +67,10 @@ export function registerImageRoutes(
     // DELETE /api/v3/content-images/:id
     app.delete(
         "/api/v3/content-images/:id",
-        {
-            schema: { params: idParamSchema },
-        },
+        { schema: { params: idParamSchema } },
         async (request, reply) => {
-            const clerkUserId = request.headers["x-clerk-user-id"] as string;
-            if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
-            }
             const { id } = request.params as { id: string };
-            await service.delete(id, clerkUserId);
+            await service.delete(id);
             return reply.send({
                 data: { message: "Image deleted successfully" },
             });

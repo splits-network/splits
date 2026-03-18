@@ -70,11 +70,6 @@ export interface JobListParams {
   job_owner_filter?: 'all' | 'assigned' | 'saved';
   is_early_access?: boolean;
   is_priority?: boolean;
-  // Internal scoping fields (set by service, not from query params)
-  visible_statuses?: string[];
-  exclude_early_access?: boolean;
-  owner_recruiter_id?: string;
-  scoped_company_ids?: string[];
 }
 
 // ── JSON Schemas ───────────────────────────────────────────────────

@@ -16,6 +16,7 @@ import {
   updateSchema,
   idParamSchema,
 } from './types';
+import { registerMembershipDetailView } from './views/detail.route';
 
 export function registerMembershipRoutes(
   app: FastifyInstance,
@@ -24,6 +25,9 @@ export function registerMembershipRoutes(
 ) {
   const repository = new MembershipRepository(supabase);
   const service = new MembershipService(repository, supabase, eventPublisher);
+
+  // Register views before parameterized CRUD routes
+  registerMembershipDetailView(app, supabase);
 
   // GET /api/v3/memberships — list
   app.get('/api/v3/memberships', {

@@ -6,7 +6,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { EnrichedPlacementRepository } from './enriched.repository';
-import { PlacementScopeFilters } from '../repository';
+import { PlacementScopeFilters } from './scoped-list.repository';
 import { PlacementListParams } from '../types';
 
 export class EnrichedPlacementService {

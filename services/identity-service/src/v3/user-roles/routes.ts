@@ -16,6 +16,7 @@ import {
   updateSchema,
   idParamSchema,
 } from './types';
+import { registerUserRoleDetailView } from './views/detail.route';
 
 export function registerUserRoleRoutes(
   app: FastifyInstance,
@@ -24,6 +25,9 @@ export function registerUserRoleRoutes(
 ) {
   const repository = new UserRoleRepository(supabase);
   const service = new UserRoleService(repository, supabase, eventPublisher);
+
+  // Register views before parameterized CRUD routes
+  registerUserRoleDetailView(app, supabase);
 
   // GET /api/v3/user-roles — list
   app.get('/api/v3/user-roles', {

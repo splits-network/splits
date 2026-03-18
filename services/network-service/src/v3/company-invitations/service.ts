@@ -45,9 +45,10 @@ export class CompanyInvitationService {
     });
 
     if (input.send_email && input.invited_email) {
+      const recruiter = await this.resolveRecruiterInfo(inv.recruiter_id);
       await this.eventPublisher?.publish('company_invitation.created', {
         invitation_id: inv.id, recruiter_id: inv.recruiter_id,
-        recruiter_name: inv.recruiter?.user?.name, recruiter_email: inv.recruiter?.user?.email,
+        recruiter_name: recruiter?.name, recruiter_email: recruiter?.email,
         invited_email: inv.invited_email, company_name_hint: inv.company_name_hint,
         personal_message: inv.personal_message, invite_code: inv.invite_code,
         invite_link_token: inv.invite_link_token, expires_at: inv.expires_at, send_email: true,

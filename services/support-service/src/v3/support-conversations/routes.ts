@@ -27,6 +27,9 @@ import {
     idParamSchema,
     sendMessageSchema,
 } from "./types";
+import { registerLinkSessionAction } from "./actions/link-session.route";
+import { registerConversationClaimAction } from "./actions/claim.route";
+import { registerAdminDetailView } from "./views/admin-detail.route";
 
 export function registerSupportConversationRoutes(
     app: FastifyInstance,
@@ -50,7 +53,11 @@ export function registerSupportConversationRoutes(
         return reply.send({ data: { online } });
     });
 
-    // ── Non-parameterized routes (before :id) ──
+    // ── Views & Actions (before parameterized routes) ──
+
+    registerAdminDetailView(app, supabase);
+    registerLinkSessionAction(app, supabase);
+    registerConversationClaimAction(app, supabase, eventPublisher);
 
     // GET /api/v3/support/conversations/mine — visitor's conversations
     app.get("/api/v3/support/conversations/mine", async (request, reply) => {
@@ -63,7 +70,7 @@ export function registerSupportConversationRoutes(
         return reply.send({ data });
     });
 
-    // POST /api/v3/support/conversations/link-session
+    // POST /api/v3/support/conversations/link-session (backward compat)
     app.post(
         "/api/v3/support/conversations/link-session",
         async (request, reply) => {
@@ -77,8 +84,6 @@ export function registerSupportConversationRoutes(
                 });
             }
 
-            // Only link if both sessionId and clerkUserId are present
-            // Anonymous users will have sessionId but no clerkUserId
             if (ctx.clerkUserId) {
                 await service.linkSession(
                     ctx.sessionId,
@@ -118,13 +123,22 @@ export function registerSupportConversationRoutes(
         },
     );
 
-    // GET /api/v3/support/conversations/:id
+    // GET /api/v3/support/conversations/:id — requires auth
     app.get(
         "/api/v3/support/conversations/:id",
         {
             schema: { params: idParamSchema },
         },
         async (request, reply) => {
+            const clerkUserId = request.headers["x-clerk-user-id"] as string;
+            if (!clerkUserId) {
+                return reply.status(401).send({
+                    error: {
+                        code: "AUTH_REQUIRED",
+                        message: "Authentication required",
+                    },
+                });
+            }
             const { id } = request.params as { id: string };
             const data = await service.getById(id);
             return reply.send({ data });

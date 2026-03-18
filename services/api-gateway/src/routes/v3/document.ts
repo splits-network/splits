@@ -12,6 +12,11 @@ import { requireAuth } from '../../middleware/auth';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 const documentV3Routes: V3RouteConfig[] = [
+  // ── Views (before parameterized routes) ────────────────────────
+  { path: '/documents/views/friendly-list', method: 'GET', auth: 'required' },
+  { path: '/documents/:id/view/friendly', method: 'GET', auth: 'required' },
+
+  // ── Core CRUD ──────────────────────────────────────────────────
   { path: '/documents', method: 'GET', auth: 'required' },
   { path: '/documents/:id', method: 'GET', auth: 'required' },
   { path: '/documents/:id', method: 'PATCH', auth: 'required' },

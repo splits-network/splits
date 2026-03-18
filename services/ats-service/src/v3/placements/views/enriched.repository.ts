@@ -5,7 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { PlacementListParams } from '../types';
-import { PlacementScopeFilters } from '../repository';
+import { PlacementScopeFilters } from './scoped-list.repository';
 
 const ENRICHED_SELECT = `
   *,

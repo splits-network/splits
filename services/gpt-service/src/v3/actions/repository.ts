@@ -33,13 +33,135 @@ export class GptActionsRepository {
     return data;
   }
 
-  async getApplicationsByCandidate(candidateId: string, includeInactive: boolean = false): Promise<any[]> {
-    let query = this.supabase.from('applications').select('*').eq('candidate_id', candidateId);
-    if (!includeInactive) query = query.not('status', 'in', '("withdrawn","rejected")');
-    query = query.order('created_at', { ascending: false });
+  async getApplicationsByCandidate(
+    candidateId: string,
+    includeInactive: boolean = false,
+    page: number = 1,
+    limit: number = 25,
+  ): Promise<{ data: any[]; total: number }> {
+    const offset = (page - 1) * limit;
 
-    const { data, error } = await query;
+    let query = this.supabase
+      .from('applications')
+      .select('*', { count: 'exact' })
+      .eq('candidate_id', candidateId);
+
+    if (!includeInactive) {
+      query = query.not('status', 'in', '("withdrawn","rejected")');
+    }
+
+    query = query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
     if (error) throw error;
-    return data || [];
+    return { data: data || [], total: count || 0 };
+  }
+
+  async checkDuplicateApplication(candidateId: string, jobId: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('applications')
+      .select('*')
+      .eq('candidate_id', candidateId)
+      .eq('job_id', jobId)
+      .not('stage', 'in', '(withdrawn,rejected)')
+      .maybeSingle();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return data;
+  }
+
+  async createApplication(
+    candidateId: string,
+    jobId: string,
+    coverLetter?: string,
+    resumeData?: any,
+    resumeSource?: string,
+  ): Promise<any> {
+    const payload: Record<string, unknown> = {
+      candidate_id: candidateId,
+      job_id: jobId,
+      cover_letter: coverLetter,
+      stage: 'gpt_review',
+    };
+
+    if (resumeData) {
+      payload.resume_data = {
+        ...resumeData,
+        source: resumeSource || 'custom_gpt',
+        created_at: new Date().toISOString(),
+      };
+    }
+
+    const { data, error } = await this.supabase
+      .from('applications')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async acceptProposalForReview(
+    applicationId: string,
+    coverLetter?: string,
+    resumeData?: any,
+    resumeSource?: string,
+  ): Promise<any> {
+    const payload: Record<string, unknown> = {
+      stage: 'gpt_review',
+      cover_letter: coverLetter,
+    };
+
+    if (resumeData) {
+      payload.resume_data = {
+        ...resumeData,
+        source: resumeSource || 'custom_gpt',
+        created_at: new Date().toISOString(),
+      };
+    }
+
+    const { data, error } = await this.supabase
+      .from('applications')
+      .update(payload)
+      .eq('id', applicationId)
+      .eq('stage', 'recruiter_proposed')
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  async savePreScreenAnswers(applicationId: string, answers: any[]): Promise<void> {
+    const { error } = await this.supabase
+      .from('applications')
+      .update({ pre_screen_answers: answers })
+      .eq('id', applicationId);
+
+    if (error) throw error;
+  }
+
+  async getCandidateResume(candidateId: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('documents')
+      .select('*')
+      .eq('entity_type', 'candidate')
+      .eq('entity_id', candidateId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      throw error;
+    }
+    return data;
   }
 }

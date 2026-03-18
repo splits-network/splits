@@ -1,13 +1,9 @@
 /**
- * User Roles V3 Repository — Pure data layer
- *
- * NO role logic. Scope filtering set by service layer.
+ * User Roles V3 Repository — Pure CRUD (flat select('*') only)
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { UserRoleListParams } from './types';
-
-const USER_ROLE_SELECT = '*, users(*), roles!user_roles_role_name_fkey(*)';
 
 export class UserRoleRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -21,7 +17,7 @@ export class UserRoleRepository {
 
     let query = this.supabase
       .from('user_roles')
-      .select(USER_ROLE_SELECT, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .is('deleted_at', null);
 
     if (params.user_id) query = query.eq('user_id', params.user_id);
@@ -39,7 +35,7 @@ export class UserRoleRepository {
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('user_roles')
-      .select(USER_ROLE_SELECT)
+      .select('*')
       .eq('id', id)
       .is('deleted_at', null)
       .maybeSingle();
@@ -52,7 +48,7 @@ export class UserRoleRepository {
     const { data, error } = await this.supabase
       .from('user_roles')
       .insert(record)
-      .select(USER_ROLE_SELECT)
+      .select('*')
       .single();
 
     if (error) throw error;
@@ -64,7 +60,7 @@ export class UserRoleRepository {
       .from('user_roles')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
-      .select(USER_ROLE_SELECT)
+      .select('*')
       .single();
 
     if (error) {

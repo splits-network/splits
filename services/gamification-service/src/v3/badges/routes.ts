@@ -1,5 +1,7 @@
 /**
- * Badges V3 Routes — GET list, GET by id
+ * Badges V3 Routes — Core CRUD (GET list, GET by id) + Views
+ *
+ * Auth is enforced at the gateway level (auth: 'required' for CRUD).
  */
 
 import { FastifyInstance } from "fastify";
@@ -7,31 +9,24 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { BadgeRepository } from "./repository";
 import { BadgeService } from "./service";
 import { BadgeListParams, idParamSchema, listQuerySchema } from "./types";
+import { registerBadgeProgressView } from "./views/progress/route";
 
 export function registerBadgeRoutes(
     app: FastifyInstance,
     supabase: SupabaseClient,
 ) {
     const repository = new BadgeRepository(supabase);
-    const service = new BadgeService(repository, supabase);
+    const service = new BadgeService(repository);
+
+    // Register views first (before :id routes to avoid collision)
+    registerBadgeProgressView(app, supabase);
 
     app.get(
         "/api/v3/badges",
         { schema: { querystring: listQuerySchema } },
         async (request, reply) => {
-            const clerkUserId = request.headers["x-clerk-user-id"] as string;
-            if (!clerkUserId)
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
             const result = await service.getAll(
                 request.query as BadgeListParams,
-                clerkUserId,
             );
             return reply.send({
                 data: result.data,
@@ -44,19 +39,8 @@ export function registerBadgeRoutes(
         "/api/v3/badges/:id",
         { schema: { params: idParamSchema } },
         async (request, reply) => {
-            const clerkUserId = request.headers["x-clerk-user-id"] as string;
-            if (!clerkUserId)
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
             const data = await service.getById(
                 (request.params as { id: string }).id,
-                clerkUserId,
             );
             return reply.send({ data });
         },

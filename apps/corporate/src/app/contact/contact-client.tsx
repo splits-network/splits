@@ -93,7 +93,7 @@ export default function ContactBaselClient() {
                 ? `[${formData.subject}]\n\n${formData.message}`
                 : formData.message;
 
-            const response = await fetch("/api/v2/status-contact", {
+            const response = await fetch("/api/v3/status-contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

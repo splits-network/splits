@@ -12,7 +12,7 @@ export class CompanyCultureTagRepository {
   async findByCompanyId(companyId: string): Promise<any[]> {
     const { data, error } = await this.supabase
       .from('company_culture_tags')
-      .select('*, culture_tag:culture_tags(*)')
+      .select('*')
       .eq('company_id', companyId)
       .order('created_at', { ascending: true });
 
@@ -24,7 +24,7 @@ export class CompanyCultureTagRepository {
     const { data, error } = await this.supabase
       .from('company_culture_tags')
       .upsert(record)
-      .select('*, culture_tag:culture_tags(*)')
+      .select('*')
       .single();
 
     if (error) throw error;
@@ -61,7 +61,7 @@ export class CompanyCultureTagRepository {
     const { data, error } = await this.supabase
       .from('company_culture_tags')
       .insert(rows)
-      .select('*, culture_tag:culture_tags(*)');
+      .select('*');
 
     if (error) throw error;
     return data || [];

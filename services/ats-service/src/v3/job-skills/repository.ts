@@ -16,7 +16,7 @@ export class JobSkillRepository {
 
     const { data, count, error } = await this.supabase
       .from('job_skills')
-      .select('*, skill:skills(id, name, slug)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('job_id', params.job_id)
       .order('created_at', { ascending: true })
       .range(offset, offset + limit - 1);
@@ -29,7 +29,7 @@ export class JobSkillRepository {
     const { data, error } = await this.supabase
       .from('job_skills')
       .upsert({ job_id: jobId, skill_id: skillId, is_required: isRequired })
-      .select('*, skill:skills(id, name, slug)')
+      .select('*')
       .single();
 
     if (error) throw error;

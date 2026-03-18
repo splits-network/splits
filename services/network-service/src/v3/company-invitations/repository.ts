@@ -16,7 +16,6 @@ function generateInviteCode(): string {
   return `SPLITS-${code}`;
 }
 
-const SELECT = '*, recruiter:recruiters!inner(id, user:users!recruiters_user_id_fkey!inner(name, email))';
 const LOOKUP_SELECT = '*, recruiter:recruiters!inner(id, tagline, location, years_experience, industries, specialties, user:users!recruiters_user_id_fkey!inner(name, email, profile_image_url))';
 
 export class CompanyInvitationRepository {
@@ -27,7 +26,7 @@ export class CompanyInvitationRepository {
     const limit = Math.min(params.limit || 25, 100);
     const offset = (page - 1) * limit;
 
-    let query = this.supabase.from('recruiter_company_invitations').select(SELECT, { count: 'exact' });
+    let query = this.supabase.from('recruiter_company_invitations').select('*', { count: 'exact' }).is('deleted_at', null);
     if (scopeFilters?.recruiter_id) query = query.eq('recruiter_id', scopeFilters.recruiter_id);
     if (params.recruiter_id) query = query.eq('recruiter_id', params.recruiter_id);
     if (params.status) query = query.eq('status', params.status);
@@ -47,7 +46,7 @@ export class CompanyInvitationRepository {
   }
 
   async findById(id: string): Promise<any | null> {
-    const { data, error } = await this.supabase.from('recruiter_company_invitations').select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.supabase.from('recruiter_company_invitations').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
     if (error) throw error;
     return data;
   }
@@ -79,20 +78,22 @@ export class CompanyInvitationRepository {
       recruiter_id: recruiterId, invite_code: inviteCode,
       invited_email: data.invited_email?.toLowerCase(), company_name_hint: data.company_name_hint,
       personal_message: data.personal_message, status: 'pending',
-    }).select(SELECT).single();
+    }).select('*').single();
     if (error) throw error;
     return result;
   }
 
   async update(id: string, updates: Record<string, any>): Promise<any> {
     const { data, error } = await this.supabase.from('recruiter_company_invitations')
-      .update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select(SELECT).single();
+      .update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select('*').single();
     if (error) throw error;
     return data;
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.supabase.from('recruiter_company_invitations').delete().eq('id', id);
+    const { error } = await this.supabase.from('recruiter_company_invitations')
+      .update({ deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('id', id);
     if (error) throw error;
   }
 }

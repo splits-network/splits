@@ -5,20 +5,30 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { IEventPublisher } from "../../v2/shared/events";
 import { GptActionsRepository } from "./repository";
 import { GptActionsService } from "./service";
+import { registerSubmitApplicationAction } from "./actions/submit-application.route";
+import { registerAnalyzeResumeAction } from "./actions/analyze-resume.route";
 import {
     JobSearchParams,
+    ApplicationListParams,
     jobSearchQuerySchema,
     jobIdParamSchema,
+    applicationListQuerySchema,
 } from "./types";
 
 export function registerGptActionRoutes(
     app: FastifyInstance,
     supabase: SupabaseClient,
+    eventPublisher?: IEventPublisher,
 ) {
     const repository = new GptActionsRepository(supabase);
     const service = new GptActionsService(repository, supabase);
+
+    // Register action routes BEFORE parameterized routes
+    registerSubmitApplicationAction(app, supabase, eventPublisher);
+    registerAnalyzeResumeAction(app, supabase, eventPublisher);
 
     // GET /api/v3/gpt/jobs/search
     app.get(
@@ -50,8 +60,10 @@ export function registerGptActionRoutes(
         },
     );
 
-    // GET /api/v3/gpt/applications
-    app.get("/api/v3/gpt/applications", async (request, reply) => {
+    // GET /api/v3/gpt/applications — with standard pagination
+    app.get("/api/v3/gpt/applications", {
+        schema: { querystring: applicationListQuerySchema },
+    }, async (request, reply) => {
         const clerkUserId = request.headers["x-clerk-user-id"] as string;
         if (!clerkUserId) {
             return reply
@@ -63,11 +75,11 @@ export function registerGptActionRoutes(
                     },
                 });
         }
-        const query = request.query as { include_inactive?: string };
-        const data = await service.getApplications(
-            clerkUserId,
-            query.include_inactive === "true",
-        );
-        return reply.send({ data });
+        const query = request.query as ApplicationListParams;
+        const result = await service.getApplications(clerkUserId, query);
+        return reply.send({
+            data: result.data,
+            pagination: result.pagination,
+        });
     });
 }

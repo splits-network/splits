@@ -24,6 +24,12 @@ export interface ResumeAnalysisInput {
   resume_text?: string;
 }
 
+export interface ApplicationListParams {
+  page?: number;
+  limit?: number;
+  include_inactive?: string;
+}
+
 export const jobSearchQuerySchema = {
   type: 'object',
   properties: {
@@ -72,4 +78,13 @@ export const resumeAnalysisSchema = {
     resume_text: { type: 'string' },
   },
   additionalProperties: false,
+};
+
+export const applicationListQuerySchema = {
+  type: 'object',
+  properties: {
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+    include_inactive: { type: 'string', enum: ['true', 'false'] },
+  },
 };

@@ -1,5 +1,7 @@
 /**
  * Company Reputation V3 Repository — Pure Data Layer
+ *
+ * Flat select('*') only. NO joins, NO enrichment.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -15,7 +17,8 @@ export class CompanyReputationRepository {
 
     let query = this.supabase
       .from('company_reputation')
-      .select('*, company:companies(id, name)', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .is('deleted_at', null);
 
     if (params.company_id) {
       query = query.eq('company_id', params.company_id);
@@ -34,8 +37,9 @@ export class CompanyReputationRepository {
   async findByCompanyId(companyId: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('company_reputation')
-      .select('*, company:companies(id, name)')
+      .select('*')
       .eq('company_id', companyId)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;

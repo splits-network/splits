@@ -15,7 +15,7 @@ export class FraudSignalRepository {
     const limit = Math.min(params.limit || 25, 100);
     const offset = (page - 1) * limit;
 
-    let query = this.supabase.from('fraud_signals').select('*', { count: 'exact' });
+    let query = this.supabase.from('fraud_signals').select('*', { count: 'exact' }).is('deleted_at', null);
     if (params.recruiter_id) query = query.eq('recruiter_id', params.recruiter_id);
     if (params.candidate_id) query = query.eq('candidate_id', params.candidate_id);
     if (params.severity) query = query.eq('severity', params.severity);
@@ -32,7 +32,7 @@ export class FraudSignalRepository {
   }
 
   async findById(id: string): Promise<any | null> {
-    const { data, error } = await this.supabase.from('fraud_signals').select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.supabase.from('fraud_signals').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
     if (error) throw error;
     return data;
   }
@@ -51,7 +51,8 @@ export class FraudSignalRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.supabase.from('fraud_signals').delete().eq('id', id);
+    const { error } = await this.supabase.from('fraud_signals')
+      .update({ deleted_at: new Date().toISOString() }).eq('id', id);
     if (error) throw error;
   }
 }

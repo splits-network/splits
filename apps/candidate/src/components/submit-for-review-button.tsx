@@ -62,12 +62,12 @@ export default function SubmitForReviewButton({ applicationId, jobTitle }: Submi
                 {isSubmitting ? (
                     <>
                         <span className="loading loading-spinner loading-sm"></span>
-                        Submitting...
+                        Getting AI Review...
                     </>
                 ) : (
                     <>
                         <i className="fa-duotone fa-regular fa-paper-plane"></i>
-                        Submit for Review
+                        Get AI Review
                     </>
                 )}
             </button>

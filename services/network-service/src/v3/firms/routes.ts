@@ -8,6 +8,8 @@ import { IEventPublisher } from '../../v2/shared/events';
 import { FirmRepository } from './repository';
 import { FirmService } from './service';
 import { registerFirmDetailView } from './views/detail.route';
+import { registerFirmListView } from './views/list.route';
+import { registerFirmMembersView } from './views/members.route';
 import {
   FirmListParams, FirmUpdate, CreateFirmInput, FirmMemberListParams,
   CreateFirmInvitationInput, TransferOwnershipInput, PublicFirmListParams,
@@ -121,6 +123,8 @@ export function registerFirmRoutes(
 
   // --- Views (before :id to avoid route collision) ---
 
+  registerFirmListView(app, supabase);
+  registerFirmMembersView(app, supabase);
   registerFirmDetailView(app, supabase);
 
   // --- Core CRUD ---

@@ -8,8 +8,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ApplicationNoteListParams } from './types';
 
-const NOTE_SELECT = '*, created_by:users!created_by_user_id(id, name, email)';
-
 export class ApplicationNoteRepository {
   constructor(private supabase: SupabaseClient) {}
 
@@ -26,7 +24,7 @@ export class ApplicationNoteRepository {
 
     let query = this.supabase
       .from('application_notes')
-      .select(NOTE_SELECT, { count: 'exact' });
+      .select('*', { count: 'exact' });
 
     // Role-based scoping (set by service layer)
     if (scopeFilters?.application_ids) {
@@ -57,7 +55,7 @@ export class ApplicationNoteRepository {
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('application_notes')
-      .select(NOTE_SELECT)
+      .select('*')
       .eq('id', id)
       .maybeSingle();
 
@@ -69,7 +67,7 @@ export class ApplicationNoteRepository {
     const { data, error } = await this.supabase
       .from('application_notes')
       .insert(record)
-      .select(NOTE_SELECT)
+      .select('*')
       .single();
 
     if (error) throw error;
@@ -81,7 +79,7 @@ export class ApplicationNoteRepository {
       .from('application_notes')
       .update(updates)
       .eq('id', id)
-      .select(NOTE_SELECT)
+      .select('*')
       .single();
 
     if (error) {

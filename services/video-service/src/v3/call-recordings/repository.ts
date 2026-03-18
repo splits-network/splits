@@ -23,7 +23,8 @@ export class CallRecordingRepository {
 
     let query = this.supabase
       .from('call_recordings')
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .is('deleted_at', null);
 
     if (params.call_id) query = query.eq('call_id', params.call_id);
     if (params.recording_status) query = query.eq('recording_status', params.recording_status);
@@ -43,6 +44,7 @@ export class CallRecordingRepository {
       .from('call_recordings')
       .select('*')
       .eq('id', id)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;
@@ -82,7 +84,7 @@ export class CallRecordingRepository {
   async delete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from('call_recordings')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;

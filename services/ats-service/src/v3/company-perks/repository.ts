@@ -12,7 +12,7 @@ export class CompanyPerkRepository {
   async findByCompanyId(companyId: string): Promise<any[]> {
     const { data, error } = await this.supabase
       .from('company_perks')
-      .select('*, perk:perks(*)')
+      .select('*')
       .eq('company_id', companyId)
       .order('created_at', { ascending: true });
 
@@ -24,7 +24,7 @@ export class CompanyPerkRepository {
     const { data, error } = await this.supabase
       .from('company_perks')
       .upsert(record)
-      .select('*, perk:perks(*)')
+      .select('*')
       .single();
 
     if (error) throw error;
@@ -61,7 +61,7 @@ export class CompanyPerkRepository {
     const { data, error } = await this.supabase
       .from('company_perks')
       .insert(rows)
-      .select('*, perk:perks(*)');
+      .select('*');
 
     if (error) throw error;
     return data || [];

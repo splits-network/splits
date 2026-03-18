@@ -25,9 +25,6 @@ export default clerkMiddleware(async (auth, request) => {
         pathname.startsWith('/sso-callback') ||
         pathname.startsWith('/accept-invitation') ||
         pathname.startsWith('/firms/invitations') ||
-        pathname.startsWith('/api/v2/jobs') ||
-        pathname.startsWith('/api/v2/recruiters') ||
-        pathname.startsWith('/api/v2/status-contact') ||
         pathname.startsWith('/api/v3/');
 
     if (isPublicEndpoint) {
@@ -56,7 +53,6 @@ export const config = {
         //'/join(.*)', // Join platform (handled conditionally in page)
 
         // API routes (authentication handled conditionally in middleware)
-        '/api/v2/(.*)', // V2 routes (internal proxies still at v2 path)
         '/api/v3/(.*)', // V3 routes
 
         '/api/notifications/(.*)', // V1 notification APIs

@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CandidateSkillRepository } from './repository';
 import { CandidateSkillService } from './service';
+import { registerWithDetailsView } from './views/with-details.route';
 import {
   CreateCandidateSkillInput,
   BulkReplaceCandidateSkillsInput,
@@ -19,6 +20,9 @@ import {
 export function registerCandidateSkillRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CandidateSkillRepository(supabase);
   const service = new CandidateSkillService(repository, supabase);
+
+  // Register views before parameterized routes
+  registerWithDetailsView(app, supabase);
 
   // GET /api/v3/candidate-skills?candidate_id=
   app.get('/api/v3/candidate-skills', {

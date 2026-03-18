@@ -1,13 +1,9 @@
 /**
- * Invitations V3 Repository — Pure data layer
- *
- * NO role logic. Scope filtering set by service layer.
+ * Invitations V3 Repository — Pure CRUD (flat select('*') only)
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { InvitationListParams } from './types';
-
-const INVITATION_SELECT = '*, organizations(*), companies(*)';
 
 export class InvitationRepository {
   constructor(private supabase: SupabaseClient) {}
@@ -21,7 +17,7 @@ export class InvitationRepository {
 
     let query = this.supabase
       .from('invitations')
-      .select(INVITATION_SELECT, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .is('deleted_at', null);
 
     if (params.organization_id) query = query.eq('organization_id', params.organization_id);
@@ -47,7 +43,7 @@ export class InvitationRepository {
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('invitations')
-      .select(INVITATION_SELECT)
+      .select('*')
       .eq('id', id)
       .is('deleted_at', null)
       .maybeSingle();
@@ -60,7 +56,7 @@ export class InvitationRepository {
     const { data, error } = await this.supabase
       .from('invitations')
       .insert(record)
-      .select(INVITATION_SELECT)
+      .select('*')
       .single();
 
     if (error) throw error;
@@ -72,7 +68,7 @@ export class InvitationRepository {
       .from('invitations')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
-      .select(INVITATION_SELECT)
+      .select('*')
       .single();
 
     if (error) {

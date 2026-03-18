@@ -190,8 +190,8 @@ export default function ActionsToolbar({
 
     // Get submit button label based on stage
     const getSubmitLabel = () => {
-        if (stage === "draft") return "Submit for Review";
-        if (stage === "ai_failed") return "Resubmit for Review";
+        if (stage === "draft") return "Get AI Review";
+        if (stage === "ai_failed") return "Retry AI Review";
         if (stage === "ai_reviewed") return "Submit";
         return "Submit";
     };

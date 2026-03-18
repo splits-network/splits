@@ -21,6 +21,7 @@ export class CompanyInvitationDetailRepository {
       .from('recruiter_company_invitations')
       .select(DETAIL_SELECT)
       .eq('id', id)
+      .is('deleted_at', null)
       .maybeSingle();
 
     if (error) throw error;

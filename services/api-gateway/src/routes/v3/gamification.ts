@@ -13,9 +13,10 @@ const gamificationV3Routes: V3RouteConfig[] = [
   // ── Badges (views before CRUD to avoid :id collision) ──────────
   { path: '/badges/awards/batch', method: 'GET', auth: 'optional' },
   { path: '/badges/awards', method: 'GET', auth: 'optional' },
-  { path: '/badges/progress', method: 'GET', auth: 'optional' },
-  { path: '/badges', method: 'GET', auth: 'optional' },
-  { path: '/badges/:id', method: 'GET', auth: 'optional' },
+  { path: '/badges/views/progress', method: 'GET', auth: 'none' },
+  { path: '/badges/progress', method: 'GET', auth: 'none' },
+  { path: '/badges', method: 'GET', auth: 'required' },
+  { path: '/badges/:id', method: 'GET', auth: 'required' },
 
   // ── XP (views before CRUD to avoid :id collision) ──────────────
   { path: '/xp/levels/batch', method: 'GET', auth: 'optional' },
@@ -28,10 +29,15 @@ const gamificationV3Routes: V3RouteConfig[] = [
   { path: '/streaks', method: 'GET', auth: 'required' },
   { path: '/streaks/:id', method: 'GET', auth: 'required' },
 
-  // ── Leaderboards (rank before :id to avoid collision) ─────────
-  { path: '/leaderboards/rank', method: 'GET', auth: 'optional' },
-  { path: '/leaderboards', method: 'GET', auth: 'optional' },
-  { path: '/leaderboards/:id', method: 'GET', auth: 'optional' },
+  // ── Leaderboard Views (public, no auth) ────────────────────────
+  { path: '/leaderboards/views/public-listing/rank', method: 'GET', auth: 'none' },
+  { path: '/leaderboards/views/public-listing', method: 'GET', auth: 'none' },
+  { path: '/leaderboards/:id/view/public-listing', method: 'GET', auth: 'none' },
+
+  // ── Leaderboard Legacy (public, no auth — backward compat) ────
+  { path: '/leaderboards/rank', method: 'GET', auth: 'none' },
+  { path: '/leaderboards', method: 'GET', auth: 'none' },
+  { path: '/leaderboards/:id', method: 'GET', auth: 'none' },
 ];
 
 export function registerGamificationV3Routes(app: FastifyInstance, services: ServiceRegistry) {

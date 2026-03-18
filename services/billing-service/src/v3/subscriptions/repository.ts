@@ -54,7 +54,7 @@ export class SubscriptionRepository {
   async findByUserId(userId: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('subscriptions')
-      .select('*, plan:plans(*)')
+      .select('*')
       .eq('user_id', userId)
       .eq('status', 'active')
       .order('created_at', { ascending: false })

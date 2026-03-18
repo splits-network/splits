@@ -14,14 +14,6 @@ interface ScopeFilters {
 export class RecruiterCandidateRepository {
   constructor(private supabase: SupabaseClient) {}
 
-  private buildSelectClause(): string {
-    return [
-      '*',
-      'candidate:candidates!candidate_id!inner(id, user_id, email, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))',
-      'recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users!recruiters_user_id_fkey(name, email))',
-    ].join(',');
-  }
-
   async findAll(
     params: RecruiterCandidateListParams,
     scopeFilters?: ScopeFilters
@@ -33,7 +25,7 @@ export class RecruiterCandidateRepository {
 
     let query = this.supabase
       .from('recruiter_candidates')
-      .select(this.buildSelectClause(), { count: 'exact' });
+      .select('*', { count: 'exact' });
 
     if (scopeFilters?.recruiter_id) query = query.eq('recruiter_id', scopeFilters.recruiter_id);
     if (scopeFilters?.candidate_id) query = query.eq('candidate_id', scopeFilters.candidate_id);

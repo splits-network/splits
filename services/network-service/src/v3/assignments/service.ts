@@ -22,18 +22,15 @@ export class AssignmentService {
 
   async getAll(params: AssignmentListParams, clerkUserId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
-    const scopeFilters: { recruiter_id?: string; organization_ids?: string[] } = {};
 
+    // Scope by recruiter_id for non-admin users
     if (context.recruiterId) {
-      scopeFilters.recruiter_id = context.recruiterId;
+      params = { ...params, recruiter_id: params.recruiter_id || context.recruiterId };
     } else if (!context.isPlatformAdmin) {
-      if (context.organizationIds.length === 0) {
-        return this.emptyPage(params);
-      }
-      scopeFilters.organization_ids = context.organizationIds;
+      return this.emptyPage(params);
     }
 
-    const { data, total } = await this.repository.findAll(params, scopeFilters);
+    const { data, total } = await this.repository.findAll(params);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
     return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
