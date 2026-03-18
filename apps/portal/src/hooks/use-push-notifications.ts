@@ -75,7 +75,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
             const pushSubscription =
                 await swRegistrationRef.current.pushManager.subscribe({
                     userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
                 });
 
             setPermission(Notification.permission as PushPermission);
