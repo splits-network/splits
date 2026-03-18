@@ -43,7 +43,7 @@ export class CandidateSkillRepository {
 
   async bulkReplace(
     candidateId: string,
-    skills: Array<{ skill_id: string; proficiency_level?: string }>
+    skills: Array<{ skill_id: string }>
   ): Promise<any[]> {
     const { error: deleteError } = await this.supabase
       .from('candidate_skills')
@@ -56,7 +56,6 @@ export class CandidateSkillRepository {
     const rows = skills.map(s => ({
       candidate_id: candidateId,
       skill_id: s.skill_id,
-      proficiency_level: s.proficiency_level || null,
     }));
 
     const { data, error } = await this.supabase
