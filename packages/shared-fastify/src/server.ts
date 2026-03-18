@@ -44,7 +44,10 @@ export async function buildServer(
 
     // Register Helmet for security headers
     if (useHelmet) {
-        await app.register(helmet as any);
+        await app.register(helmet as any, {
+            crossOriginResourcePolicy: { policy: 'cross-origin' },
+            crossOriginEmbedderPolicy: false,
+        });
     }
 
     // Note: Health check endpoint should be registered by each service
