@@ -17,8 +17,8 @@ export function registerPushRoutes(
   const repository = new PushSubscriptionRepository(supabase);
   const service = new PushSubscriptionService(repository, supabase);
 
-  // GET /api/v3/push/vapid-key — public, no auth needed
-  app.get('/api/v3/push/vapid-key', async (_request, reply) => {
+  // GET /api/v3/public/push/vapid-key — public, no auth needed
+  app.get('/api/v3/public/push/vapid-key', async (_request, reply) => {
     const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
     if (!vapidPublicKey) {
       return reply.status(503).send({

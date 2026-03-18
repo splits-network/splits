@@ -10,6 +10,7 @@ import {
     InAppNotification,
 } from "@/lib/notifications";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { PushPermissionBanner } from "@/components/notifications/push-permission-banner";
 
 export default function NotificationBell() {
     const router = useRouter();
@@ -192,6 +193,9 @@ export default function NotificationBell() {
                         </Link>
                     </div>
                 </div>
+
+                {/* Push notification opt-in banner */}
+                <PushPermissionBanner />
 
                 {/* Notification List */}
                 <div className="max-h-96 overflow-y-auto">

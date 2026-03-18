@@ -31,7 +31,7 @@ const notificationV3Routes: V3RouteConfig[] = [
   { path: '/notification-preferences/:category', method: 'PATCH', auth: 'required' },
 
   // ── Push Notifications ─────────────────────────────────────────
-  { path: '/push/vapid-key', method: 'GET', auth: 'optional' },
+  { path: '/public/push/vapid-key', method: 'GET', auth: 'none' },
   { path: '/push/subscriptions/actions/unsubscribe', method: 'POST', auth: 'required' },
   { path: '/push/subscriptions', method: 'POST', auth: 'required' },
   { path: '/push/subscriptions', method: 'GET', auth: 'required' },
