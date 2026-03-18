@@ -158,6 +158,8 @@ export default async function RootLayout({
                     />
                     <JsonLd data={webAppJsonLd} id="splits-webapp-jsonld" />
 
+                    <link rel="manifest" href="/manifest.json" />
+
                     {/* Preconnect to critical origins for faster API/auth requests */}
                     <link rel="preconnect" href="https://api.splits.network" />
                     <link

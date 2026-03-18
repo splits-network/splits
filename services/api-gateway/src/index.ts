@@ -511,8 +511,10 @@ async function main() {
         }
 
         // Skip auth for call magic-link token exchange (video app uses magic links without Clerk auth)
-        // V3: should use /api/v3/public/calls/exchange-token
-        if (request.method === 'POST' && request.url.startsWith('/api/v2/calls/exchange-token')) {
+        if (request.method === 'POST' && (
+            request.url.startsWith('/api/v2/calls/exchange-token') ||
+            request.url.startsWith('/api/v3/calls/exchange-token')
+        )) {
             return;
         }
 

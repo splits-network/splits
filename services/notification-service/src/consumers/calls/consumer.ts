@@ -181,6 +181,13 @@ export class CallsEventConsumer {
                     source,
                     userId: contact.userId,
                 });
+
+                await this.inAppService.notifyCancellation(contact.userId, {
+                    callId,
+                    title: payload.title,
+                    cancelledByName,
+                    reason: payload.cancelReason,
+                });
             }
 
             this.logger.info(
@@ -228,6 +235,13 @@ export class CallsEventConsumer {
                     joinUrl,
                     source,
                     userId: contact.userId,
+                });
+
+                await this.inAppService.notifyReschedule(contact.userId, {
+                    callId,
+                    title: payload.title,
+                    newDateTime,
+                    isCandidate,
                 });
             }
 
@@ -277,6 +291,13 @@ export class CallsEventConsumer {
                     entityContext,
                     source,
                     userId: contact.userId,
+                });
+
+                await this.inAppService.notifyRecordingReady(contact.userId, {
+                    callId,
+                    title: payload.title,
+                    callDate,
+                    isCandidate,
                 });
             }
 
@@ -540,6 +561,17 @@ export class CallsEventConsumer {
                 source,
                 userId: contact.userId,
             });
+
+            // In-app notification for scheduled calls (excluding creator)
+            if (contact.userId !== payload.createdBy) {
+                await this.inAppService.notifyScheduledCall(contact.userId, {
+                    callId,
+                    title: payload.title,
+                    scheduledAt: payload.scheduledAt!,
+                    participantNames: allNames.filter(n => n !== contact.name),
+                    isCandidate,
+                });
+            }
         }
 
         this.logger.info(

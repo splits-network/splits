@@ -40,6 +40,40 @@ export class CallInAppNotificationService {
         return `${this.portalUrl}/portal/calls/${callId}`;
     }
 
+    // ─── Scheduled Call (persistent toast with Join button) ──────────────
+
+    async notifyScheduledCall(
+        userId: string,
+        data: {
+            callId: string;
+            title?: string;
+            scheduledAt: string;
+            participantNames: string[];
+            isCandidate?: boolean;
+        },
+    ): Promise<void> {
+        const title = data.title || `Call with ${data.participantNames.join(', ')}`;
+        const baseUrl = this.getBaseUrl(data.isCandidate || false);
+        const joinUrl = `${baseUrl}/portal/calls/${data.callId}/join`;
+
+        await this.createInAppNotification({
+            userId,
+            subject: `Call scheduled: ${title}`,
+            eventType: 'call.scheduled',
+            priority: 'high',
+            category: 'calls',
+            payload: {
+                callId: data.callId,
+                title,
+                scheduledAt: data.scheduledAt,
+                participantNames: data.participantNames,
+                toastType: 'scheduled_call',
+            },
+            actionUrl: joinUrl,
+            actionLabel: 'View Call',
+        });
+    }
+
     // ─── Starting Soon (5-min reminder, high priority toast) ─────────────
 
     async notifyStartingSoon(
@@ -257,6 +291,20 @@ export class CallInAppNotificationService {
         notification: InAppCallNotification,
     ): Promise<void> {
         try {
+            // Check user preferences before creating in-app notification
+            const effectiveChannel = await this.repository.resolveChannelWithPreferences(
+                notification.userId,
+                'in_app',
+                notification.category || null,
+            );
+            if (!effectiveChannel) {
+                this.logger.debug(
+                    { userId: notification.userId, eventType: notification.eventType },
+                    'In-app notification skipped — user preference disabled',
+                );
+                return;
+            }
+
             await this.repository.createNotificationLog({
                 event_type: notification.eventType,
                 recipient_user_id: notification.userId,

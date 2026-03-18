@@ -24,7 +24,7 @@ export function adaptCallToCallContext(call: CallDetail): CallContext {
             avatar_url: p.user.avatar_url,
         })),
         job: jobLink
-            ? { id: jobLink.entity_id, title: call.title || 'Call', company_name: '' }
+            ? { id: jobLink.entity_id, title: jobLink.name || call.title || 'Call', company_name: jobLink.subtitle || '' }
             : { id: '', title: call.title || 'Video Call', company_name: '' },
     };
 }

@@ -96,23 +96,34 @@ export class CallService {
             ai_analysis_enabled: input.ai_analysis_enabled ?? false,
         });
 
-        // Insert participants (ensure creator is always included as host)
+        // Insert participants (resolve Clerk IDs to internal UUIDs)
         const participants = input.participants || [];
-        const creatorIncluded = participants.some(
+
+        // Resolve all participant user IDs (may be Clerk IDs or UUIDs)
+        const resolvedParticipants: { user_id: string; role: string }[] = [];
+        for (const p of participants) {
+            const resolved = await this.repository.resolveUserId(p.user_id);
+            if (resolved) {
+                resolvedParticipants.push({ user_id: resolved, role: p.role });
+            }
+        }
+
+        // Ensure creator is always included as host
+        const creatorIncluded = resolvedParticipants.some(
             (p) => p.user_id === resolvedUserId,
         );
-        const allParticipants = creatorIncluded
-            ? participants
-            : [
-                  { user_id: resolvedUserId, role: "host" as const },
-                  ...participants,
-              ];
+        if (!creatorIncluded) {
+            resolvedParticipants.unshift({
+                user_id: resolvedUserId,
+                role: "host",
+            });
+        }
 
-        if (allParticipants.length > 0) {
+        if (resolvedParticipants.length > 0) {
             const { error: pErr } = await this.supabase
                 .from("call_participants")
                 .insert(
-                    allParticipants.map((p) => ({
+                    resolvedParticipants.map((p) => ({
                         call_id: call.id,
                         user_id: p.user_id,
                         role: p.role,
@@ -156,6 +167,15 @@ export class CallService {
                 title: call.title,
                 created_by: resolvedUserId,
                 scheduled_at: call.scheduled_at,
+                agenda: input.agenda || null,
+                participants: resolvedParticipants.map((p) => ({
+                    user_id: p.user_id,
+                    role: p.role,
+                })),
+                entity_links: (input.entity_links || []).map((el) => ({
+                    entity_type: el.entity_type,
+                    entity_id: el.entity_id,
+                })),
             },
             "call-service",
         );

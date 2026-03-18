@@ -70,4 +70,42 @@ export class PreferenceGate {
             return effectiveChannel;
         }
     }
+
+    /**
+     * Check if push notifications are enabled for a user + category.
+     * Independent of the email/in_app channel resolution chain.
+     *
+     * @returns true if push should be sent, false to skip
+     */
+    async isPushEnabled(
+        recipientUserId: string | null | undefined,
+        notificationCategory: string | null | undefined,
+    ): Promise<boolean> {
+        if (!recipientUserId || !notificationCategory) return true;
+
+        const prefCategory = resolvePreferenceCategory(notificationCategory);
+        if (!prefCategory) return true;
+
+        // Unsubscribable categories always send
+        if (PREFERENCE_CATEGORIES[prefCategory].unsubscribable) return true;
+
+        try {
+            const { data } = await this.supabase
+                .from('notification_preferences')
+                .select('push_enabled')
+                .eq('user_id', recipientUserId)
+                .eq('category', prefCategory)
+                .maybeSingle();
+
+            // Missing row = enabled (opt-out model)
+            return data?.push_enabled ?? true;
+        } catch (error) {
+            // Fail open
+            this.logger.error(
+                { recipientUserId, error: error instanceof Error ? error.message : String(error) },
+                'Push preference check failed — allowing push (fail-open)',
+            );
+            return true;
+        }
+    }
 }

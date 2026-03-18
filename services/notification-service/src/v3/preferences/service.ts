@@ -67,6 +67,7 @@ export class PreferenceService {
         icon: config.icon,
         email_enabled: pref?.email_enabled ?? true,
         in_app_enabled: pref?.in_app_enabled ?? true,
+        push_enabled: pref?.push_enabled ?? true,
         unsubscribable: config.unsubscribable,
         email_entitled: emailEntitled,
       };
@@ -99,6 +100,7 @@ export class PreferenceService {
       icon: config.icon,
       email_enabled: saved.email_enabled,
       in_app_enabled: saved.in_app_enabled,
+      push_enabled: saved.push_enabled,
       unsubscribable: config.unsubscribable,
       email_entitled: emailEntitled,
     };
@@ -136,7 +138,7 @@ export class PreferenceService {
   private validateUnsubscribable(category: PreferenceCategory, update: PreferenceUpdateInput): void {
     const config = PREFERENCE_CATEGORIES[category];
     if (config?.unsubscribable) {
-      if (update.email_enabled === false || update.in_app_enabled === false) {
+      if (update.email_enabled === false || update.in_app_enabled === false || update.push_enabled === false) {
         throw new BadRequestError(
           `Cannot disable ${config.label} notifications - they are required`,
         );

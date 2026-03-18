@@ -8,6 +8,7 @@
 export interface PreferenceUpdateInput {
   email_enabled?: boolean;
   in_app_enabled?: boolean;
+  push_enabled?: boolean;
 }
 
 export interface BulkPreferenceUpdateInput {
@@ -15,6 +16,7 @@ export interface BulkPreferenceUpdateInput {
     category: string;
     email_enabled: boolean;
     in_app_enabled: boolean;
+    push_enabled: boolean;
   }>;
 }
 
@@ -25,6 +27,7 @@ export interface EffectivePreference {
   icon: string;
   email_enabled: boolean;
   in_app_enabled: boolean;
+  push_enabled: boolean;
   unsubscribable: boolean;
   email_entitled: boolean;
 }
@@ -53,6 +56,7 @@ export const updateSchema = {
   properties: {
     email_enabled: { type: 'boolean' },
     in_app_enabled: { type: 'boolean' },
+    push_enabled: { type: 'boolean' },
   },
   additionalProperties: false,
 };
@@ -65,11 +69,12 @@ export const bulkUpdateSchema = {
       type: 'array',
       items: {
         type: 'object',
-        required: ['category', 'email_enabled', 'in_app_enabled'],
+        required: ['category', 'email_enabled', 'in_app_enabled', 'push_enabled'],
         properties: {
           category: { type: 'string', minLength: 1 },
           email_enabled: { type: 'boolean' },
           in_app_enabled: { type: 'boolean' },
+          push_enabled: { type: 'boolean' },
         },
         additionalProperties: false,
       },

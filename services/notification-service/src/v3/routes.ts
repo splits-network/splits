@@ -12,6 +12,7 @@ import { registerNotificationRoutes } from './notifications/routes';
 import { registerPreferenceRoutes } from './preferences/routes';
 import { registerTemplateRoutes } from './templates/routes';
 import { registerAdminNotificationRoutes } from './admin-notifications/routes';
+import { registerPushRoutes } from './push/routes';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;
@@ -23,4 +24,5 @@ export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config)
   registerPreferenceRoutes(app, config.supabase);
   registerTemplateRoutes(app, config.supabase, config.eventPublisher);
   registerAdminNotificationRoutes(app, config.supabase, config.eventPublisher);
+  registerPushRoutes(app, config.supabase);
 }

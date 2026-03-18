@@ -1,0 +1,16 @@
+{
+  "name": "Splits Network",
+  "short_name": "Splits",
+  "description": "Split-fee recruiting marketplace",
+  "display": "browser",
+  "start_url": "/portal/dashboard",
+  "theme_color": "#233876",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/splits-icon.png",
+      "sizes": "180x179",
+      "type": "image/png"
+    }
+  ]
+}
