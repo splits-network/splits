@@ -164,6 +164,7 @@ export class ApplicationService {
 
       await this.eventPublisher?.publish('application.stage_changed', {
         application_id: id, old_stage: current.stage, new_stage: input.stage,
+        candidate_id: current.candidate_id, job_id: current.job_id,
         changed_by: context.identityUserId,
       }, 'ats-service');
     }
