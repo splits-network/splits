@@ -6,6 +6,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { IEventPublisher } from '../../v2/shared/events';
 import { DiscountRepository } from './repository';
+import { PlanRepository } from '../plans/repository';
 import { DiscountService } from './service';
 import {
   DiscountValidationRequest,
@@ -19,7 +20,8 @@ export function registerDiscountRoutes(
   eventPublisher?: IEventPublisher
 ) {
   const repository = new DiscountRepository(supabase);
-  const service = new DiscountService(repository, supabase, eventPublisher);
+  const planRepository = new PlanRepository(supabase);
+  const service = new DiscountService(repository, planRepository, supabase, eventPublisher);
 
   // POST /api/v3/discounts/validate — validate a promotion code
   app.post('/api/v3/discounts/validate', {
