@@ -22,13 +22,16 @@ export interface BaselAvatarProps {
 
 /* ─── Size config ────────────────────────────────────────────────────────── */
 
-const sizeConfig: Record<BaselAvatarSize, {
-    box: string;
-    text: string;
-    dot: string;
-    dotBorder: string;
-    dotOffset: string;
-}> = {
+const sizeConfig: Record<
+    BaselAvatarSize,
+    {
+        box: string;
+        text: string;
+        dot: string;
+        dotBorder: string;
+        dotOffset: string;
+    }
+> = {
     xs: {
         box: "w-8 h-8",
         text: "text-xs",
@@ -97,7 +100,7 @@ export function BaselAvatar({
                 <img
                     src={src}
                     alt={alt || initials}
-                    className={`${cfg.box} object-cover border border-base-300`}
+                    className={`${cfg.box} object-contain border border-base-300`}
                 />
             ) : (
                 <div
@@ -109,7 +112,13 @@ export function BaselAvatar({
             {presence && (
                 <span
                     className={`absolute ${cfg.dotOffset} ${cfg.dot} ${cfg.dotBorder} border-base-100 ${presenceColor[presence]}`}
-                    title={presence === "online" ? "Online" : presence === "idle" ? "Away" : "Offline"}
+                    title={
+                        presence === "online"
+                            ? "Online"
+                            : presence === "idle"
+                              ? "Away"
+                              : "Offline"
+                    }
                 />
             )}
         </div>
