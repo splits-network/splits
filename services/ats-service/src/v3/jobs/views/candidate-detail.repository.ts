@@ -15,7 +15,7 @@ export class CandidateDetailRepository {
         id, title, candidate_description, location, department,
         employment_type, commute_types, job_level,
         open_to_relocation, show_salary_range,
-        salary_min, salary_max, status, created_at, updated_at,
+        salary_min, salary_max, pre_screen_questions, status, created_at, updated_at,
         company:companies(id, name, logo_url, industry, headquarters_location, description, website),
         firm:firms(id, name, logo_url)
       `)
