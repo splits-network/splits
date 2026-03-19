@@ -101,7 +101,7 @@ export function PaymentForm({
                 billing_period: billingPeriod,
             });
 
-            const result = response.data.data ?? response.data;
+            const result = response?.data ?? response;
 
             if (result.valid && result.discount) {
                 setAppliedDiscount(result.discount);

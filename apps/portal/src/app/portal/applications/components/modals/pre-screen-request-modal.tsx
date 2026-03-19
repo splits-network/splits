@@ -54,11 +54,12 @@ export default function PreScreenRequestModal({
                 setJobCompanyRecruiter(application.company_recruiter);
             } else {
                 const rcResponse: any = await client.get(
-                    `/recruiter-companies?company_id=${companyId}&status=active`,
+                    `/recruiter-companies/views/list`,
+                    { params: { company_id: companyId, status: "active" } },
                 );
-                const recruiterList = (rcResponse.data || []).map(
-                    (rc: any) => rc.recruiter,
-                );
+                const recruiterList = (rcResponse.data || [])
+                    .map((rc: any) => rc.recruiter)
+                    .filter(Boolean);
                 setCompanyRecruiters(recruiterList);
             }
         } catch (err) {
