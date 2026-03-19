@@ -122,7 +122,14 @@ export class BillingEventConsumer {
             // Acknowledge message
             this.channel.ack(msg);
         } catch (error) {
-            this.logger.error({ err: error, msg: msg.content.toString() }, 'Error handling message');
+            const routingKey = msg.fields.routingKey;
+            let eventSummary: Record<string, unknown> = { routingKey };
+            try {
+                const parsed = JSON.parse(msg.content.toString());
+                eventSummary.event_id = parsed.event_id;
+                eventSummary.event_type = parsed.event_type ?? routingKey;
+            } catch { /* unparseable — log routing key only */ }
+            this.logger.error({ err: error, ...eventSummary }, 'Error handling message');
 
             // Negative acknowledge - requeue for retry
             if (this.channel) {

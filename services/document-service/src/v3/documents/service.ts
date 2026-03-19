@@ -88,7 +88,28 @@ export class DocumentService {
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('Document', id);
 
-    const result = await this.repository.update(id, input);
+    // Merge metadata with existing values; keys set to null are removed
+    const updatePayload: Record<string, any> = {};
+    if (input.document_type !== undefined) updatePayload.document_type = input.document_type;
+    if (input.processing_status !== undefined) updatePayload.processing_status = input.processing_status;
+    if (input.metadata !== undefined) {
+      const merged = { ...(existing.metadata || {}), ...input.metadata };
+      updatePayload.metadata = Object.fromEntries(
+        Object.entries(merged).filter(([_, v]) => v !== null),
+      );
+    }
+
+    // Clear other primary resumes when marking one as primary
+    const markingPrimary =
+      input.metadata?.is_primary_for_candidate === true &&
+      existing.document_type === 'resume' &&
+      existing.entity_type === 'candidate';
+
+    if (markingPrimary) {
+      await this.clearOtherPrimaryResumes(id, existing.entity_id);
+    }
+
+    const result = await this.repository.update(id, updatePayload);
 
     await this.eventPublisher?.publish('document.updated', {
       document_id: id,
@@ -96,7 +117,44 @@ export class DocumentService {
       entity_id: existing.entity_id,
     }, 'document-service');
 
+    if (markingPrimary) {
+      await this.eventPublisher?.publish('resume.primary.changed', {
+        document_id: id,
+        entity_type: existing.entity_type,
+        entity_id: existing.entity_id,
+      }, 'document-service');
+    }
+
     return result;
+  }
+
+  /**
+   * Clear is_primary_for_candidate from all other resumes for a candidate.
+   */
+  private async clearOtherPrimaryResumes(currentDocId: string, candidateId: string) {
+    const { data: resumes } = await this.supabase
+      .from('documents')
+      .select('id, metadata')
+      .eq('entity_type', 'candidate')
+      .eq('entity_id', candidateId)
+      .eq('document_type', 'resume')
+      .is('deleted_at', null)
+      .neq('id', currentDocId);
+
+    if (!resumes?.length) return;
+
+    const updates = resumes
+      .filter((r: any) => r.metadata?.is_primary_for_candidate)
+      .map((r: any) => {
+        const cleaned = { ...r.metadata };
+        delete cleaned.is_primary_for_candidate;
+        return this.supabase
+          .from('documents')
+          .update({ metadata: cleaned, updated_at: new Date().toISOString() })
+          .eq('id', r.id);
+      });
+
+    await Promise.all(updates);
   }
 
   async delete(id: string, clerkUserId: string) {
