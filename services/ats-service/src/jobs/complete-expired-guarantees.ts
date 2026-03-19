@@ -30,10 +30,34 @@ async function main() {
     const endDate = nowIso.slice(0, 10);
 
     const logger: Logger = {
-        info: (obj: any, msg?: string) => console.log(JSON.stringify({ level: 'info', ...obj, msg })),
-        error: (obj: any, msg?: string) => console.error(JSON.stringify({ level: 'error', ...obj, msg })),
-        warn: (obj: any, msg?: string) => console.warn(JSON.stringify({ level: 'warn', ...obj, msg })),
-        debug: (obj: any, msg?: string) => console.log(JSON.stringify({ level: 'debug', ...obj, msg })),
+        info: (msg: string | object, message?: string) => {
+            if (typeof msg === 'string') {
+                console.log(`info: ${msg}`);
+            } else {
+                console.log(`info: ${message || 'info'} ${JSON.stringify(msg)}`);
+            }
+        },
+        error: (msg: string | object, message?: string) => {
+            if (typeof msg === 'string') {
+                console.error(`error: ${msg}`);
+            } else {
+                console.error(`error: ${message || 'error'} ${JSON.stringify(msg)}`);
+            }
+        },
+        warn: (msg: string | object, message?: string) => {
+            if (typeof msg === 'string') {
+                console.warn(`warn: ${msg}`);
+            } else {
+                console.warn(`warn: ${message || 'warn'} ${JSON.stringify(msg)}`);
+            }
+        },
+        debug: (msg: string | object, message?: string) => {
+            if (typeof msg === 'string') {
+                console.log(`debug: ${msg}`);
+            } else {
+                console.log(`debug: ${message || 'debug'} ${JSON.stringify(msg)}`);
+            }
+        }
     } as Logger;
     const eventPublisher = new EventPublisher(rabbitMqUrl, logger);
     await eventPublisher.connect();

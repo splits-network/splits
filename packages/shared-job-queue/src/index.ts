@@ -45,7 +45,24 @@ export class JobQueue<T extends JobData = JobData> {
     private isProcessing = false;
 
     constructor(private config: JobQueueConfig) {
-        this.logger = config.logger || (console as any);
+        this.logger = config.logger || {
+            info: (msg: string | object, message?: string) => {
+                const logMsg = typeof msg === 'string' ? msg : (message || 'info');
+                console.info(logMsg);
+            },
+            error: (msg: string | object, message?: string) => {
+                const logMsg = typeof msg === 'string' ? msg : (message || 'error');
+                console.error(logMsg);
+            },
+            warn: (msg: string | object, message?: string) => {
+                const logMsg = typeof msg === 'string' ? msg : (message || 'warn');
+                console.warn(logMsg);
+            },
+            debug: (msg: string | object, message?: string) => {
+                const logMsg = typeof msg === 'string' ? msg : (message || 'debug');
+                console.log(logMsg);
+            }
+        } as Logger;
     }
 
     /**

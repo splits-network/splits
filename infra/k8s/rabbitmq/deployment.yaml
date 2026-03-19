@@ -4,7 +4,7 @@ metadata:
     name: rabbitmq
     namespace: splits-network
 spec:
-    replicas: ${REPLICAS}
+    replicas: 1
     selector:
         matchLabels:
             app: rabbitmq
@@ -32,10 +32,10 @@ spec:
                   resources:
                       requests:
                           cpu: 200m
-                          memory: 256Mi
+                          memory: 512Mi
                       limits:
-                          cpu: 1000m
-                          memory: 1Gi
+                          cpu: 1500m
+                          memory: 2Gi
                   livenessProbe:
                       exec:
                           command:

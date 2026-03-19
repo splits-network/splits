@@ -38,7 +38,7 @@ spec:
                           command: ["node"]
                           args:
                               [
-                                  "services/billing-service/dist/jobs/finalize-placement-invoices.js",
+                                  "/app/services/billing-service/dist/jobs/finalize-placement-invoices.js",
                               ]
                           env:
                               - name: SUPABASE_URL
