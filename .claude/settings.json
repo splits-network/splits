@@ -66,6 +66,8 @@
             "Write(/.claude/memphis/**/*)",
             "Edit(/.claude/commands/**/*)",
             "Edit(/.claude/memphis/**/*)",
+            "Write(/.memory/**/*)",
+            "Edit(/.memory/**/*)",
             "Bash(ls -la apps/corporate/src/app/landing/*)",
             "Bash(find apps/corporate/src/app/landing -name \"*.tsx\")",
             "Bash(npx tsc:*)"
@@ -79,6 +81,16 @@
                     {
                         "type": "command",
                         "command": "node .claude/hooks/gsd-check-update.js"
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash .claude/hooks/memory-checkpoint.sh"
                     }
                 ]
             }

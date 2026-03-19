@@ -38,6 +38,17 @@ export class OrganizationRepository {
     return { data: data || [], total: count || 0 };
   }
 
+  async findBySlug(slug: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('organizations')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  }
+
   async findById(id: string): Promise<any | null> {
     const { data, error } = await this.supabase
       .from('organizations')

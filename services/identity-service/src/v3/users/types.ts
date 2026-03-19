@@ -29,6 +29,7 @@ export interface UpdateUserInput {
   onboarding_status?: string;
   onboarding_step?: number;
   onboarding_completed_at?: string;
+  onboarding_metadata?: Record<string, unknown>;
 }
 
 export interface RegisterUserInput {
@@ -95,6 +96,7 @@ export const updateSchema = {
     onboarding_status: { type: 'string' },
     onboarding_step: { type: 'integer', minimum: 1 },
     onboarding_completed_at: { type: 'string' },
+    onboarding_metadata: { type: 'object' },
   },
   additionalProperties: false,
 };

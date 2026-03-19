@@ -32,7 +32,11 @@ export class InvitationService {
 
     if (!context.isPlatformAdmin) {
       if (params.organization_id) {
-        this.requireCompanyAdminOrPlatformAdmin(context, params.organization_id);
+        // Any member of the organization can list invitations (read-only).
+        // Write operations (create, update, delete) still require company_admin.
+        if (!context.organizationIds.includes(params.organization_id)) {
+          throw new ForbiddenError('You do not have access to this organization');
+        }
       } else {
         throw new ForbiddenError('Platform admin permissions required');
       }

@@ -29,6 +29,7 @@ const SCOPES = [
 interface TeamTabProps {
     organizationId: string;
     companyId: string;
+    isCompanyAdmin?: boolean;
 }
 
 function getRolePillColor(role: string): "error" | "success" | "primary" {
@@ -53,7 +54,7 @@ function getRoleLabel(role: string): string {
     }
 }
 
-export function TeamTab({ organizationId, companyId }: TeamTabProps) {
+export function TeamTab({ organizationId, companyId, isCompanyAdmin = false }: TeamTabProps) {
     const auth = useAuth();
     const { getToken } = auth;
     const toast = useToast();
@@ -222,77 +223,79 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                 Invite colleagues and manage team access.
             </p>
 
-            {/* ── Invite New Member ──────────────────────────────────────── */}
-            <div className="bg-base-200 border border-base-300 p-6 mb-8">
-                <h3 className="font-bold mb-4">Invite Team Member</h3>
-                <form onSubmit={handleInvite}>
-                    <div className="grid md:grid-cols-2 gap-6 mb-6">
-                        <BaselFormField label="Email Address" required>
-                            <input
-                                type="email"
-                                value={inviteEmail}
-                                onChange={(e) => setInviteEmail(e.target.value)}
-                                placeholder="colleague@example.com"
-                                className="input input-bordered w-full"
-                                required
-                                disabled={inviting}
-                            />
-                        </BaselFormField>
+            {/* ── Invite New Member (admin only) ────────────────────────── */}
+            {isCompanyAdmin && (
+                <div className="bg-base-200 border border-base-300 p-6 mb-8">
+                    <h3 className="font-bold mb-4">Invite Team Member</h3>
+                    <form onSubmit={handleInvite}>
+                        <div className="grid md:grid-cols-2 gap-6 mb-6">
+                            <BaselFormField label="Email Address" required>
+                                <input
+                                    type="email"
+                                    value={inviteEmail}
+                                    onChange={(e) => setInviteEmail(e.target.value)}
+                                    placeholder="colleague@example.com"
+                                    className="input input-bordered w-full"
+                                    required
+                                    disabled={inviting}
+                                />
+                            </BaselFormField>
 
-                        <BaselFormField label="Role">
-                            <select
-                                value={inviteRole}
-                                onChange={(e) => setInviteRole(e.target.value)}
-                                className="select w-full"
-                                disabled={inviting}
+                            <BaselFormField label="Role">
+                                <select
+                                    value={inviteRole}
+                                    onChange={(e) => setInviteRole(e.target.value)}
+                                    className="select w-full"
+                                    disabled={inviting}
+                                >
+                                    {ROLES.map((r) => (
+                                        <option key={r.value} value={r.value}>
+                                            {r.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </BaselFormField>
+
+                            <BaselFormField
+                                label="Access Scope"
+                                hint={
+                                    inviteScope === "company"
+                                        ? "User will only see this company's data"
+                                        : "User will see all companies in the organization"
+                                }
                             >
-                                {ROLES.map((r) => (
-                                    <option key={r.value} value={r.value}>
-                                        {r.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </BaselFormField>
+                                <select
+                                    value={inviteScope}
+                                    onChange={(e) => setInviteScope(e.target.value)}
+                                    className="select w-full"
+                                    disabled={inviting}
+                                >
+                                    {SCOPES.map((s) => (
+                                        <option key={s.value} value={s.value}>
+                                            {s.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </BaselFormField>
+                        </div>
 
-                        <BaselFormField
-                            label="Access Scope"
-                            hint={
-                                inviteScope === "company"
-                                    ? "User will only see this company's data"
-                                    : "User will see all companies in the organization"
-                            }
-                        >
-                            <select
-                                value={inviteScope}
-                                onChange={(e) => setInviteScope(e.target.value)}
-                                className="select w-full"
-                                disabled={inviting}
+                        <div className="flex justify-end">
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={inviting || !inviteEmail.trim()}
                             >
-                                {SCOPES.map((s) => (
-                                    <option key={s.value} value={s.value}>
-                                        {s.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </BaselFormField>
-                    </div>
-
-                    <div className="flex justify-end">
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={inviting || !inviteEmail.trim()}
-                        >
-                            <ButtonLoading
-                                loading={inviting}
-                                text="Send Invitation"
-                                loadingText="Sending..."
-                                icon="fa-duotone fa-regular fa-paper-plane"
-                            />
-                        </button>
-                    </div>
-                </form>
-            </div>
+                                <ButtonLoading
+                                    loading={inviting}
+                                    text="Send Invitation"
+                                    loadingText="Sending..."
+                                    icon="fa-duotone fa-regular fa-paper-plane"
+                                />
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
             {/* ── Pending Invitations ────────────────────────────────────── */}
             {pendingInvitations.length > 0 && (
@@ -341,17 +344,19 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                                             ? "Company"
                                             : "Org"}
                                     </span>
-                                    <button
-                                        className="btn btn-xs btn-ghost text-error"
-                                        onClick={() =>
-                                            handleRevokeInvitation(
-                                                invitation.id,
-                                                invitation.email,
-                                            )
-                                        }
-                                    >
-                                        <i className="fa-duotone fa-regular fa-ban" />
-                                    </button>
+                                    {isCompanyAdmin && (
+                                        <button
+                                            className="btn btn-xs btn-ghost text-error"
+                                            onClick={() =>
+                                                handleRevokeInvitation(
+                                                    invitation.id,
+                                                    invitation.email,
+                                                )
+                                            }
+                                        >
+                                            <i className="fa-duotone fa-regular fa-ban" />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -402,7 +407,7 @@ export function TeamTab({ organizationId, companyId }: TeamTabProps) {
                                         member.created_at,
                                     ).toLocaleDateString()}
                                 </span>
-                                {member.role_name !== "company_admin" && (
+                                {isCompanyAdmin && member.role_name !== "company_admin" && (
                                     <button
                                         className="btn btn-xs btn-ghost text-error"
                                         onClick={() =>

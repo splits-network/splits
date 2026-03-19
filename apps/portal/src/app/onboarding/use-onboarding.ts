@@ -75,15 +75,31 @@ export function useOnboarding(): UseOnboardingReturn {
 
                 const client = createAuthenticatedClient(token);
 
-                // Single call — creates user if missing, returns existing otherwise
-                const initResponse = await client.post<{
-                    data: { user: any };
-                }>("/onboarding/init", {
-                    email: user.primaryEmailAddress?.emailAddress || "",
-                    name: user.fullName || user.firstName || "",
-                    image_url: user.imageUrl,
-                    source_app: "portal",
-                });
+                // Single call — creates user if missing, returns existing otherwise.
+                // Retry once on network/CORS failures (transient pod restarts).
+                let initResponse: { data: { user: any } } | null = null;
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    try {
+                        initResponse = await client.post<{
+                            data: { user: any };
+                        }>("/onboarding/init", {
+                            email: user.primaryEmailAddress?.emailAddress || "",
+                            name: user.fullName || user.firstName || "",
+                            image_url: user.imageUrl,
+                            source_app: "portal",
+                        });
+                        break;
+                    } catch (err: any) {
+                        // Retry only on network failures (no status = fetch failed / CORS)
+                        if (attempt === 0 && !err.status) {
+                            await new Promise((r) => setTimeout(r, 1500));
+                            continue;
+                        }
+                        throw err;
+                    }
+                }
+
+                if (!initResponse) throw new Error("Failed to initialize onboarding");
 
                 const data = initResponse?.data?.user ?? null;
 
@@ -232,37 +248,61 @@ export function useOnboarding(): UseOnboardingReturn {
     // ── Actions ────────────────────────────────────────────────────────────
     const actions: OnboardingActions = {
         setStep: async (step: number) => {
-            setState((prev) => ({
-                ...prev,
-                currentStep: step,
-                status:
-                    prev.status === "pending" && step > 1
-                        ? "in_progress"
-                        : prev.status,
-            }));
+            setState((prev) => {
+                const next = {
+                    ...prev,
+                    currentStep: step,
+                    status:
+                        prev.status === "pending" && step > 1
+                            ? ("in_progress" as const)
+                            : prev.status,
+                };
+                stateRef.current = next;
+                return next;
+            });
             await persistState();
         },
 
         setRole: (role: UserRole) => {
-            setState((prev) => ({ ...prev, selectedRole: role }));
+            setState((prev) => {
+                const next = { ...prev, selectedRole: role };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setSelectedPlan: (plan: SelectedPlan | null) => {
-            setState((prev) => ({ ...prev, selectedPlan: plan }));
+            setState((prev) => {
+                const next = { ...prev, selectedPlan: plan };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setStripePaymentInfo: (info: StripePaymentInfo | null) => {
-            setState((prev) => ({ ...prev, stripePaymentInfo: info }));
+            setState((prev) => {
+                const next = { ...prev, stripePaymentInfo: info };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setRecruiterProfile: (
             profile: OnboardingState["recruiterProfile"],
         ) => {
-            setState((prev) => ({ ...prev, recruiterProfile: profile }));
+            setState((prev) => {
+                const next = { ...prev, recruiterProfile: profile };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setCompanyInfo: (info: OnboardingState["companyInfo"]) => {
-            setState((prev) => ({ ...prev, companyInfo: info }));
+            setState((prev) => {
+                const next = { ...prev, companyInfo: info };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         submitOnboarding: async () => {

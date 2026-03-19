@@ -50,6 +50,10 @@ export class OrganizationService {
     if (!input.name?.trim()) throw new BadRequestError('Organization name is required');
     if (!input.slug?.trim()) throw new BadRequestError('Organization slug is required');
 
+    // Check slug uniqueness before insert
+    const existing = await this.repository.findBySlug(input.slug);
+    if (existing) throw new BadRequestError(`Organization slug "${input.slug}" is already taken`);
+
     const now = new Date().toISOString();
     const record = {
       name: input.name,

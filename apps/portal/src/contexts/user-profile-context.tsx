@@ -243,7 +243,16 @@ export function UserProfileProvider({
 
                 const profileData = await getCurrentUserProfile(getToken);
                 setProfile(profileData as UserProfile | null);
-            } catch (err) {
+            } catch (err: any) {
+                // 404 means user hasn't been created yet (new signup, pre-onboarding).
+                // Treat as "no profile" rather than an error so the onboarding flow
+                // can proceed without showing an error screen.
+                if (err?.status === 404) {
+                    setProfile(null);
+                    if (!opts?.silent) setIsLoading(false);
+                    return;
+                }
+
                 console.error("Failed to fetch user profile:", err);
                 // Only surface errors when not silently refreshing
                 if (!opts?.silent) {

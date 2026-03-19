@@ -5,7 +5,7 @@
  * Stripe Elements payment form for collecting card details
  */
 
-import { useState, FormEvent, useEffect, useCallback } from "react";
+import { useState, FormEvent } from "react";
 import {
     PaymentElement,
     useStripe,
@@ -84,62 +84,45 @@ export function PaymentForm({
     );
     const [discountError, setDiscountError] = useState<string | null>(null);
 
-    // Debounced discount validation (300ms)
-    const validateDiscountCode = useCallback(
-        async (code: string) => {
-            if (!code.trim() || !planId) return;
+    const applyDiscountCode = async () => {
+        if (!discountCode.trim() || !planId) return;
 
-            setDiscountValidating(true);
-            setDiscountError(null);
+        setDiscountValidating(true);
+        setDiscountError(null);
 
-            try {
-                const token = await getToken();
-                if (!token) return;
+        try {
+            const token = await getToken();
+            if (!token) return;
 
-                const client = createAuthenticatedClient(token);
-                const response = await client.post("/discounts/validate", {
-                    code: code.trim(),
-                    plan_id: planId,
-                    billing_period: billingPeriod,
-                });
+            const client = createAuthenticatedClient(token);
+            const response = await client.post("/discounts/validate", {
+                code: discountCode.trim(),
+                plan_id: planId,
+                billing_period: billingPeriod,
+            });
 
-                if (response.data.valid && response.data.discount) {
-                    setAppliedDiscount(response.data.discount);
-                    onDiscountApplied?.(response.data.discount);
-                    setDiscountError(null);
-                } else {
-                    setAppliedDiscount(null);
-                    setDiscountError(
-                        response.data.error?.message || "Invalid discount code",
-                    );
-                }
-            } catch (err: any) {
-                console.error("Discount validation failed:", err);
-                setAppliedDiscount(null);
-                setDiscountError(
-                    "Unable to validate discount code. Please try again.",
-                );
-            } finally {
-                setDiscountValidating(false);
-            }
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [planId, billingPeriod, onDiscountApplied],
-    );
+            const result = response.data.data ?? response.data;
 
-    // Debounced validation effect
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (discountCode.trim()) {
-                validateDiscountCode(discountCode);
+            if (result.valid && result.discount) {
+                setAppliedDiscount(result.discount);
+                onDiscountApplied?.(result.discount);
+                setDiscountError(null);
             } else {
                 setAppliedDiscount(null);
-                setDiscountError(null);
+                setDiscountError(
+                    result.error?.message || "Invalid discount code",
+                );
             }
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [discountCode, validateDiscountCode]);
+        } catch (err: any) {
+            console.error("Discount validation failed:", err);
+            setAppliedDiscount(null);
+            setDiscountError(
+                "Unable to validate discount code. Please try again.",
+            );
+        } finally {
+            setDiscountValidating(false);
+        }
+    };
 
     const removeDiscount = () => {
         setDiscountCode("");
@@ -227,26 +210,40 @@ export function PaymentForm({
                             <legend className="fieldset-legend">
                                 Discount Code (Optional)
                             </legend>
-                            <div className="relative">
+                            <div className="flex gap-2">
                                 <input
                                     type="text"
-                                    className="input w-full"
+                                    className="input flex-1"
                                     value={discountCode}
                                     onChange={(e) =>
                                         setDiscountCode(e.target.value)
                                     }
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            applyDiscountCode();
+                                        }
+                                    }}
                                     placeholder="Enter discount code"
+                                    disabled={processing || isProcessing}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm h-auto"
+                                    onClick={applyDiscountCode}
                                     disabled={
+                                        !discountCode.trim() ||
                                         discountValidating ||
                                         processing ||
                                         isProcessing
                                     }
-                                />
-                                {discountValidating && (
-                                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                >
+                                    {discountValidating ? (
                                         <span className="loading loading-spinner loading-sm"></span>
-                                    </div>
-                                )}
+                                    ) : (
+                                        "Apply"
+                                    )}
+                                </button>
                             </div>
                             {discountError && (
                                 <div className="alert alert-info mt-2">
