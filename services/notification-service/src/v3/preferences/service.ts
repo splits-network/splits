@@ -47,7 +47,7 @@ export class PreferenceService {
     const [saved, hasEmailEntitlement, isRecruiter] = await Promise.all([
       this.repository.findByUserId(userId),
       this.entitlementChecker
-        .hasEntitlement(clerkUserId, 'email_notifications')
+        .hasEntitlement(userId, 'email_notifications')
         .catch(() => true),
       this.isRecruiterUser(userId),
     ]);
@@ -87,7 +87,7 @@ export class PreferenceService {
     const config = PREFERENCE_CATEGORIES[category as PreferenceCategory];
     const [hasEmailEntitlement, isRecruiter] = await Promise.all([
       this.entitlementChecker
-        .hasEntitlement(clerkUserId, 'email_notifications')
+        .hasEntitlement(userId, 'email_notifications')
         .catch(() => true),
       this.isRecruiterUser(userId),
     ]);

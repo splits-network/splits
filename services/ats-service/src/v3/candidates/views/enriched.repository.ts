@@ -11,6 +11,7 @@ import { CandidateListParams } from '../types';
 interface ScopeFilters {
   candidate_ids?: string[];
   user_id?: string;
+  exclude_hidden_marketplace?: boolean;
 }
 
 export class CandidateEnrichedRepository {
@@ -43,6 +44,12 @@ export class CandidateEnrichedRepository {
     }
     if (scopeFilters?.user_id) {
       query = query.eq('user_id', scopeFilters.user_id);
+    }
+
+    // Marketplace visibility — hidden candidates must not appear in browse listings.
+    // This is a hard filter, not client-controlled.
+    if (scopeFilters?.exclude_hidden_marketplace) {
+      query = query.neq('marketplace_visibility', 'hidden');
     }
 
     // User-supplied filters
