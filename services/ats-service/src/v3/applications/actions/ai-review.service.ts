@@ -92,7 +92,7 @@ export class AIReviewService {
 
         await this.eventPublisher?.publish('application.returned_to_draft', {
             application_id: id, from_stage: application.stage,
-            updatedBy: context.identityUserId,
+            updated_by: context.identityUserId,
         }, 'ats-service');
 
         return updated;
