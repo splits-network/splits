@@ -38,7 +38,7 @@ spec:
                           command: ["node"]
                           args:
                               [
-                                  "services/ats-service/dist/jobs/complete-expired-guarantees.js",
+                                  "/app/services/ats-service/dist/jobs/complete-expired-guarantees.js",
                               ]
                           env:
                               - name: SUPABASE_URL
