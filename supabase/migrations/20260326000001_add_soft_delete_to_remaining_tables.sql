@@ -2,7 +2,7 @@
 -- Date: 2026-03-18
 -- Description: Adds deleted_at column for soft delete support
 --   to recruiter_reputation, recruiter_company_invitations, automation_rules,
---   fraud_signals, subscription_discounts, and company_reputation.
+--   fraud_signals, subscription_discounts, and company_reputation (if exists).
 --   call_recordings already has deleted_at and is skipped.
 --
 -- ROLLBACK:
@@ -38,7 +38,13 @@ ALTER TABLE subscription_discounts ADD COLUMN IF NOT EXISTS deleted_at timestamp
 CREATE INDEX IF NOT EXISTS idx_subscription_discounts_not_deleted
     ON subscription_discounts(deleted_at) WHERE deleted_at IS NULL;
 
--- 6. company_reputation
-ALTER TABLE company_reputation ADD COLUMN IF NOT EXISTS deleted_at timestamptz DEFAULT NULL;
-CREATE INDEX IF NOT EXISTS idx_company_reputation_not_deleted
-    ON company_reputation(deleted_at) WHERE deleted_at IS NULL;
+-- 6. company_reputation (conditional — table may not exist in all environments)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'company_reputation') THEN
+        ALTER TABLE company_reputation ADD COLUMN IF NOT EXISTS deleted_at timestamptz DEFAULT NULL;
+        CREATE INDEX IF NOT EXISTS idx_company_reputation_not_deleted
+            ON company_reputation(deleted_at) WHERE deleted_at IS NULL;
+    END IF;
+END
+$$;

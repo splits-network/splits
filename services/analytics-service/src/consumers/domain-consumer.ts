@@ -147,9 +147,9 @@ export class DomainEventConsumer {
                 event_type: eventType,
                 entity_type: this.getEntityType(eventType),
                 entity_id: this.getEntityId(data),
-                user_id: data.userId || data.clerkUserId,
-                user_role: data.userRole,
-                organization_id: data.organizationId || data.companyId,
+                user_id: data.user_id || data.changed_by || data.created_by,
+                user_role: data.user_role,
+                organization_id: data.organization_id || data.company_id,
                 metadata: data,
                 created_at: timestamp || new Date(),
             });
@@ -166,19 +166,19 @@ export class DomainEventConsumer {
     private async updateMetrics(eventType: string, data: any): Promise<void> {
         switch (eventType) {
             case 'application.created':
-                await this.incrementHourlyMetric('applications_submitted', data.recruiterId);
+                await this.incrementHourlyMetric('applications_submitted', data.recruiter_id || data.candidate_recruiter_id);
                 break;
 
             case 'placement.completed':
-                await this.incrementHourlyMetric('placements_completed', data.recruiterId);
+                await this.incrementHourlyMetric('placements_completed', data.recruiter_id || data.candidate_recruiter_id);
                 break;
 
             case 'job.created':
-                await this.incrementHourlyMetric('jobs_posted', data.companyId);
+                await this.incrementHourlyMetric('jobs_posted', data.company_id);
                 break;
 
             case 'candidate.verified':
-                await this.incrementHourlyMetric('candidates_verified', data.candidateId);
+                await this.incrementHourlyMetric('candidates_verified', data.candidate_id);
                 break;
 
             // Add more event-to-metric mappings as needed
@@ -194,8 +194,7 @@ export class DomainEventConsumer {
         const now = new Date();
         const timeBucket = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
 
-        // Try to increment existing metric
-        const { data: existing } = await this.supabase
+        const { data: existing, error: selectError } = await this.supabase
             .schema('analytics')
             .from('metrics_hourly')
             .select('id, value')
@@ -205,16 +204,24 @@ export class DomainEventConsumer {
             .eq('dimension_user_id', dimensionId)
             .single();
 
+        if (selectError && selectError.code !== 'PGRST116') {
+            logger.error({ error: selectError, metricType, dimensionId }, 'Failed to query metrics_hourly');
+            throw selectError;
+        }
+
         if (existing) {
-            // Update existing metric
-            await this.supabase
+            const { error: updateError } = await this.supabase
                 .schema('analytics')
                 .from('metrics_hourly')
                 .update({ value: existing.value + 1 })
                 .eq('id', existing.id);
+
+            if (updateError) {
+                logger.error({ error: updateError, metricType, dimensionId }, 'Failed to update metrics_hourly');
+                throw updateError;
+            }
         } else {
-            // Insert new metric
-            await this.supabase
+            const { error: insertError } = await this.supabase
                 .schema('analytics')
                 .from('metrics_hourly')
                 .insert({
@@ -224,6 +231,11 @@ export class DomainEventConsumer {
                     dimension_user_id: dimensionId,
                     value: 1,
                 });
+
+            if (insertError) {
+                logger.error({ error: insertError, metricType, dimensionId }, 'Failed to insert metrics_hourly');
+                throw insertError;
+            }
         }
     }
 
@@ -237,9 +249,9 @@ export class DomainEventConsumer {
             // Identify affected recruiter(s) from event data
             const recruiterIds = new Set<string>();
 
-            if (data.recruiterId) recruiterIds.add(data.recruiterId);
-            if (data.candidateRecruiterId) recruiterIds.add(data.candidateRecruiterId);
-            if (data.companyRecruiterId) recruiterIds.add(data.companyRecruiterId);
+            if (data.recruiter_id) recruiterIds.add(data.recruiter_id);
+            if (data.candidate_recruiter_id) recruiterIds.add(data.candidate_recruiter_id);
+            if (data.company_recruiter_id) recruiterIds.add(data.company_recruiter_id);
 
             // Determine which metrics changed based on event type
             const changedMetrics: string[] = [];
@@ -275,11 +287,11 @@ export class DomainEventConsumer {
     private getEntityId(data: any): string {
         return (
             data.id ||
-            data.applicationId ||
-            data.placementId ||
-            data.jobId ||
-            data.candidateId ||
-            data.recruiterId ||
+            data.application_id ||
+            data.placement_id ||
+            data.job_id ||
+            data.candidate_id ||
+            data.recruiter_id ||
             'unknown'
         );
     }

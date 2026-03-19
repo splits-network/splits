@@ -118,10 +118,10 @@ export class DomainEventConsumer {
       .insert({
         event_type: eventType,
         entity_type: eventType.split('.')[0],
-        entity_id: data.id || data.applicationId || data.placementId || data.jobId || data.candidateId || data.recruiterId || 'unknown',
-        user_id: data.userId || data.clerkUserId,
-        user_role: data.userRole,
-        organization_id: data.organizationId || data.companyId,
+        entity_id: data.id || data.application_id || data.placement_id || data.job_id || data.candidate_id || data.recruiter_id || 'unknown',
+        user_id: data.user_id || data.changed_by || data.created_by,
+        user_role: data.user_role,
+        organization_id: data.organization_id || data.company_id,
         metadata: data,
         created_at: timestamp || new Date(),
       });
@@ -136,13 +136,13 @@ export class DomainEventConsumer {
     const metricType = EVENT_METRIC_MAP[eventType];
     if (!metricType) return;
 
-    const dimensionId = data.recruiterId || data.companyId || data.candidateId;
+    const dimensionId = data.recruiter_id || data.candidate_recruiter_id || data.company_id || data.candidate_id;
     if (!dimensionId) return;
 
     const now = new Date();
     const timeBucket = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
 
-    const { data: existing } = await this.supabase
+    const { data: existing, error: selectError } = await this.supabase
       .schema('analytics')
       .from('metrics_hourly')
       .select('id, value')
@@ -152,14 +152,24 @@ export class DomainEventConsumer {
       .eq('dimension_user_id', dimensionId)
       .single();
 
+    if (selectError && selectError.code !== 'PGRST116') {
+      logger.error({ error: selectError, metricType, dimensionId }, 'Failed to query metrics_hourly');
+      throw selectError;
+    }
+
     if (existing) {
-      await this.supabase
+      const { error: updateError } = await this.supabase
         .schema('analytics')
         .from('metrics_hourly')
         .update({ value: existing.value + 1 })
         .eq('id', existing.id);
+
+      if (updateError) {
+        logger.error({ error: updateError, metricType, dimensionId }, 'Failed to update metrics_hourly');
+        throw updateError;
+      }
     } else {
-      await this.supabase
+      const { error: insertError } = await this.supabase
         .schema('analytics')
         .from('metrics_hourly')
         .insert({
@@ -169,6 +179,11 @@ export class DomainEventConsumer {
           dimension_user_id: dimensionId,
           value: 1,
         });
+
+      if (insertError) {
+        logger.error({ error: insertError, metricType, dimensionId }, 'Failed to insert metrics_hourly');
+        throw insertError;
+      }
     }
   }
 
@@ -176,9 +191,9 @@ export class DomainEventConsumer {
     if (!this.dashboardPublisher) return;
 
     const recruiterIds = new Set<string>();
-    if (data.recruiterId) recruiterIds.add(data.recruiterId);
-    if (data.candidateRecruiterId) recruiterIds.add(data.candidateRecruiterId);
-    if (data.companyRecruiterId) recruiterIds.add(data.companyRecruiterId);
+    if (data.recruiter_id) recruiterIds.add(data.recruiter_id);
+    if (data.candidate_recruiter_id) recruiterIds.add(data.candidate_recruiter_id);
+    if (data.company_recruiter_id) recruiterIds.add(data.company_recruiter_id);
 
     const changedMetrics = this.resolveChangedMetrics(eventType);
 
