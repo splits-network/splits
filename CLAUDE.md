@@ -96,6 +96,17 @@ Design standards: in the root /showcase directory
 | `/promo:create`          | Create social media promo video  |
 | `/promo:record`          | Record HTML animation to MP4     |
 
+## Knowledge Base (`.memory/`)
+
+Shared Obsidian vault at `.memory/` — the relational knowledge base for decisions, patterns, hindsight, and project context. Both human and AI read/write here.
+
+### Context Management Rules
+1. **Offload early** — When you discover something reusable (a pattern, gotcha, decision rationale), write it to `.memory/` immediately. Don't hold it in conversation context hoping to use it later.
+2. **Read on demand** — Instead of keeping all project knowledge in context, read specific `.memory/` files when you need them. The index files (`decisions/index.md`, `patterns/index.md`, etc.) tell you what exists.
+3. **Write hindsight** — After completing non-trivial work (3+ files changed, new feature, bug fix that required investigation), write a hindsight note to `.memory/hindsight/` with: what happened, what was harder than expected, what you'd do differently, and `[[wikilinks]]` to related notes.
+4. **Update, don't duplicate** — Before creating a new note, check if one exists that should be updated instead.
+5. **Link everything** — Use `[[wikilinks]]` to connect related knowledge. A decision should link to the patterns it creates. A hindsight should link to the decision it reflects on.
+
 ## Guidance Documents
 
 Key standards in `docs/guidance/`:
