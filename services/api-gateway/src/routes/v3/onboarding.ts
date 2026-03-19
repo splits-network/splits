@@ -351,6 +351,9 @@ export function registerOnboardingV3Routes(
         }
 
         // Step 2: Create recruiter profile
+        const locationArray = body.profile.location || [];
+        const locationString = Array.isArray(locationArray) ? locationArray.join(', ') : locationArray;
+
         const recruiterResponse = await networkService().post<any>(
           '/api/v3/recruiters',
           {
@@ -359,7 +362,7 @@ export function registerOnboardingV3Routes(
             phone: body.profile.phone,
             industries: body.profile.industries || [],
             specialties: body.profile.specialties || [],
-            location: body.profile.location || [],
+            location: locationString || null,
             tagline: body.profile.tagline || null,
             years_experience: body.profile.years_experience || null,
           },

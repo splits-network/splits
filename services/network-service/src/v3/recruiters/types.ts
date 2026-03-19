@@ -35,9 +35,9 @@ export interface CreateRecruiterInput {
   bio?: string;
   phone?: string;
   industries?: string[];
-  specialization?: string;
+  specialties?: string[];
   location?: string;
-  taglines?: string[];
+  tagline?: string;
   years_experience?: number;
   status?: string;
   name?: string;
@@ -73,9 +73,9 @@ export const createSchema = {
     bio: { type: 'string' },
     phone: { type: 'string' },
     industries: { type: 'array', items: { type: 'string' } },
-    specialization: { type: 'string' },
+    specialties: { type: 'array', items: { type: 'string' } },
     location: { type: 'string' },
-    taglines: { type: 'array', items: { type: 'string' } },
+    tagline: { type: 'string' },
     years_experience: { type: 'integer', minimum: 0 },
     status: { type: 'string' },
     name: { type: 'string' },
