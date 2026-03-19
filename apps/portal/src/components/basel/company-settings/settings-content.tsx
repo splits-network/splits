@@ -69,7 +69,7 @@ export default function BaselSettingsContent({
     organizationId,
 }: SettingsContentProps) {
     const { getToken } = useAuth();
-    const { profile, isLoading, isCompanyUser } = useUserProfile();
+    const { profile, isLoading, isCompanyUser, hasRole } = useUserProfile();
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
@@ -200,6 +200,7 @@ export default function BaselSettingsContent({
                             <TeamTab
                                 organizationId={resolvedOrgId}
                                 companyId={companyId}
+                                isCompanyAdmin={hasRole("company_admin")}
                             />
                         )}
 
