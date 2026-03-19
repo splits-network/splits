@@ -232,37 +232,61 @@ export function useOnboarding(): UseOnboardingReturn {
     // ── Actions ────────────────────────────────────────────────────────────
     const actions: OnboardingActions = {
         setStep: async (step: number) => {
-            setState((prev) => ({
-                ...prev,
-                currentStep: step,
-                status:
-                    prev.status === "pending" && step > 1
-                        ? "in_progress"
-                        : prev.status,
-            }));
+            setState((prev) => {
+                const next = {
+                    ...prev,
+                    currentStep: step,
+                    status:
+                        prev.status === "pending" && step > 1
+                            ? ("in_progress" as const)
+                            : prev.status,
+                };
+                stateRef.current = next;
+                return next;
+            });
             await persistState();
         },
 
         setRole: (role: UserRole) => {
-            setState((prev) => ({ ...prev, selectedRole: role }));
+            setState((prev) => {
+                const next = { ...prev, selectedRole: role };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setSelectedPlan: (plan: SelectedPlan | null) => {
-            setState((prev) => ({ ...prev, selectedPlan: plan }));
+            setState((prev) => {
+                const next = { ...prev, selectedPlan: plan };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setStripePaymentInfo: (info: StripePaymentInfo | null) => {
-            setState((prev) => ({ ...prev, stripePaymentInfo: info }));
+            setState((prev) => {
+                const next = { ...prev, stripePaymentInfo: info };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setRecruiterProfile: (
             profile: OnboardingState["recruiterProfile"],
         ) => {
-            setState((prev) => ({ ...prev, recruiterProfile: profile }));
+            setState((prev) => {
+                const next = { ...prev, recruiterProfile: profile };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         setCompanyInfo: (info: OnboardingState["companyInfo"]) => {
-            setState((prev) => ({ ...prev, companyInfo: info }));
+            setState((prev) => {
+                const next = { ...prev, companyInfo: info };
+                stateRef.current = next;
+                return next;
+            });
         },
 
         submitOnboarding: async () => {

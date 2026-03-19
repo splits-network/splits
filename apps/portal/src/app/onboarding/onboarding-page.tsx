@@ -181,6 +181,13 @@ export function OnboardingPage() {
                                     actions={actions}
                                 />
                             )}
+                        {state.currentStep === 3 &&
+                            !state.selectedRole && (
+                                <RoleStep
+                                    selectedRole={state.selectedRole}
+                                    actions={actions}
+                                />
+                            )}
                         {state.currentStep === 4 && (
                             <ReviewStep state={state} actions={actions} />
                         )}
