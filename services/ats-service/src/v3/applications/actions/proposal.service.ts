@@ -127,7 +127,8 @@ export class ProposalService {
 
     await this.eventPublisher?.publish('application.proposal_accepted', {
       application_id: id, candidate_id: application.candidate_id,
-      job_id: application.job_id, accepted_by: context.identityUserId,
+      job_id: application.job_id, candidate_recruiter_id: application.candidate_recruiter_id,
+      accepted_by: context.identityUserId,
     }, 'ats-service');
 
     return updated;

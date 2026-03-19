@@ -82,7 +82,8 @@ export class CompanySourcerService {
     if (!updated) throw new NotFoundError('CompanySourcer', id);
 
     await this.eventPublisher?.publish('company_sourcer.updated', {
-      id, updated_fields: Object.keys(updates), updated_by: context.identityUserId,
+      sourcer_id: id, company_id: existing.company_id,
+      updated_fields: Object.keys(updates), updated_by: context.identityUserId,
     }, 'ats-service');
 
     return updated;

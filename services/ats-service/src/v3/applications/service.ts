@@ -106,7 +106,12 @@ export class ApplicationService {
 
     await this.eventPublisher?.publish('application.created', {
       application_id: application.id, job_id: input.job_id,
-      candidate_id: candidateId, stage: initialStage,
+      candidate_id: candidateId,
+      candidate_recruiter_id: candidateRecruiterId || null,
+      company_recruiter_id: companyRecruiterId || null,
+      application_source: applicationSource,
+      has_recruiter: hasRecruiter,
+      stage: initialStage,
       created_by: context.identityUserId,
     }, 'ats-service');
 
@@ -165,6 +170,7 @@ export class ApplicationService {
       await this.eventPublisher?.publish('application.stage_changed', {
         application_id: id, old_stage: current.stage, new_stage: input.stage,
         candidate_id: current.candidate_id, job_id: current.job_id,
+        candidate_recruiter_id: current.candidate_recruiter_id,
         changed_by: context.identityUserId,
       }, 'ats-service');
     }

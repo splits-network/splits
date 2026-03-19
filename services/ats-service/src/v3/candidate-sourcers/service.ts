@@ -98,7 +98,8 @@ export class CandidateSourcerService {
     if (!updated) throw new NotFoundError('CandidateSourcer', id);
 
     await this.eventPublisher?.publish('candidate_sourcer.updated', {
-      id, updated_fields: Object.keys(updates), updated_by: context.identityUserId,
+      sourcer_id: id, candidate_id: existing.candidate_id,
+      updated_fields: Object.keys(updates), updated_by: context.identityUserId,
     }, 'ats-service');
 
     return updated;
