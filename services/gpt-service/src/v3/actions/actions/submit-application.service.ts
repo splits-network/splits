@@ -154,7 +154,12 @@ export class SubmitApplicationService {
             application_id: application.id,
             candidate_id: token.candidateId,
             job_id: token.jobId,
+            candidate_recruiter_id: null,
+            company_recruiter_id: null,
+            application_source: 'custom_gpt',
+            has_recruiter: false,
             stage: 'gpt_review',
+            created_by: token.clerkUserId,
           });
         }
         await this.eventPublisher.publish('application.stage_changed', {
@@ -163,6 +168,7 @@ export class SubmitApplicationService {
           job_id: token.jobId,
           old_stage: isProposalAcceptance ? 'recruiter_proposed' : 'draft',
           new_stage: 'gpt_review',
+          changed_by: token.clerkUserId,
         });
         await this.eventPublisher.publish('gpt.action.application_submitted', {
           application_id: application.id,

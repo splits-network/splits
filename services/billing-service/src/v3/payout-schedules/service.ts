@@ -91,6 +91,7 @@ export class PayoutScheduleService {
       schedule_id: created.id,
       placement_id: input.placement_id,
       scheduled_date: input.scheduled_date,
+      trigger_event: input.trigger_event,
       created_by: context.identityUserId,
     }, 'billing-service');
 

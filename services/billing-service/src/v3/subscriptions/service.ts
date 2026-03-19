@@ -195,6 +195,7 @@ export class SubscriptionService {
       subscription_id: subscription.id,
       user_id: context.identityUserId,
       plan_id: input.plan_id,
+      created_by: context.identityUserId,
     }, 'billing-service');
 
     return {

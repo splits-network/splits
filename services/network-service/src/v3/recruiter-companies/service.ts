@@ -53,7 +53,8 @@ export class RecruiterCompanyService {
     });
     await this.eventPublisher?.publish('recruiter_company.invited', {
       relationshipId: rel.id, recruiterId: input.recruiter_id, companyId: input.company_id,
-      permissions: rel.permissions, invitedBy: ctx.identityUserId, message: input.message,
+      relationshipType: rel.relationship_type, permissions: rel.permissions,
+      invitedBy: ctx.identityUserId, message: input.message,
     }, 'network-service');
     return rel;
   }
@@ -75,7 +76,8 @@ export class RecruiterCompanyService {
     });
     await this.eventPublisher?.publish('recruiter_company.connection_requested', {
       relationshipId: rel.id, recruiterId: ctx.recruiterId, companyId: input.company_id,
-      requestedBy: ctx.identityUserId, message: input.message,
+      relationshipType: rel.relationship_type, requestedBy: ctx.identityUserId,
+      message: input.message,
     }, 'network-service');
     return rel;
   }

@@ -56,10 +56,22 @@ export class SplitCalculator {
     const transactionsToCreate = this.buildTransactions(createdSplits);
     const createdTransactions = await this.repository.createTransactionsBatch(transactionsToCreate);
 
+    const totalPaidOut = createdSplits.reduce((sum: number, s: any) => sum + (s.split_amount || 0), 0);
+    const platformRemainder = snapshot.total_placement_fee - totalPaidOut;
+
     await this.eventPublisher?.publish('placement.splits_created', {
       placementId,
       splitCount: createdSplits.length,
       transactionCount: createdTransactions.length,
+      totalPaidOut,
+      platformRemainder,
+      roleTiers: {
+        candidate_recruiter: snapshot.candidate_recruiter_tier,
+        company_recruiter: snapshot.company_recruiter_tier,
+        job_owner: snapshot.job_owner_tier,
+        candidate_sourcer: snapshot.candidate_sourcer_tier,
+        company_sourcer: snapshot.company_sourcer_tier,
+      },
     }, 'billing-service');
 
     return { splits: createdSplits, transactions: createdTransactions };
