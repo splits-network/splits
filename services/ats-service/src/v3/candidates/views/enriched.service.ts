@@ -26,10 +26,10 @@ export class CandidateEnrichedService {
 
   async getAll(params: CandidateListParams, clerkUserId: string) {
     const context = await this.accessResolver.resolve(clerkUserId);
-    const scopeFilters: { candidate_ids?: string[]; user_id?: string } = {};
+    const scopeFilters: { candidate_ids?: string[]; user_id?: string; exclude_hidden_marketplace?: boolean } = {};
 
     if (context.isPlatformAdmin) {
-      // Admins see all
+      // Admins see all — including hidden
     } else if (context.candidateId && !context.recruiterId) {
       scopeFilters.user_id = context.identityUserId || undefined;
     } else if (context.recruiterId) {
@@ -42,6 +42,9 @@ export class CandidateEnrichedService {
         const ids = await this.crudRepository.getSavedCandidateIds(context.recruiterId);
         if (ids.length === 0) return this.emptyPage(params);
         scopeFilters.candidate_ids = ids;
+      } else {
+        // Browsing all candidates — exclude hidden from marketplace
+        scopeFilters.exclude_hidden_marketplace = true;
       }
     } else if (context.organizationIds.length > 0) {
       const scope = params.scope || 'all';
@@ -50,6 +53,9 @@ export class CandidateEnrichedService {
         const ids = await this.crudRepository.getCompanyCandidateIds(context.companyIds);
         if (ids.length === 0) return this.emptyPage(params);
         scopeFilters.candidate_ids = ids;
+      } else {
+        // Browsing all candidates — exclude hidden from marketplace
+        scopeFilters.exclude_hidden_marketplace = true;
       }
     } else {
       return this.emptyPage(params);
