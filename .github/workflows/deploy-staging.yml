@@ -466,7 +466,7 @@ jobs:
 
             - name: Deploy backend services
               run: |
-                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service matching-service analytics-service chat-gateway analytics-gateway chat-service support-service support-gateway gpt-service content-service integration-service health-monitor gamification-service video-service call-service admin-gateway onboarding-service outbox-service"
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service matching-service search-service analytics-service chat-gateway analytics-gateway chat-service support-service support-gateway gpt-service content-service integration-service health-monitor gamification-service video-service call-service admin-gateway onboarding-service outbox-service"
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl annotate deployment "$svc" kubectl.kubernetes.io/last-applied-configuration- --namespace=${{ env.NAMESPACE }} || true
@@ -491,6 +491,7 @@ jobs:
                   kubectl rollout status deployment/document-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/ai-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/matching-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/search-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/document-processing-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/analytics-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/chat-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
