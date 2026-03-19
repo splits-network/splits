@@ -110,12 +110,19 @@ export class DomainEventConsumer {
 
                 } catch (error) {
                     const errorDetails = error instanceof Error
-                        ? { message: error.message, stack: error.stack }
-                        : { error: String(error) };
+                        ? { err_message: error.message, stack: error.stack }
+                        : { err_message: String(error) };
+
+                    let eventSummary: Record<string, unknown> = { routingKey: msg.fields.routingKey };
+                    try {
+                        const parsed = JSON.parse(msg.content.toString());
+                        eventSummary.event_id = parsed.event_id;
+                        eventSummary.event_type = parsed.event_type ?? msg.fields.routingKey;
+                    } catch { /* unparseable — log routing key only */ }
 
                     this.logger.error({
                         ...errorDetails,
-                        message: msg.content.toString()
+                        ...eventSummary,
                     }, 'Error processing event');
 
                     // Negative acknowledge - requeue the message
