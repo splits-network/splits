@@ -187,16 +187,21 @@ export function ProfileSettingsShell() {
         if (!candidateId || Object.keys(pendingChangesRef.current).length === 0)
             return;
 
+        const changesToSave = { ...pendingChangesRef.current };
+        pendingChangesRef.current = {};
         setSaving(true);
         try {
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            const changesToSave = { ...pendingChangesRef.current };
-            pendingChangesRef.current = {};
             await client.patch(`/candidates/${candidateId}`, changesToSave);
             toast.success("Profile updated.");
         } catch (err) {
+            // Restore failed changes so they can be retried
+            pendingChangesRef.current = {
+                ...changesToSave,
+                ...pendingChangesRef.current,
+            };
             console.error("Failed to save:", err);
             toast.error("Changes couldn't be saved. Try again.");
         } finally {

@@ -185,12 +185,19 @@ export class CandidateService {
     }
 
     const updates: Record<string, any> = {};
-    if (input.full_name !== undefined) updates.full_name = input.full_name;
-    if (input.email !== undefined) updates.email = input.email;
-    if (input.phone !== undefined) updates.phone = input.phone;
-    if (input.location !== undefined) updates.location = input.location;
-    if (input.verification_status !== undefined) updates.verification_status = input.verification_status;
-    if (input.verification_metadata !== undefined) updates.verification_metadata = input.verification_metadata;
+    const passthrough: (keyof UpdateCandidateInput)[] = [
+      'full_name', 'email', 'phone', 'location',
+      'verification_status', 'verification_metadata',
+      'current_title', 'current_company',
+      'linkedin_url', 'github_url', 'portfolio_url', 'bio',
+      'marketplace_profile', 'marketplace_visibility',
+      'show_email', 'show_phone', 'show_location', 'show_current_company',
+      'show_salary_expectations', 'desired_salary_min', 'desired_salary_max',
+      'desired_job_type', 'open_to_remote', 'open_to_relocation', 'availability',
+    ];
+    for (const key of passthrough) {
+      if (input[key] !== undefined) updates[key] = input[key];
+    }
 
     if (Object.keys(updates).length === 0) return existing;
 

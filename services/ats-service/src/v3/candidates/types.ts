@@ -17,6 +17,25 @@ export interface UpdateCandidateInput {
   location?: string;
   verification_status?: string;
   verification_metadata?: Record<string, any>;
+  current_title?: string;
+  current_company?: string;
+  linkedin_url?: string;
+  github_url?: string;
+  portfolio_url?: string;
+  bio?: string;
+  marketplace_profile?: Record<string, any>;
+  marketplace_visibility?: 'public' | 'limited' | 'hidden';
+  show_email?: boolean;
+  show_phone?: boolean;
+  show_location?: boolean;
+  show_current_company?: boolean;
+  show_salary_expectations?: boolean;
+  desired_salary_min?: number;
+  desired_salary_max?: number;
+  desired_job_type?: string;
+  open_to_remote?: boolean;
+  open_to_relocation?: boolean;
+  availability?: string;
 }
 
 export interface CandidateListParams {
@@ -71,6 +90,25 @@ export const updateSchema = {
     location: { type: 'string', maxLength: 255 },
     verification_status: { type: 'string' },
     verification_metadata: { type: 'object' },
+    current_title: { type: 'string', maxLength: 255 },
+    current_company: { type: 'string', maxLength: 255 },
+    linkedin_url: { type: 'string', maxLength: 500 },
+    github_url: { type: 'string', maxLength: 500 },
+    portfolio_url: { type: 'string', maxLength: 500 },
+    bio: { type: 'string', maxLength: 5000 },
+    marketplace_profile: { type: 'object' },
+    marketplace_visibility: { type: 'string', enum: ['public', 'limited', 'hidden'] },
+    show_email: { type: 'boolean' },
+    show_phone: { type: 'boolean' },
+    show_location: { type: 'boolean' },
+    show_current_company: { type: 'boolean' },
+    show_salary_expectations: { type: 'boolean' },
+    desired_salary_min: { type: 'number', minimum: 0 },
+    desired_salary_max: { type: 'number', minimum: 0 },
+    desired_job_type: { type: 'string', maxLength: 50 },
+    open_to_remote: { type: 'boolean' },
+    open_to_relocation: { type: 'boolean' },
+    availability: { type: 'string', maxLength: 50 },
   },
   additionalProperties: false,
 };
