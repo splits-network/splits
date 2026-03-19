@@ -469,6 +469,7 @@ jobs:
                   kubectl apply -f infra/k8s/document-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/ai-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/matching-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/search-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/document-processing-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/analytics-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/chat-gateway/ --namespace=splits-network
@@ -500,6 +501,7 @@ jobs:
                   kubectl rollout status deployment/document-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/ai-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/matching-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/search-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/document-processing-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/analytics-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/chat-gateway --timeout=180s --namespace=splits-network
