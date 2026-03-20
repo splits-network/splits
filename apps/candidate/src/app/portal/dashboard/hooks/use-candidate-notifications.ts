@@ -20,7 +20,7 @@ export function useCandidateNotifications() {
             const [messagesResult, notificationsResult] = await Promise.allSettled([
                 client.get('/chat/conversations/views/list-for-user'),
                 client.get('/notifications', {
-                    params: { filters: { unread_only: true }, limit: 100 },
+                    params: { unread_only: true, limit: 100 },
                 }),
             ]);
 

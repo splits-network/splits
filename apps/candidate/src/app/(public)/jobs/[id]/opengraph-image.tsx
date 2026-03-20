@@ -51,9 +51,9 @@ export default async function OgImage({
 
     let job: Job | null = null;
     try {
-        const res = await apiClient.get<{ data: Job }>(`/jobs/${id}`, {
-            params: { include: "company" },
-        });
+        const res = await apiClient.get<{ data: Job }>(
+            `/jobs/${id}/view/candidate-detail`,
+        );
         job = res.data;
     } catch {
         /* fall through to default */

@@ -88,7 +88,7 @@ export default function OwnershipAuditClient() {
             if (params.sort_order)
                 queryParams.set("sort_order", params.sort_order);
 
-            queryParams.set("include", "candidate");
+            // TODO: needs a /candidate-sourcers/views/enriched view for candidate joins
             const response = await apiClient.get(
                 `/candidate-sourcers?${queryParams.toString()}`,
             );

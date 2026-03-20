@@ -28,11 +28,6 @@ export function useOfferReview(applicationId: string) {
                 const client = createAuthenticatedClient(token);
                 const res = await client.get(
                     `/applications/${applicationId}/view/detail`,
-                    {
-                        params: {
-                            include: "recruiter,documents,audit_log",
-                        },
-                    },
                 );
                 const app: Application = res.data;
 

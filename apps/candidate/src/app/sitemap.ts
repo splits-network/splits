@@ -54,7 +54,7 @@ async function fetchJobs(): Promise<{ id: string; updated_at?: string; created_a
     const limit = 50;
 
     while (true) {
-        const response: any = await apiClient.get("/jobs", {
+        const response: any = await apiClient.get("/jobs/views/candidate-listing", {
             params: { page, limit, sort_by: "updated_at", sort_order: "desc" },
         });
         const data = response?.data ?? response ?? [];
@@ -82,12 +82,11 @@ async function fetchRecruiters(): Promise<{ id: string; updated_at?: string; cre
     const limit = 50;
 
     while (true) {
-        const response: any = await apiClient.get("/recruiters", {
+        const response: any = await apiClient.get("/recruiters/views/marketplace-listing", {
             params: {
                 page,
                 limit,
-                include: "user,reputation",
-                filters: { marketplace_enabled: true },
+                marketplace_enabled: true,
             },
         });
         const data = response?.data ?? response ?? [];

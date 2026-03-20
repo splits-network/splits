@@ -103,7 +103,7 @@ export default function ReputationManagementClient() {
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
             if (params.sort_order) queryParams.set('sort_order', params.sort_order);
 
-            queryParams.set('include', 'reputation');
+            // TODO: needs a /recruiters/views/with-reputation view for enriched data
             const response = await apiClient.get(`/recruiters?${queryParams.toString()}`);
             return response;
         },

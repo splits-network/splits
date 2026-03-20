@@ -74,7 +74,7 @@ export default function HireClient({
                 const client = createAuthenticatedClient(token);
 
                 const appRes: any = await client.get(
-                    `/applications/${applicationId}/view/detail?include=recruiter,documents,timeline`,
+                    `/applications/${applicationId}/view/detail`,
                 );
                 const app = appRes.data as Application;
 

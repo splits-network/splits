@@ -90,8 +90,7 @@ export default function ThreadPanel({
         if (applicationId) {
             try {
                 const response: any = await client.get(
-                    `/applications/${applicationId}`,
-                    { params: { include: "job" } },
+                    `/applications/${applicationId}/view/detail`,
                 );
                 const app = response?.data;
                 if (app?.job?.title) {

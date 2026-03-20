@@ -41,7 +41,7 @@ export function useOfferWizard(applicationId: string) {
 
                 const client = createAuthenticatedClient(token);
                 const res = await client.get(
-                    `/applications/${applicationId}/view/detail?include=recruiter,documents,timeline,ai_review`,
+                    `/applications/${applicationId}/view/detail`,
                 );
                 const app: Application = res.data;
 
