@@ -40,6 +40,13 @@ export const STEP_LABELS: Record<StepId, string> = {
     "review": "Review & Submit",
 };
 
+export const STEP_DESCRIPTIONS: Record<StepId, string> = {
+    "find-role": "Search and select the role you want to submit a candidate for.",
+    "select-candidate": "Choose from your represented candidates or search the database.",
+    "build-case": "Write your pitch explaining why this candidate is a strong fit.",
+    "review": "Review all details before submitting your proposal.",
+};
+
 export const STATUS_BADGE_MAP: Record<string, string> = {
     active: "badge-success",
     paused: "badge-warning",

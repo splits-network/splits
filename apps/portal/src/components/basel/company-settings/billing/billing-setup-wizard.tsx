@@ -7,6 +7,7 @@ import {
     BaselFormField,
     BaselAlertBox,
     BaselWizardModal,
+    WizardHelpZone,
 } from "@splits-network/basel-ui";
 import { ModalPortal } from "@splits-network/shared-ui";
 import { BaselPaymentForm } from "./payment-form";
@@ -31,9 +32,9 @@ interface BaselBillingSetupWizardProps {
 type Step = 0 | 1 | 2;
 
 const WIZARD_STEPS = [
-    { label: "Details" },
-    { label: "Payment" },
-    { label: "Done" },
+    { label: "Details", description: "Enter your company's billing email, contact, and mailing address." },
+    { label: "Payment", description: "Add a credit card or bank account for placement fee invoices." },
+    { label: "Done", description: "Review your billing configuration." },
 ];
 
 export function BaselBillingSetupWizard({
@@ -193,6 +194,10 @@ export function BaselBillingSetupWizard({
         }
     };
 
+    const handleStepClick = (index: number) => {
+        if (index === 0) setStep(0 as Step);
+    };
+
     /* ─── Step-specific footer for Step 1 (Details) ──────────────────────── */
     const detailsFooter = step === 0 ? (
         <div className="flex justify-between w-full">
@@ -280,7 +285,8 @@ export function BaselBillingSetupWizard({
             nextLabel="Continue"
             submitLabel="Done"
             footer={detailsFooter || paymentFooter || doneFooter}
-            maxWidth="max-w-2xl"
+            showHelpPanel
+            onStepClick={handleStepClick}
         >
             {loadingProfile && (
                 <div className="flex items-center justify-center py-8">
@@ -308,113 +314,140 @@ export function BaselBillingSetupWizard({
                         Enter your company&apos;s billing information.
                     </p>
 
-                    <BaselFormField label="Billing Email" required>
-                        <input
-                            type="email"
-                            className="input input-bordered w-full"
-                            value={billingEmail}
-                            onChange={(e) => setBillingEmail(e.target.value)}
-                            placeholder="billing@company.com"
-                            required
-                        />
-                    </BaselFormField>
+                    <WizardHelpZone
+                        title="Billing Email"
+                        description="Where placement invoices and billing notifications will be sent."
+                        tips={["Use a shared billing inbox if possible", "This can be different from your account email"]}
+                    >
+                        <BaselFormField label="Billing Email" required>
+                            <input
+                                type="email"
+                                className="input input-bordered w-full"
+                                value={billingEmail}
+                                onChange={(e) => setBillingEmail(e.target.value)}
+                                placeholder="billing@company.com"
+                                required
+                            />
+                        </BaselFormField>
+                    </WizardHelpZone>
 
-                    <BaselFormField label="Billing Contact Name">
-                        <input
-                            type="text"
-                            className="input input-bordered w-full"
-                            value={billingContactName}
-                            onChange={(e) =>
-                                setBillingContactName(e.target.value)
-                            }
-                            placeholder="Jane Smith"
-                        />
-                    </BaselFormField>
-
-                    <BaselFormField label="Payment Terms" required>
-                        <select
-                            className="select w-full"
-                            value={billingTerms}
-                            onChange={(e) => setBillingTerms(e.target.value)}
-                            required
-                        >
-                            <option value="immediate">
-                                Immediate (Charge on completion)
-                            </option>
-                            <option value="net_30">Net 30</option>
-                            <option value="net_60">Net 60</option>
-                            <option value="net_90">Net 90</option>
-                        </select>
-                    </BaselFormField>
-
-                    <p className="text-sm text-base-content/50 flex items-start gap-2">
-                        <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5 shrink-0" />
-                        A 3% processing fee is applied to all placement invoices to cover payment processing costs.
-                    </p>
-
-                    <BaselFormField label="Street Address">
-                        <input
-                            type="text"
-                            className="input input-bordered w-full"
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
-                            placeholder="123 Main Street"
-                        />
-                    </BaselFormField>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <BaselFormField label="City">
+                    <WizardHelpZone
+                        title="Billing Contact"
+                        description="The person responsible for processing placement invoices."
+                    >
+                        <BaselFormField label="Billing Contact Name">
                             <input
                                 type="text"
                                 className="input input-bordered w-full"
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                                placeholder="New York"
+                                value={billingContactName}
+                                onChange={(e) =>
+                                    setBillingContactName(e.target.value)
+                                }
+                                placeholder="Jane Smith"
                             />
                         </BaselFormField>
+                    </WizardHelpZone>
 
-                        <BaselFormField label="State">
+                    <WizardHelpZone
+                        title="Payment Terms"
+                        description="How quickly placement invoices must be paid after a successful hire."
+                        tips={["Net 30 is the most common choice", "Immediate billing charges your card automatically on placement confirmation", "A 3% processing fee applies to all placement invoices"]}
+                    >
+                        <BaselFormField label="Payment Terms" required>
+                            <select
+                                className="select w-full"
+                                value={billingTerms}
+                                onChange={(e) => setBillingTerms(e.target.value)}
+                                required
+                            >
+                                <option value="immediate">
+                                    Immediate (Charge on completion)
+                                </option>
+                                <option value="net_30">Net 30</option>
+                                <option value="net_60">Net 60</option>
+                                <option value="net_90">Net 90</option>
+                            </select>
+                        </BaselFormField>
+
+                        <p className="text-sm text-base-content/50 flex items-start gap-2 mt-2">
+                            <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5 shrink-0" />
+                            A 3% processing fee is applied to all placement invoices to cover payment processing costs.
+                        </p>
+                    </WizardHelpZone>
+
+                    <WizardHelpZone
+                        title="Billing Address"
+                        description="The mailing address for your company. Used on invoices and for tax purposes."
+                    >
+                        <BaselFormField label="Street Address">
                             <input
                                 type="text"
                                 className="input input-bordered w-full"
-                                value={state}
-                                onChange={(e) => setState(e.target.value)}
-                                placeholder="NY"
+                                value={street}
+                                onChange={(e) => setStreet(e.target.value)}
+                                placeholder="123 Main Street"
                             />
                         </BaselFormField>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <BaselFormField label="ZIP">
+                        <div className="grid grid-cols-2 gap-4 mt-4">
+                            <BaselFormField label="City">
+                                <input
+                                    type="text"
+                                    className="input input-bordered w-full"
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    placeholder="New York"
+                                />
+                            </BaselFormField>
+
+                            <BaselFormField label="State">
+                                <input
+                                    type="text"
+                                    className="input input-bordered w-full"
+                                    value={state}
+                                    onChange={(e) => setState(e.target.value)}
+                                    placeholder="NY"
+                                />
+                            </BaselFormField>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mt-4">
+                            <BaselFormField label="ZIP">
+                                <input
+                                    type="text"
+                                    className="input input-bordered w-full"
+                                    value={zip}
+                                    onChange={(e) => setZip(e.target.value)}
+                                    placeholder="10001"
+                                />
+                            </BaselFormField>
+
+                            <BaselFormField label="Country">
+                                <input
+                                    type="text"
+                                    className="input input-bordered w-full"
+                                    value={country}
+                                    onChange={(e) => setCountry(e.target.value)}
+                                    placeholder="United States"
+                                />
+                            </BaselFormField>
+                        </div>
+                    </WizardHelpZone>
+
+                    <WizardHelpZone
+                        title="Tax ID"
+                        description="Your company's Employer Identification Number (EIN). Optional but recommended for invoice accuracy."
+                    >
+                        <BaselFormField label="Tax ID (EIN)" hint="Optional">
                             <input
                                 type="text"
                                 className="input input-bordered w-full"
-                                value={zip}
-                                onChange={(e) => setZip(e.target.value)}
-                                placeholder="10001"
+                                value={taxId}
+                                onChange={(e) => setTaxId(e.target.value)}
+                                placeholder="12-3456789"
                             />
                         </BaselFormField>
-
-                        <BaselFormField label="Country">
-                            <input
-                                type="text"
-                                className="input input-bordered w-full"
-                                value={country}
-                                onChange={(e) => setCountry(e.target.value)}
-                                placeholder="United States"
-                            />
-                        </BaselFormField>
-                    </div>
-
-                    <BaselFormField label="Tax ID (EIN)" hint="Optional">
-                        <input
-                            type="text"
-                            className="input input-bordered w-full"
-                            value={taxId}
-                            onChange={(e) => setTaxId(e.target.value)}
-                            placeholder="12-3456789"
-                        />
-                    </BaselFormField>
+                    </WizardHelpZone>
                 </div>
             )}
 

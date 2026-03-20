@@ -23,6 +23,10 @@ export default defineConfig({
     video: 'on-first-retry',
     actionTimeout: 15_000,
     navigationTimeout: 60_000,
+    // Hide dev overlays that intercept clicks (TanStack Query devtools, Next.js dev tools)
+    contextOptions: {
+      reducedMotion: 'reduce',
+    },
   },
 
   projects: [

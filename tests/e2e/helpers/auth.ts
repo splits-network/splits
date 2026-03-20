@@ -62,3 +62,57 @@ export async function saveAuthState(page: Page, role: string) {
   await page.context().storageState({ path: storagePath });
   console.log(`  Saved auth state for: ${role}`);
 }
+
+/**
+ * Hide dev tool overlays (TanStack Query devtools, Next.js dev tools)
+ * that intercept pointer events on the page.
+ */
+export async function hideDevOverlays(page: Page) {
+  await page.evaluate(() => {
+    // Hide TanStack Query devtools
+    document.querySelectorAll('.tsqd-parent-container').forEach(el => {
+      (el as HTMLElement).style.display = 'none';
+    });
+    // Hide Next.js dev tools
+    document.querySelectorAll('[data-nextjs-dialog-overlay]').forEach(el => {
+      (el as HTMLElement).style.display = 'none';
+    });
+    // Hide any floating dev buttons
+    document.querySelectorAll('button:has(> svg[viewBox="0 0 633 633"])').forEach(el => {
+      (el as HTMLElement).style.display = 'none';
+    });
+  });
+}
+
+/**
+ * Dismiss the cookie consent banner if it appears.
+ * Must be called before interacting with the page to prevent click interception.
+ */
+export async function dismissCookieBanner(page: Page) {
+  // First hide dev overlays that can intercept clicks
+  await hideDevOverlays(page);
+
+  const acceptBtn = page.locator('button:has-text("Accept All")');
+  if (await acceptBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await acceptBtn.click({ force: true });
+    console.log('  Dismissed cookie consent banner');
+    await page.waitForTimeout(500);
+  }
+}
+
+/**
+ * Set up console error capturing for debugging.
+ * Returns a function that retrieves captured errors.
+ */
+export function captureConsoleErrors(page: Page): () => string[] {
+  const errors: string[] = [];
+  page.on('console', msg => {
+    if (msg.type() === 'error') {
+      errors.push(msg.text());
+    }
+  });
+  page.on('pageerror', err => {
+    errors.push(`PAGE ERROR: ${err.message}`);
+  });
+  return () => errors;
+}

@@ -19,12 +19,12 @@ import type { FormData, Company, SkillOption } from "@/app/portal/roles/componen
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const WIZARD_STEPS = [
-    { label: "Role Details" },
-    { label: "Compensation" },
-    { label: "Descriptions" },
-    { label: "Requirements" },
-    { label: "Skills" },
-    { label: "Screening" },
+    { label: "Role Details", description: "Set the job title, company, location, and visibility options for this role." },
+    { label: "Compensation", description: "Define salary range, placement fee, guarantee period, and employment terms." },
+    { label: "Descriptions", description: "Write separate descriptions for recruiters (internal) and candidates (public)." },
+    { label: "Requirements", description: "Add mandatory and preferred qualifications that candidates must meet." },
+    { label: "Skills", description: "Tag required and preferred skills for candidate matching." },
+    { label: "Screening", description: "Create pre-screen questions candidates answer before applying." },
 ];
 
 const INITIAL_FORM: FormData = {
@@ -276,6 +276,11 @@ export default function RoleWizardModal({
         setCurrentStep((prev) => Math.max(prev - 1, 0));
     }, []);
 
+    const handleStepClick = useCallback((index: number) => {
+        setError(null);
+        setCurrentStep(index);
+    }, []);
+
     // ── Skills helpers ──
 
     const searchSkills = useCallback(async (query: string): Promise<SkillOption[]> => {
@@ -409,7 +414,8 @@ export default function RoleWizardModal({
             nextDisabled={loading}
             submitLabel={mode === "edit" ? "Update Role" : "Create Role"}
             submittingLabel={mode === "edit" ? "Updating..." : "Creating..."}
-            maxWidth="max-w-3xl"
+            showHelpPanel
+            onStepClick={handleStepClick}
         >
             {error && (
                 <BaselAlertBox variant="error" className="mb-5">

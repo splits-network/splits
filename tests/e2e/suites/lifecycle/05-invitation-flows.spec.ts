@@ -71,7 +71,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
         ).first();
 
         if (await acceptButton.isVisible().catch(() => false)) {
-          await acceptButton.click();
+          await acceptButton.click({ force: true });
           await page.waitForLoadState('networkidle');
 
           await expect(page.locator('body')).not.toContainText(
@@ -115,7 +115,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
       const hasInvite = await inviteButton.isVisible().catch(() => false);
 
       if (hasInvite) {
-        await inviteButton.click();
+        await inviteButton.click({ force: true });
         await page.waitForLoadState('networkidle');
 
         const emailInput = page.locator(
@@ -132,7 +132,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
           ).first();
 
           if (await sendButton.isVisible().catch(() => false)) {
-            await sendButton.click();
+            await sendButton.click({ force: true });
             await page.waitForLoadState('networkidle');
           }
         }
@@ -156,7 +156,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
       ).first();
 
       if (await acceptButton.isVisible().catch(() => false)) {
-        await acceptButton.click();
+        await acceptButton.click({ force: true });
         await page.waitForLoadState('networkidle');
 
         await expect(page.locator('body')).not.toContainText(
@@ -184,7 +184,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
       const hasInvite = await inviteButton.isVisible().catch(() => false);
 
       if (hasInvite) {
-        await inviteButton.click();
+        await inviteButton.click({ force: true });
         await page.waitForLoadState('networkidle');
 
         const emailInput = page.locator(
@@ -218,7 +218,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
           ).first();
 
           if (await sendButton.isVisible().catch(() => false)) {
-            await sendButton.click();
+            await sendButton.click({ force: true });
             await page.waitForLoadState('networkidle');
           }
         }
@@ -244,7 +244,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
       ).first();
 
       if (await acceptButton.isVisible().catch(() => false)) {
-        await acceptButton.click();
+        await acceptButton.click({ force: true });
         await page.waitForLoadState('networkidle');
 
         await expect(page.locator('body')).not.toContainText(

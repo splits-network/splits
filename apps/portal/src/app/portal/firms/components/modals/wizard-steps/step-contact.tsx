@@ -1,6 +1,6 @@
 "use client";
 
-import { BaselFormField } from "@splits-network/basel-ui";
+import { BaselFormField, WizardHelpZone } from "@splits-network/basel-ui";
 import type { FirmFormData } from "./types";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
@@ -25,93 +25,117 @@ interface StepContactProps {
 export function StepContact({ form, onChange, errors }: StepContactProps) {
     return (
         <div className="space-y-5">
-            {/* Section: Online Presence */}
-            <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30">
-                Online Presence
-            </p>
-
-            <BaselFormField
-                label="Website"
-                hint="Include https:// — e.g. https://apexrecruiting.com"
-                error={errors.website_url}
+            <WizardHelpZone
+                title="Online Presence"
+                description="Your website and LinkedIn profile help potential partners verify your firm and learn more about you before reaching out."
+                icon="fa-duotone fa-regular fa-globe"
+                tips={[
+                    "A professional website significantly increases partnership interest",
+                    "LinkedIn company pages are the most-checked link by other recruiters",
+                    "Make sure URLs include https:// for proper linking",
+                ]}
+                className="space-y-5"
             >
-                <div className="flex items-center gap-0">
-                    <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
-                        <i className="fa-duotone fa-regular fa-globe" />
-                    </span>
-                    <input
-                        type="url"
-                        className={`input w-full bg-base-200 border-base-300 ${errors.website_url ? "border-error" : ""}`}
-                        value={form.website_url}
-                        onChange={(e) => onChange({ website_url: e.target.value })}
-                        placeholder="https://yourfirm.com"
-                    />
-                </div>
-            </BaselFormField>
+                {/* Section: Online Presence */}
+                <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30">
+                    Online Presence
+                </p>
 
-            <BaselFormField
-                label="LinkedIn"
-                hint="Your firm's LinkedIn company page URL."
-                error={errors.linkedin_url}
-            >
-                <div className="flex items-center gap-0">
-                    <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
-                        <i className="fa-brands fa-linkedin" />
-                    </span>
-                    <input
-                        type="url"
-                        className={`input w-full bg-base-200 border-base-300 ${errors.linkedin_url ? "border-error" : ""}`}
-                        value={form.linkedin_url}
-                        onChange={(e) => onChange({ linkedin_url: e.target.value })}
-                        placeholder="https://linkedin.com/company/your-firm"
-                    />
-                </div>
-            </BaselFormField>
+                <BaselFormField
+                    label="Website"
+                    hint="Include https:// — e.g. https://apexrecruiting.com"
+                    error={errors.website_url}
+                >
+                    <div className="flex items-center gap-0">
+                        <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
+                            <i className="fa-duotone fa-regular fa-globe" />
+                        </span>
+                        <input
+                            type="url"
+                            className={`input w-full bg-base-200 border-base-300 ${errors.website_url ? "border-error" : ""}`}
+                            value={form.website_url}
+                            onChange={(e) => onChange({ website_url: e.target.value })}
+                            placeholder="https://yourfirm.com"
+                        />
+                    </div>
+                </BaselFormField>
+
+                <BaselFormField
+                    label="LinkedIn"
+                    hint="Your firm's LinkedIn company page URL."
+                    error={errors.linkedin_url}
+                >
+                    <div className="flex items-center gap-0">
+                        <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
+                            <i className="fa-brands fa-linkedin" />
+                        </span>
+                        <input
+                            type="url"
+                            className={`input w-full bg-base-200 border-base-300 ${errors.linkedin_url ? "border-error" : ""}`}
+                            value={form.linkedin_url}
+                            onChange={(e) => onChange({ linkedin_url: e.target.value })}
+                            placeholder="https://linkedin.com/company/your-firm"
+                        />
+                    </div>
+                </BaselFormField>
+            </WizardHelpZone>
 
             <div className="border-t border-base-300" />
 
-            {/* Section: Direct Contact */}
-            <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30">
-                Direct Contact
-            </p>
-
-            <BaselFormField
-                label="Contact Email"
-                hint="Shown to other recruiters when contact info is visible."
-                error={errors.contact_email}
+            <WizardHelpZone
+                title="Direct Contact"
+                description="How other recruiters can reach your firm directly. Contact visibility is controlled separately in the Marketplace step."
+                icon="fa-duotone fa-regular fa-address-book"
+                tips={[
+                    "Use a team or general inbox rather than a personal email for continuity",
+                    "Contact info is only shown to logged-in recruiters if you enable it in settings",
+                    "Including a phone number makes it easier for partners to discuss time-sensitive deals",
+                ]}
+                className="space-y-5"
             >
-                <div className="flex items-center gap-0">
-                    <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
-                        <i className="fa-duotone fa-regular fa-envelope" />
-                    </span>
-                    <input
-                        type="email"
-                        className={`input w-full bg-base-200 border-base-300 ${errors.contact_email ? "border-error" : ""}`}
-                        value={form.contact_email}
-                        onChange={(e) => onChange({ contact_email: e.target.value })}
-                        placeholder="hello@yourfirm.com"
-                    />
-                </div>
-            </BaselFormField>
+                {/* Section: Direct Contact */}
+                <p className="text-sm font-semibold uppercase tracking-widest text-base-content/30">
+                    Direct Contact
+                </p>
 
-            <BaselFormField
-                label="Phone"
-                hint="Optional. Include country code for international numbers."
-                error={errors.contact_phone}
-            >
-                <div className="flex items-center gap-0">
-                    <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
-                        <i className="fa-duotone fa-regular fa-phone" />
-                    </span>
-                    <input
-                        type="tel"
-                        className={`input w-full bg-base-200 border-base-300 ${errors.contact_phone ? "border-error" : ""}`}
-                        value={form.contact_phone}
-                        onChange={(e) => onChange({ contact_phone: e.target.value })}
-                        placeholder="+1 (212) 555-0100"
-                    />
-                </div>
-            </BaselFormField>
+                <BaselFormField
+                    label="Contact Email"
+                    hint="Shown to other recruiters when contact info is visible."
+                    error={errors.contact_email}
+                >
+                    <div className="flex items-center gap-0">
+                        <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
+                            <i className="fa-duotone fa-regular fa-envelope" />
+                        </span>
+                        <input
+                            type="email"
+                            className={`input w-full bg-base-200 border-base-300 ${errors.contact_email ? "border-error" : ""}`}
+                            value={form.contact_email}
+                            onChange={(e) => onChange({ contact_email: e.target.value })}
+                            placeholder="hello@yourfirm.com"
+                        />
+                    </div>
+                </BaselFormField>
+
+                <BaselFormField
+                    label="Phone"
+                    hint="Optional. Include country code for international numbers."
+                    error={errors.contact_phone}
+                >
+                    <div className="flex items-center gap-0">
+                        <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0">
+                            <i className="fa-duotone fa-regular fa-phone" />
+                        </span>
+                        <input
+                            type="tel"
+                            className={`input w-full bg-base-200 border-base-300 ${errors.contact_phone ? "border-error" : ""}`}
+                            value={form.contact_phone}
+                            onChange={(e) => onChange({ contact_phone: e.target.value })}
+                            placeholder="+1 (212) 555-0100"
+                        />
+                    </div>
+                </BaselFormField>
+            </WizardHelpZone>
         </div>
     );
 }

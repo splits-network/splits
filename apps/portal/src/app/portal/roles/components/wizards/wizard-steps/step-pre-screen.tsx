@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { WizardHelpZone } from "@splits-network/basel-ui";
 import type { FormData, PreScreenQuestion } from "./types";
 
 // ─── Pre-Screen Question Card ────────────────────────────────────────────────
@@ -222,43 +223,49 @@ export function StepPreScreen({ formData, onChange }: StepPreScreenProps) {
                 </span>
             </div>
 
-            <div className="flex justify-between items-center">
-                <div>
-                    <h4 className="font-black text-sm uppercase tracking-wider">
-                        Questions for Candidates
-                    </h4>
-                    <span className="text-sm text-base-content/50 font-semibold">
-                        e.g., eligibility, clearance, relocation
-                    </span>
-                </div>
-                <button type="button" className="btn btn-primary btn-sm" onClick={addQuestion}>
-                    <i className="fa-duotone fa-regular fa-plus mr-1" />
-                    Add Question
-                </button>
-            </div>
-
-            <div className="space-y-4">
-                {formData.pre_screen_questions.length === 0 ? (
-                    <div className="text-center py-10 border-2 border-dashed border-info/20 bg-info/5">
-                        <i className="fa-duotone fa-regular fa-clipboard-question text-2xl text-info/40 mb-2" />
-                        <p className="text-base-content/40 text-sm font-semibold">
-                            No screening questions yet. Add a question to filter candidates before they apply.
-                        </p>
+            <WizardHelpZone
+                title="Screening Questions"
+                description="Pre-screen questions candidates must answer before submitting an application. Use these to filter for basic eligibility."
+                tips={["Keep questions concise and specific", "Use Yes/No for eligibility checks (clearance, visa, etc.)", "Required questions must be answered to submit", "Add disclaimers for sensitive questions (EEO, health)"]}
+            >
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h4 className="font-black text-sm uppercase tracking-wider">
+                            Questions for Candidates
+                        </h4>
+                        <span className="text-sm text-base-content/50 font-semibold">
+                            e.g., eligibility, clearance, relocation
+                        </span>
                     </div>
-                ) : (
-                    formData.pre_screen_questions.map((question, idx) => (
-                        <PreScreenQuestionCard
-                            key={idx}
-                            question={question}
-                            index={idx}
-                            onUpdate={updateQuestion}
-                            onRemove={removeQuestion}
-                            onAddOption={addOption}
-                            onRemoveOption={removeOption}
-                        />
-                    ))
-                )}
-            </div>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={addQuestion}>
+                        <i className="fa-duotone fa-regular fa-plus mr-1" />
+                        Add Question
+                    </button>
+                </div>
+
+                <div className="space-y-4 mt-4">
+                    {formData.pre_screen_questions.length === 0 ? (
+                        <div className="text-center py-10 border-2 border-dashed border-info/20 bg-info/5">
+                            <i className="fa-duotone fa-regular fa-clipboard-question text-2xl text-info/40 mb-2" />
+                            <p className="text-base-content/40 text-sm font-semibold">
+                                No screening questions yet. Add a question to filter candidates before they apply.
+                            </p>
+                        </div>
+                    ) : (
+                        formData.pre_screen_questions.map((question, idx) => (
+                            <PreScreenQuestionCard
+                                key={idx}
+                                question={question}
+                                index={idx}
+                                onUpdate={updateQuestion}
+                                onRemove={removeQuestion}
+                                onAddOption={addOption}
+                                onRemoveOption={removeOption}
+                            />
+                        ))
+                    )}
+                </div>
+            </WizardHelpZone>
         </div>
     );
 }
