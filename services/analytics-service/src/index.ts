@@ -112,14 +112,11 @@ app.addHook("onRequest", async (request, reply) => {
 });
 
 // Health check endpoint
-app.get("/health", async (request, reply) => {
-    return reply.send({
-        status: "healthy",
-        service: "analytics-service",
-        timestamp: new Date().toISOString(),
-        version: "1.0.0",
-    });
-});
+app.get("/health", async () => ({
+    status: "healthy",
+    service: "analytics-service",
+    timestamp: new Date().toISOString(),
+}));
 
 // Create a Redis data client for presence queries (reads presence:user:* keys set by chat-gateway)
 const redisData = new Redis(redisConfig);

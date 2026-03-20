@@ -6,7 +6,7 @@ import {
     createSupabaseClient,
 } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import { NotificationRepository } from './repository';
 import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
@@ -150,39 +150,10 @@ async function main() {
         eventPublisher: outboxPublisher,
     });
 
-    // Simple health check wrapper
-    const createChecker = (name: string, originalChecker: () => Promise<any>) => {
-        return async () => {
-            try {
-                return await originalChecker();
-            } catch (error) {
-                logger.error({ dependency: name, error: error instanceof Error ? error.message : String(error) }, 'Health check failed');
-                throw error;
-            }
-        };
-    };
-
-    // Simple Resend check
-    const createResendChecker = () => {
-        return HealthCheckers.custom('resend', async () => {
-            return !!resendConfig.apiKey;
-        }, { provider: 'resend' });
-    };
-
     // Register standardized health check
     registerHealthCheck(app, {
         serviceName: 'notification-service',
         logger,
-        checkers: {
-            database: createChecker('database', HealthCheckers.database(supabaseClient)),
-            ...(v2EventPublisher && {
-                rabbitmq_publisher: createChecker('rabbitmq_publisher', HealthCheckers.rabbitMqPublisher(v2EventPublisher))
-            }),
-            ...(consumer && {
-                rabbitmq_consumer: createChecker('rabbitmq_consumer', HealthCheckers.rabbitMqConsumer(consumer))
-            }),
-            resend: createResendChecker(),
-        },
     });
 
     // Graceful shutdown

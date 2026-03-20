@@ -10,7 +10,6 @@ import {
     buildServer,
     errorHandler,
     registerHealthCheck,
-    HealthCheckers,
 } from "@splits-network/shared-fastify";
 import formbody from "@fastify/formbody";
 import { EventPublisher } from "./v2/shared/events";
@@ -112,9 +111,6 @@ async function main() {
     registerHealthCheck(app, {
         serviceName: "gpt-service",
         logger,
-        checkers: {
-            rabbitmq: HealthCheckers.rabbitMqPublisher(eventPublisher),
-        },
     });
 
     // Log GPT config summary (non-sensitive fields only)

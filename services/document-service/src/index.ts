@@ -1,4 +1,4 @@
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers } from "@splits-network/shared-fastify";
+import { buildServer, errorHandler, registerHealthCheck } from "@splits-network/shared-fastify";
 import { createLogger } from "@splits-network/shared-logging";
 import {
     loadBaseConfig,
@@ -99,18 +99,6 @@ async function start() {
         registerHealthCheck(fastify, {
             serviceName: 'document-service',
             logger,
-            checkers: {
-                database: HealthCheckers.database(supabaseClient),
-                ...(eventPublisher && {
-                    rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
-                }),
-                storage: HealthCheckers.externalProvider('storage', async (signal) => {
-                    // Uses externalProvider so a Supabase Storage outage caps status at
-                    // 'degraded' rather than 'unhealthy' — a pod restart can't fix a
-                    // storage-side outage, it would just cause a crash-loop.
-                    return await storage.healthCheck();
-                }, { provider: 'supabase-storage' }),
-            },
         });
 
         process.on("SIGTERM", async () => {

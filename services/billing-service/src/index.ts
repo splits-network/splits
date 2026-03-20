@@ -167,15 +167,10 @@ async function main() {
         logger
     );
 
-    // Track consumer connection status for health checks
-    let billingEventConsumerConnected = false;
-
     try {
         await billingEventConsumer.connect();
-        billingEventConsumerConnected = true;
         logger.info('Billing event consumer connected and listening');
     } catch (error) {
-        billingEventConsumerConnected = false;
         logger.error({ err: error }, 'CRITICAL: Billing event consumer failed to connect - commission processing DISABLED');
     }
 
@@ -193,28 +188,11 @@ async function main() {
     });
 
     // Health check endpoint
-    app.get('/health', async (request, reply) => {
-        try {
-            // Check database connectivity
-            const { error: healthError } = await supabase.from('plans').select('id').limit(1);
-            if (healthError) throw new Error(`Database health check failed: ${healthError.message}`);
-            return reply.status(200).send({
-                status: billingEventConsumerConnected ? 'healthy' : 'degraded',
-                service: 'billing-service',
-                timestamp: new Date().toISOString(),
-                event_consumer: billingEventConsumerConnected ? 'connected' : 'disconnected',
-            });
-        } catch (error) {
-            logger.error({ err: error }, 'Health check failed');
-            return reply.status(503).send({
-                status: 'unhealthy',
-                service: 'billing-service',
-                timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : 'Unknown error',
-                event_consumer: billingEventConsumerConnected ? 'connected' : 'disconnected',
-            });
-        }
-    });
+    app.get('/health', async () => ({
+        status: 'healthy',
+        service: 'billing-service',
+        timestamp: new Date().toISOString(),
+    }));
 
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down billing service');

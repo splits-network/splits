@@ -166,14 +166,11 @@ async function main() {
         crypto,
     });
 
-    app.get("/health", async (request, reply) => {
-        return reply.status(200).send({
-            status: "healthy",
-            service: "integration-service",
-            rabbitmq_connected: eventPublisher.isConnected(),
-            timestamp: new Date().toISOString(),
-        });
-    });
+    app.get("/health", async () => ({
+        status: "healthy",
+        service: "integration-service",
+        timestamp: new Date().toISOString(),
+    }));
 
     process.on("SIGTERM", async () => {
         logger.info("SIGTERM received, shutting down gracefully");

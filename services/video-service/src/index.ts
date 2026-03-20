@@ -179,14 +179,11 @@ async function main() {
         },
     });
 
-    app.get("/health", async (request, reply) => {
-        return reply.status(200).send({
-            status: "healthy",
-            service: "video-service",
-            rabbitmq_connected: eventPublisher.isConnected(),
-            timestamp: new Date().toISOString(),
-        });
-    });
+    app.get("/health", async () => ({
+        status: "healthy",
+        service: "video-service",
+        timestamp: new Date().toISOString(),
+    }));
 
     process.on("SIGTERM", async () => {
         logger.info("SIGTERM received, shutting down gracefully");

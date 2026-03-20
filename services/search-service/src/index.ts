@@ -42,14 +42,11 @@ app.addHook("onRequest", async (request, reply) => {
 });
 
 // Health check endpoint
-app.get("/health", async (request, reply) => {
-    return reply.send({
-        status: "healthy",
-        service: "search-service",
-        timestamp: new Date().toISOString(),
-        version: "1.0.0",
-    });
-});
+app.get("/health", async () => ({
+    status: "healthy",
+    service: "search-service",
+    timestamp: new Date().toISOString(),
+}));
 
 // Register V2 routes (routes include full /api/v2 paths since API Gateway forwards them)
 app.register(registerV2Routes, {

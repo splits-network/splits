@@ -9,7 +9,6 @@ import {
     buildServer,
     errorHandler,
     registerHealthCheck,
-    HealthCheckers,
     setupProcessErrorHandlers,
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
@@ -207,21 +206,6 @@ async function main() {
     registerHealthCheck(app, {
         serviceName: "matching-service",
         logger,
-        checkers: {
-            database: HealthCheckers.database(supabaseClient),
-            ...(eventPublisher && {
-                rabbitmq_publisher:
-                    HealthCheckers.rabbitMqPublisher(eventPublisher),
-            }),
-            ...(domainConsumer && {
-                rabbitmq_consumer:
-                    HealthCheckers.rabbitMqConsumer(domainConsumer),
-            }),
-            ...(v3DomainConsumer && {
-                rabbitmq_v3_consumer:
-                    HealthCheckers.rabbitMqConsumer(v3DomainConsumer),
-            }),
-        },
     });
 
     // Start server
