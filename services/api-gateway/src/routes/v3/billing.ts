@@ -5,11 +5,9 @@
  * The proxy layer handles auth, CORS, correlation IDs — no custom handlers.
  */
 
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
-import { requireAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 const billingV3Routes: V3RouteConfig[] = [
   // ── Plans Public Listing ───────────────────────────────────────
@@ -110,6 +108,7 @@ const billingV3Routes: V3RouteConfig[] = [
 
   // ── Webhooks ────────────────────────────────────────────────────
   { path: '/billing-webhooks/health', method: 'GET', auth: 'none' },
+  // NOTE: /webhooks/stripe is registered as a custom handler below (needs raw body + stripe-signature)
 
   // ── Placement Payout Audit Log ──────────────────────────────────
   { path: '/placement-payout-audit-log', method: 'GET', auth: 'required' },
@@ -121,4 +120,32 @@ export function registerBillingV3Routes(app: FastifyInstance, services: ServiceR
   const billingClient = services.get('billing');
 
   registerV3Routes(app, billingClient, billingV3Routes);
+
+  // Custom Stripe webhook proxy — forwards raw body + stripe-signature for signature verification
+  app.post('/api/v3/webhooks/stripe', async (request: FastifyRequest, reply: FastifyReply) => {
+    const correlationId = (request as any).correlationId;
+    const rawBody = (request as any).rawBody as Buffer;
+
+    if (!rawBody) {
+      request.log.error({ correlationId }, 'Missing raw body for Stripe webhook');
+      return reply.status(400).send({ error: { message: 'Missing raw body' } });
+    }
+
+    try {
+      const data = await billingClient.post(
+        '/api/v3/webhooks/stripe',
+        rawBody,
+        correlationId,
+        {
+          'stripe-signature': request.headers['stripe-signature'] as string,
+        }
+      );
+      return reply.send(data);
+    } catch (error: any) {
+      request.log.error({ error: error.message, correlationId }, 'V3 Stripe webhook proxy failed');
+      return reply
+        .status(error.statusCode || 500)
+        .send(error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message || 'Webhook processing failed' } });
+    }
+  });
 }

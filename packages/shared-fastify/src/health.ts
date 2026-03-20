@@ -108,7 +108,7 @@ export class HealthCheckers {
                 }
 
                 // Check if connection and channel exist and are not closed
-                const hasConnection = eventPublisher.connection && !eventPublisher.connection.connection?.closed;
+                const hasConnection = eventPublisher.connection && !(eventPublisher.connection as any).closed;
                 const hasChannel = eventPublisher.channel && !eventPublisher.channel.closed;
 
                 if (hasConnection && hasChannel) {

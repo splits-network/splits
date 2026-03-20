@@ -29,6 +29,18 @@ export function registerAdminNotificationRoutes(
   const repository = new AdminNotificationRepository(supabase);
   const service = new AdminNotificationService(repository, supabase, eventPublisher);
 
+  // GET /api/v3/public/site-notifications — public, no auth required
+  // Returns active site notifications (maintenance, incidents, announcements)
+  app.get('/api/v3/public/site-notifications', async (_request, reply) => {
+    try {
+      const data = await repository.findActiveSiteNotifications();
+      return reply.send({ data });
+    } catch (error) {
+      _request.log.error({ err: error }, 'Failed to fetch active site notifications');
+      return reply.status(500).send({ data: [] });
+    }
+  });
+
   // GET /api/v3/admin-notifications/views/notification-log
   app.get('/api/v3/admin-notifications/views/notification-log', {
     schema: { querystring: notificationLogListSchema },

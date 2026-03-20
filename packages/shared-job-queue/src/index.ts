@@ -381,7 +381,9 @@ export class EventPublisher implements IEventPublisher {
         try {
             this.logger.info('Attempting to connect event publisher to RabbitMQ');
 
-            this.connection = await amqp.connect(this.rabbitMqUrl) as any;
+            this.connection = await amqp.connect(this.rabbitMqUrl, {
+                heartbeat: 30,
+            }) as any;
             if (!this.connection) throw new Error('Failed to establish RabbitMQ connection');
 
             this.connection.on('error', (err: Error) => {
@@ -402,11 +404,13 @@ export class EventPublisher implements IEventPublisher {
             this.channel.on('error', (err: Error) => {
                 this.logger.error({ err }, 'RabbitMQ event publisher channel error');
                 this.connectionHealthy = false;
+                if (!this.isClosing) this.scheduleReconnect();
             });
 
             this.channel.on('close', () => {
                 this.logger.warn('RabbitMQ event publisher channel closed');
                 this.connectionHealthy = false;
+                if (!this.isClosing) this.scheduleReconnect();
             });
 
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });

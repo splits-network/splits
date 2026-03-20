@@ -11,8 +11,8 @@ import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const integrationV3Routes: V3RouteConfig[] = [
   // ── Integration Providers ──────────────────────────────────────
-  { path: '/integrations/providers', method: 'GET', auth: 'required' },
-  { path: '/integrations/providers/:slug', method: 'GET', auth: 'required' },
+  { path: '/integrations/providers', method: 'GET', auth: 'none' },
+  { path: '/integrations/providers/:slug', method: 'GET', auth: 'none' },
 
   // ── Integration Connections ────────────────────────────────────
   { path: '/integrations/connections', method: 'GET', auth: 'required' },

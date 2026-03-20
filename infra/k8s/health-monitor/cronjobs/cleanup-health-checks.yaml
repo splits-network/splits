@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+    name: cleanup-health-checks
+    namespace: splits-network
+    labels:
+        app: health-monitor
+        component: cron
+spec:
+    # Run daily at 03:00 UTC — deletes health_checks rows older than 7 days
+    schedule: "0 3 * * *"
+    successfulJobsHistoryLimit: 3
+    failedJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    jobTemplate:
+        spec:
+            activeDeadlineSeconds: 300
+            backoffLimit: 0
+            template:
+                metadata:
+                    labels:
+                        app: health-monitor
+                        component: cron-job
+                spec:
+                    nodeSelector:
+                        agentpool: userpool
+                    tolerations:
+                        - key: "kubernetes.azure.com/scalesetpriority"
+                          operator: "Equal"
+                          value: "spot"
+                          effect: "NoSchedule"
+                    restartPolicy: Never
+                    containers:
+                        - name: cleanup-health-checks
+                          image: ${ACR_SERVER}/health-monitor:${IMAGE_TAG}
+                          imagePullPolicy: Always
+                          command: ["node"]
+                          args:
+                              [
+                                  "services/health-monitor/dist/jobs/cleanup-health-checks.js",
+                              ]
+                          env:
+                              - name: SUPABASE_URL
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-url
+                              - name: SUPABASE_SERVICE_ROLE_KEY
+                                valueFrom:
+                                    secretKeyRef:
+                                        name: supabase-secrets
+                                        key: supabase-service-role-key
+                              - name: NODE_ENV
+                                value: "production"
+                              - name: LOG_LEVEL
+                                value: "info"

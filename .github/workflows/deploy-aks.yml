@@ -478,6 +478,7 @@ jobs:
                   kubectl apply -f infra/k8s/support-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/support-gateway/ --namespace=splits-network
                   kubectl apply -f infra/k8s/health-monitor/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/health-monitor/cronjobs/ --namespace=splits-network
                   kubectl apply -f infra/k8s/gpt-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/gpt-service/cronjobs/ --namespace=splits-network
                   kubectl apply -f infra/k8s/content-service/ --namespace=splits-network

@@ -17,6 +17,7 @@ import { registerMatchingV3Routes } from './matching';
 import { registerNetworkV3Routes } from './network';
 import { registerNotificationV3Routes } from './notification';
 import { registerSearchV3Routes } from './search';
+import { registerSiteNotificationV3Routes } from './site-notifications';
 import { registerSupportV3Routes } from './support';
 import { registerVideoV3Routes } from './video';
 import { registerOnboardingV3Routes } from './onboarding';
@@ -50,5 +51,6 @@ export function registerV3GatewayRoutes(
   registerSearchV3Routes(app, services);
   registerSupportV3Routes(app, services);
   registerVideoV3Routes(app, services);
+  registerSiteNotificationV3Routes(app, services);
   registerStatusV3Routes(app, services);
 }

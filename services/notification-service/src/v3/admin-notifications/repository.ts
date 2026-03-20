@@ -87,6 +87,22 @@ export class AdminNotificationRepository {
     if (error) throw error;
   }
 
+  async findActiveSiteNotifications(): Promise<any[]> {
+    const now = new Date().toISOString();
+
+    const { data, error } = await this.supabase
+      .from('site_notifications')
+      .select('*')
+      .eq('is_active', true)
+      .or(`starts_at.is.null,starts_at.lte.${now}`)
+      .or(`expires_at.is.null,expires_at.gt.${now}`)
+      .order('severity', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
+
   async findAllNotificationLog(
     params: AdminListParams,
   ): Promise<{ data: any[]; total: number }> {
