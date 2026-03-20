@@ -62,7 +62,7 @@ export function SectionMarketplace({
                             onUpdate({
                                 marketplace_visibility: e.target.value as
                                     | "public"
-                                    | "private"
+                                    | "limited"
                                     | "hidden",
                             })
                         }
@@ -70,8 +70,8 @@ export function SectionMarketplace({
                         <option value="public">
                             Public - Visible to all recruiters
                         </option>
-                        <option value="private">
-                            Private - Visible to connected recruiters only
+                        <option value="limited">
+                            Limited - Visible to connected recruiters only
                         </option>
                         <option value="hidden">
                             Hidden - Not visible in marketplace
