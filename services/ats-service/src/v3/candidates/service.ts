@@ -157,22 +157,6 @@ export class CandidateService {
     const existing = await this.repository.findById(id);
     if (!existing) throw new NotFoundError('Candidate', id);
 
-    const context = await this.accessResolver.resolve(clerkUserId);
-    const isOwn = context.candidateId === id;
-    const canManage = context.isPlatformAdmin || !!context.recruiterId ||
-      context.roles.some(r => ['company_admin', 'hiring_manager'].includes(r));
-
-    if (!canManage && !isOwn) {
-      throw new ForbiddenError('You do not have permission to update this candidate');
-    }
-
-    // Verification status requires recruiter or admin
-    if (input.verification_status !== undefined) {
-      if (!context.isPlatformAdmin && !context.recruiterId) {
-        throw new ForbiddenError('Only recruiters and admins can update verification status');
-      }
-    }
-
     if (input.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(input.email)) {
@@ -207,7 +191,7 @@ export class CandidateService {
     await this.eventPublisher?.publish('candidate.updated', {
       candidateId: id,
       updatedFields: Object.keys(updates),
-      updatedBy: context.identityUserId,
+      updatedBy: clerkUserId,
     }, 'ats-service');
 
     return updated;
