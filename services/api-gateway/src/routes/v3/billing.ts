@@ -22,6 +22,7 @@ const billingV3Routes: V3RouteConfig[] = [
   { resource: 'subscriptions', auth: 'required' },
 
   // ── Subscriptions Views & Actions ───────────────────────────────
+  { path: '/subscriptions/views/my-subscription', method: 'GET', auth: 'required' },
   { path: '/subscriptions/me', method: 'GET', auth: 'required' },
   { path: '/subscriptions/payment-methods', method: 'GET', auth: 'required' },
   { path: '/subscriptions/invoices', method: 'GET', auth: 'required' },

@@ -49,7 +49,7 @@ export default function ApplicationSearch({
                 const token = await getToken();
                 if (!token) return;
                 const client = createAuthenticatedClient(token);
-                const res = (await client.get("/applications", {
+                const res = (await client.get("/applications/views/listing", {
                     params: { search: query.trim(), limit: 10 },
                 })) as { data: any[] };
 

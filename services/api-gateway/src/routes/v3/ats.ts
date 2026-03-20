@@ -48,6 +48,7 @@ const atsV3Routes: V3RouteConfig[] = [
 
   // ── Job Skills (partial CRUD) ──────────────────────────────────
   // Cannot use `resource` helper (no PATCH/:id, composite delete key)
+  { path: '/job-skills/views/with-details', method: 'GET', auth: 'required' },
   { path: '/job-skills', method: 'GET', auth: 'required' },
   { path: '/job-skills', method: 'POST', auth: 'required' },
   // DELETE for composite key registered manually below
@@ -131,6 +132,10 @@ const atsV3Routes: V3RouteConfig[] = [
   // ── Application Notes Core CRUD ───────────────────────────────
   { resource: 'application-notes', auth: 'required' },
 
+  // ── Application Notes Views ─────────────────────────────────
+  { path: '/application-notes/views/with-author', method: 'GET', auth: 'required' },
+  { path: '/application-notes/:id/view/with-author', method: 'GET', auth: 'required' },
+
   // ── Pre-Screen ────────────────────────────────────────────────
   { path: '/pre-screen', method: 'GET', auth: 'required' },
   { path: '/pre-screen', method: 'POST', auth: 'required' },
@@ -146,6 +151,7 @@ const atsV3Routes: V3RouteConfig[] = [
   { path: '/skills/:id', method: 'DELETE', auth: 'required' },
 
   // ── Candidate Skills (junction) ───────────────────────────────
+  { path: '/candidate-skills/views/with-details', method: 'GET', auth: 'required' },
   { path: '/candidate-skills', method: 'GET', auth: 'required' },
   { path: '/candidate-skills', method: 'POST', auth: 'required' },
   { path: '/candidate-skills/candidate/:candidateId/bulk-replace', method: 'PUT', auth: 'required' },

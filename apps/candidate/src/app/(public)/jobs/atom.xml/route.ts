@@ -39,7 +39,7 @@ export async function GET() {
     let jobs: any[] = [];
 
     try {
-        const response: any = await apiClient.get("/jobs", {
+        const response: any = await apiClient.get("/jobs/views/candidate-listing", {
             params: { limit: 50, sort_by: "updated_at", sort_order: "desc" },
         });
         jobs = response?.data || response || [];

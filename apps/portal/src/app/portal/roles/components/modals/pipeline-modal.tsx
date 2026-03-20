@@ -80,10 +80,9 @@ export default function PipelineModal({
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get("/applications", {
+            const response: any = await client.get("/applications/views/listing", {
                 params: {
-                    filters: { job_id: roleId },
-                    include: "candidate,job,company",
+                    job_id: roleId,
                 },
             });
             setApplications(response.data || []);
