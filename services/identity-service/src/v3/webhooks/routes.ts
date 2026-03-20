@@ -55,7 +55,8 @@ export function registerWebhookRoutes(
         'svix-timestamp': request.headers['svix-timestamp'] as string,
         'svix-signature': request.headers['svix-signature'] as string,
       };
-      const payload = JSON.stringify(request.body);
+      const rawBody = (request as any).rawBody as Buffer | undefined;
+      const payload = rawBody ? rawBody.toString() : JSON.stringify(request.body);
 
       let event: ClerkWebhookEvent | null = null;
       let sourceApp: WebhookSourceApp = 'unknown';

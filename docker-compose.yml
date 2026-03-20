@@ -85,6 +85,9 @@ services:
       # Clerk credentials - for syncing user data back to Clerk
       SPLITS_CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
       APP_CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
+      # Clerk webhook signing secrets
+      SPLITS_CLERK_WEBHOOK_SECRET: ${SPLITS_CLERK_WEBHOOK_SECRET}
+      APP_CLERK_WEBHOOK_SECRET: ${APP_CLERK_WEBHOOK_SECRET}
     volumes:
       - ./services/identity-service/src:/app/services/identity-service/src
       - ./packages:/app/packages
