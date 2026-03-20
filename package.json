@@ -13,9 +13,14 @@
         "vault:populate": "node scripts/populate-vault.js",
         "test:notifications": "tsx scripts/test-ts",
         "test:notifications:e2e": "tsx scripts/test-notification-e2e.ts",
-        "seed:content": "tsx -r dotenv/config services/content-service/seeds/seed-content.ts"
+        "seed:content": "tsx -r dotenv/config services/content-service/seeds/seed-content.ts",
+        "e2e:seed": "tsx scripts/e2e-seed.ts",
+        "e2e": "playwright test --config=tests/e2e/playwright.config.ts",
+        "e2e:ui": "playwright test --config=tests/e2e/playwright.config.ts --ui",
+        "e2e:report": "playwright show-report"
     },
     "devDependencies": {
+        "@playwright/test": "^1.58.2",
         "@types/amqplib": "^0.10.6",
         "@types/node": "^22.10.2",
         "amqplib": "^0.10.5",

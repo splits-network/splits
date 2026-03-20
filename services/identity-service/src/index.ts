@@ -64,6 +64,28 @@ async function main() {
         disableRequestLogging: true,
     });
 
+    // Preserve raw body for webhook signature verification (Svix/Clerk)
+    // The gateway forwards the raw body as a Buffer, but Fastify's default
+    // JSON parser deserializes it. Re-serializing with JSON.stringify() won't
+    // produce byte-identical output, so svix verification fails.
+    app.addContentTypeParser(
+        'application/json',
+        { parseAs: 'buffer' },
+        (req, body, done) => {
+            try {
+                (req as any).rawBody = body;
+                const str = (body as Buffer).toString();
+                if (!str || str.trim() === '') {
+                    done(null, undefined);
+                    return;
+                }
+                done(null, JSON.parse(str));
+            } catch (err: any) {
+                done(err);
+            }
+        }
+    );
+
     // Set error handler
     app.setErrorHandler(errorHandler);
 

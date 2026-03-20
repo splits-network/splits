@@ -107,7 +107,8 @@ export async function webhooksRoutesV2(
                 'svix-timestamp': request.headers['svix-timestamp'],
                 'svix-signature': request.headers['svix-signature']
             };
-            const payload = JSON.stringify(request.body);
+            const rawBody = (request as any).rawBody as Buffer | undefined;
+            const payload = rawBody ? rawBody.toString() : JSON.stringify(request.body);
 
             // Try each secret until one verifies successfully
             // Track which Clerk instance the webhook came from
