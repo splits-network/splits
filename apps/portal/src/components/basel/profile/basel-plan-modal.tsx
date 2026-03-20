@@ -200,8 +200,8 @@ export function BaselPlanModal({
                     updateData.payment_method_id = paymentMethodId;
                     updateData.customer_id = setupIntent.customer_id;
                 }
-                if (appliedDiscount?.code) {
-                    updateData.promotion_code = appliedDiscount.code;
+                if (appliedDiscount?.id) {
+                    updateData.promotion_code = appliedDiscount.id;
                 }
                 await client.patch(
                     `/subscriptions/${currentSubscription.id}`,
@@ -220,8 +220,8 @@ export function BaselPlanModal({
                     activateData.payment_method_id = paymentMethodId;
                     activateData.customer_id = setupIntent.customer_id;
                 }
-                if (appliedDiscount?.code) {
-                    activateData.promotion_code = appliedDiscount.code;
+                if (appliedDiscount?.id) {
+                    activateData.promotion_code = appliedDiscount.id;
                 }
                 await client.post("/subscriptions/activate", activateData);
             }

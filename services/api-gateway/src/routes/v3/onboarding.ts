@@ -384,17 +384,13 @@ export function registerOnboardingV3Routes(
           }
         }
 
-        try {
-          const subResponse = await billingService().post<any>(
-            '/api/v3/subscriptions/activate',
-            activateData,
-            correlationId,
-            authHeaders
-          );
-          subscription = subResponse?.data ?? subResponse;
-        } catch (subErr: any) {
-          request.log.error({ error: subErr.message }, 'Failed to activate subscription');
-        }
+        const subResponse = await billingService().post<any>(
+          '/api/v3/subscriptions/activate',
+          activateData,
+          correlationId,
+          authHeaders
+        );
+        subscription = subResponse?.data ?? subResponse;
 
         // Step 4: Mark onboarding complete
         const completeResponse = await identityService().patch<any>(
