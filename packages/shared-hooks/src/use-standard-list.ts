@@ -92,6 +92,8 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
      * Defaults to `createPortalClient`. Admin app should pass `createAdminClient`.
      */
     clientFactory?: (token: string) => AppApiClient;
+    /** V2 include parameter — passed through for backwards compatibility until full V3 migration */
+    include?: string;
 }
 
 export interface UseStandardListReturn<T, F extends Record<string, any> = Record<string, any>> {
@@ -187,6 +189,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         requireAuth = true,
         getToken,
         clientFactory,
+        include,
     } = options;
 
     // Support deprecated storageKey as fallback
@@ -310,7 +313,8 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         sortBy,
         sortOrder,
         JSON.stringify(activeFilters),
-    ], [endpoint, page, limit, searchQuery, sortBy, sortOrder, activeFilters]);
+        include ?? '',
+    ], [endpoint, page, limit, searchQuery, sortBy, sortOrder, activeFilters, include]);
 
     const query = useQuery({
         queryKey,
@@ -341,6 +345,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
                 sort_order: sortOrder,
             };
             if (searchQuery) params.search = searchQuery;
+            if (include) params.include = include;
             // Spread filters as flat query params (V3 expects flat params, not nested filters wrapper)
             Object.entries(activeFilters).forEach(([key, value]) => {
                 if (value !== undefined && value !== null) {

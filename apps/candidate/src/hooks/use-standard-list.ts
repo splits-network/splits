@@ -59,6 +59,8 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
     autoFetch?: boolean;
     /** Require authentication (default: true). Set to false for public routes */
     requireAuth?: boolean;
+    /** V2 include parameter — passed through for backwards compatibility until full V3 migration */
+    include?: string;
     /** Seeded data for SSR to avoid client-only loading states */
     initialData?: T[];
     /** Seeded pagination for SSR to avoid client-only loading states */
@@ -149,6 +151,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         storageKey, // Deprecated alias for viewModeKey
         autoFetch = true,
         requireAuth = true,
+        include,
         initialData,
         initialPagination,
     } = options;
@@ -330,6 +333,9 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
                 if (searchQuery) {
                     params.search = searchQuery;
+                }
+                if (include) {
+                    params.include = include;
                 }
 
                 // Spread filters as flat query params (V3 expects flat params, not nested filters wrapper)
