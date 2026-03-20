@@ -86,14 +86,9 @@ export function registerRecruiterCandidateRoutes(
   app.get('/api/v3/recruiter-candidates', {
     schema: { querystring: listQuerySchema },
   }, async (request, reply) => {
-    const clerkUserId = getClerkUserId(request);
     const query = request.query as any;
-    let parsedFilters: Record<string, any> = {};
-    if (query.filters) {
-      try { parsedFilters = typeof query.filters === 'string' ? JSON.parse(query.filters) : query.filters; } catch { /* ignore */ }
-    }
-    const params: RecruiterCandidateListParams = { ...query, filters: parsedFilters };
-    const result = await service.getAll(params, clerkUserId || undefined);
+    const params: RecruiterCandidateListParams = { ...query };
+    const result = await service.getAll(params);
     return reply.send({ data: result.data, pagination: result.pagination });
   });
 
