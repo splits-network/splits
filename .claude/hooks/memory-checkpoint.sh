@@ -39,8 +39,10 @@ date +%s > "$COOLDOWN_FILE"
 
 # Output reminder (injected into conversation)
 cat <<'REMINDER'
-MEMORY CHECKPOINT: Significant changes detected. Before moving on:
-1. If this work was non-trivial → write a hindsight note to .memory/hindsight/
-2. If you learned something reusable → update or create a note in .memory/patterns/ or .memory/decisions/
-3. If context is heavy → offload key findings to .memory/ so they survive compression
+MEMORY CHECKPOINT — Update .memory/claude/ tree if applicable:
+- Decision made? → .memory/claude/decisions/ (date, reasoning, alternatives, expected outcome)
+- Lesson learned? → .memory/claude/hindsight/ (what happened, what was harder, what to do differently)
+- New pattern discovered? → .memory/claude/patterns/ or .memory/claude/snippets/
+- User correction or confirmation? → .memory/claude/feedback/
+- Always update the root index: .memory/claude/claude-memory.md
 REMINDER

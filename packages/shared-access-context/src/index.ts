@@ -100,10 +100,47 @@ export async function resolveAccessContext(
             return { ...EMPTY_CONTEXT, error: userResult.error.message };
         }
 
-        const identityUserId = userResult.data?.id || null;
+        let identityUserId = userResult.data?.id || null;
 
+        // Retry once after a short delay if user not found — handles race condition
+        // where the Clerk webhook hasn't synced the user record yet
         if (!identityUserId) {
-            return { ...EMPTY_CONTEXT, error: 'Identity user not found' };
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            const retryResult = await supabase
+                .from('users')
+                .select(
+                    `
+                    id,
+                    memberships!memberships_user_id_fkey1 (
+                        role_name,
+                        organization_id,
+                        company_id
+                    ),
+                    user_roles!user_roles_user_id_fkey (
+                        role_name,
+                        role_entity_id
+                    )
+                `
+                )
+                .eq('clerk_user_id', clerkUserId)
+                .is('memberships.deleted_at', null)
+                .is('user_roles.deleted_at', null)
+                .maybeSingle();
+
+            if (retryResult.error) {
+                console.error('resolveAccessContext retry query error:', retryResult.error);
+                return { ...EMPTY_CONTEXT, error: retryResult.error.message };
+            }
+
+            identityUserId = retryResult.data?.id || null;
+
+            if (!identityUserId) {
+                return { ...EMPTY_CONTEXT, error: 'Identity user not found' };
+            }
+
+            // Use retry result data for the rest of the resolution
+            userResult.data = retryResult.data;
         }
 
         // Handle both array and single object cases (Supabase returns object for 1:1, array for 1:many)

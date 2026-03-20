@@ -20,6 +20,12 @@ export class DomainEventConsumer {
     private channel: Channel | null = null;
     private readonly exchange = 'splits-network-events';
     private readonly queue = 'ai-service-queue';
+    private reconnectAttempts = 0;
+    private readonly maxReconnectAttempts = 10;
+    private reconnectTimeout: NodeJS.Timeout | null = null;
+    private isConnecting = false;
+    private isClosing = false;
+    private connectionHealthy = false;
 
     constructor(
         private rabbitMqUrl: string,
@@ -32,11 +38,45 @@ export class DomainEventConsumer {
     ) { }
 
     async connect(): Promise<void> {
+        if (this.isConnecting) {
+            this.logger.debug('AI service consumer connection attempt already in progress, skipping');
+            return;
+        }
+
+        this.isConnecting = true;
+
         try {
-            this.connection = await amqp.connect(this.rabbitMqUrl) as any;
+            this.connection = await amqp.connect(this.rabbitMqUrl, {
+                heartbeat: 30,
+            }) as any;
             this.channel = await (this.connection as any).createChannel();
 
             if (!this.channel) throw new Error('Failed to create channel');
+
+            // Setup connection event listeners
+            this.connection!.on('error', (err) => {
+                this.logger.error({ err }, 'AI service consumer RabbitMQ connection error');
+                this.connectionHealthy = false;
+                this.scheduleReconnect();
+            });
+
+            this.connection!.on('close', () => {
+                this.logger.warn('AI service consumer RabbitMQ connection closed');
+                this.connectionHealthy = false;
+                if (!this.isClosing) this.scheduleReconnect();
+            });
+
+            this.channel.on('error', (err) => {
+                this.logger.error({ err }, 'AI service consumer RabbitMQ channel error');
+                this.connectionHealthy = false;
+                if (!this.isClosing) this.scheduleReconnect();
+            });
+
+            this.channel.on('close', () => {
+                this.logger.warn('AI service consumer RabbitMQ channel closed');
+                this.connectionHealthy = false;
+                if (!this.isClosing) this.scheduleReconnect();
+            });
 
             // Assert exchange exists
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
@@ -45,12 +85,13 @@ export class DomainEventConsumer {
             await this.channel.assertQueue(this.queue, { durable: true });
 
             // Bind to events we care about
-            // Listen for application stage changes (specifically when stage becomes ai_review or gpt_review)
             await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
-            // Listen for processed documents to extract structured resume metadata
             await this.channel.bindQueue(this.queue, this.exchange, 'document.processed');
-            // Listen for completed call recordings to trigger generalized call AI pipeline
             await this.channel.bindQueue(this.queue, this.exchange, 'call.recording_ready');
+
+            this.reconnectAttempts = 0;
+            this.isConnecting = false;
+            this.connectionHealthy = true;
 
             this.logger.info({
                 exchange: this.exchange,
@@ -60,9 +101,52 @@ export class DomainEventConsumer {
 
             await this.startConsuming();
         } catch (error) {
+            this.isConnecting = false;
+            this.connectionHealthy = false;
             this.logger.error({ error }, 'Failed to connect to RabbitMQ');
-            throw error;
+
+            if (!this.isClosing) {
+                this.scheduleReconnect();
+            } else {
+                throw error;
+            }
         }
+    }
+
+    private scheduleReconnect(): void {
+        if (this.isClosing || this.reconnectTimeout) return;
+
+        this.reconnectAttempts++;
+
+        if (this.reconnectAttempts > this.maxReconnectAttempts) {
+            this.logger.error('AI service consumer max reconnection attempts reached, giving up');
+            return;
+        }
+
+        const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
+        this.logger.info({ attempt: this.reconnectAttempts, delay }, 'Scheduling AI service consumer reconnection');
+
+        this.reconnectTimeout = setTimeout(async () => {
+            this.reconnectTimeout = null;
+            await this.cleanup();
+            try {
+                await this.connect();
+            } catch (error) {
+                this.logger.error({ err: error }, 'AI service consumer reconnection attempt failed');
+            }
+        }, delay);
+    }
+
+    private async cleanup(): Promise<void> {
+        this.connectionHealthy = false;
+        try { if (this.channel) await this.channel.close(); } catch (_) { }
+        try { if (this.connection) await (this.connection as any).close(); } catch (_) { }
+        this.connection = null;
+        this.channel = null;
+    }
+
+    isConnected(): boolean {
+        return this.connection !== null && this.channel !== null && this.connectionHealthy;
     }
 
     private async startConsuming(): Promise<void> {
@@ -326,16 +410,12 @@ export class DomainEventConsumer {
     }
 
     async close(): Promise<void> {
-        try {
-            if (this.channel) {
-                await this.channel.close();
-            }
-            if (this.connection) {
-                await (this.connection as any).close();
-            }
-            this.logger.info('AI service domain consumer closed');
-        } catch (error) {
-            this.logger.error({ error }, 'Error closing domain consumer');
+        this.isClosing = true;
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
         }
+        await this.cleanup();
+        this.logger.info('AI service domain consumer closed');
     }
 }

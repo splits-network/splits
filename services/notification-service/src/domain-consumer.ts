@@ -245,7 +245,9 @@ export class DomainEventConsumer {
         try {
             this.logger.info('Attempting to connect to RabbitMQ');
 
-            this.connection = await amqp.connect(this.rabbitMqUrl) as any;
+            this.connection = await amqp.connect(this.rabbitMqUrl, {
+                heartbeat: 30,
+            }) as any;
             this.channel = await (this.connection as any).createChannel();
 
             if (!this.channel) throw new Error('Failed to create channel');
@@ -269,11 +271,13 @@ export class DomainEventConsumer {
             this.channel.on('error', (err) => {
                 this.logger.error({ err }, 'RabbitMQ channel error');
                 this.connectionHealthy = false;
+                if (!this.isClosing) this.scheduleReconnect();
             });
 
             this.channel.on('close', () => {
                 this.logger.warn('RabbitMQ channel closed');
                 this.connectionHealthy = false;
+                if (!this.isClosing) this.scheduleReconnect();
             });
 
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });

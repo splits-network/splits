@@ -363,7 +363,7 @@ async function main() {
         }
 
         // Skip auth for GPT routes (gpt-service handles its own token validation)
-        if (request.url.startsWith('/api/v1/gpt/')) {
+        if (request.url.startsWith('/api/v1/gpt/') || request.url.startsWith('/api/v3/gpt/mcp')) {
             return;
         }
 

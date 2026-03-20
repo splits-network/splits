@@ -79,38 +79,70 @@ async function main() {
             `Document processing service HTTP server started on port ${port}`,
         );
 
-        // Connect to RabbitMQ
+        // Connect to RabbitMQ with heartbeat for faster dead-connection detection
+        const rabbitMqUrl = process.env.RABBITMQ_URL || "amqp://localhost:5672";
         logger.info("Connecting to RabbitMQ");
-        const connection = await amqp.connect(
-            process.env.RABBITMQ_URL || "amqp://localhost:5672",
-        );
-        const channel = await connection.createChannel();
 
-        // Ensure exchange exists
-        await channel.assertExchange("splits-network-events", "topic", {
-            durable: true,
-        });
+        let connection: amqp.ChannelModel;
+        let channel: amqp.Channel;
+        let consumer: DomainConsumer;
+        let isClosing = false;
 
-        // Ensure queue exists and bind to routing keys
-        const queue = "document-processing-service";
-        await channel.assertQueue(queue, { durable: true });
-        await channel.bindQueue(
-            queue,
-            "splits-network-events",
-            "document.uploaded",
-        );
+        async function connectRabbitMQ(): Promise<void> {
+            connection = await amqp.connect(rabbitMqUrl, {
+                heartbeat: 30,
+            });
+            channel = await connection.createChannel();
+
+            connection.on('error', (err) => {
+                logger.error({ err }, 'Document processing RabbitMQ connection error');
+            });
+
+            connection.on('close', () => {
+                logger.warn('Document processing RabbitMQ connection closed');
+                if (!isClosing) {
+                    logger.info('Attempting to reconnect document processing consumer...');
+                    setTimeout(() => connectRabbitMQ().catch((err) => {
+                        logger.error({ err }, 'Failed to reconnect document processing consumer');
+                    }), 5000);
+                }
+            });
+
+            channel.on('error', (err) => {
+                logger.error({ err }, 'Document processing RabbitMQ channel error');
+            });
+
+            channel.on('close', () => {
+                logger.warn('Document processing RabbitMQ channel closed');
+            });
+
+            // Ensure exchange exists
+            await channel.assertExchange("splits-network-events", "topic", {
+                durable: true,
+            });
+
+            // Ensure queue exists and bind to routing keys
+            const queue = "document-processing-service";
+            await channel.assertQueue(queue, { durable: true });
+            await channel.bindQueue(
+                queue,
+                "splits-network-events",
+                "document.uploaded",
+            );
+
+            consumer = new DomainConsumer(channel, eventPublisher);
+            await consumer.initialize();
+        }
 
         // Initialize EventPublisher
         const eventPublisher = new EventPublisher(
-            process.env.RABBITMQ_URL || "amqp://localhost:5672",
+            rabbitMqUrl,
             logger,
             "document-processing-service"
         );
         await eventPublisher.connect();
 
-        // Initialize domain consumer (will be updated to use V2)
-        const consumer = new DomainConsumer(channel, eventPublisher);
-        await consumer.initialize();
+        await connectRabbitMQ();
 
         logger.info("Document Processing Service started successfully");
 
@@ -156,18 +188,20 @@ async function main() {
         // Graceful shutdown handling
         process.on("SIGTERM", async () => {
             logger.info("Received SIGTERM, shutting down gracefully");
+            isClosing = true;
             await server.close();
-            await channel.close();
-            await connection.close();
+            try { await channel.close(); } catch (_) { }
+            try { await connection.close(); } catch (_) { }
             if (eventPublisher) await eventPublisher.close();
             process.exit(0);
         });
 
         process.on("SIGINT", async () => {
             logger.info("Received SIGINT, shutting down gracefully");
+            isClosing = true;
             await server.close();
-            await channel.close();
-            await connection.close();
+            try { await channel.close(); } catch (_) { }
+            try { await connection.close(); } catch (_) { }
             if (eventPublisher) await eventPublisher.close();
             process.exit(0);
         });

@@ -70,7 +70,7 @@ export function useSiteNotifications(options?: {
     const fetchNotifications = useCallback(async () => {
         try {
             const base = getGatewayBaseUrl();
-            const response = await fetch(`${base}/api/v3/site-notifications`, {
+            const response = await fetch(`${base}/api/v3/public/site-notifications`, {
                 cache: "no-store",
                 signal: AbortSignal.timeout(10000),
             });

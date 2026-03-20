@@ -100,12 +100,25 @@ Design standards: in the root /showcase directory
 
 Shared Obsidian vault at `.memory/` — the relational knowledge base for decisions, patterns, hindsight, and project context. Both human and AI read/write here.
 
+### Claude's Memory Tree (`.memory/claude/`)
+Claude's persistent memory lives in `.memory/claude/claude-memory.md` (root node). Read this at conversation start for orientation, then drill into branches on demand:
+- **feedback/** — Corrections and confirmed approaches
+- **patterns/** — Codebase patterns and technical knowledge
+- **snippets/** — Real code templates (API routes, services, repos, gateway, portal, events)
+- **decisions/** — Architecture/design decisions with date, reasoning, alternatives, outcome
+- **hindsight/** — Post-task reflections (what worked, what didn't, what to do differently)
+- **project/** — Active initiatives and deadlines
+- **user/** — User preferences and working style
+- **references/** — External system pointers
+
 ### Context Management Rules
-1. **Offload early** — When you discover something reusable (a pattern, gotcha, decision rationale), write it to `.memory/` immediately. Don't hold it in conversation context hoping to use it later.
-2. **Read on demand** — Instead of keeping all project knowledge in context, read specific `.memory/` files when you need them. The index files (`decisions/index.md`, `patterns/index.md`, etc.) tell you what exists.
-3. **Write hindsight** — After completing non-trivial work (3+ files changed, new feature, bug fix that required investigation), write a hindsight note to `.memory/hindsight/` with: what happened, what was harder than expected, what you'd do differently, and `[[wikilinks]]` to related notes.
-4. **Update, don't duplicate** — Before creating a new note, check if one exists that should be updated instead.
-5. **Link everything** — Use `[[wikilinks]]` to connect related knowledge. A decision should link to the patterns it creates. A hindsight should link to the decision it reflects on.
+1. **Offload early** — When you discover something reusable (a pattern, gotcha, decision rationale), write it to `.memory/claude/` immediately. Don't hold it in conversation context hoping to use it later.
+2. **Read on demand** — Instead of keeping all project knowledge in context, read `.memory/claude/claude-memory.md` for orientation, then drill into specific branches when the task requires it.
+3. **Log decisions** — When a non-trivial decision is made, log it to `.memory/claude/decisions/` with date, context, reasoning, alternatives, and expected outcome.
+4. **Write hindsight** — After completing non-trivial work (3+ files changed, new feature, bug fix that required investigation), write a hindsight note to `.memory/claude/hindsight/` with: what happened, what was harder than expected, what you'd do differently, and `[[wikilinks]]` to related notes.
+5. **Update snippets** — When a code pattern changes significantly, update the relevant snippet in `.memory/claude/snippets/`.
+6. **Update, don't duplicate** — Before creating a new note, check if one exists that should be updated instead.
+7. **Link everything** — Use `[[wikilinks]]` to connect related knowledge. A decision should link to the patterns it creates. A hindsight should link to the decision it reflects on.
 
 ## Guidance Documents
 

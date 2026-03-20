@@ -3,13 +3,13 @@
  *
  * Declarative config for all V3 identity-related resources.
  * The proxy layer handles auth, CORS, correlation IDs — no custom handlers.
+ *
+ * Exception: Clerk webhook requires custom proxy to forward raw body + Svix headers.
  */
 
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
-import { requireAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 const identityV3Routes: V3RouteConfig[] = [
   // ── Users (specific paths before :id to avoid collision) ────────
@@ -61,11 +61,41 @@ const identityV3Routes: V3RouteConfig[] = [
 
   // ── Webhooks ────────────────────────────────────────────────────
   { path: '/webhooks/health', method: 'GET', auth: 'none' },
-  { path: '/webhooks/clerk', method: 'POST', auth: 'none' },
+  // NOTE: /webhooks/clerk is registered as a custom handler below (needs raw body + Svix headers)
 ];
 
 export function registerIdentityV3Routes(app: FastifyInstance, services: ServiceRegistry) {
   const identityClient = services.get('identity');
 
   registerV3Routes(app, identityClient, identityV3Routes);
+
+  // Custom webhook proxy — forwards raw body + Svix headers for signature verification
+  app.post('/api/v3/webhooks/clerk', async (request: FastifyRequest, reply: FastifyReply) => {
+    const correlationId = (request as any).correlationId;
+    const rawBody = (request as any).rawBody as Buffer;
+
+    if (!rawBody) {
+      request.log.error({ correlationId }, 'Missing raw body for Clerk webhook');
+      return reply.status(400).send({ error: { message: 'Missing raw body' } });
+    }
+
+    try {
+      const data = await identityClient.post(
+        '/api/v3/webhooks/clerk',
+        rawBody,
+        correlationId,
+        {
+          'svix-id': request.headers['svix-id'] as string,
+          'svix-timestamp': request.headers['svix-timestamp'] as string,
+          'svix-signature': request.headers['svix-signature'] as string,
+        }
+      );
+      return reply.send(data);
+    } catch (error: any) {
+      request.log.error({ error: error.message, correlationId }, 'V3 Clerk webhook proxy failed');
+      return reply
+        .status(error.statusCode || 500)
+        .send(error.jsonBody || { error: { code: 'PROXY_ERROR', message: error.message || 'Webhook processing failed' } });
+    }
+  });
 }

@@ -36,6 +36,12 @@ export class DomainEventConsumer {
   private executionRunner: ExecutionRunner;
   private fraudRunner: FraudRunner;
   private logger: Logger;
+  private reconnectAttempts = 0;
+  private readonly maxReconnectAttempts = 10;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
+  private isConnecting = false;
+  private isClosing = false;
+  private connectionHealthy = false;
 
   constructor(private config: DomainConsumerConfig) {
     this.logger = config.logger;
@@ -44,34 +50,119 @@ export class DomainEventConsumer {
   }
 
   async connect(): Promise<void> {
-    this.connection = await amqp.connect(this.config.rabbitMqUrl);
-    if (!this.connection) throw new Error('Failed to establish RabbitMQ connection');
-
-    this.channel = await this.connection.createChannel();
-    if (!this.channel) throw new Error('Failed to create channel');
-
-    await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
-    await this.channel.assertQueue(this.queue, { durable: true });
-
-    for (const event of SUBSCRIBED_EVENTS) {
-      await this.channel.bindQueue(this.queue, this.exchange, event);
+    if (this.isConnecting) {
+      this.logger.debug('Automation consumer connection attempt already in progress, skipping');
+      return;
     }
 
-    this.logger.info('V3 domain consumer connected to RabbitMQ');
+    this.isConnecting = true;
 
-    await this.channel.consume(this.queue, async (msg) => {
-      if (!msg) return;
-      try {
-        const event: DomainEvent = JSON.parse(msg.content.toString());
-        await this.handleEvent(event);
-        this.channel!.ack(msg);
-      } catch (error) {
-        this.logger.error({ err: error }, 'Failed to process event');
-        this.channel!.nack(msg, false, false);
+    try {
+      this.connection = await amqp.connect(this.config.rabbitMqUrl, {
+        heartbeat: 30,
+      });
+      if (!this.connection) throw new Error('Failed to establish RabbitMQ connection');
+
+      this.connection.on('error', (err) => {
+        this.logger.error({ err }, 'Automation consumer RabbitMQ connection error');
+        this.connectionHealthy = false;
+        this.scheduleReconnect();
+      });
+
+      this.connection.on('close', () => {
+        this.logger.warn('Automation consumer RabbitMQ connection closed');
+        this.connectionHealthy = false;
+        if (!this.isClosing) this.scheduleReconnect();
+      });
+
+      this.channel = await this.connection.createChannel();
+      if (!this.channel) throw new Error('Failed to create channel');
+
+      this.channel.on('error', (err) => {
+        this.logger.error({ err }, 'Automation consumer RabbitMQ channel error');
+        this.connectionHealthy = false;
+        if (!this.isClosing) this.scheduleReconnect();
+      });
+
+      this.channel.on('close', () => {
+        this.logger.warn('Automation consumer RabbitMQ channel closed');
+        this.connectionHealthy = false;
+        if (!this.isClosing) this.scheduleReconnect();
+      });
+
+      await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
+      await this.channel.assertQueue(this.queue, { durable: true });
+
+      for (const event of SUBSCRIBED_EVENTS) {
+        await this.channel.bindQueue(this.queue, this.exchange, event);
       }
-    });
 
-    this.logger.info('Started consuming domain events for V3 rule evaluation');
+      this.reconnectAttempts = 0;
+      this.isConnecting = false;
+      this.connectionHealthy = true;
+
+      this.logger.info('V3 domain consumer connected to RabbitMQ');
+
+      await this.channel.consume(this.queue, async (msg) => {
+        if (!msg) return;
+        try {
+          const event: DomainEvent = JSON.parse(msg.content.toString());
+          await this.handleEvent(event);
+          this.channel!.ack(msg);
+        } catch (error) {
+          this.logger.error({ err: error }, 'Failed to process event');
+          this.channel!.nack(msg, false, false);
+        }
+      });
+
+      this.logger.info('Started consuming domain events for V3 rule evaluation');
+    } catch (error) {
+      this.isConnecting = false;
+      this.connectionHealthy = false;
+      this.logger.error({ err: error }, 'Failed to connect automation consumer to RabbitMQ');
+
+      if (!this.isClosing) {
+        this.scheduleReconnect();
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private scheduleReconnect(): void {
+    if (this.isClosing || this.reconnectTimeout) return;
+
+    this.reconnectAttempts++;
+
+    if (this.reconnectAttempts > this.maxReconnectAttempts) {
+      this.logger.error('Automation consumer max reconnection attempts reached, giving up');
+      return;
+    }
+
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts - 1), 30000);
+    this.logger.info({ attempt: this.reconnectAttempts, delay }, 'Scheduling automation consumer reconnection');
+
+    this.reconnectTimeout = setTimeout(async () => {
+      this.reconnectTimeout = null;
+      await this.cleanup();
+      try {
+        await this.connect();
+      } catch (error) {
+        this.logger.error({ err: error }, 'Automation consumer reconnection attempt failed');
+      }
+    }, delay);
+  }
+
+  private async cleanup(): Promise<void> {
+    this.connectionHealthy = false;
+    try { if (this.channel) await this.channel.close(); } catch (_) { }
+    try { if (this.connection) await this.connection.close(); } catch (_) { }
+    this.connection = null;
+    this.channel = null;
+  }
+
+  isConnected(): boolean {
+    return this.connection !== null && this.channel !== null && this.connectionHealthy;
   }
 
   private async handleEvent(event: DomainEvent): Promise<void> {
@@ -87,12 +178,12 @@ export class DomainEventConsumer {
   }
 
   async close(): Promise<void> {
-    try {
-      if (this.channel) await this.channel.close();
-      if (this.connection) await this.connection.close();
-      this.logger.info('Closed V3 domain consumer RabbitMQ connection');
-    } catch (error) {
-      this.logger.error({ err: error }, 'Error closing RabbitMQ connection');
+    this.isClosing = true;
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
     }
+    await this.cleanup();
+    this.logger.info('Closed V3 domain consumer RabbitMQ connection');
   }
 }
