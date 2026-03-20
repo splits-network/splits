@@ -51,7 +51,7 @@ export function OverviewTab({ code }: { code: RecruiterCode }) {
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                             <i className="fa-duotone fa-regular fa-briefcase text-xs text-base-content/40 shrink-0" />
                             <span className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/40 shrink-0">
-                                Recruiters
+                                Companies
                             </span>
                             <span className="text-sm text-base-content/70 truncate">
                                 {recruiterLink}
@@ -97,7 +97,9 @@ export function OverviewTab({ code }: { code: RecruiterCode }) {
                         label="Status"
                         value={
                             <div className="flex items-center gap-2">
-                                <span className={`badge ${statusBadgeClass(code)}`}>
+                                <span
+                                    className={`badge ${statusBadgeClass(code)}`}
+                                >
                                     {code.status}
                                 </span>
                                 {code.is_default && (
