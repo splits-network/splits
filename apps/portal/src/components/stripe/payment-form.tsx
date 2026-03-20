@@ -266,11 +266,8 @@ export function PaymentForm({
                                         </div>
                                         <div className="text-sm text-base-content/70">
                                             Save $
-                                            {(appliedDiscount.savings_amount ||
-                                                0) / 100}
-                                            (
-                                            {appliedDiscount.savings_percentage}
-                                            %)
+                                            {appliedDiscount.savings_amount || 0}
+                                            {" "}({appliedDiscount.savings_percentage}%)
                                         </div>
                                     </div>
                                 </div>
