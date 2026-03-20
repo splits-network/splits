@@ -83,7 +83,20 @@ export class DiscountService {
     }
 
     const promotionCode = promotionCodes.data[0];
-    const coupon = (promotionCode as any).coupon as Stripe.Coupon;
+
+    // Resolve coupon — promotion.coupon is a string ID by default in SDK v20+
+    const couponRef = promotionCode.promotion?.coupon;
+    let coupon: Stripe.Coupon;
+    if (typeof couponRef === 'object' && couponRef !== null) {
+      coupon = couponRef as Stripe.Coupon;
+    } else if (typeof couponRef === 'string') {
+      coupon = await this.stripe.coupons.retrieve(couponRef);
+    } else {
+      return {
+        valid: false,
+        error: { code: 'invalid', message: 'This promotion code has no associated coupon.' },
+      };
+    }
 
     // Check if expired
     if (promotionCode.expires_at && promotionCode.expires_at < Math.floor(Date.now() / 1000)) {
