@@ -11,7 +11,7 @@ export interface CandidateSettings {
     portfolio_url?: string;
     bio?: string;
     marketplace_profile?: MarketplaceProfile;
-    marketplace_visibility?: "public" | "private" | "hidden";
+    marketplace_visibility?: "public" | "limited" | "hidden";
     show_email?: boolean;
     show_phone?: boolean;
     show_location?: boolean;

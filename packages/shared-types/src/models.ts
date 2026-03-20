@@ -426,7 +426,7 @@ export interface Candidate {
     verified_by_user_id?: string;
 
     // Marketplace enhancement fields
-    marketplace_visibility?: 'public' | 'private' | 'hidden';
+    marketplace_visibility?: 'public' | 'limited' | 'hidden';
     marketplace_profile?: MarketplaceProfile; // Rich bio and other structured content
     show_email?: boolean;
     show_phone?: boolean;

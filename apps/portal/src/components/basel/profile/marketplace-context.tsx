@@ -26,7 +26,7 @@ import {
 export interface MarketplaceSettingsData {
     slug: string;
     marketplace_enabled: boolean;
-    marketplace_visibility: "public" | "private" | "hidden";
+    marketplace_visibility: "public" | "limited" | "hidden";
     industries: string[];
     specialties: string[];
     location: string;
