@@ -3,7 +3,6 @@ export interface StandardListParams {
     limit?: number;
     search?: string;
     filters?: Record<string, any>;
-    include?: string;
     sort_by?: string;
     sort_order?: 'asc' | 'desc';
 }

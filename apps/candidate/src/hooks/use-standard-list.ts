@@ -43,8 +43,6 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
     defaultSortOrder?: 'asc' | 'desc';
     /** Default page size */
     defaultLimit?: number;
-    /** Include related data (comma-separated) */
-    include?: string;
     /** Transform response data after fetching */
     transformData?: (data: any[]) => T[];
     /** Sync state to URL query params */
@@ -145,7 +143,6 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         defaultSortBy = 'created_at',
         defaultSortOrder = 'desc',
         defaultLimit = DEFAULT_LIMIT,
-        include,
         transformData,
         syncToUrl = true,
         viewModeKey,
@@ -335,13 +332,12 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
                     params.search = searchQuery;
                 }
 
-                if (include) {
-                    params.include = include;
-                }
-
-                if (Object.keys(activeFilters).length > 0) {
-                    params.filters = activeFilters;
-                }
+                // Spread filters as flat query params (V3 expects flat params, not nested filters wrapper)
+                Object.entries(activeFilters).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null) {
+                        (params as any)[key] = value;
+                    }
+                });
 
                 // Handle authentication based on requireAuth option
                 if (requireAuth) {

@@ -93,7 +93,6 @@ function JobsPageInner() {
         syncToUrl: true,
         autoFetch: true,
         requireAuth: false,
-        include: "company,skills",
     });
 
     /* -- Gamification: register company entities -- */

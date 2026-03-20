@@ -660,12 +660,6 @@ export function DetailLoader({
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Application }>(
                     `/applications/${id}/view/detail`,
-                    {
-                        params: {
-                            include:
-                                "recruiter,ai_review,documents,audit_log",
-                        },
-                    },
                 );
                 if (!signal?.cancelled) setApplication(res.data);
             } catch (err) {
