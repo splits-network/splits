@@ -477,6 +477,9 @@ jobs:
                       if [ "$svc" = "billing-service" ]; then
                         kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
                       fi
+                      if [ "$svc" = "health-monitor" ]; then
+                        kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }} 2>&1 | grep -v "missing the kubectl.kubernetes.io" || true
+                      fi
                     fi
                   done
 
