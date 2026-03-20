@@ -152,6 +152,7 @@ const atsV3Routes: V3RouteConfig[] = [
   // DELETE for composite key registered manually below
 
   // ── Company Skills (junction) ─────────────────────────────────
+  { path: '/company-skills/views/with-details', method: 'GET', auth: 'required' },
   { path: '/company-skills', method: 'GET', auth: 'required' },
   { path: '/company-skills', method: 'POST', auth: 'required' },
   { path: '/company-skills/company/:companyId/bulk-replace', method: 'PUT', auth: 'required' },
@@ -164,6 +165,7 @@ const atsV3Routes: V3RouteConfig[] = [
   { path: '/perks/:id', method: 'DELETE', auth: 'required' },
 
   // ── Company Perks (junction) ──────────────────────────────────
+  { path: '/company-perks/views/with-details', method: 'GET', auth: 'required' },
   { path: '/company-perks', method: 'GET', auth: 'required' },
   { path: '/company-perks', method: 'POST', auth: 'required' },
   { path: '/company-perks/company/:companyId/bulk-replace', method: 'PUT', auth: 'required' },
@@ -176,6 +178,7 @@ const atsV3Routes: V3RouteConfig[] = [
   { path: '/culture-tags/:id', method: 'DELETE', auth: 'required' },
 
   // ── Company Culture Tags (junction) ───────────────────────────
+  { path: '/company-culture-tags/views/with-details', method: 'GET', auth: 'required' },
   { path: '/company-culture-tags', method: 'GET', auth: 'required' },
   { path: '/company-culture-tags', method: 'POST', auth: 'required' },
   { path: '/company-culture-tags/company/:companyId/bulk-replace', method: 'PUT', auth: 'required' },

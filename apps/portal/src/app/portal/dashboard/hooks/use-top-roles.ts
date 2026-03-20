@@ -26,7 +26,7 @@ export function useTopRoles() {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
-            const response: any = await api.get('/jobs', {
+            const response: any = await api.get('/jobs/views/recruiter-board', {
                 params: { status: 'active', limit: 5 },
             });
 

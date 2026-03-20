@@ -79,7 +79,7 @@ export default function JobsAdminPage() {
                 queryParams.set("sort_order", params.sort_order);
 
             const response = await apiClient.get(
-                `/jobs?${queryParams.toString()}`,
+                `/jobs/views/admin-board?${queryParams.toString()}`,
             );
             return response;
         },

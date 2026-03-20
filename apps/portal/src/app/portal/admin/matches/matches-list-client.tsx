@@ -56,7 +56,7 @@ export default function MatchesListClient() {
             if (params.sort_by) queryParams.set("sort_by", params.sort_by);
             if (params.sort_order) queryParams.set("sort_order", params.sort_order);
 
-            return apiClient.get(`/matches?${queryParams.toString()}`);
+            return apiClient.get(`/matches/views/enriched?${queryParams.toString()}`);
         },
         defaultFilters,
         defaultSortBy: "match_score",

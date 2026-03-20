@@ -168,9 +168,9 @@ export function CompanyDetailLoader({
                 }
 
                 const [skillsRes, perksRes, cultureRes] = await Promise.all([
-                    client.get<{ data: Array<{ skill?: { name: string } }> }>(`/company-skills?company_id=${id}`),
-                    client.get<{ data: Array<{ perk?: { name: string } }> }>(`/company-perks?company_id=${id}`),
-                    client.get<{ data: Array<{ culture_tag?: { name: string } }> }>(`/company-culture-tags?company_id=${id}`),
+                    client.get<{ data: Array<{ skill?: { name: string } }> }>(`/company-skills/views/with-details`, { params: { company_id: id } }),
+                    client.get<{ data: Array<{ perk?: { name: string } }> }>(`/company-perks/views/with-details`, { params: { company_id: id } }),
+                    client.get<{ data: Array<{ culture_tag?: { name: string } }> }>(`/company-culture-tags/views/with-details`, { params: { company_id: id } }),
                 ]);
 
                 if (!signal?.cancelled) {

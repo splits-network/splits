@@ -88,7 +88,7 @@ export function useCandidateDashboardData() {
                     params: { limit: 100 },
                 }),
                 client.get<ApiResponse<ActiveRecruiter[]>>('/recruiter-candidates/views/list-for-candidate'),
-                client.get<{ data: EnrichedMatch[] }>('/matches', {
+                client.get<{ data: EnrichedMatch[] }>('/matches/views/enriched', {
                     params: { limit: 5, status: 'active' },
                 }),
             ]);

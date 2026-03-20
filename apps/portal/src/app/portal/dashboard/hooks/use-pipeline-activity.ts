@@ -26,7 +26,7 @@ export function usePipelineActivity() {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
-            const response: any = await api.get('/applications', {
+            const response: any = await api.get('/applications/views/listing', {
                 params: {
                     limit: 10,
                     sort_by: 'updated_at',

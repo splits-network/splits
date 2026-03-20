@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -75,10 +75,47 @@ export default function AdminBillingProfilesPage() {
         syncToUrl: true,
     });
 
+    // Enrich profiles with company names (CRUD returns flat data without joins)
+    const [companyNames, setCompanyNames] = useState<Record<string, string>>({});
+    const enrichedRef = useRef<Set<string>>(new Set());
+    useEffect(() => {
+        if (!profiles.length) return;
+        const missing = profiles
+            .map((p) => p.company_id)
+            .filter((id) => id && !enrichedRef.current.has(id));
+        if (!missing.length) return;
+        const unique = [...new Set(missing)];
+        (async () => {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            const res: any = await client.get("/companies", {
+                params: { ids: unique.join(","), limit: unique.length },
+            });
+            const names: Record<string, string> = {};
+            for (const c of res?.data || []) {
+                names[c.id] = c.name;
+                enrichedRef.current.add(c.id);
+            }
+            setCompanyNames((prev) => ({ ...prev, ...names }));
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profiles]);
+
+    const enrichedProfiles = useMemo(
+        () =>
+            profiles.map((p) =>
+                p.company?.name
+                    ? p
+                    : { ...p, company: { id: p.company_id, name: companyNames[p.company_id] || "" } },
+            ),
+        [profiles, companyNames],
+    );
+
     const visibleProfiles = useMemo(() => {
         const query = searchInput.trim().toLowerCase();
-        if (!query) return profiles;
-        return profiles.filter((profile) => {
+        if (!query) return enrichedProfiles;
+        return enrichedProfiles.filter((profile) => {
             const haystack = [
                 profile.company?.name,
                 profile.billing_email,
@@ -91,7 +128,7 @@ export default function AdminBillingProfilesPage() {
                 .toLowerCase();
             return haystack.includes(query);
         });
-    }, [profiles, searchInput]);
+    }, [enrichedProfiles, searchInput]);
 
     const fetchInvoices = useCallback(
         async (params: { page: number; limit: number }) => {

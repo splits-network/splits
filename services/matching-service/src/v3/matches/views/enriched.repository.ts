@@ -28,6 +28,7 @@ export class EnrichedMatchRepository {
       .from('candidate_role_matches')
       .select(ENRICHED_SELECT, { count: 'exact' });
 
+    if ((params as any).id) query = query.eq('id', (params as any).id);
     if (params.candidate_id) query = query.eq('candidate_id', params.candidate_id);
     if (params.job_id) query = query.eq('job_id', params.job_id);
     if (params.match_tier) query = query.eq('match_tier', params.match_tier);

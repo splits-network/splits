@@ -55,7 +55,7 @@ export default function JobDetailClient({ jobId }: { jobId: string }) {
             if (!token) throw new Error("No auth token");
             const client = createAuthenticatedClient(token);
             const response = await client.get(
-                `/jobs/${jobId}?include=company,requirements`,
+                `/jobs/${jobId}/view/recruiter-detail`,
             );
             setJob(response.data);
         } catch (err) {

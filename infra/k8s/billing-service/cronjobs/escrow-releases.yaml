@@ -55,7 +55,7 @@ spec:
                           command: ["node"]
                           args:
                               [
-                                  "/app/services/billing-service/dist/jobs/escrow-releases.js",
+                                  "/app/services/billing-service/dist/jobs/process-escrow-releases.js",
                               ]
 
                           env:
