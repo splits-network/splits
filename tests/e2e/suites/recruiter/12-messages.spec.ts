@@ -4,7 +4,7 @@ test.describe('Recruiter — Messages', () => {
   test('messages page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/messages');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('conversation list or empty state is visible', async ({

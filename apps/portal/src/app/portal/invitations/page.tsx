@@ -72,7 +72,7 @@ export default function InvitationsBaselPage() {
 
             try {
                 const client = createAuthenticatedClient(token);
-                const response = await client.get("/recruiter-candidates", {
+                const response = await client.get("/recruiter-candidates/views/list", {
                     params: { limit: 100 },
                 });
 
@@ -175,7 +175,7 @@ export default function InvitationsBaselPage() {
         setSortBy,
         setSortOrder,
     } = useStandardList<Invitation, InvitationFilters>({
-        endpoint: "/recruiter-candidates",
+        endpoint: "/recruiter-candidates/views/list",
         defaultFilters,
         defaultSortBy: "invited_at",
         defaultSortOrder: "desc",

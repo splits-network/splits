@@ -22,12 +22,10 @@ export class RecruiterCandidateService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
-  async getAll(params: RecruiterCandidateListParams, clerkUserId?: string) {
-    const scopeFilters = clerkUserId ? await this.buildScopeFilters(clerkUserId) : undefined;
+  async getAll(params: RecruiterCandidateListParams) {
     const page = params.page || 1;
     const limit = Math.min(params.limit || 25, 100);
-    if (scopeFilters === null) return { data: [], pagination: { total: 0, page, limit, total_pages: 0 } };
-    const { data, total } = await this.repository.findAll(params, scopeFilters);
+    const { data, total } = await this.repository.findAll(params);
     return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
   }
 
@@ -211,11 +209,4 @@ export class RecruiterCandidateService {
     return updated;
   }
 
-  private async buildScopeFilters(clerkUserId: string) {
-    const ctx = await this.accessResolver.resolve(clerkUserId);
-    if (ctx.isPlatformAdmin) return {};
-    if (ctx.recruiterId) return { recruiter_id: ctx.recruiterId };
-    if (ctx.candidateId) return { candidate_id: ctx.candidateId };
-    return null;
-  }
 }

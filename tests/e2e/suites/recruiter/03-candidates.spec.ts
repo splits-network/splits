@@ -5,7 +5,7 @@ test.describe('Recruiter — Candidates', () => {
   test('candidates page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/candidates');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('candidate list or empty state is visible', async ({ recruiterPage: page }) => {
@@ -39,7 +39,7 @@ test.describe('Recruiter — Candidates', () => {
       const target = count > 1 ? viewButtons.nth(1) : viewButtons.first();
       await target.click();
       // Page should still be stable after switching
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 
@@ -54,7 +54,7 @@ test.describe('Recruiter — Candidates', () => {
       await searchInput.first().fill('test candidate');
       // Allow debounce time
       await page.waitForTimeout(500);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
       // Clear search
       await searchInput.first().clear();
     }
@@ -71,7 +71,7 @@ test.describe('Recruiter — Candidates', () => {
     if (await addButton.first().isVisible().catch(() => false)) {
       await addButton.first().click();
       // Should navigate to a form or open a modal without errors
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 });

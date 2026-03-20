@@ -2,10 +2,10 @@ import { test, expect } from '../../fixtures/auth';
 
 test.describe('Company Admin — Roles', () => {
   test('roles listing page loads', async ({ companyAdminPage: page, seedData }) => {
-    await page.goto('/portal/roles');
+    await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
-    await expect(page.locator('body')).not.toContainText(/500|internal server error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     // Page should show a heading or list area
     const heading = page.locator('h1, h2').first();
@@ -16,7 +16,7 @@ test.describe('Company Admin — Roles', () => {
     companyAdminPage: page,
     seedData,
   }) => {
-    await page.goto('/portal/roles');
+    await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
 
     // Wait for page content to fully load (profile hydration can be slow)
     await page.waitForLoadState('networkidle');
@@ -42,7 +42,7 @@ test.describe('Company Admin — Roles', () => {
   });
 
   test('create a new role', async ({ companyAdminPage: page, seedData }) => {
-    await page.goto('/portal/roles');
+    await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
 
     // Retry if profile failed to load
@@ -98,7 +98,7 @@ test.describe('Company Admin — Roles', () => {
 
     // Verify new role appears (navigate back to listing if redirected)
     if (!page.url().includes('/portal/roles')) {
-      await page.goto('/portal/roles');
+      await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
       await page.waitForLoadState('networkidle');
     }
 

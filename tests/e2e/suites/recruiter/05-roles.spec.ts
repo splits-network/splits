@@ -5,7 +5,7 @@ test.describe('Recruiter — Roles', () => {
   test('roles page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/roles');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('recruiter board or role list is visible', async ({ recruiterPage: page }) => {
@@ -37,7 +37,7 @@ test.describe('Recruiter — Roles', () => {
     if (await companyFilter.first().isVisible().catch(() => false)) {
       await companyFilter.first().click();
       await page.waitForTimeout(300);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 

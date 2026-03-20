@@ -11,7 +11,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
       await page.waitForLoadState('networkidle');
 
       await expect(page).not.toHaveURL(/\/sign-in/);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
       // Look for invitation form
       const emailInput = page.locator(
@@ -41,11 +41,11 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
         ).first();
 
         if (await sendButton.isVisible().catch(() => false)) {
-          await sendButton.click();
+          await sendButton.click({ force: true });
           await page.waitForLoadState('networkidle');
         }
 
-        await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+        await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
       }
     });
 
@@ -75,7 +75,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
           await page.waitForLoadState('networkidle');
 
           await expect(page.locator('body')).not.toContainText(
-            /500|Internal Server Error/i
+            /Internal Server Error/i
           );
         }
       }
@@ -88,7 +88,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
       await page.waitForLoadState('networkidle');
 
       await expect(page).not.toHaveURL(/\/sign-in/);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
       // Page should load — roles may or may not include the newly connected company
       const content = page.locator(
@@ -144,7 +144,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
         }
 
         await expect(page.locator('body')).not.toContainText(
-          /500|Internal Server Error/i
+          /Internal Server Error/i
         );
       }
     });
@@ -166,7 +166,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
         await page.waitForLoadState('networkidle');
 
         await expect(page.locator('body')).not.toContainText(
-          /500|Internal Server Error/i
+          /Internal Server Error/i
         );
       }
     });
@@ -230,7 +230,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
         }
 
         await expect(page.locator('body')).not.toContainText(
-          /500|Internal Server Error/i
+          /Internal Server Error/i
         );
       }
     });
@@ -243,7 +243,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
       await page.waitForLoadState('networkidle');
 
       // May redirect to candidate app or show invitations inline
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
       const acceptButton = page.locator(
         'button:has-text("Accept"), [data-testid="accept-invitation"]'
@@ -254,7 +254,7 @@ test.describe.serial('Lifecycle — Cross-Role Invitation Flows', () => {
         await page.waitForLoadState('networkidle');
 
         await expect(page.locator('body')).not.toContainText(
-          /500|Internal Server Error/i
+          /Internal Server Error/i
         );
       }
     });

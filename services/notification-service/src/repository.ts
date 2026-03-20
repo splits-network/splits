@@ -29,8 +29,9 @@ export class NotificationRepository {
     }
 
     /** Initialize the push sender (called once at startup) */
-    initPushSender(logger: Logger): void {
+    async initPushSender(logger: Logger): Promise<void> {
         this._pushSender = new PushSender(this.supabase, logger);
+        await this._pushSender.init();
     }
 
     /**

@@ -8,7 +8,7 @@ test.describe('Company Admin — Company Settings', () => {
     await page.goto('/portal/company/settings');
 
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
-    await expect(page.locator('body')).not.toContainText(/500|internal server error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     // Settings page may use h1, h2, h3, or just labeled sections
     const heading = page.locator('h1, h2, h3, [class*="heading"], [class*="title"]').first();

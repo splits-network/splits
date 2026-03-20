@@ -5,7 +5,6 @@
  * Handles expired subscriptions (410 Gone) by auto-deleting them.
  */
 
-import webpush from 'web-push';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { PushSubscriptionRepository } from '../v3/push/repository';
@@ -14,23 +13,33 @@ import type { PushPayload, PushSubscriptionRecord } from '../v3/push/types';
 export class PushSender {
   private repository: PushSubscriptionRepository;
   private configured = false;
+  private webpush: typeof import('web-push') | null = null;
 
   constructor(
     private supabase: SupabaseClient,
     private logger: Logger,
   ) {
     this.repository = new PushSubscriptionRepository(supabase);
+  }
 
+  async init(): Promise<void> {
     const publicKey = process.env.VAPID_PUBLIC_KEY;
     const privateKey = process.env.VAPID_PRIVATE_KEY;
     const subject = process.env.VAPID_SUBJECT || 'mailto:support@splits.network';
 
-    if (publicKey && privateKey) {
-      webpush.setVapidDetails(subject, publicKey, privateKey);
+    if (!publicKey || !privateKey) {
+      this.logger.warn('VAPID keys not configured — push notifications disabled');
+      return;
+    }
+
+    try {
+      const wp = await import('web-push');
+      this.webpush = wp.default || wp;
+      this.webpush.setVapidDetails(subject, publicKey, privateKey);
       this.configured = true;
       this.logger.info('Push sender initialized with VAPID keys');
-    } else {
-      this.logger.warn('VAPID keys not configured — push notifications disabled');
+    } catch {
+      this.logger.warn('web-push module not available — push notifications disabled');
     }
   }
 
@@ -96,7 +105,7 @@ export class PushSender {
       },
     };
 
-    await webpush.sendNotification(
+    await this.webpush!.sendNotification(
       pushSubscription,
       JSON.stringify(payload),
       { TTL: 86400 }, // 24 hours

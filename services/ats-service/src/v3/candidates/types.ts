@@ -24,7 +24,7 @@ export interface UpdateCandidateInput {
   portfolio_url?: string;
   bio?: string;
   marketplace_profile?: Record<string, any>;
-  marketplace_visibility?: 'public' | 'limited' | 'hidden';
+  marketplace_visibility?: 'public' | 'private' | 'hidden';
   show_email?: boolean;
   show_phone?: boolean;
   show_location?: boolean;
@@ -97,7 +97,7 @@ export const updateSchema = {
     portfolio_url: { type: 'string', maxLength: 500 },
     bio: { type: 'string', maxLength: 5000 },
     marketplace_profile: { type: 'object' },
-    marketplace_visibility: { type: 'string', enum: ['public', 'limited', 'hidden'] },
+    marketplace_visibility: { type: 'string', enum: ['public', 'private', 'hidden'] },
     show_email: { type: 'boolean' },
     show_phone: { type: 'boolean' },
     show_location: { type: 'boolean' },

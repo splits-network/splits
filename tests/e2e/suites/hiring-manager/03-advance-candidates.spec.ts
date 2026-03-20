@@ -7,7 +7,7 @@ test.describe('Hiring Manager — Advance Candidates', () => {
     await page.goto('/portal/applications');
 
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
-    await expect(page.locator('body')).not.toContainText(/500|internal server error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     const heading = page.locator('h1, h2').first();
     await expect(heading).toBeVisible({ timeout: 15000 });

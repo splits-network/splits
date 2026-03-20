@@ -81,7 +81,7 @@ export function SectionNotifications() {
                 const token = await getToken();
                 if (!token) return;
                 const client = createAuthenticatedClient(token);
-                await client.put("/notification-preferences", {
+                await client.post("/notification-preferences/actions/bulk-update", {
                     preferences: updated.map((p) => ({
                         category: p.category,
                         email_enabled: p.email_enabled,

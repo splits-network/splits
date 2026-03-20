@@ -79,7 +79,7 @@ export class SubscriptionRepository {
                 plan:plans(*)
             `)
             .eq('user_id', userId)
-            .eq('status', 'active')
+            .in('status', ['active', 'trialing'])
             .order('created_at', { ascending: false })
             .limit(1)
             .single();

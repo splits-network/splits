@@ -15,7 +15,7 @@ interface ScopeFilters {
 
 const LIST_SELECT = [
   '*',
-  'candidate:candidates!candidate_id!inner(id, user_id, email, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))',
+  'candidate:candidates!candidate_id!inner(id, user_id, email, full_name, phone, location, linkedin_url, current_title, current_company, profile_picture, user:users!candidates_user_id_fkey(name, email))',
   'recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users!recruiters_user_id_fkey(name, email))',
 ].join(',');
 

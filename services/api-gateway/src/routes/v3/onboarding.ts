@@ -350,26 +350,43 @@ export function registerOnboardingV3Routes(
           });
         }
 
-        // Step 2: Create recruiter profile
+        // Step 2: Create recruiter profile (idempotent — reuse existing on retry)
         const locationArray = body.profile.location || [];
         const locationString = Array.isArray(locationArray) ? locationArray.join(', ') : locationArray;
 
-        const recruiterResponse = await networkService().post<any>(
-          '/api/v3/recruiters',
-          {
-            user_id: user.id,
-            bio: body.profile.bio,
-            phone: body.profile.phone,
-            industries: body.profile.industries || [],
-            specialties: body.profile.specialties || [],
-            location: locationString || null,
-            tagline: body.profile.tagline || null,
-            years_experience: body.profile.years_experience || null,
-          },
-          correlationId,
-          authHeaders
-        );
-        const recruiter = recruiterResponse?.data ?? recruiterResponse;
+        let recruiter: any;
+        try {
+          const recruiterResponse = await networkService().post<any>(
+            '/api/v3/recruiters',
+            {
+              user_id: user.id,
+              bio: body.profile.bio,
+              phone: body.profile.phone,
+              industries: body.profile.industries || [],
+              specialties: body.profile.specialties || [],
+              location: locationString || null,
+              tagline: body.profile.tagline || null,
+              years_experience: body.profile.years_experience || null,
+            },
+            correlationId,
+            authHeaders
+          );
+          recruiter = recruiterResponse?.data ?? recruiterResponse;
+        } catch (createErr: any) {
+          const isDuplicate =
+            createErr.statusCode === 400 &&
+            createErr.jsonBody?.error?.message?.includes('already exists');
+
+          if (isDuplicate) {
+            request.log.info({ correlationId }, 'Recruiter already exists — reusing on retry');
+            const existingResponse = await networkService().get<any>(
+              '/api/v3/recruiters/me', undefined, correlationId, authHeaders
+            );
+            recruiter = existingResponse?.data ?? existingResponse;
+          } else {
+            throw createErr;
+          }
+        }
 
         // Step 3: Activate subscription
         let subscription: any = null;

@@ -44,8 +44,8 @@ export interface SetupIntentRequest {
 
 export interface ActivateSubscriptionRequest {
   plan_id: string;
-  payment_method_id: string;
-  customer_id: string;
+  payment_method_id?: string;
+  customer_id?: string;
   billing_period?: BillingPeriod;
   promotion_code?: string;
 }
@@ -104,7 +104,7 @@ export const setupIntentSchema = {
 
 export const activateSchema = {
   type: 'object',
-  required: ['plan_id', 'payment_method_id', 'customer_id'],
+  required: ['plan_id'],
   properties: {
     plan_id: { type: 'string' },
     payment_method_id: { type: 'string' },

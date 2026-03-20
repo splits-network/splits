@@ -22,7 +22,7 @@ export function registerMySubscriptionView(app: FastifyInstance, supabase: Supab
     if (!context.identityUserId) throw new BadRequestError('Unable to resolve user');
 
     const subscription = await repository.findByUserId(context.identityUserId);
-    if (!subscription) throw new NotFoundError('Subscription', 'active');
+    if (!subscription) throw new NotFoundError('Subscription', `user:${context.identityUserId}`);
 
     return reply.send({ data: subscription });
   });

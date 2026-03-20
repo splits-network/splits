@@ -68,7 +68,7 @@ export class SubscriptionService {
 
     // Uses view repository for plan join
     const subscription = await this.mySubscriptionRepo.findByUserId(context.identityUserId);
-    if (!subscription) throw new NotFoundError('Subscription', 'active');
+    if (!subscription) throw new NotFoundError('Subscription', `user:${context.identityUserId}`);
     return subscription;
   }
 

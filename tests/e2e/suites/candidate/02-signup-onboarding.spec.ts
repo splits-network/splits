@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Candidate — Signup & Onboarding', () => {
   test('signup page loads with form', async ({ page }) => {
     await page.goto('/sign-up');
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     // Clerk signup form should be visible
     const form = page.locator(

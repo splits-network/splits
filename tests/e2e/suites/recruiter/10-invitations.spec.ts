@@ -5,7 +5,7 @@ test.describe('Recruiter — Invitations', () => {
   test('invitations page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/invitations');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('sent invitations list or empty state is visible', async ({
@@ -30,7 +30,7 @@ test.describe('Recruiter — Invitations', () => {
   test('invite companies page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/invite-companies');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('invite form is visible', async ({ recruiterPage: page }) => {

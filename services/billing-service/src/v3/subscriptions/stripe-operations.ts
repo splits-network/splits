@@ -120,6 +120,10 @@ export class SubscriptionStripeOperations {
       return { stripe_subscription_id: null, stripe_customer_id: null, current_period_end: null };
     }
 
+    if (!input.payment_method_id || !input.customer_id) {
+      throw new BadRequestError('payment_method_id and customer_id are required for paid plans');
+    }
+
     await this.stripe.paymentMethods.attach(input.payment_method_id, { customer: input.customer_id });
     await this.stripe.customers.update(input.customer_id, {
       invoice_settings: { default_payment_method: input.payment_method_id },

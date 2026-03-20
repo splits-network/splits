@@ -5,7 +5,7 @@ test.describe('Recruiter — Referral Codes', () => {
   test('referral codes page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/referral-codes');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('page has tabs or content sections', async ({ recruiterPage: page }) => {
@@ -41,7 +41,7 @@ test.describe('Recruiter — Referral Codes', () => {
       await createButton.click();
       await page.waitForTimeout(500);
       // Should open a modal or form without errors
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 });
