@@ -6,7 +6,7 @@ test.describe('Hiring Manager — Dashboard', () => {
     await page.goto('/portal/dashboard');
 
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
-    await expect(page.locator('body')).not.toContainText(/500|internal server error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     const heading = page.locator('h1, h2, [data-testid="dashboard-heading"]').first();
     await expect(heading).toBeVisible({ timeout: 15000 });

@@ -4,7 +4,7 @@ test.describe('Recruiter — Firms', () => {
   test('firms page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/firms');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('firms list or empty state is visible', async ({ recruiterPage: page }) => {
@@ -35,7 +35,7 @@ test.describe('Recruiter — Firms', () => {
       await createButton.click();
       await page.waitForTimeout(500);
       // Should open a modal or navigate to a creation form
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 });

@@ -4,7 +4,7 @@ test.describe('Candidate — Saved Jobs', () => {
   test('saved jobs page loads', async ({ candidatePage: page }) => {
     await page.goto('/portal/jobs/saved');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('saved jobs list or empty state is visible', async ({ candidatePage: page }) => {

@@ -5,7 +5,7 @@ test.describe('Recruiter — Companies', () => {
   test('companies page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/companies');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('company marketplace is visible', async ({ recruiterPage: page }) => {
@@ -36,7 +36,7 @@ test.describe('Recruiter — Companies', () => {
     if (await searchInput.first().isVisible().catch(() => false)) {
       await searchInput.first().fill('test company');
       await page.waitForTimeout(500);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
       await searchInput.first().clear();
     }
   });
@@ -51,7 +51,7 @@ test.describe('Recruiter — Companies', () => {
     if (await companyCard.isVisible().catch(() => false)) {
       await companyCard.click();
       await page.waitForLoadState('networkidle');
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 });

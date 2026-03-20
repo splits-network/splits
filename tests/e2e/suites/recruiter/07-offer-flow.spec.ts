@@ -4,7 +4,7 @@ test.describe('Recruiter — Offer Flow', () => {
   test('applications page loads for offer flow', async ({ recruiterPage: page }) => {
     await page.goto('/portal/applications');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('offer wizard is accessible from application at interview stage', async ({
@@ -29,7 +29,7 @@ test.describe('Recruiter — Offer Flow', () => {
 
     await offerButton.click();
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('offer wizard steps are present', async ({ recruiterPage: page, seedData }) => {

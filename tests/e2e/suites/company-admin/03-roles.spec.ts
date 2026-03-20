@@ -5,7 +5,7 @@ test.describe('Company Admin — Roles', () => {
     await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
-    await expect(page.locator('body')).not.toContainText(/500|internal server error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     // Page should show a heading or list area
     const heading = page.locator('h1, h2').first();

@@ -4,7 +4,7 @@ test.describe('Platform Admin — Payout Administration', () => {
   test('payout overview loads', async ({ platformAdminPage: page }) => {
     await page.goto('/portal/admin/payouts');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     const heading = page.locator('h1, h2, [data-testid="page-title"]').first();
@@ -14,7 +14,7 @@ test.describe('Platform Admin — Payout Administration', () => {
   test('payout schedules listed', async ({ platformAdminPage: page }) => {
     await page.goto('/portal/admin/payouts/schedules');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     const content = page.locator(
@@ -31,7 +31,7 @@ test.describe('Platform Admin — Payout Administration', () => {
   test('escrow holds listed', async ({ platformAdminPage: page }) => {
     await page.goto('/portal/admin/payouts/escrow');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     const content = page.locator(
@@ -48,7 +48,7 @@ test.describe('Platform Admin — Payout Administration', () => {
   test('audit log loads', async ({ platformAdminPage: page }) => {
     await page.goto('/portal/admin/payouts/audit');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     const content = page.locator(

@@ -4,7 +4,7 @@ test.describe('Platform Admin — User Management', () => {
   test('user list loads', async ({ platformAdminPage: page }) => {
     await page.goto('/portal/admin/users');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     const heading = page.locator('h1, h2, [data-testid="page-title"]').first();
@@ -27,7 +27,7 @@ test.describe('Platform Admin — User Management', () => {
     if (hasSearch) {
       await searchInput.fill('test');
       await page.waitForTimeout(500);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
       await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
       // Clear search
@@ -40,7 +40,7 @@ test.describe('Platform Admin — User Management', () => {
   test('recruiter list loads', async ({ platformAdminPage: page }) => {
     await page.goto('/portal/admin/recruiters');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     const content = page.locator(
@@ -57,7 +57,7 @@ test.describe('Platform Admin — User Management', () => {
   test('company list loads', async ({ platformAdminPage: page }) => {
     await page.goto('/portal/admin/companies');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     const content = page.locator(

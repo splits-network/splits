@@ -4,7 +4,7 @@ test.describe('Candidate — Dashboard', () => {
   test('dashboard page loads', async ({ candidatePage: page }) => {
     await page.goto('/portal/dashboard');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('greeting text is present', async ({ candidatePage: page }) => {

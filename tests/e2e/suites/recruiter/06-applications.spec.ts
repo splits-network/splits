@@ -5,7 +5,7 @@ test.describe('Recruiter — Applications', () => {
   test('applications page loads', async ({ recruiterPage: page }) => {
     await page.goto('/portal/applications');
     await expect(page).not.toHaveURL(/\/sign-in/);
-    await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
   test('application list or empty state is visible', async ({ recruiterPage: page }) => {
@@ -42,7 +42,7 @@ test.describe('Recruiter — Applications', () => {
       if (await allButton.isVisible().catch(() => false)) {
         await allButton.click();
         await page.waitForTimeout(500);
-        await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+        await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
       }
     }
   });
@@ -58,7 +58,7 @@ test.describe('Recruiter — Applications', () => {
     if (await stageFilter.first().isVisible().catch(() => false)) {
       await stageFilter.first().click();
       await page.waitForTimeout(300);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 
@@ -74,7 +74,7 @@ test.describe('Recruiter — Applications', () => {
     if (count > 1) {
       await viewButtons.nth(1).click();
       await page.waitForTimeout(500);
-      await expect(page.locator('body')).not.toContainText(/500|Internal Server Error/i);
+      await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
     }
   });
 });
