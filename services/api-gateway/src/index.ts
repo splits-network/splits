@@ -678,35 +678,11 @@ async function main() {
     registerV3GatewayRoutes(app, services);
 
     // Health check endpoint (no auth required)
-    app.get('/health', async (request, reply) => {
-        try {
-            // Check Redis connectivity with 1 second timeout to avoid blocking health checks
-            // If Redis is slow, fail fast so health monitor can detect the issue immediately
-            const pingPromise = redis.ping();
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Redis ping timeout')), 1000)
-            );
-            await Promise.race([pingPromise, timeoutPromise]);
-
-            return reply.status(200).send({
-                status: 'healthy',
-                service: 'api-gateway',
-                timestamp: new Date().toISOString(),
-                checks: {
-                    redis: 'connected',
-                    auth: 'configured',
-                },
-            });
-        } catch (error) {
-            logger.error({ err: error }, 'Health check failed');
-            return reply.status(503).send({
-                status: 'unhealthy',
-                service: 'api-gateway',
-                timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : 'Unknown error',
-            });
-        }
-    });
+    app.get('/health', async () => ({
+        status: 'healthy',
+        service: 'api-gateway',
+        timestamp: new Date().toISOString(),
+    }));
 
     // Graceful shutdown
     process.on('SIGTERM', async () => {

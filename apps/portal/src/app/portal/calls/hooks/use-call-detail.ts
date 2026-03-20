@@ -113,7 +113,7 @@ export function useCallDetail(callId: string) {
             const client = createAuthenticatedClient(token);
 
             const res = await client.get<{ data: CallDetail }>(
-                `/calls/${callId}?include=recordings,transcript,summary,notes,participants,entity_links`
+                `/calls/${callId}/view/detail`,
             );
             if (res.data) {
                 setCall(res.data);

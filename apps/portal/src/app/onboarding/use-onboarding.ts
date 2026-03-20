@@ -392,9 +392,9 @@ export function useOnboarding(): UseOnboardingReturn {
                             stripePaymentInfo.paymentMethodId;
                         planData.customer_id =
                             stripePaymentInfo.customerId;
-                        if (stripePaymentInfo.appliedDiscount?.code) {
+                        if (stripePaymentInfo.appliedDiscount?.id) {
                             planData.promotion_code =
-                                stripePaymentInfo.appliedDiscount.code;
+                                stripePaymentInfo.appliedDiscount.id;
                         }
                     }
 

@@ -9,7 +9,6 @@ import {
     buildServer,
     errorHandler,
     registerHealthCheck,
-    HealthCheckers,
     setupProcessErrorHandlers
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
@@ -198,19 +197,10 @@ async function main() {
         logger.error({ err: error }, "Failed to connect domain event consumer");
     }
 
-    // Register standardized health check with dependency monitoring
+    // Register standardized health check
     registerHealthCheck(app, {
         serviceName: 'ai-service',
         logger,
-        checkers: {
-            database: HealthCheckers.database(supabaseClient),
-            ...(eventPublisher && {
-                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
-            }),
-            ...(domainConsumer && {
-                rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(domainConsumer)
-            }),
-        },
     });
 
     // Start server

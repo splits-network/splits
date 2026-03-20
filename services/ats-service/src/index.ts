@@ -192,46 +192,11 @@ async function main() {
     });
 
     // Health check endpoint
-    app.get('/health', async (request, reply) => {
-        try {
-            // Check database connectivity using V2 repository
-            const healthRepo = new ApplicationRepository(
-                dbConfig.supabaseUrl,
-                supabaseKey
-            );
-
-            // Test database connectivity by doing a simple query
-            await healthRepo.findApplications('internal-service', { limit: 1 });
-
-            // Check RabbitMQ connectivity by attempting to ensure connection
-            let rabbitHealthy = true;
-            try {
-                await v2EventPublisher.ensureConnection();
-            } catch (error) {
-                rabbitHealthy = false;
-                logger.warn('RabbitMQ not connected during health check');
-            }
-
-            return reply.status(200).send({
-                status: 'healthy',
-                service: 'ats-service',
-                version: 'v2+v3',
-                timestamp: new Date().toISOString(),
-                rabbitmq: {
-                    connected: rabbitHealthy,
-                    status: rabbitHealthy ? 'connected' : 'disconnected'
-                }
-            });
-        } catch (error) {
-            logger.error({ err: error }, 'Health check failed');
-            return reply.status(503).send({
-                status: 'unhealthy',
-                service: 'ats-service',
-                timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : 'Unknown error',
-            });
-        }
-    });
+    app.get('/health', async () => ({
+        status: 'healthy',
+        service: 'ats-service',
+        timestamp: new Date().toISOString(),
+    }));
 
     // Graceful shutdown
     process.on('SIGTERM', async () => {

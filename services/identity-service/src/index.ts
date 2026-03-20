@@ -1,6 +1,6 @@
 import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig, createSupabaseClient } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerV2Routes } from './v2/routes';
@@ -141,32 +141,10 @@ async function main() {
         eventPublisher: outboxPublisher,
     });
 
-    // Register standardized health check with dependency monitoring
+    // Register standardized health check
     registerHealthCheck(app, {
         serviceName: 'identity-service',
         logger,
-        checkers: {
-            database: HealthCheckers.database(supabaseClient),
-            ...(eventPublisher && {
-                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher)
-            }),
-            clerk: HealthCheckers.externalProvider('clerk', async (signal) => {
-                // Test Clerk API connectivity if secret key is available.
-                // Uses externalProvider so a Clerk outage caps status at 'degraded' and
-                // never causes a pod restart — the service still auth's via JWT fine.
-                if (process.env.CLERK_SECRET_KEY) {
-                    const response = await fetch('https://api.clerk.dev/v1/users', {
-                        signal,
-                        headers: {
-                            'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    return response.ok;
-                }
-                return true; // If no key configured, sync is disabled — not a fault
-            }, { provider: 'clerk' }),
-        },
     });
 
     // Start server

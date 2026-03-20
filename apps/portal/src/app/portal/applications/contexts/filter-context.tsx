@@ -51,7 +51,6 @@ export function FilterProvider({ children }: { children: ReactNode }) {
 
     const listState = useStandardList<Application, ApplicationFilters>({
         endpoint: "/applications/views/listing",
-        include: "ai_review",
         defaultFilters,
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",

@@ -9,7 +9,6 @@ import {
     buildServer,
     errorHandler,
     registerHealthCheck,
-    HealthCheckers,
     setupProcessErrorHandlers,
 } from '@splits-network/shared-fastify';
 import { EventPublisher } from '@splits-network/shared-job-queue';
@@ -66,10 +65,6 @@ async function main() {
     registerHealthCheck(app, {
         serviceName: 'outbox-service',
         logger,
-        checkers: {
-            database: HealthCheckers.database(supabase),
-            rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(eventPublisher),
-        },
     });
 
     // Graceful shutdown

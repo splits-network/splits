@@ -182,6 +182,8 @@ export default function ApplicationsAdminPage() {
             if (params.sort_order)
                 queryParams.set("sort_order", params.sort_order);
 
+            // TODO: V3 CRUD returns flat data — app.job, app.candidate, app.company
+            // will be undefined. Need an admin applications view endpoint with joins.
             const response = await apiClient.get(
                 `/applications?${queryParams.toString()}`,
             );

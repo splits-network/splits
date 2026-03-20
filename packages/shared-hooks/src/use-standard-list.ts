@@ -54,8 +54,6 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
     defaultSortOrder?: 'asc' | 'desc';
     /** Default page size */
     defaultLimit?: number;
-    /** Include related data (comma-separated) */
-    include?: string;
     /** Transform response data after fetching */
     transformData?: (data: any[]) => T[];
     /** Sync state to URL query params. Requires `urlSync` to be provided. */
@@ -94,6 +92,8 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
      * Defaults to `createPortalClient`. Admin app should pass `createAdminClient`.
      */
     clientFactory?: (token: string) => AppApiClient;
+    /** V2 include parameter — passed through for backwards compatibility until full V3 migration */
+    include?: string;
 }
 
 export interface UseStandardListReturn<T, F extends Record<string, any> = Record<string, any>> {
@@ -179,7 +179,6 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         defaultSortBy = 'created_at',
         defaultSortOrder = 'desc',
         defaultLimit = DEFAULT_LIMIT,
-        include,
         transformData,
         syncToUrl = true,
         urlSync,
@@ -190,6 +189,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         requireAuth = true,
         getToken,
         clientFactory,
+        include,
     } = options;
 
     // Support deprecated storageKey as fallback
@@ -346,7 +346,12 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
             };
             if (searchQuery) params.search = searchQuery;
             if (include) params.include = include;
-            if (Object.keys(activeFilters).length > 0) params.filters = activeFilters;
+            // Spread filters as flat query params (V3 expects flat params, not nested filters wrapper)
+            Object.entries(activeFilters).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    (params as any)[key] = value;
+                }
+            });
 
             if (requireAuth) {
                 if (!getToken) {

@@ -41,20 +41,20 @@ export class AtsClient extends BaseClient {
             limit?: number;
             search?: string;
             filters?: Record<string, any>;
-            include?: string;
             sort_by?: string;
             sort_order?: 'asc' | 'desc';
+            include?: string;
         }
     ): Promise<ApiResponse<Job[]>> {
         const queryParams = new URLSearchParams();
-        
+
         if (params) {
             if (params.page) queryParams.set('page', params.page.toString());
             if (params.limit) queryParams.set('limit', params.limit.toString());
             if (params.search) queryParams.set('search', params.search);
-            if (params.include) queryParams.set('include', params.include);
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
             if (params.sort_order) queryParams.set('sort_order', params.sort_order);
+            if (params.include) queryParams.set('include', params.include);
             
             if (params.filters) {
                 Object.entries(params.filters).forEach(([key, value]) => {

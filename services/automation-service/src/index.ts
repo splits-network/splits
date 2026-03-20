@@ -5,7 +5,7 @@ import {
     createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
+import { buildServer, errorHandler, registerHealthCheck, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { registerV2Routes } from "./v2/routes";
@@ -148,18 +148,6 @@ async function main() {
         registerHealthCheck(app, {
             serviceName: 'automation-service',
             logger,
-            checkers: {
-                database: HealthCheckers.database(supabaseClient),
-                ...(v2EventPublisher && {
-                    rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher)
-                }),
-                ...(domainConsumer && {
-                    rabbitmq_consumer: HealthCheckers.rabbitMqConsumer(domainConsumer)
-                }),
-                ...(reputationConsumer && {
-                    reputation_consumer: HealthCheckers.rabbitMqConsumer(reputationConsumer)
-                }),
-            },
         });
 
         process.on("SIGTERM", async () => {

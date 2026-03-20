@@ -95,7 +95,6 @@ export default function ApplicationsBaselPage() {
         defaultSortOrder: "desc",
         defaultLimit: 25,
         syncToUrl: true,
-        include: "ai_review",
     });
 
     const { registerEntities } = useGamification();

@@ -142,35 +142,11 @@ async function main() {
     });
 
     // Health check
-    app.get("/health", async (request, reply) => {
-        try {
-            let rabbitHealthy = true;
-            try {
-                await eventPublisher.ensureConnection();
-            } catch {
-                rabbitHealthy = false;
-            }
-
-            return reply.status(200).send({
-                status: "healthy",
-                service: "content-service",
-                version: "v2",
-                timestamp: new Date().toISOString(),
-                rabbitmq: {
-                    connected: rabbitHealthy,
-                    status: rabbitHealthy ? "connected" : "disconnected",
-                },
-            });
-        } catch (error) {
-            logger.error({ err: error }, "Health check failed");
-            return reply.status(503).send({
-                status: "unhealthy",
-                service: "content-service",
-                timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : "Unknown error",
-            });
-        }
-    });
+    app.get("/health", async () => ({
+        status: "healthy",
+        service: "content-service",
+        timestamp: new Date().toISOString(),
+    }));
 
     // Graceful shutdown
     process.on("SIGTERM", async () => {

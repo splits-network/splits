@@ -1,6 +1,6 @@
 import { loadBaseConfig, loadDatabaseConfig, createSupabaseClient } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { buildServer, errorHandler, registerHealthCheck, HealthCheckers, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
+import { buildServer, errorHandler, registerHealthCheck, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { EventPublisherV2, OutboxPublisher } from './v2/shared/events';
@@ -132,12 +132,6 @@ async function main() {
     registerHealthCheck(app, {
         serviceName: 'gamification-service',
         logger,
-        checkers: {
-            database: HealthCheckers.database(supabaseClient),
-            ...(v2EventPublisher && {
-                rabbitmq_publisher: HealthCheckers.rabbitMqPublisher(v2EventPublisher),
-            }),
-        },
     });
 
     try {

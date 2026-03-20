@@ -39,14 +39,11 @@ async function buildServer(): Promise<FastifyInstance> {
     registerV3Routes(app, { supabase });
 
     // Health check
-    app.get("/health", async () => {
-        return {
-            status: "healthy",
-            service: "document-processing-service",
-            version: "1.0.0",
-            architecture: "v2",
-        };
-    });
+    app.get("/health", async () => ({
+        status: "healthy",
+        service: "document-processing-service",
+        timestamp: new Date().toISOString(),
+    }));
 
     // Processing stats endpoint
     app.get("/stats", async () => {
