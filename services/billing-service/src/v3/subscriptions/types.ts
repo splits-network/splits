@@ -35,6 +35,7 @@ export interface UpdateSubscriptionInput {
   current_period_end?: string;
   cancel_at?: string;
   canceled_at?: string;
+  promotion_code?: string;
 }
 
 export interface SetupIntentRequest {
@@ -89,6 +90,7 @@ export const updateSchema = {
     status: { type: 'string', enum: ['active', 'past_due', 'canceled', 'trialing', 'incomplete'] },
     payment_method_id: { type: 'string' },
     customer_id: { type: 'string' },
+    promotion_code: { type: 'string' },
   },
   additionalProperties: false,
 };

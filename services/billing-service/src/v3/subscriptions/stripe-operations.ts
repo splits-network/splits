@@ -222,6 +222,8 @@ export class SubscriptionStripeOperations {
   private async handleStripePlanChange(subscription: any, updates: Record<string, any>) {
     const newPlanId = updates.plan_id || subscription.plan_id;
     const billingPeriod = updates.billing_period || subscription.billing_period || 'monthly';
+    const promotionCode = updates.promotion_code;
+    delete updates.promotion_code;
 
     const { data: plan } = await this.supabase.from('plans').select('*').eq('id', newPlanId).single();
     if (!plan || plan.tier === 'starter' || plan.price_monthly === 0) return;
@@ -233,11 +235,16 @@ export class SubscriptionStripeOperations {
     const itemId = stripeSub.items.data[0]?.id;
     if (!itemId) throw new BadRequestError('Unable to find subscription item');
 
-    const updated = await this.stripe.subscriptions.update(subscription.stripe_subscription_id, {
+    const updateParams: any = {
       items: [{ id: itemId, price: priceId }],
       proration_behavior: 'create_prorations',
       metadata: { ...stripeSub.metadata, plan_id: newPlanId, billing_period: billingPeriod },
-    });
+    };
+    if (promotionCode) {
+      updateParams.discounts = [{ promotion_code: promotionCode }];
+    }
+
+    const updated = await this.stripe.subscriptions.update(subscription.stripe_subscription_id, updateParams);
 
     const endTs = (updated as any).current_period_end;
     if (endTs) updates.current_period_end = new Date(endTs * 1000).toISOString();
