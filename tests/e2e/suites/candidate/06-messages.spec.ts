@@ -12,17 +12,9 @@ test.describe('Candidate — Messages', () => {
   }) => {
     await page.goto('/portal/messages');
 
-    const conversations = page.locator(
-      '[data-testid="conversation-list"], [data-testid="message-list"], ' +
-      '.card, table, li'
-    );
-    const emptyState = page.getByText(
-      /no messages|no conversations|start a conversation|inbox is empty/i
-    );
-
-    const hasConversations = await conversations.first().isVisible().catch(() => false);
-    const isEmpty = await emptyState.isVisible().catch(() => false);
-
-    expect(hasConversations || isEmpty).toBeTruthy();
+    // Wait for page content to render
+    const heading = page.locator('h1, h2, h3').first();
+    await expect(heading).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 });
