@@ -53,7 +53,7 @@ export default function MatchesContent() {
                 queryParams.min_score = TIER_MIN_SCORES[tier];
             }
 
-            return client.get("/matches", { params: queryParams });
+            return client.get("/matches/views/enriched", { params: queryParams });
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [],

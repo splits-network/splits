@@ -16,7 +16,7 @@ export function useTopMatches() {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
-            const response: any = await api.get("/matches", {
+            const response: any = await api.get("/matches/views/enriched", {
                 params: {
                     status: "active",
                     sort_by: "match_score",

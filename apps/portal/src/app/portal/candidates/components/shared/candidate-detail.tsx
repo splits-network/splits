@@ -193,7 +193,8 @@ export function CandidateDetail({
             if (!token) return;
             const client = createAuthenticatedClient(token);
             const res = await client.get(
-                `/applications?candidate_id=${candidate.id}&include=job`,
+                `/applications/views/listing`,
+                { params: { candidate_id: candidate.id } },
             );
             setApplications(res.data || []);
         } catch (e) {

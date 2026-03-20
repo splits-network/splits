@@ -26,7 +26,7 @@ export function useCompanyActivity() {
             if (!token) return;
 
             const api = createAuthenticatedClient(token);
-            const response: any = await api.get('/applications', {
+            const response: any = await api.get('/applications/views/listing', {
                 params: {
                     limit: 8,
                     sort_by: 'updated_at',

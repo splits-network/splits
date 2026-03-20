@@ -33,8 +33,9 @@ export default function MatchDetailClient({ matchId }: MatchDetailClientProps) {
             const token = await getToken();
             if (!token) throw new Error("No auth token");
             const apiClient = createAuthenticatedClient(token);
-            const response = await apiClient.get<{ data: EnrichedMatch }>(`/matches/${matchId}`);
-            setMatch(response.data);
+            const response: any = await apiClient.get(`/matches/views/enriched`, { params: { id: matchId, limit: 1 } });
+            const items = response?.data || [];
+            setMatch(Array.isArray(items) ? items[0] || null : items);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load match");
         } finally {

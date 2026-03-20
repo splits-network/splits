@@ -54,7 +54,7 @@ export default function RoleAssignmentsPage() {
             const apiClient = createAuthenticatedClient(token);
 
             const [jobsResponse, recruitersResponse] = await Promise.all([
-                apiClient.get("/jobs?status=active"),
+                apiClient.get("/jobs/views/admin-board?status=active"),
                 apiClient.get("/recruiters"),
             ]);
 

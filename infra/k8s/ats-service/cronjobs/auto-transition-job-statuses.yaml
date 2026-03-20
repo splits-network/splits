@@ -37,7 +37,7 @@ spec:
                           command: ["node"]
                           args:
                               [
-                                  "services/ats-service/dist/jobs/auto-transition-job-statuses.js",
+                                  "/app/services/ats-service/dist/jobs/auto-transition-job-statuses.js",
                               ]
                           env:
                               - name: SUPABASE_URL

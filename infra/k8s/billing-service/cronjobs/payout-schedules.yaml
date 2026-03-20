@@ -55,7 +55,7 @@ spec:
                           command: ["node"]
                           args:
                               [
-                                  "/app/services/billing-service/dist/jobs/payout-schedules.js",
+                                  "/app/services/billing-service/dist/jobs/process-payout-schedules.js",
                               ]
 
                           env:
