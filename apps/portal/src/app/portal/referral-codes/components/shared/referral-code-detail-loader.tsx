@@ -18,6 +18,7 @@ export function ReferralCodeDetailLoader({
     const { getToken } = useAuth();
     const [code, setCode] = useState<RecruiterCode | null>(null);
     const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
     const fetchDetail = useCallback(
@@ -30,8 +31,21 @@ export function ReferralCodeDetailLoader({
                     `/recruiter-codes/${id}`,
                 );
                 if (!signal?.cancelled) setCode(res.data);
-            } catch (err) {
-                console.error("Failed to fetch referral code:", err);
+            } catch (err: unknown) {
+                if (!signal?.cancelled) {
+                    const status =
+                        err && typeof err === "object" && "status" in err
+                            ? (err as { status: number }).status
+                            : 0;
+                    if (status === 404) {
+                        setNotFound(true);
+                    } else {
+                        console.error(
+                            "Failed to fetch referral code:",
+                            err,
+                        );
+                    }
+                }
             }
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,6 +77,20 @@ export function ReferralCodeDetailLoader({
                         Loading referral code...
                     </span>
                 </div>
+            </div>
+        );
+    }
+
+    if (notFound) {
+        return (
+            <div className="h-full flex flex-col items-center justify-center p-12 gap-4">
+                <i className="fa-duotone fa-regular fa-circle-exclamation text-3xl text-base-content/30" />
+                <p className="text-sm text-base-content/50">
+                    This referral code no longer exists.
+                </p>
+                <button className="btn btn-sm btn-ghost" onClick={onClose}>
+                    Close
+                </button>
             </div>
         );
     }
