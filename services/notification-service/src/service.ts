@@ -68,7 +68,7 @@ export class NotificationService {
         // Initialize user preference gate for per-user notification preferences
         repository.initPreferenceGate(logger);
 
-        // Initialize push notification sender
+        // Initialize push notification sender (async — non-blocking, push is optional)
         repository.initPushSender(logger);
 
         this.applications = new ApplicationsEmailService(resend, repository, fromEmail, candidateFromEmail, logger);

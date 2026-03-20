@@ -1,4 +1,4 @@
-import { test as base, type Page, type BrowserContext } from '@playwright/test';
+import { test as base, type Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
 
@@ -16,14 +16,8 @@ function storageStatePath(role: TestRole): string {
   return path.join(AUTH_DIR, `${role}.json`);
 }
 
-function getSeedData(): Record<string, any> {
-  const seedPath = path.join(AUTH_DIR, 'seed-data.json');
-  if (!fs.existsSync(seedPath)) {
-    throw new Error(
-      'Seed data not found. Run the seed script first: pnpm tsx scripts/e2e-seed.ts'
-    );
-  }
-  return JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+function hasAuthState(role: TestRole): boolean {
+  return fs.existsSync(storageStatePath(role));
 }
 
 type AuthFixtures = {
@@ -36,30 +30,16 @@ type AuthFixtures = {
   seedData: Record<string, any>;
 };
 
-async function createAuthenticatedPage(
-  context: typeof base,
-  role: TestRole
-): Promise<Page> {
-  const storagePath = storageStatePath(role);
-  if (!fs.existsSync(storagePath)) {
-    throw new Error(
-      `Auth state for "${role}" not found at ${storagePath}. Run global-setup first.`
-    );
-  }
-
-  const browser = await context.step(`Create ${role} context`, async () => {
-    // This is handled via test.use() with storageState instead
-    return null;
-  });
-  return null as any; // Placeholder — real implementation below
-}
-
 /**
  * Extend base test with role-specific authenticated pages.
  * Each fixture creates a fresh browser context with the role's stored auth state.
+ * Auth state is created by the onboarding test specs that run first.
  */
 export const test = base.extend<AuthFixtures>({
   recruiterPage: async ({ browser }, use) => {
+    if (!hasAuthState('recruiter')) {
+      throw new Error('Recruiter auth state not found. Run onboarding tests first.');
+    }
     const context = await browser.newContext({
       storageState: storageStatePath('recruiter'),
     });
@@ -69,6 +49,9 @@ export const test = base.extend<AuthFixtures>({
   },
 
   companyAdminPage: async ({ browser }, use) => {
+    if (!hasAuthState('company_admin')) {
+      throw new Error('Company admin auth state not found. Run onboarding tests first.');
+    }
     const context = await browser.newContext({
       storageState: storageStatePath('company_admin'),
     });
@@ -78,6 +61,9 @@ export const test = base.extend<AuthFixtures>({
   },
 
   hiringManagerPage: async ({ browser }, use) => {
+    if (!hasAuthState('hiring_manager')) {
+      throw new Error('Hiring manager auth state not found. Run onboarding tests first.');
+    }
     const context = await browser.newContext({
       storageState: storageStatePath('hiring_manager'),
     });
@@ -87,6 +73,9 @@ export const test = base.extend<AuthFixtures>({
   },
 
   candidatePage: async ({ browser }, use) => {
+    if (!hasAuthState('candidate')) {
+      throw new Error('Candidate auth state not found. Run onboarding tests first.');
+    }
     const context = await browser.newContext({
       storageState: storageStatePath('candidate'),
     });
@@ -96,6 +85,9 @@ export const test = base.extend<AuthFixtures>({
   },
 
   platformAdminPage: async ({ browser }, use) => {
+    if (!hasAuthState('platform_admin')) {
+      throw new Error('Platform admin auth state not found. Run onboarding tests first.');
+    }
     const context = await browser.newContext({
       storageState: storageStatePath('platform_admin'),
     });
@@ -105,6 +97,9 @@ export const test = base.extend<AuthFixtures>({
   },
 
   secondRecruiterPage: async ({ browser }, use) => {
+    if (!hasAuthState('second_recruiter')) {
+      throw new Error('Second recruiter auth state not found. Run onboarding tests first.');
+    }
     const context = await browser.newContext({
       storageState: storageStatePath('second_recruiter'),
     });
@@ -114,7 +109,9 @@ export const test = base.extend<AuthFixtures>({
   },
 
   seedData: async ({}, use) => {
-    await use(getSeedData());
+    // Legacy fixture — onboarding tests create data via the UI now.
+    // Tests that need entity IDs should extract them from the UI or API.
+    await use({});
   },
 });
 
