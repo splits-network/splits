@@ -32,8 +32,7 @@ export function MatchCandidatePopup({ candidateId, candidateName }: Props) {
                 if (!token || cancelled) return;
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Candidate }>(
-                    `/candidates/${candidateId}`,
-                    { params: { include: "skills" } },
+                    `/candidates/${candidateId}/view/detail`,
                 );
                 if (!cancelled) setCandidate(res.data as unknown as Candidate);
             } catch {

@@ -117,9 +117,7 @@ export function ProfileSettingsShell() {
             }
 
             const client = createAuthenticatedClient(token);
-            const result = await client.get("/candidates/me", {
-                params: { include: "user" },
-            });
+            const result = await client.get("/candidates/me");
             const dataArray = result.data || result;
             let data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
 

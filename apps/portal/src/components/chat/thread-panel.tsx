@@ -94,9 +94,9 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
 
             if (jobId) {
                 try {
-                    const response: any = await client.get(`/jobs/${jobId}`, {
-                        params: { include: "company" },
-                    });
+                    const response: any = await client.get(
+                        `/jobs/${jobId}/view/recruiter-detail`,
+                    );
                     const job = response?.data;
                     if (job?.title) setJobTitle(job.title);
                     if (job?.company?.name) setCompanyName(job.company.name);

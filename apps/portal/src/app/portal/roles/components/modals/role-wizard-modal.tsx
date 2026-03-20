@@ -214,7 +214,7 @@ export default function RoleWizardModal({
                     const organizationId = profile?.organization_ids?.[0];
                     if (organizationId) {
                         try {
-                            const companyResponse = await client.get<{ data: Company[]; pagination: any }>(`/companies`, { params: { filters: { organizationId }, limit: 1 } });
+                            const companyResponse = await client.get<{ data: Company[]; pagination: any }>(`/companies`, { params: { organization_id: organizationId, limit: 1 } });
                             const comps = companyResponse.data || [];
                             setCompanies(comps);
                             if (comps.length > 0 && mode !== "edit") setFormData((prev) => ({ ...prev, company_id: comps[0].id }));

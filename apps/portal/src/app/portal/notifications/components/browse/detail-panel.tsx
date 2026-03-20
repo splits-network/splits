@@ -251,11 +251,9 @@ function RoleDetailsLoader({ roleId }: { roleId: string }) {
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            const res = await client.get(`/jobs/${roleId}`, {
-                params: {
-                    include: "company,requirements",
-                },
-            });
+            const res = await client.get(
+                `/jobs/${roleId}/view/recruiter-detail`,
+            );
             setJob(res.data);
         } catch (err) {
             console.error("Failed to fetch role:", err);

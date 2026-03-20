@@ -256,9 +256,9 @@ export function FilterProvider({ children }: { children: ReactNode }) {
             await Promise.all(
                 Array.from(jobIds).map(async (jobId) => {
                     try {
-                        const res: any = await client.get(`/jobs/${jobId}`, {
-                            params: { include: "company" },
-                        });
+                        const res: any = await client.get(
+                            `/jobs/${jobId}/view/recruiter-detail`,
+                        );
                         const job = res?.data;
                         if (job) {
                             jobMap[jobId] = {

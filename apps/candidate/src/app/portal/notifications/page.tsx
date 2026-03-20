@@ -42,9 +42,7 @@ export default function NotificationsPage() {
             const data = await client
                 .get("/notifications", {
                     params: {
-                        filters: {
-                            unread_only: filter === "unread" ? true : undefined,
-                        },
+                        unread_only: filter === "unread" ? true : undefined,
                         limit: 100,
                     },
                 })
