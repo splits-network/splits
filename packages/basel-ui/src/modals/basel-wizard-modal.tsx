@@ -165,7 +165,7 @@ export function BaselWizardModal({
             backdropRef={backdropRef}
             closeOnBackdropClick={closeOnBackdropClick && !submitting}
         >
-            <div className={showHelpPanel ? "relative flex-1 min-h-0 overflow-hidden" : "flex flex-col flex-1 min-h-0"}>
+            <div className={showHelpPanel ? "relative flex flex-col flex-1 min-h-0 overflow-hidden" : "flex flex-col flex-1 min-h-0"}>
                 {/* Sidebar help panel — absolute-positioned so it never affects modal height */}
                 {showHelpPanel && (
                     <WizardHelpPanel
@@ -177,7 +177,7 @@ export function BaselWizardModal({
                 )}
 
                 {/* Main content column — lg:ml-64 offsets for the absolute sidebar */}
-                <div className={`flex flex-col flex-1 min-w-0 ${showHelpPanel ? "lg:ml-64" : ""}`}>
+                <div className={`flex flex-col flex-1 min-w-0 min-h-0 ${showHelpPanel ? "lg:ml-64" : ""}`}>
                     {/* Header */}
                     <BaselModalHeader
                         title={title}

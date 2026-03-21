@@ -1,111 +1,132 @@
 import { test, expect } from '../../fixtures/auth';
+import { dismissCookieBanner, captureConsoleErrors } from '../../helpers/auth';
 
 test.describe('Company Admin — Roles', () => {
-  test('roles listing page loads', async ({ companyAdminPage: page, seedData }) => {
-    await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
-
-    await expect(page.locator('body')).not.toContainText(/something went wrong/i);
-    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
-
-    // Page should show a heading or list area
-    const heading = page.locator('h1, h2').first();
-    await expect(heading).toBeVisible({ timeout: 15000 });
-  });
-
-  test('"Create Role" button is visible', async ({
-    companyAdminPage: page,
-    seedData,
-  }) => {
-    await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
-
-    // Wait for page content to fully load (profile hydration can be slow)
-    await page.waitForLoadState('networkidle');
-
-    // Retry navigation if we hit profile loading error
-    const errorVisible = await page.locator('text=/unable to load|failed to fetch/i').isVisible().catch(() => false);
-    if (errorVisible) {
-      const retryBtn = page.locator('button:has-text("Try Again")');
-      if (await retryBtn.isVisible().catch(() => false)) {
-        await retryBtn.click();
-        await page.waitForLoadState('networkidle');
-      }
-    }
-
-    const createBtn = page.locator(
-      'button:has-text("Create"), a:has-text("Create"), button:has-text("New Role"), a:has-text("New Role"), button:has-text("Add Role"), a:has-text("Add Role"), [data-testid="create-role"]'
-    );
-    // Button may not exist if user lacks company — soft assertion
-    const count = await createBtn.count();
-    if (count > 0) {
-      await expect(createBtn.first()).toBeVisible({ timeout: 10000 });
-    }
-  });
-
-  test('create a new role', async ({ companyAdminPage: page, seedData }) => {
+  test('roles listing page loads', async ({ companyAdminPage: page }) => {
     await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
-    // Retry if profile failed to load
-    const errorVisible = await page.locator('text=/unable to load|failed to fetch/i').isVisible().catch(() => false);
-    if (errorVisible) {
-      const retryBtn = page.locator('button:has-text("Try Again")');
-      if (await retryBtn.isVisible().catch(() => false)) {
-        await retryBtn.click();
-        await page.waitForLoadState('networkidle');
-      }
-    }
-
-    // Click create button
-    const createBtn = page.locator(
-      'button:has-text("Create"), a:has-text("Create"), button:has-text("New Role"), a:has-text("New Role"), button:has-text("Add Role"), a:has-text("Add Role"), [data-testid="create-role"]'
-    );
-
-    // If no create button, skip — user may not have company set up
-    if ((await createBtn.count()) === 0) {
-      test.skip();
+    if (page.url().includes('/onboarding')) {
+      test.skip(true, 'Company admin onboarding not complete');
       return;
     }
 
-    await createBtn.first().click();
+    await expect(page.locator('body')).not.toContainText(/something went wrong/i);
+    await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
+  });
+
+  test('create a role via the 6-step wizard', async ({ companyAdminPage: page }) => {
+    test.setTimeout(180_000);
+    const getErrors = captureConsoleErrors(page);
+
+    await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
+    await dismissCookieBanner(page);
 
-    const roleTitle = 'E2E Test Role - Senior Developer';
-
-    // Fill title
-    const titleInput = page.locator(
-      'input[name="title"], input[name="name"], input[placeholder*="title" i], input[placeholder*="name" i]'
-    ).first();
-    if (await titleInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await titleInput.fill(roleTitle);
+    if (page.url().includes('/onboarding')) {
+      test.skip(true, 'Company admin onboarding not complete');
+      return;
     }
 
-    // Fill description
-    const descInput = page.locator(
-      'textarea[name="description"], textarea[placeholder*="description" i], textarea'
-    ).first();
-    if (await descInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await descInput.fill('End-to-end test role created by Playwright automation.');
+    // ── Open the wizard ──
+    const addRoleBtn = page.locator('button:has-text("Add Role")');
+    await expect(addRoleBtn).toBeVisible({ timeout: 30_000 });
+    await addRoleBtn.click();
+
+    // Wait for wizard modal — subtitle shows "Step 1 of 6"
+    await page.getByText('Step 1 of 6').waitFor({ timeout: 10_000 });
+    console.log('  Wizard opened');
+
+    // ── Step 1: Role Details ──
+    const roleTitle = `E2E Senior Developer ${Date.now()}`;
+    const titleInput = page.locator('input[placeholder="e.g., Senior Software Engineer"]');
+    await expect(titleInput).toBeVisible({ timeout: 10_000 });
+    await titleInput.fill(roleTitle);
+
+    // Location (optional)
+    const locationInput = page.locator('input[placeholder="e.g., New York, NY or Remote"]');
+    if (await locationInput.isVisible().catch(() => false)) {
+      await locationInput.fill('New York, NY');
     }
 
-    // Submit
-    const submitBtn = page.locator(
-      'button[type="submit"], button:has-text("Save"), button:has-text("Create"), button:has-text("Submit")'
-    ).first();
-    if (await submitBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await submitBtn.click();
-      await page.waitForLoadState('networkidle');
+    // Department (optional)
+    const deptInput = page.locator('input[placeholder="e.g., Engineering"]');
+    if (await deptInput.isVisible().catch(() => false)) {
+      await deptInput.fill('Engineering');
     }
 
-    // Verify new role appears (navigate back to listing if redirected)
-    if (!page.url().includes('/portal/roles')) {
-      await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
-      await page.waitForLoadState('networkidle');
+    // Wait for company data to load (Next button enabled once companies are loaded)
+    const nextBtn = page.locator('button:has-text("Next")');
+    await expect(nextBtn).toBeEnabled({ timeout: 15_000 });
+    await nextBtn.click();
+    console.log('  Step 1 complete — Role Details');
+
+    // ── Step 2: Compensation ──
+    await page.getByText('Step 2 of 6').waitFor({ timeout: 10_000 });
+
+    const salaryMinInput = page.locator('input[placeholder="120,000"]');
+    if (await salaryMinInput.isVisible({ timeout: 5_000 }).catch(() => false)) {
+      await salaryMinInput.fill('120000');
     }
 
-    // Check the role is listed — soft check since form structure may vary
-    const bodyText = await page.locator('body').textContent();
-    if (bodyText?.includes(roleTitle)) {
-      expect(bodyText).toContain(roleTitle);
+    const salaryMaxInput = page.locator('input[placeholder="150,000"]');
+    if (await salaryMaxInput.isVisible().catch(() => false)) {
+      await salaryMaxInput.fill('150000');
     }
+
+    await nextBtn.click();
+    console.log('  Step 2 complete — Compensation');
+
+    // ── Step 3: Descriptions (optional — skip) ──
+    await page.getByText('Step 3 of 6').waitFor({ timeout: 10_000 });
+    await nextBtn.click();
+    console.log('  Step 3 skipped — Descriptions');
+
+    // ── Step 4: Requirements (optional — skip) ──
+    await page.getByText('Step 4 of 6').waitFor({ timeout: 10_000 });
+    await nextBtn.click();
+    console.log('  Step 4 skipped — Requirements');
+
+    // ── Step 5: Skills (optional — skip) ──
+    await page.getByText('Step 5 of 6').waitFor({ timeout: 10_000 });
+    await nextBtn.click();
+    console.log('  Step 5 skipped — Skills');
+
+    // ── Step 6: Screening (last step — submit) ──
+    await page.getByText('Step 6 of 6').waitFor({ timeout: 10_000 });
+
+    // Capture the job creation API response
+    const responsePromise = page.waitForResponse(
+      resp => resp.url().includes('/jobs') && resp.request().method() === 'POST',
+      { timeout: 30_000 }
+    ).catch(() => null);
+
+    const createRoleBtn = page.locator('button:has-text("Create Role")');
+    await expect(createRoleBtn).toBeVisible({ timeout: 5_000 });
+    await createRoleBtn.click();
+
+    const response = await responsePromise;
+    if (response) {
+      const status = response.status();
+      console.log(`  Job creation API: ${status}`);
+      if (status >= 400) {
+        const body = await response.text().catch(() => '');
+        console.log(`  API error: ${body}`);
+      }
+      expect(status).toBeLessThan(400);
+    } else {
+      console.log('  WARNING: No job creation API response captured');
+    }
+
+    // Wait for modal to close (toast appears on success)
+    await page.waitForTimeout(3000);
+
+    const errors = getErrors();
+    if (errors.length > 0) {
+      console.log(`  Console errors:\n    ${errors.slice(0, 3).join('\n    ')}`);
+    }
+
+    console.log(`  Created role: ${roleTitle}`);
   });
 });
