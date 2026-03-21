@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { WizardHelpZone } from "@splits-network/basel-ui";
 
 interface PreScreenQuestion {
     question: string;
@@ -19,18 +19,15 @@ interface StepQuestionsProps {
     questions: PreScreenQuestion[];
     answers: Answer[];
     onChange: (answers: Answer[]) => void;
-    onNext: () => void;
-    onBack: () => void;
+    error?: string | null;
 }
 
 export default function StepQuestions({
     questions,
     answers,
     onChange,
-    onNext,
-    onBack,
+    error = null,
 }: StepQuestionsProps) {
-    const [error, setError] = useState<string | null>(null);
 
     const getAnswer = (index: number) => {
         return answers.find((a) => a.index === index)?.answer;
@@ -43,71 +40,11 @@ export default function StepQuestions({
         const newAnswers = answers.filter((a) => a.index !== index);
         newAnswers.push({ index, answer });
         onChange(newAnswers);
-        setError(null);
     };
-
-    const handleNext = () => {
-        const missingRequired = questions
-            .filter((q) => q.is_required)
-            .filter((q, idx) => {
-                const ans = getAnswer(idx);
-                if (ans === undefined || ans === null || ans === "")
-                    return true;
-                if (Array.isArray(ans) && ans.length === 0) return true;
-                return false;
-            });
-
-        if (missingRequired.length > 0) {
-            setError(
-                `${missingRequired.length} required ${missingRequired.length === 1 ? "question needs" : "questions need"} an answer before you can continue.`,
-            );
-            return;
-        }
-
-        onNext();
-    };
-
-    if (questions.length === 0) {
-        return (
-            <div className="space-y-6">
-                <div className="bg-info/5 border-l-4 border-info p-4">
-                    <div className="flex items-start gap-3">
-                        <i className="fa-duotone fa-regular fa-circle-info text-info mt-0.5" />
-                        <p className="text-sm text-base-content/70">
-                            No screening questions for this role — you're almost
-                            done.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex justify-between border-t border-base-200 pt-6">
-                    <button
-                        type="button"
-                        className="btn btn-ghost"
-                        onClick={onBack}
-                    >
-                        <i className="fa-duotone fa-regular fa-arrow-left" />
-                        Back
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={onNext}
-                    >
-                        Continue to Review
-                        <i className="fa-duotone fa-regular fa-arrow-right" />
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-6">
             <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
-                    Step 3
-                </p>
                 <h3 className="text-xl font-black tracking-tight mb-2">
                     A few questions from the team
                 </h3>
@@ -135,8 +72,18 @@ export default function StepQuestions({
 
             <div className="space-y-4">
                 {questions.map((question, index) => (
-                    <div
+                    <WizardHelpZone
                         key={index}
+                        title={`Question ${index + 1}`}
+                        description={question.question}
+                        icon={question.question_type === "yes_no" ? "fa-duotone fa-regular fa-toggle-on" : question.question_type === "text" ? "fa-duotone fa-regular fa-keyboard" : "fa-duotone fa-regular fa-list"}
+                        tips={[
+                            ...(question.is_required ? ["This question is required — you must answer it to continue"] : ["This question is optional but answering it strengthens your application"]),
+                            question.question_type === "text" ? "Be specific and concise — hiring teams review many applications" : question.question_type === "multi_select" ? "You can select multiple options" : "Choose the option that best describes your situation",
+                            ...(question.disclaimer ? [`Note: ${question.disclaimer}`] : []),
+                        ]}
+                    >
+                    <div
                         className="border-l-4 border-base-300 bg-base-200 p-5"
                     >
                         <fieldset>
@@ -271,28 +218,10 @@ export default function StepQuestions({
                             )}
                         </fieldset>
                     </div>
+                    </WizardHelpZone>
                 ))}
             </div>
 
-            {/* Navigation */}
-            <div className="flex justify-between border-t border-base-200 pt-6">
-                <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={onBack}
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-left" />
-                    Back
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleNext}
-                >
-                    Continue to Review
-                    <i className="fa-duotone fa-regular fa-arrow-right" />
-                </button>
-            </div>
         </div>
     );
 }

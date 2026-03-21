@@ -66,7 +66,7 @@ test.describe('Hiring Manager — Restricted Access', () => {
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     // The dashboard should load without errors — that's the key assertion
-    const heading = page.locator('h1, h2, h3').first();
+    const heading = page.locator(':is(h1, h2, h3):visible').first();
     await expect(heading).toBeVisible({ timeout: 15_000 });
   });
 });

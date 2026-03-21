@@ -329,29 +329,42 @@ test.describe.serial('Lifecycle — Full Application to Payout', () => {
   }) => {
     test.setTimeout(60_000);
 
+    if (!jobId) {
+      test.skip(true, 'No job created');
+      return;
+    }
+
     await page.goto('/portal/placements', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
     await dismissCookieBanner(page);
 
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
-    // Wait for placements page content to load
-    await page.waitForTimeout(3000);
-    await hideDevOverlays(page);
-
-    // Verify via API
+    // Verify placement via API — find the one matching our job
     await page.waitForFunction(() => !!(window as any).Clerk?.session, { timeout: 15_000 });
-    const result = await gatewayCall(page, 'GET', '/placements?limit=5');
+    const result = await gatewayCall(page, 'GET', '/placements?limit=20');
     const placements = result?.data?.data || [];
-    console.log(`  Placements found: ${placements.length}`);
+    console.log(`  Total placements: ${placements.length}`);
 
-    if (placements.length > 0) {
-      const latest = placements[0];
-      console.log(`  Latest placement: ${latest.id} — job_id: ${latest.job_id}, status: ${latest.status}`);
-    }
+    // Find the placement for the job we created in this test run
+    const ourPlacement = placements.find((p: any) => p.job_id === jobId);
+    expect(ourPlacement).toBeTruthy();
 
-    expect(placements.length).toBeGreaterThan(0);
-    console.log('  Placement verified');
+    console.log(`  Placement ID: ${ourPlacement.id}`);
+    console.log(`  Placement job_id: ${ourPlacement.job_id}`);
+    console.log(`  Placement candidate_id: ${ourPlacement.candidate_id}`);
+    console.log(`  Placement state: ${ourPlacement.state}`);
+    console.log(`  Placement salary: ${ourPlacement.salary}`);
+    console.log(`  Placement fee_percentage: ${ourPlacement.fee_percentage}`);
+
+    // Verify placement data matches our hire
+    expect(ourPlacement.job_id).toBe(jobId);
+    expect(ourPlacement.candidate_id).toBe(candidateId);
+    expect(ourPlacement.state).toBe('hired');
+    expect(Number(ourPlacement.salary)).toBe(120000);
+    expect(Number(ourPlacement.fee_percentage)).toBe(20);
+
+    console.log('  Placement verified with correct hire data');
   });
 
   // ── Step 6: Admin verifies payout ─────────────────────────────────────

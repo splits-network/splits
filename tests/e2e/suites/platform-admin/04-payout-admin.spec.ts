@@ -18,7 +18,7 @@ test.describe('Platform Admin — Payout Administration', () => {
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     // Wait for page content to render
-    const heading = page.locator('h1, h2, h3').first();
+    const heading = page.locator(':is(h1, h2, h3):visible').first();
     await expect(heading).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
@@ -30,7 +30,7 @@ test.describe('Platform Admin — Payout Administration', () => {
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     // Wait for page content to render
-    const heading = page.locator('h1, h2, h3').first();
+    const heading = page.locator(':is(h1, h2, h3):visible').first();
     await expect(heading).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
@@ -42,7 +42,7 @@ test.describe('Platform Admin — Payout Administration', () => {
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
 
     // Wait for page content to render
-    const heading = page.locator('h1, h2, h3').first();
+    const heading = page.locator(':is(h1, h2, h3):visible').first();
     await expect(heading).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });

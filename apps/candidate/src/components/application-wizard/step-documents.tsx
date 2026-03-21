@@ -1,32 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import UploadDocumentModal from "@/components/upload-document-modal";
 import { useToast } from "@/lib/toast-context";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { WizardHelpZone } from "@splits-network/basel-ui";
 
 interface StepDocumentsProps {
     documents: any[];
     selected: string[];
     onChange: (docs: { selected: string[] }) => void;
-    onNext: () => void;
     onDocumentsUpdated?: (newDocuments: any[]) => void;
+    error?: string | null;
 }
 
 export default function StepDocuments({
     documents,
     selected,
     onChange,
-    onNext,
     onDocumentsUpdated,
+    error: externalError,
 }: StepDocumentsProps) {
     const { getToken } = useAuth();
     const { success, error: showError } = useToast();
     const [error, setError] = useState<string | null>(null);
-    const [showUploadModal, setShowUploadModal] = useState(false);
     const [candidateId, setCandidateId] = useState<string | null>(null);
     const [localDocuments, setLocalDocuments] = useState(documents);
     const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
@@ -34,6 +33,14 @@ export default function StepDocuments({
         id: string;
         name: string;
     } | null>(null);
+
+    // Inline upload state
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploadFile, setUploadFile] = useState<File | null>(null);
+    const [uploadDocType, setUploadDocType] = useState("resume");
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleToggleDocument = (docId: string) => {
         const currentDocs =
@@ -81,19 +88,49 @@ export default function StepDocuments({
         }
     };
 
-    const handleUploadClick = async () => {
-        const id = await getCandidateId();
-        if (!id) {
-            setError(
-                "Unable to find your candidate profile. Please contact support.",
-            );
+    const validateFile = useCallback((file: File): string | null => {
+        const allowedTypes = [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ];
+        if (!allowedTypes.includes(file.type)) {
+            return "Please upload a PDF or Word document (.pdf, .doc, .docx)";
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            return "File size must be less than 10 MB";
+        }
+        return null;
+    }, []);
+
+    const handleFileSelect = useCallback((file: File) => {
+        const validationError = validateFile(file);
+        if (validationError) {
+            setUploadError(validationError);
             return;
         }
-        setShowUploadModal(true);
-    };
+        setUploadFile(file);
+        setUploadError(null);
+    }, [validateFile]);
 
-    const handleUploadSuccess = async () => {
-        setShowUploadModal(false);
+    const handleDrop = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileSelect(file);
+    }, [handleFileSelect]);
+
+    const handleDragOver = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    }, []);
+
+    const handleDragLeave = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    }, []);
+
+    const reloadDocuments = async () => {
         try {
             const token = await getToken();
             if (!token) return;
@@ -108,6 +145,48 @@ export default function StepDocuments({
         } catch (err: any) {
             console.error("Failed to reload documents:", err);
             setError(err.message || "Failed to reload documents");
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!uploadFile) return;
+
+        const id = await getCandidateId();
+        if (!id) {
+            setUploadError("Unable to find your candidate profile. Please contact support.");
+            return;
+        }
+
+        setUploading(true);
+        setUploadError(null);
+
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("No auth token available");
+
+            const formData = new FormData();
+            formData.append("file", uploadFile);
+            formData.append("entity_type", "candidate");
+            formData.append("entity_id", id);
+            formData.append("document_type", uploadDocType);
+
+            const client = createAuthenticatedClient(token);
+            await client.post("/documents", formData);
+
+            setUploadFile(null);
+            setUploadDocType("resume");
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            success(`"${uploadFile.name}" uploaded successfully`);
+            await reloadDocuments();
+        } catch (err: any) {
+            console.error("Upload error:", err);
+            setUploadError(
+                err.response?.data?.error?.message ||
+                    err.message ||
+                    "Upload failed",
+            );
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -146,33 +225,6 @@ export default function StepDocuments({
         }
     };
 
-    const handleNext = () => {
-        const currentDocs =
-            localDocuments.length > 0 ? localDocuments : documents;
-
-        if (selected.length === 0) {
-            setError("Select at least one document to continue.");
-            return;
-        }
-
-        const selectedResumes = selected.filter((id) => {
-            const doc = currentDocs.find((d) => d.id === id);
-            return doc && doc.document_type === "resume";
-        });
-
-        if (selectedResumes.length === 0) {
-            setError("A resume is required. Please select one to continue.");
-            return;
-        }
-
-        if (selectedResumes.length > 1) {
-            setError("Only one resume can be attached per application.");
-            return;
-        }
-
-        onNext();
-    };
-
     const currentDocs = localDocuments.length > 0 ? localDocuments : documents;
     const currentResumes = currentDocs.filter(
         (doc) => doc.document_type === "resume",
@@ -183,102 +235,148 @@ export default function StepDocuments({
 
     /* ─── Empty State ─────────────────────────────────────────────────── */
 
-    if (currentDocs.length === 0) {
-        return (
-            <>
-                <div className="space-y-6">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
-                            Getting Started
-                        </p>
-                        <h3 className="text-xl font-black tracking-tight mb-2">
-                            Upload your resume
-                        </h3>
-                        <p className="text-sm text-base-content/60 leading-relaxed">
-                            We need at least one resume on file before you can
-                            apply. Upload yours now and you can reuse it for
-                            future applications too.
-                        </p>
+    /* ─── Inline Upload Zone ───────────────────────────────────────────── */
+
+    const uploadZone = (
+        <WizardHelpZone
+            title="Upload a Document"
+            description="Drag and drop a file or click to browse. Uploaded documents are saved to your library for reuse across applications."
+            icon="fa-duotone fa-regular fa-cloud-arrow-up"
+            tips={[
+                "Accepted formats: PDF, DOC, DOCX — up to 10 MB",
+                "Choose the document type so it's categorized correctly",
+                "Uploaded files are saved to your document library for future applications",
+            ]}
+        >
+        <div>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
+                Upload New Document
+            </h4>
+
+            {uploadError && (
+                <div className="bg-error/5 border-l-4 border-error p-3 mb-3">
+                    <div className="flex items-start gap-2">
+                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5 text-xs" />
+                        <span className="text-xs">{uploadError}</span>
                     </div>
+                </div>
+            )}
 
-                    {error && (
-                        <div className="bg-error/5 border-l-4 border-error p-4">
-                            <div className="flex items-start gap-3">
-                                <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
-                                <span className="text-sm">{error}</span>
-                            </div>
+            {!uploadFile ? (
+                <div
+                    className={`border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
+                        isDragging
+                            ? "border-primary bg-primary/5"
+                            : "border-base-300 bg-base-200 hover:border-base-content/20"
+                    }`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileSelect(file);
+                        }}
+                    />
+                    <i className={`fa-duotone fa-regular fa-cloud-arrow-up text-2xl mb-2 ${
+                        isDragging ? "text-primary" : "text-base-content/30"
+                    }`} />
+                    <p className="text-sm font-semibold text-base-content/60">
+                        {isDragging ? "Drop your file here" : "Drag and drop a file here"}
+                    </p>
+                    <p className="text-xs text-base-content/40 mt-1">
+                        or <span className="text-primary font-semibold">browse your computer</span> · PDF, DOC, DOCX up to 10 MB
+                    </p>
+                </div>
+            ) : (
+                <div className="border border-base-300 bg-base-200 p-4 space-y-3">
+                    {/* Selected file */}
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <i className="fa-duotone fa-regular fa-file-pdf text-primary text-sm" />
                         </div>
-                    )}
-
-                    <div className="bg-base-200 p-8 text-center">
-                        <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                            <i className="fa-duotone fa-regular fa-cloud-arrow-up text-2xl text-primary" />
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold truncate">{uploadFile.name}</p>
+                            <p className="text-xs text-base-content/40">
+                                {(uploadFile.size / 1024).toFixed(0)} KB
+                            </p>
                         </div>
                         <button
                             type="button"
-                            className="btn btn-primary mb-3"
-                            onClick={handleUploadClick}
+                            className="btn btn-ghost btn-xs btn-square"
+                            onClick={() => {
+                                setUploadFile(null);
+                                if (fileInputRef.current) fileInputRef.current.value = "";
+                            }}
+                            disabled={uploading}
                         >
-                            <i className="fa-duotone fa-regular fa-upload" />
-                            Upload Resume
+                            <i className="fa-duotone fa-regular fa-xmark text-xs" />
                         </button>
-                        <p className="text-xs text-base-content/40">
-                            PDF or DOC, up to 10 MB
-                        </p>
                     </div>
 
-                    <div className="text-center">
-                        <Link
-                            href="/portal/documents"
-                            className="text-sm text-primary hover:underline"
+                    {/* Type + Upload */}
+                    <div className="flex items-end gap-3">
+                        <fieldset className="fieldset flex-1">
+                            <legend className="fieldset-legend text-xs">Document Type</legend>
+                            <select
+                                className="select select-sm w-full"
+                                value={uploadDocType}
+                                onChange={(e) => setUploadDocType(e.target.value)}
+                                disabled={uploading}
+                            >
+                                <option value="resume">Resume</option>
+                                <option value="cover_letter">Cover Letter</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </fieldset>
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={handleUpload}
+                            disabled={uploading}
                         >
-                            <i className="fa-duotone fa-regular fa-folder-open mr-1" />
-                            Or manage your documents library
-                        </Link>
+                            {uploading ? (
+                                <>
+                                    <span className="loading loading-spinner loading-xs" />
+                                    Uploading...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fa-duotone fa-regular fa-upload" />
+                                    Upload
+                                </>
+                            )}
+                        </button>
                     </div>
                 </div>
+            )}
+        </div>
+        </WizardHelpZone>
+    );
 
-                {showUploadModal && candidateId &&
-                    createPortal(
-                        <UploadDocumentModal
-                            entityType="candidate"
-                            entityId={candidateId}
-                            documentType="resume"
-                            onClose={() => setShowUploadModal(false)}
-                            onSuccess={handleUploadSuccess}
-                        />,
-                        document.body,
-                    )}
-            </>
-        );
-    }
+    /* ─── Empty State ─────────────────────────────────────────────────── */
 
-    /* ─── Document Selection ──────────────────────────────────────────── */
-
-    return (
-        <>
+    if (currentDocs.length === 0) {
+        return (
             <div className="space-y-6">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
-                            Step 1
-                        </p>
-                        <h3 className="text-xl font-black tracking-tight mb-2">
-                            Choose your documents
-                        </h3>
-                        <p className="text-sm text-base-content/60 leading-relaxed">
-                            Select one resume (required) and any supporting
-                            files you'd like to include.
-                        </p>
-                    </div>
-                    <button
-                        type="button"
-                        className="btn btn-sm btn-ghost"
-                        onClick={handleUploadClick}
-                    >
-                        <i className="fa-duotone fa-regular fa-plus" />
-                        Upload
-                    </button>
+                <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
+                        Getting Started
+                    </p>
+                    <h3 className="text-xl font-black tracking-tight mb-2">
+                        Upload your resume
+                    </h3>
+                    <p className="text-sm text-base-content/60 leading-relaxed">
+                        We need at least one resume on file before you can
+                        apply. Upload yours now and you can reuse it for
+                        future applications too.
+                    </p>
                 </div>
 
                 {error && (
@@ -290,8 +388,58 @@ export default function StepDocuments({
                     </div>
                 )}
 
+                {uploadZone}
+
+                <div className="text-center">
+                    <Link
+                        href="/portal/documents"
+                        className="text-sm text-primary hover:underline"
+                    >
+                        <i className="fa-duotone fa-regular fa-folder-open mr-1" />
+                        Or manage your documents library
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    /* ─── Document Selection ──────────────────────────────────────────── */
+
+    return (
+        <>
+            <div className="space-y-6">
+                <div>
+                    <h3 className="text-xl font-black tracking-tight mb-2">
+                        Choose your documents
+                    </h3>
+                    <p className="text-sm text-base-content/60 leading-relaxed">
+                        Select one resume (required) and any supporting
+                        files you'd like to include.
+                    </p>
+                </div>
+
+                {(error || externalError) && (
+                    <div className="bg-error/5 border-l-4 border-error p-4">
+                        <div className="flex items-start gap-3">
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
+                            <span className="text-sm">{error || externalError}</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Resumes */}
                 {currentResumes.length > 0 && (
+                    <WizardHelpZone
+                        title="Resume"
+                        description="Select the resume you want to submit with this application. Only one resume can be attached per application."
+                        icon="fa-duotone fa-regular fa-file-pdf"
+                        tips={[
+                            "Choose the resume most relevant to this specific role",
+                            "You can upload a new one using the Upload button if your current resume isn't up to date",
+                            "Your primary resume is marked with a star",
+                            "Only one resume per application — selecting a new one deselects the previous",
+                        ]}
+                    >
                     <div>
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
                             Resumes
@@ -357,10 +505,21 @@ export default function StepDocuments({
                             ))}
                         </div>
                     </div>
+                    </WizardHelpZone>
                 )}
 
                 {/* Other Documents */}
                 {currentOtherDocs.length > 0 && (
+                    <WizardHelpZone
+                        title="Supporting Documents"
+                        description="Optionally attach additional documents like portfolios, certifications, or work samples."
+                        icon="fa-duotone fa-regular fa-folder-open"
+                        tips={[
+                            "Only include documents relevant to this specific role",
+                            "Cover letters are handled in the next step",
+                            "Portfolios and certifications can strengthen your application",
+                        ]}
+                    >
                     <div>
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
                             Additional Files
@@ -417,32 +576,13 @@ export default function StepDocuments({
                             ))}
                         </div>
                     </div>
+                    </WizardHelpZone>
                 )}
 
-                {/* Navigation */}
-                <div className="flex justify-end border-t border-base-200 pt-6">
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleNext}
-                    >
-                        Continue
-                        <i className="fa-duotone fa-regular fa-arrow-right" />
-                    </button>
-                </div>
+                {/* Inline Upload */}
+                {uploadZone}
+
             </div>
-
-            {showUploadModal && candidateId &&
-                createPortal(
-                    <UploadDocumentModal
-                        entityType="candidate"
-                        entityId={candidateId}
-                        documentType="resume"
-                        onClose={() => setShowUploadModal(false)}
-                        onSuccess={handleUploadSuccess}
-                    />,
-                    document.body,
-                )}
 
             {/* Delete Confirmation */}
             {confirmDelete &&

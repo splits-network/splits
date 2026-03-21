@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { MarkdownEditor } from "@splits-network/shared-ui";
+import { WizardHelpZone } from "@splits-network/basel-ui";
 
 interface StepCoverLetterProps {
     coverLetter: string;
     onChange: (coverLetter: string) => void;
-    onNext: () => void;
-    onBack: () => void;
+    onSkipConfirm: () => void;
+    showSkipWarning: boolean;
     uploadedCoverLetterDocs?: Array<{
         id: string;
         file_name: string;
@@ -19,33 +19,15 @@ interface StepCoverLetterProps {
 export default function StepCoverLetter({
     coverLetter,
     onChange,
-    onNext,
-    onBack,
+    onSkipConfirm,
+    showSkipWarning,
     uploadedCoverLetterDocs = [],
 }: StepCoverLetterProps) {
-    const [showSkipWarning, setShowSkipWarning] = useState(false);
-
-    const handleNext = () => {
-        if (!coverLetter?.trim() && uploadedCoverLetterDocs.length === 0) {
-            setShowSkipWarning(true);
-            return;
-        }
-        setShowSkipWarning(false);
-        onNext();
-    };
-
-    const handleTextChange = (value: string) => {
-        onChange(value);
-        setShowSkipWarning(false);
-    };
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
-                    Step 2 · Optional
-                </p>
                 <h3 className="text-xl font-black tracking-tight mb-2">
                     Add a cover letter
                 </h3>
@@ -82,6 +64,17 @@ export default function StepCoverLetter({
             )}
 
             {/* Editor */}
+            <WizardHelpZone
+                title="Cover Letter"
+                description="A personal message to the hiring team explaining why you're a great fit. Applications with cover letters consistently get more attention."
+                icon="fa-duotone fa-regular fa-file-lines"
+                tips={[
+                    "Mention something specific about the company or role — generic letters get skimmed",
+                    "Connect your experience directly to what they need",
+                    "Keep it to 2-3 short paragraphs — brevity shows respect for their time",
+                    "This step is optional, but a strong cover letter can set you apart",
+                ]}
+            >
             <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2 block">
                     {uploadedCoverLetterDocs.length > 0
@@ -91,7 +84,7 @@ export default function StepCoverLetter({
                 <div className="min-h-[240px] border border-base-300 overflow-hidden">
                     <MarkdownEditor
                         value={coverLetter}
-                        onChange={handleTextChange}
+                        onChange={onChange}
                         placeholder={
                             uploadedCoverLetterDocs.length > 0
                                 ? "Anything else you'd like the hiring team to know..."
@@ -101,32 +94,7 @@ export default function StepCoverLetter({
                     />
                 </div>
             </div>
-
-            {/* Writing tips */}
-            <div className="bg-base-200 p-5">
-                <div className="flex items-start gap-3">
-                    <i className="fa-duotone fa-regular fa-lightbulb text-primary mt-0.5" />
-                    <div className="text-sm text-base-content/60">
-                        <p className="font-bold text-base-content/80 mb-1">
-                            Quick tips
-                        </p>
-                        <ul className="space-y-1">
-                            <li>
-                                Mention something specific about the company or
-                                role
-                            </li>
-                            <li>
-                                Connect your experience directly to what they
-                                need
-                            </li>
-                            <li>
-                                Keep it to 2-3 short paragraphs — brevity shows
-                                respect for their time
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            </WizardHelpZone>
 
             {/* Skip warning */}
             {showSkipWarning && (
@@ -142,32 +110,13 @@ export default function StepCoverLetter({
                         <button
                             type="button"
                             className="btn btn-warning btn-sm flex-shrink-0"
-                            onClick={() => {
-                                setShowSkipWarning(false);
-                                onNext();
-                            }}
+                            onClick={onSkipConfirm}
                         >
                             Skip
                         </button>
                     </div>
                 </div>
             )}
-
-            {/* Navigation */}
-            <div className="flex justify-between border-t border-base-200 pt-6">
-                <button type="button" className="btn btn-ghost" onClick={onBack}>
-                    <i className="fa-duotone fa-regular fa-arrow-left" />
-                    Back
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleNext}
-                >
-                    Continue
-                    <i className="fa-duotone fa-regular fa-arrow-right" />
-                </button>
-            </div>
         </div>
     );
 }

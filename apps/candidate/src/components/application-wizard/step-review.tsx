@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { WizardHelpZone } from "@splits-network/basel-ui";
 
 interface PreScreenQuestion {
     question: string;
@@ -30,9 +30,7 @@ interface StepReviewProps {
     answers: Answer[];
     additionalNotes: string;
     selectedRecruiter?: SelectedRecruiter | null;
-    onBack: () => void;
-    onSubmit: () => Promise<void>;
-    onSaveAsDraft: () => Promise<void>;
+    error?: string | null;
 }
 
 export default function StepReview({
@@ -44,13 +42,8 @@ export default function StepReview({
     answers,
     additionalNotes,
     selectedRecruiter,
-    onBack,
-    onSubmit,
-    onSaveAsDraft,
+    error = null,
 }: StepReviewProps) {
-    const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
     const selectedDocs = documents.filter((d) =>
         selectedDocuments.includes(d.id),
     );
@@ -71,37 +64,9 @@ export default function StepReview({
         return answer;
     };
 
-    const handleSubmit = async () => {
-        setSubmitting(true);
-        setError(null);
-        try {
-            await onSubmit();
-        } catch (err: any) {
-            setError(
-                err.message ||
-                    "Something went wrong. Please try again.",
-            );
-            setSubmitting(false);
-        }
-    };
-
-    const handleSaveAsDraft = async () => {
-        setSubmitting(true);
-        setError(null);
-        try {
-            await onSaveAsDraft();
-        } catch (err: any) {
-            setError(err.message || "Unable to save draft. Please try again.");
-            setSubmitting(false);
-        }
-    };
-
     return (
         <div className="space-y-6">
             <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
-                    Final Step
-                </p>
                 <h3 className="text-xl font-black tracking-tight mb-2">
                     Review and submit for AI review
                 </h3>
@@ -122,6 +87,17 @@ export default function StepReview({
             )}
 
             {/* Review Sections */}
+            <WizardHelpZone
+                title="Application Summary"
+                description="Review everything you're about to submit. Use the Back button to fix anything that doesn't look right."
+                icon="fa-duotone fa-regular fa-clipboard-check"
+                tips={[
+                    "Double-check your resume is the right version for this role",
+                    "Save as draft if you want to come back and polish it later",
+                    "After submission, your application goes through AI review before reaching the hiring team",
+                    "You can track your application status from your dashboard",
+                ]}
+            >
             <div className="bg-base-200 p-6 space-y-5">
                 {/* Position */}
                 <div>
@@ -280,6 +256,7 @@ export default function StepReview({
                     </>
                 )}
             </div>
+            </WizardHelpZone>
 
             {/* What happens next */}
             <div className="bg-primary/5 border-l-4 border-primary p-5">
@@ -299,56 +276,6 @@ export default function StepReview({
                 </div>
             </div>
 
-            {/* Navigation */}
-            <div className="flex justify-between items-center border-t border-base-200 pt-6">
-                <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={onBack}
-                    disabled={submitting}
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-left" />
-                    Back
-                </button>
-                <div className="flex gap-3">
-                    <button
-                        type="button"
-                        className="btn btn-ghost"
-                        onClick={handleSaveAsDraft}
-                        disabled={submitting}
-                    >
-                        {submitting ? (
-                            <>
-                                <span className="loading loading-spinner loading-sm" />
-                                Saving...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-duotone fa-regular fa-floppy-disk" />
-                                Save Draft
-                            </>
-                        )}
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                    >
-                        {submitting ? (
-                            <>
-                                <span className="loading loading-spinner loading-sm" />
-                                Getting Your AI Review...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-duotone fa-regular fa-paper-plane" />
-                                Get Your AI Review
-                            </>
-                        )}
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }

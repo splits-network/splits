@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { BaselWizardModal, BaselAlertBox } from "@splits-network/basel-ui";
 import StepDocuments from "@/components/application-wizard/step-documents";
 import StepCoverLetter from "@/components/application-wizard/step-cover-letter";
 import StepQuestions from "@/components/application-wizard/step-questions";
 import StepNotes from "@/components/application-wizard/step-notes";
 import StepRecruiter from "@/components/application-wizard/step-recruiter";
 import StepReview from "@/components/application-wizard/step-review";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface ApplicationWizardModalProps {
     jobId: string;
@@ -20,14 +23,30 @@ interface ApplicationWizardModalProps {
     existingApplication?: any;
 }
 
-function buildStepLabels(hasQuestions: boolean, hasRecruiterChoice: boolean): string[] {
-    const steps = ["Documents", "Cover Letter"];
-    if (hasQuestions) steps.push("Questions");
-    steps.push("Notes");
-    if (hasRecruiterChoice) steps.push("Recruiter");
-    steps.push("Review");
+interface WizardStep {
+    label: string;
+    description: string;
+}
+
+// ─── Step Builder ────────────────────────────────────────────────────────────
+
+function buildWizardSteps(hasQuestions: boolean, hasRecruiterChoice: boolean): WizardStep[] {
+    const steps: WizardStep[] = [
+        { label: "Documents", description: "Select your resume and any supporting documents." },
+        { label: "Cover Letter", description: "Add an optional cover letter to strengthen your application." },
+    ];
+    if (hasQuestions) {
+        steps.push({ label: "Questions", description: "Answer screening questions from the hiring team." });
+    }
+    steps.push({ label: "Notes", description: "Share any additional context with the employer." });
+    if (hasRecruiterChoice) {
+        steps.push({ label: "Recruiter", description: "Choose which recruiter should represent you." });
+    }
+    steps.push({ label: "Review", description: "Review everything before submitting." });
     return steps;
 }
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ApplicationWizardModal({
     jobId,
@@ -39,11 +58,8 @@ export default function ApplicationWizardModal({
 }: ApplicationWizardModalProps) {
     const router = useRouter();
     const { getToken } = useAuth();
-    const backdropRef = useRef<HTMLDivElement>(null);
-    const boxRef = useRef<HTMLDivElement>(null);
-    const stepContentRef = useRef<HTMLDivElement>(null);
 
-    const [currentStep, setCurrentStep] = useState(1);
+    const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(true);
     const [job, setJob] = useState<any>(null);
     const [questions, setQuestions] = useState<any[]>([]);
@@ -77,28 +93,13 @@ export default function ApplicationWizardModal({
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showCoverLetterSkipWarning, setShowCoverLetterSkipWarning] = useState(false);
 
     const hasQuestions = questions.length > 0;
     const hasRecruiterChoice = activeRecruiters.length > 1;
-    const stepLabels = buildStepLabels(hasQuestions, hasRecruiterChoice);
-    const totalSteps = stepLabels.length;
-
-    const currentStepLabel = stepLabels[currentStep - 1] || "";
-
-    /* ─── CSS Entrance Animation ──────────────────────────────────────── */
-
-    const [visible, setVisible] = useState(false);
-    const [closing, setClosing] = useState(false);
-
-    useEffect(() => {
-        // Trigger entrance animation on next frame
-        requestAnimationFrame(() => setVisible(true));
-    }, []);
-
-    const handleClose = useCallback(() => {
-        setClosing(true);
-        setTimeout(onClose, 300);
-    }, [onClose]);
+    const wizardSteps = buildWizardSteps(hasQuestions, hasRecruiterChoice);
+    const currentStepLabel = wizardSteps[currentStep]?.label || "";
+    const isReviewStep = currentStepLabel === "Review";
 
     /* ─── Data Loading ────────────────────────────────────────────────── */
 
@@ -109,15 +110,11 @@ export default function ApplicationWizardModal({
 
             try {
                 const token = await getToken();
-                if (!token) {
-                    throw new Error("Authentication required");
-                }
+                if (!token) throw new Error("Authentication required");
 
                 const authClient = createAuthenticatedClient(token);
                 const [jobResponse, documentsResponse, recruitersResponse] = await Promise.all([
-                    authClient.get<{ data: any }>(
-                        `/jobs/${jobId}/view/candidate-detail`,
-                    ),
+                    authClient.get<{ data: any }>(`/jobs/${jobId}/view/candidate-detail`),
                     authClient.get<{ data: any[] }>("/documents"),
                     authClient.get<{ data: any[] }>("/recruiter-candidates"),
                 ]);
@@ -132,33 +129,21 @@ export default function ApplicationWizardModal({
                     );
                     const appOriginalDocIds = new Set(
                         existingApplication.documents
-                            .map(
-                                (doc: any) =>
-                                    doc.metadata?.original_document_id,
-                            )
+                            .map((doc: any) => doc.metadata?.original_document_id)
                             .filter(Boolean),
                     );
-
                     documentsData = documentsData.filter(
-                        (doc: any) =>
-                            !appDocIds.has(doc.id) &&
-                            !appOriginalDocIds.has(doc.id),
+                        (doc: any) => !appDocIds.has(doc.id) && !appOriginalDocIds.has(doc.id),
                     );
-
-                    documentsData = [
-                        ...documentsData,
-                        ...existingApplication.documents,
-                    ];
+                    documentsData = [...documentsData, ...existingApplication.documents];
                 }
 
-                // Filter to active recruiters with consent
                 const allRecruiters = recruitersResponse.data || [];
                 const active = allRecruiters.filter(
                     (r: any) => r.status === "active" && r.consent_given !== false,
                 );
                 setActiveRecruiters(active);
 
-                // Auto-select if only one recruiter
                 if (active.length === 1 && !existingApplication?.candidate_recruiter_id) {
                     setFormData((prev) => ({
                         ...prev,
@@ -182,21 +167,139 @@ export default function ApplicationWizardModal({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [jobId]);
 
-    /* ─── Step Navigation ─────────────────────────────────────────────── */
+    /* ─── Step Validation & Navigation ─────────────────────────────────── */
 
-    const handleNext = () => {
-        setError(null);
-        setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-    };
+    const validateDocuments = useCallback((): string | null => {
+        const currentDocs = localDocuments.length > 0 ? localDocuments : documents;
+        const selected = formData.documents.selected;
 
-    const handleBack = () => {
+        if (selected.length === 0) return "Select at least one document to continue.";
+
+        const selectedResumes = selected.filter((id: string) => {
+            const doc = currentDocs.find((d: any) => d.id === id);
+            return doc && doc.document_type === "resume";
+        });
+
+        if (selectedResumes.length === 0) return "A resume is required. Please select one to continue.";
+        if (selectedResumes.length > 1) return "Only one resume can be attached per application.";
+        return null;
+    }, [localDocuments, documents, formData.documents.selected]);
+
+    const validateQuestions = useCallback((): string | null => {
+        const missingRequired = questions
+            .filter((q: any) => q.is_required)
+            .filter((_: any, idx: number) => {
+                const ans = formData.pre_screen_answers.find((a: any) => a.index === idx);
+                const answer = ans?.answer;
+                if (answer === undefined || answer === null || answer === "") return true;
+                if (Array.isArray(answer) && answer.length === 0) return true;
+                return false;
+            });
+        if (missingRequired.length > 0) {
+            return `${missingRequired.length} required ${missingRequired.length === 1 ? "question needs" : "questions need"} an answer before you can continue.`;
+        }
+        return null;
+    }, [questions, formData.pre_screen_answers]);
+
+    const handleNext = useCallback(() => {
         setError(null);
-        setCurrentStep((prev) => Math.max(prev - 1, 1));
-    };
+        setShowCoverLetterSkipWarning(false);
+
+        if (currentStepLabel === "Documents") {
+            const validationError = validateDocuments();
+            if (validationError) { setError(validationError); return; }
+        }
+
+        if (currentStepLabel === "Cover Letter") {
+            const uploadedCoverLetterDocs = localDocuments.filter(
+                (doc: any) => doc.document_type === "cover_letter" && formData.documents.selected.includes(doc.id),
+            );
+            if (!formData.cover_letter?.trim() && uploadedCoverLetterDocs.length === 0) {
+                setShowCoverLetterSkipWarning(true);
+                return;
+            }
+        }
+
+        if (currentStepLabel === "Questions") {
+            const validationError = validateQuestions();
+            if (validationError) { setError(validationError); return; }
+        }
+
+        setCurrentStep((prev) => Math.min(prev + 1, wizardSteps.length - 1));
+    }, [currentStepLabel, validateDocuments, validateQuestions, wizardSteps.length, localDocuments, formData]);
+
+    const handleCoverLetterSkipConfirm = useCallback(() => {
+        setShowCoverLetterSkipWarning(false);
+        setCurrentStep((prev) => Math.min(prev + 1, wizardSteps.length - 1));
+    }, [wizardSteps.length]);
+
+    const handleBack = useCallback(() => {
+        setError(null);
+        setShowCoverLetterSkipWarning(false);
+        setCurrentStep((prev) => Math.max(prev - 1, 0));
+    }, []);
+
+    const handleClose = useCallback(() => {
+        if (submitting) return;
+        onClose();
+    }, [submitting, onClose]);
 
     /* ─── Submission ──────────────────────────────────────────────────── */
 
-    const handleSubmit = async () => {
+    const buildPreScreenAnswers = useCallback(() => {
+        return questions.map((q: any, i: number) => {
+            const ans = formData.pre_screen_answers.find((a: any) => a.index === i);
+            return {
+                question: q.question,
+                question_type: q.question_type,
+                is_required: q.is_required,
+                ...(q.options ? { options: q.options } : {}),
+                ...(q.disclaimer ? { disclaimer: q.disclaimer } : {}),
+                answer: ans?.answer ?? null,
+            };
+        });
+    }, [questions, formData.pre_screen_answers]);
+
+    const saveNotes = useCallback(async (authClient: any, applicationId: string) => {
+        if (formData.notes && formData.notes.trim()) {
+            try {
+                await authClient.post(`/applications/${applicationId}/notes`, {
+                    created_by_type: "candidate",
+                    note_type: "note",
+                    visibility: "shared",
+                    message_text: formData.notes.trim(),
+                });
+            } catch (noteError) {
+                console.warn("Failed to create candidate note:", noteError);
+            }
+        }
+    }, [formData.notes]);
+
+    const saveApplication = useCallback(async (authClient: any, preScreenAnswers: any[]) => {
+        if (existingApplication) {
+            await authClient.patch(`/applications/${existingApplication.id}`, {
+                document_ids: formData.documents.selected,
+                cover_letter: formData.cover_letter,
+                pre_screen_answers: preScreenAnswers,
+            });
+            return existingApplication.id;
+        }
+
+        const payload: Record<string, any> = {
+            job_id: jobId,
+            document_ids: formData.documents.selected,
+            cover_letter: formData.cover_letter,
+            pre_screen_answers: preScreenAnswers,
+        };
+        if (formData.candidate_recruiter_id) {
+            payload.candidate_recruiter_id = formData.candidate_recruiter_id;
+            payload.application_source = "recruiter";
+        }
+        const result = await authClient.post("/applications", payload);
+        return result.data.id;
+    }, [existingApplication, jobId, formData]);
+
+    const handleSubmit = useCallback(async () => {
         setSubmitting(true);
         setError(null);
 
@@ -204,76 +307,13 @@ export default function ApplicationWizardModal({
             const token = await getToken();
             if (!token) throw new Error("Authentication required");
 
-            let applicationId;
             const authClient = createAuthenticatedClient(token);
-
-            // Build JSONB snapshot: merge question metadata with answers
-            const preScreenAnswers = questions.map((q: any, i: number) => {
-                const ans = formData.pre_screen_answers.find(
-                    (a: any) => a.index === i,
-                );
-                return {
-                    question: q.question,
-                    question_type: q.question_type,
-                    is_required: q.is_required,
-                    ...(q.options ? { options: q.options } : {}),
-                    ...(q.disclaimer ? { disclaimer: q.disclaimer } : {}),
-                    answer: ans?.answer ?? null,
-                };
-            });
-
-            if (existingApplication) {
-                // Save application data first (stage stays as-is)
-                await authClient.patch<{ data: any }>(
-                    `/applications/${existingApplication.id}`,
-                    {
-                        document_ids: formData.documents.selected,
-                        cover_letter: formData.cover_letter,
-                        pre_screen_answers: preScreenAnswers,
-                    },
-                );
-                applicationId = existingApplication.id;
-            } else {
-                // Create as draft first (ATS always creates as draft for candidates)
-                const createPayload: Record<string, any> = {
-                    job_id: jobId,
-                    document_ids: formData.documents.selected,
-                    cover_letter: formData.cover_letter,
-                    pre_screen_answers: preScreenAnswers,
-                };
-                if (formData.candidate_recruiter_id) {
-                    createPayload.candidate_recruiter_id = formData.candidate_recruiter_id;
-                    createPayload.application_source = "recruiter";
-                }
-                const result = await authClient.post<{ data: any }>(
-                    "/applications",
-                    createPayload,
-                );
-                applicationId = result.data.id;
-            }
+            const preScreenAnswers = buildPreScreenAnswers();
+            const applicationId = await saveApplication(authClient, preScreenAnswers);
 
             // Transition to ai_review — triggers application.stage_changed event
-            // which the ai-service picks up to run the AI review pipeline
-            await authClient.patch<{ data: any }>(
-                `/applications/${applicationId}`,
-                { stage: "ai_review" },
-            );
-
-            if (formData.notes && formData.notes.trim()) {
-                try {
-                    await authClient.post(
-                        `/applications/${applicationId}/notes`,
-                        {
-                            created_by_type: "candidate",
-                            note_type: "note",
-                            visibility: "shared",
-                            message_text: formData.notes.trim(),
-                        },
-                    );
-                } catch (noteError) {
-                    console.warn("Failed to create candidate note:", noteError);
-                }
-            }
+            await authClient.patch(`/applications/${applicationId}`, { stage: "ai_review" });
+            await saveNotes(authClient, applicationId);
 
             onClose();
             router.push(`/portal/applications?applicationId=${applicationId}`);
@@ -282,9 +322,9 @@ export default function ApplicationWizardModal({
             setError(err.message || "Failed to submit application");
             setSubmitting(false);
         }
-    };
+    }, [buildPreScreenAnswers, saveApplication, saveNotes, onClose, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const handleSaveAsDraft = async () => {
+    const handleSaveAsDraft = useCallback(async () => {
         setSubmitting(true);
         setError(null);
 
@@ -292,99 +332,38 @@ export default function ApplicationWizardModal({
             const token = await getToken();
             if (!token) throw new Error("Authentication required");
 
-            let applicationId;
             const authClient = createAuthenticatedClient(token);
-
-            // Build JSONB snapshot for draft too
-            const preScreenAnswers = questions.map((q: any, i: number) => {
-                const ans = formData.pre_screen_answers.find(
-                    (a: any) => a.index === i,
-                );
-                return {
-                    question: q.question,
-                    question_type: q.question_type,
-                    is_required: q.is_required,
-                    ...(q.options ? { options: q.options } : {}),
-                    ...(q.disclaimer ? { disclaimer: q.disclaimer } : {}),
-                    answer: ans?.answer ?? null,
-                };
-            });
-
-            if (existingApplication) {
-                await authClient.patch<{ data: any }>(
-                    `/applications/${existingApplication.id}`,
-                    {
-                        document_ids: formData.documents.selected,
-                        cover_letter: formData.cover_letter,
-                        pre_screen_answers: preScreenAnswers,
-                    },
-                );
-                applicationId = existingApplication.id;
-            } else {
-                // ATS creates as draft by default for candidates
-                const draftPayload: Record<string, any> = {
-                    job_id: jobId,
-                    document_ids: formData.documents.selected,
-                    cover_letter: formData.cover_letter,
-                    pre_screen_answers: preScreenAnswers,
-                };
-                if (formData.candidate_recruiter_id) {
-                    draftPayload.candidate_recruiter_id = formData.candidate_recruiter_id;
-                    draftPayload.application_source = "recruiter";
-                }
-                const result = await authClient.post<{ data: any }>(
-                    "/applications",
-                    draftPayload,
-                );
-                applicationId = result.data.id;
-            }
-
-            if (formData.notes && formData.notes.trim()) {
-                try {
-                    await authClient.post(
-                        `/applications/${applicationId}/notes`,
-                        {
-                            created_by_type: "candidate",
-                            note_type: "note",
-                            visibility: "shared",
-                            message_text: formData.notes.trim(),
-                        },
-                    );
-                } catch (noteError) {
-                    console.warn("Failed to create candidate note:", noteError);
-                }
-            }
+            const preScreenAnswers = buildPreScreenAnswers();
+            const applicationId = await saveApplication(authClient, preScreenAnswers);
+            await saveNotes(authClient, applicationId);
 
             onClose();
-            router.push(
-                `/portal/applications?draft=true&application=${applicationId}`,
-            );
+            router.push(`/portal/applications?draft=true&application=${applicationId}`);
         } catch (err: any) {
             console.error("Failed to save draft:", err);
             setError(err.message || "Failed to save draft");
             setSubmitting(false);
         }
-    };
+    }, [buildPreScreenAnswers, saveApplication, saveNotes, onClose, router]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    /* ─── Derived: next disabled ──────────────────────────────────────── */
+
+    const nextDisabled = loading || (currentStepLabel === "Recruiter" && !formData.candidate_recruiter_id);
 
     /* ─── Step Rendering ──────────────────────────────────────────────── */
 
     const renderStep = () => {
         if (!job) return null;
 
-        // Resolve the logical step name based on current step number
-        const stepName = stepLabels[currentStep - 1];
-
-        switch (stepName) {
+        switch (currentStepLabel) {
             case "Documents":
                 return (
                     <StepDocuments
                         documents={localDocuments}
                         selected={formData.documents.selected}
-                        onChange={(docs: any) =>
-                            setFormData({ ...formData, documents: docs })
-                        }
-                        onNext={handleNext}
+                        onChange={(docs: any) => setFormData({ ...formData, documents: docs })}
                         onDocumentsUpdated={setLocalDocuments}
+                        error={error}
                     />
                 );
             case "Cover Letter": {
@@ -393,18 +372,14 @@ export default function ApplicationWizardModal({
                         doc.document_type === "cover_letter" &&
                         formData.documents.selected.includes(doc.id),
                 );
-
                 return (
                     <StepCoverLetter
                         coverLetter={formData.cover_letter}
                         onChange={(coverLetter: string) =>
-                            setFormData({
-                                ...formData,
-                                cover_letter: coverLetter,
-                            })
+                            setFormData({ ...formData, cover_letter: coverLetter })
                         }
-                        onNext={handleNext}
-                        onBack={handleBack}
+                        onSkipConfirm={handleCoverLetterSkipConfirm}
+                        showSkipWarning={showCoverLetterSkipWarning}
                         uploadedCoverLetterDocs={uploadedCoverLetterDocs}
                     />
                 );
@@ -415,24 +390,16 @@ export default function ApplicationWizardModal({
                         questions={questions}
                         answers={formData.pre_screen_answers}
                         onChange={(answers: any) =>
-                            setFormData({
-                                ...formData,
-                                pre_screen_answers: answers,
-                            })
+                            setFormData({ ...formData, pre_screen_answers: answers })
                         }
-                        onNext={handleNext}
-                        onBack={handleBack}
+                        error={error}
                     />
                 );
             case "Notes":
                 return (
                     <StepNotes
                         notes={formData.notes}
-                        onChange={(notes: string) =>
-                            setFormData({ ...formData, notes })
-                        }
-                        onNext={handleNext}
-                        onBack={handleBack}
+                        onChange={(notes: string) => setFormData({ ...formData, notes })}
                     />
                 );
             case "Recruiter":
@@ -441,13 +408,8 @@ export default function ApplicationWizardModal({
                         recruiters={activeRecruiters}
                         selectedRecruiterId={formData.candidate_recruiter_id}
                         onChange={(id: string) =>
-                            setFormData({
-                                ...formData,
-                                candidate_recruiter_id: id,
-                            })
+                            setFormData({ ...formData, candidate_recruiter_id: id })
                         }
-                        onNext={handleNext}
-                        onBack={handleBack}
                     />
                 );
             case "Review":
@@ -465,9 +427,7 @@ export default function ApplicationWizardModal({
                                 (r: any) => r.recruiter_id === formData.candidate_recruiter_id,
                             ) || null
                         }
-                        onSubmit={handleSubmit}
-                        onSaveAsDraft={handleSaveAsDraft}
-                        onBack={handleBack}
+                        error={error}
                     />
                 );
             default:
@@ -475,125 +435,104 @@ export default function ApplicationWizardModal({
         }
     };
 
-    return (
-        <div className="modal modal-open" role="dialog">
-            {/* Backdrop */}
-            <div
-                ref={backdropRef}
-                className="modal-backdrop bg-neutral/60 transition-opacity duration-300"
-                style={{ opacity: visible && !closing ? 1 : 0 }}
-            />
+    /* ─── Custom footer for Review step ───────────────────────────────── */
 
-            {/* Modal Box */}
-            <div
-                ref={boxRef}
-                className="modal-box max-w-3xl bg-base-100 p-0 overflow-hidden max-h-[90vh] flex flex-col transition-all duration-300 ease-out"
-                style={{
-                    opacity: visible && !closing ? 1 : 0,
-                    transform:
-                        visible && !closing
-                            ? "translateY(0) scale(1)"
-                            : "translateY(40px) scale(0.96)",
-                }}
-            >
-                {/* ── Header ──────────────────────────────────── */}
-                <div className="bg-base-300 text-base-content px-8 py-6 flex-shrink-0">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-primary flex items-center justify-center flex-shrink-0">
-                                <i className="fa-duotone fa-regular fa-paper-plane text-primary-content" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-black">
-                                    {existingApplication
-                                        ? "Edit Your Application"
-                                        : "Apply to This Role"}
-                                </h3>
-                                <p className="text-xs text-base-content/60 uppercase tracking-wider">
-                                    {loading
-                                        ? "Loading..."
-                                        : `Step ${currentStep} of ${totalSteps} — ${currentStepLabel}`}
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleClose}
-                            className="btn btn-ghost btn-sm btn-square text-base-content/60 hover:text-base-content"
-                            disabled={submitting}
-                        >
-                            <i className="fa-duotone fa-regular fa-xmark text-lg" />
-                        </button>
-                    </div>
-
-                    {/* Progress bar */}
-                    {!loading && (
-                        <div className="flex gap-2 mt-5">
-                            {Array.from({ length: totalSteps }).map((_, i) => (
-                                <div
-                                    key={i}
-                                    className={`h-1 flex-1 transition-colors duration-300 ${
-                                        i < currentStep
-                                            ? "bg-primary"
-                                            : "bg-neutral-content/20"
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* ── Subheader Context ────────────────────────── */}
-                <div className="bg-base-200 border-b border-base-300 px-8 py-3 flex-shrink-0">
-                    <div className="flex items-center gap-3 text-sm">
-                        <i className="fa-duotone fa-regular fa-briefcase text-primary" />
-                        <span className="font-bold">{jobTitle}</span>
-                        <span className="text-base-content/40">at</span>
-                        <span className="text-base-content/60">
-                            {companyName}
-                        </span>
-                    </div>
-                </div>
-
-                {/* ── Content ─────────────────────────────────── */}
-                <div className="flex-1 overflow-y-auto p-8">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-16">
-                            <span className="loading loading-spinner loading-lg text-primary mb-4" />
-                            <p className="text-sm font-semibold text-base-content/40 uppercase tracking-wider">
-                                Preparing your application...
-                            </p>
-                        </div>
-                    ) : error && !job ? (
-                        <div className="py-12">
-                            <div className="bg-error/5 border-l-4 border-error p-6">
-                                <div className="flex items-start gap-3">
-                                    <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
-                                    <div>
-                                        <p className="font-bold text-sm mb-1">
-                                            Something went wrong
-                                        </p>
-                                        <p className="text-sm text-base-content/60">
-                                            {error}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    const reviewFooter = isReviewStep ? (
+        <>
+            <div>
+                <button
+                    onClick={handleBack}
+                    className="btn btn-ghost"
+                    disabled={submitting}
+                >
+                    <i className="fa-duotone fa-regular fa-arrow-left" />
+                    Back
+                </button>
+            </div>
+            <div className="flex gap-3">
+                <button
+                    onClick={handleSaveAsDraft}
+                    className="btn btn-ghost"
+                    disabled={submitting}
+                >
+                    {submitting ? (
+                        <>
+                            <span className="loading loading-spinner loading-sm" />
+                            Saving...
+                        </>
                     ) : (
-                        <div ref={stepContentRef}>
-                            {error && (
-                                <div className="bg-error/5 border-l-4 border-error p-4 mb-6">
-                                    <div className="flex items-start gap-3">
-                                        <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
-                                        <span className="text-sm">{error}</span>
-                                    </div>
-                                </div>
-                            )}
-                            {renderStep()}
-                        </div>
+                        <>
+                            <i className="fa-duotone fa-regular fa-floppy-disk" />
+                            Save Draft
+                        </>
                     )}
+                </button>
+                <button
+                    onClick={handleSubmit}
+                    className="btn btn-primary"
+                    disabled={submitting}
+                >
+                    {submitting ? (
+                        <>
+                            <span className="loading loading-spinner loading-sm" />
+                            Getting Your AI Review...
+                        </>
+                    ) : (
+                        <>
+                            <i className="fa-duotone fa-regular fa-paper-plane" />
+                            Get Your AI Review
+                        </>
+                    )}
+                </button>
+            </div>
+        </>
+    ) : undefined;
+
+    /* ─── Render ──────────────────────────────────────────────────────── */
+
+    return (
+        <BaselWizardModal
+            isOpen={true}
+            onClose={handleClose}
+            title={existingApplication ? "Edit Your Application" : "Apply to This Role"}
+            icon="fa-duotone fa-regular fa-paper-plane"
+            accentColor="primary"
+            steps={wizardSteps}
+            currentStep={currentStep}
+            onNext={handleNext}
+            onBack={handleBack}
+            submitting={submitting}
+            nextDisabled={nextDisabled}
+            nextLabel="Continue"
+            maxWidth="max-w-3xl"
+            showHelpPanel
+            footer={reviewFooter}
+        >
+            {/* Job context bar */}
+            <div className="bg-base-200 border-b border-base-300 px-4 py-3 -mx-6 -mt-6 mb-6">
+                <div className="flex items-center gap-3 text-sm">
+                    <i className="fa-duotone fa-regular fa-briefcase text-primary" />
+                    <span className="font-bold">{jobTitle}</span>
+                    <span className="text-base-content/40">at</span>
+                    <span className="text-base-content/60">{companyName}</span>
                 </div>
             </div>
-        </div>
+
+            {loading ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                    <span className="loading loading-spinner loading-lg text-primary mb-4" />
+                    <p className="text-sm font-semibold text-base-content/40 uppercase tracking-wider">
+                        Preparing your application...
+                    </p>
+                </div>
+            ) : error && !job ? (
+                <BaselAlertBox variant="error">
+                    <p className="font-bold text-sm mb-1">Something went wrong</p>
+                    <p className="text-sm text-base-content/60">{error}</p>
+                </BaselAlertBox>
+            ) : (
+                renderStep()
+            )}
+        </BaselWizardModal>
     );
 }

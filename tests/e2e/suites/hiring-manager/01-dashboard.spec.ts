@@ -8,7 +8,7 @@ test.describe('Hiring Manager — Dashboard', () => {
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
-    const heading = page.locator('h1, h2, [data-testid="dashboard-heading"]').first();
+    const heading = page.locator(':is(h1, h2):visible, [data-testid="dashboard-heading"]').first();
     await expect(heading).toBeVisible({ timeout: 15000 });
   });
 

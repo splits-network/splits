@@ -9,7 +9,7 @@ test.describe('Company Admin — Dashboard', () => {
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     // A heading or main content area is visible
-    const heading = page.locator('h1, h2, [data-testid="dashboard-heading"]').first();
+    const heading = page.locator(':is(h1, h2):visible, [data-testid="dashboard-heading"]').first();
     await expect(heading).toBeVisible({ timeout: 15000 });
   });
 

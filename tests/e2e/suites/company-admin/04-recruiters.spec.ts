@@ -10,7 +10,7 @@ test.describe('Company Admin — Recruiters', () => {
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
-    const heading = page.locator('h1, h2').first();
+    const heading = page.locator(':is(h1, h2):visible').first();
     await expect(heading).toBeVisible({ timeout: 15000 });
   });
 
