@@ -16,7 +16,7 @@ test.describe('Company Admin — Roles', () => {
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });
 
-  test('create a role via the 6-step wizard', async ({ companyAdminPage: page }) => {
+  test('create a role via the 5-step wizard', async ({ companyAdminPage: page }) => {
     test.setTimeout(180_000);
     const getErrors = captureConsoleErrors(page);
 
@@ -34,8 +34,8 @@ test.describe('Company Admin — Roles', () => {
     await expect(addRoleBtn).toBeVisible({ timeout: 30_000 });
     await addRoleBtn.click();
 
-    // Wait for wizard modal — subtitle shows "Step 1 of 6"
-    await page.getByText('Step 1 of 6').waitFor({ timeout: 10_000 });
+    // Wait for wizard modal — subtitle shows "Step 1 of 5"
+    await page.getByText('Step 1 of 5').waitFor({ timeout: 10_000 });
     console.log('  Wizard opened');
 
     // ── Step 1: Role Details ──
@@ -63,7 +63,7 @@ test.describe('Company Admin — Roles', () => {
     console.log('  Step 1 complete — Role Details');
 
     // ── Step 2: Compensation ──
-    await page.getByText('Step 2 of 6').waitFor({ timeout: 10_000 });
+    await page.getByText('Step 2 of 5').waitFor({ timeout: 10_000 });
 
     const salaryMinInput = page.locator('input[placeholder="120,000"]');
     if (await salaryMinInput.isVisible({ timeout: 5_000 }).catch(() => false)) {
@@ -79,22 +79,17 @@ test.describe('Company Admin — Roles', () => {
     console.log('  Step 2 complete — Compensation');
 
     // ── Step 3: Descriptions (optional — skip) ──
-    await page.getByText('Step 3 of 6').waitFor({ timeout: 10_000 });
+    await page.getByText('Step 3 of 5').waitFor({ timeout: 10_000 });
     await nextBtn.click();
     console.log('  Step 3 skipped — Descriptions');
 
-    // ── Step 4: Requirements (optional — skip) ──
-    await page.getByText('Step 4 of 6').waitFor({ timeout: 10_000 });
+    // ── Step 4: Requirements & Skills (optional — skip) ──
+    await page.getByText('Step 4 of 5').waitFor({ timeout: 10_000 });
     await nextBtn.click();
-    console.log('  Step 4 skipped — Requirements');
+    console.log('  Step 4 skipped — Requirements & Skills');
 
-    // ── Step 5: Skills (optional — skip) ──
-    await page.getByText('Step 5 of 6').waitFor({ timeout: 10_000 });
-    await nextBtn.click();
-    console.log('  Step 5 skipped — Skills');
-
-    // ── Step 6: Screening (last step — submit) ──
-    await page.getByText('Step 6 of 6').waitFor({ timeout: 10_000 });
+    // ── Step 5: Screening (last step — submit) ──
+    await page.getByText('Step 5 of 5').waitFor({ timeout: 10_000 });
 
     // Capture the job creation API response
     const responsePromise = page.waitForResponse(

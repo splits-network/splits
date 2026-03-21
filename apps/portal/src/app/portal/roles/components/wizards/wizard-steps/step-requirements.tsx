@@ -1,14 +1,29 @@
 "use client";
 
-import { WizardHelpZone } from "@splits-network/basel-ui";
+import { BaselSkillPicker, type SkillOption, WizardHelpZone } from "@splits-network/basel-ui";
 import type { FormData } from "./types";
 
 interface StepRequirementsProps {
     formData: FormData;
     onChange: (updates: Partial<FormData>) => void;
+    requiredSkills: SkillOption[];
+    preferredSkills: SkillOption[];
+    onRequiredSkillsChange: (skills: SkillOption[]) => void;
+    onPreferredSkillsChange: (skills: SkillOption[]) => void;
+    searchSkills: (query: string) => Promise<SkillOption[]>;
+    createSkill: (name: string) => Promise<SkillOption>;
 }
 
-export function StepRequirements({ formData, onChange }: StepRequirementsProps) {
+export function StepRequirements({
+    formData,
+    onChange,
+    requiredSkills,
+    preferredSkills,
+    onRequiredSkillsChange,
+    onPreferredSkillsChange,
+    searchSkills,
+    createSkill,
+}: StepRequirementsProps) {
     const addMandatory = () =>
         onChange({ mandatory_requirements: [...formData.mandatory_requirements, ""] });
     const addPreferred = () =>
@@ -27,8 +42,9 @@ export function StepRequirements({ formData, onChange }: StepRequirementsProps) 
             <div role="alert" className="alert alert-info">
                 <i className="fa-duotone fa-regular fa-circle-info" />
                 <span className="text-sm">
-                    Requirements appear on the job listing. Candidates are
-                    matched based on mandatory criteria.
+                    Requirements appear on the job listing and skills are used
+                    for candidate matching. Mandatory criteria filter candidates
+                    automatically.
                 </span>
             </div>
 
@@ -120,6 +136,62 @@ export function StepRequirements({ formData, onChange }: StepRequirementsProps) 
                                 </div>
                             ))
                         )}
+                    </div>
+                </div>
+            </WizardHelpZone>
+
+            <div className="divider" />
+
+            {/* Required Skills */}
+            <WizardHelpZone
+                title="Required Skills"
+                description="Skills the candidate must have for this role. These are used for automated matching and search filtering."
+                tips={["Start typing to search existing skills", "You can create new skills if they don't exist", "Keep to 5-10 required skills for best matching results"]}
+            >
+                <div className="border-l-4 border-primary pl-4">
+                    <h4 className="font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-shield-check text-primary" />
+                        Required Skills
+                    </h4>
+                    <span className="text-sm text-base-content/50 font-semibold">
+                        Skills the candidate must have for this role
+                    </span>
+                    <div className="mt-3">
+                        <BaselSkillPicker
+                            selectedSkills={requiredSkills}
+                            onSkillsChange={onRequiredSkillsChange}
+                            searchFn={searchSkills}
+                            createFn={createSkill}
+                            placeholder="Search for required skills..."
+                            maxSkills={20}
+                        />
+                    </div>
+                </div>
+            </WizardHelpZone>
+
+            {/* Preferred Skills */}
+            <WizardHelpZone
+                title="Nice-to-Have Skills"
+                description="Skills that are preferred but not required. These help rank candidates but won't exclude them."
+                tips={["Use for adjacent or emerging skills", "Helps differentiate between equally qualified candidates"]}
+            >
+                <div className="border-l-4 border-secondary pl-4">
+                    <h4 className="font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-star text-secondary" />
+                        Nice-to-Have Skills
+                    </h4>
+                    <span className="text-sm text-base-content/50 font-semibold">
+                        Skills that are preferred but not required
+                    </span>
+                    <div className="mt-3">
+                        <BaselSkillPicker
+                            selectedSkills={preferredSkills}
+                            onSkillsChange={onPreferredSkillsChange}
+                            searchFn={searchSkills}
+                            createFn={createSkill}
+                            placeholder="Search for preferred skills..."
+                            maxSkills={20}
+                        />
                     </div>
                 </div>
             </WizardHelpZone>

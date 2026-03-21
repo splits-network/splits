@@ -12,7 +12,6 @@ import { StepBasicInfo } from "@/app/portal/roles/components/wizards/wizard-step
 import { StepCompensation } from "@/app/portal/roles/components/wizards/wizard-steps/step-compensation";
 import { StepDescriptions } from "@/app/portal/roles/components/wizards/wizard-steps/step-descriptions";
 import { StepRequirements } from "@/app/portal/roles/components/wizards/wizard-steps/step-requirements";
-import { StepSkills } from "@/app/portal/roles/components/wizards/wizard-steps/step-skills";
 import { StepPreScreen } from "@/app/portal/roles/components/wizards/wizard-steps/step-pre-screen";
 import type { FormData, Company, SkillOption } from "@/app/portal/roles/components/wizards/wizard-steps/types";
 
@@ -22,8 +21,7 @@ const WIZARD_STEPS = [
     { label: "Role Details", description: "Set the job title, company, location, and visibility options for this role." },
     { label: "Compensation", description: "Define salary range, placement fee, guarantee period, and employment terms." },
     { label: "Descriptions", description: "Write separate descriptions for recruiters (internal) and candidates (public)." },
-    { label: "Requirements", description: "Add mandatory and preferred qualifications that candidates must meet." },
-    { label: "Skills", description: "Tag required and preferred skills for candidate matching." },
+    { label: "Requirements & Skills", description: "Add qualifications candidates must meet and tag skills for matching." },
     { label: "Screening", description: "Create pre-screen questions candidates answer before applying." },
 ];
 
@@ -480,18 +478,19 @@ export default function RoleWizardModal({
                     )}
                     {currentStep === 1 && <StepCompensation formData={formData} onChange={handleChange} mode={mode} />}
                     {currentStep === 2 && <StepDescriptions formData={formData} onChange={handleChange} />}
-                    {currentStep === 3 && <StepRequirements formData={formData} onChange={handleChange} />}
-                    {currentStep === 4 && (
-                        <StepSkills
+                    {currentStep === 3 && (
+                        <StepRequirements
+                            formData={formData}
+                            onChange={handleChange}
                             requiredSkills={formData.required_skills}
                             preferredSkills={formData.preferred_skills}
-                            onRequiredChange={(skills) => handleChange({ required_skills: skills })}
-                            onPreferredChange={(skills) => handleChange({ preferred_skills: skills })}
-                            searchFn={searchSkills}
-                            createFn={createSkill}
+                            onRequiredSkillsChange={(skills) => handleChange({ required_skills: skills })}
+                            onPreferredSkillsChange={(skills) => handleChange({ preferred_skills: skills })}
+                            searchSkills={searchSkills}
+                            createSkill={createSkill}
                         />
                     )}
-                    {currentStep === 5 && <StepPreScreen formData={formData} onChange={handleChange} />}
+                    {currentStep === 4 && <StepPreScreen formData={formData} onChange={handleChange} />}
                 </>
             )}
         </BaselWizardModal>
