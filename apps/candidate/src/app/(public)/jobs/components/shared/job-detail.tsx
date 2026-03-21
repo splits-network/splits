@@ -82,7 +82,7 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
                 const [recruitersRes, applicationsRes, savedJobsRes] =
                     await Promise.all([
                         authClient.get<{ data: any[] }>(
-                            "/recruiter-candidates",
+                            "/recruiter-candidates/views/list-for-candidate",
                         ),
                         authClient.get<{ data: any[] }>("/applications"),
                         authClient.get<{ data: any[] }>(
@@ -92,7 +92,10 @@ export function JobDetail({ job, onClose }: JobDetailProps) {
 
                 if (cancelled) return;
 
-                setHasActiveRecruiter((recruitersRes.data?.length ?? 0) > 0);
+                const recruiters = Array.isArray(recruitersRes.data) ? recruitersRes.data : [];
+                setHasActiveRecruiter(
+                    recruiters.some((r: any) => r.status === "active" && r.consent_given),
+                );
 
                 const applications = Array.isArray(applicationsRes.data)
                     ? applicationsRes.data

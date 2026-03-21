@@ -166,14 +166,15 @@ export default async function JobDetailPage({ params }: PageProps) {
                     applicationsResponse,
                     savedJobsResponse,
                 ] = await Promise.all([
-                    authClient.get<{ data: any[] }>("/recruiter-candidates"),
+                    authClient.get<{ data: any[] }>("/recruiter-candidates/views/list-for-candidate"),
                     authClient.get<{ data: any[] }>("/applications"),
                     authClient.get<{ data: any[] }>(`/saved-jobs?job_id=${id}`),
                 ]);
 
-                hasActiveRecruiter =
-                    recruitersResponse.data &&
-                    recruitersResponse.data.length > 0;
+                const recruiters = recruitersResponse.data || [];
+                hasActiveRecruiter = recruiters.some(
+                    (r: any) => r.status === "active" && r.consent_given,
+                );
 
                 // Check for existing application to this job
                 const applications = applicationsResponse.data || [];
