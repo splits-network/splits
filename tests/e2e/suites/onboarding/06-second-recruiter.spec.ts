@@ -125,15 +125,22 @@ test.describe('Onboarding — Second Recruiter', () => {
         console.log('  No success message — may have auto-redirected');
       });
 
-    await page.evaluate(() => { window.location.href = '/portal/dashboard'; });
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(5000);
+    // Navigate to dashboard with retry
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await page.goto('/portal/dashboard', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle').catch(() => {});
+      await page.waitForTimeout(3000);
+
+      if (!page.url().includes('/onboarding')) break;
+      console.log(`  Dashboard redirect attempt ${attempt + 1} — still on onboarding, retrying...`);
+      await page.waitForTimeout(2000);
+    }
 
     if (page.url().includes('/onboarding')) {
       await page.screenshot({ path: 'tests/e2e/.auth/second-recruiter-onboarding-stuck.png' });
       const errors = getErrors();
       if (errors.length > 0) {
-        console.log(`  Console errors:\n    ${errors.join('\n    ')}`);
+        console.log(`  Console errors:\n    ${errors.slice(0, 3).join('\n    ')}`);
       }
     }
 

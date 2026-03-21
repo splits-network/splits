@@ -55,7 +55,7 @@ export function WizardHelpPanel({
     const fallbackDescription = steps[currentStep]?.description || "";
 
     return (
-        <aside className="wizard-help-panel w-64 bg-base-200 border-r border-base-300 flex flex-col hidden lg:flex">
+        <aside className="wizard-help-panel w-64 bg-base-200 border-r border-base-300 flex-col hidden lg:flex absolute top-0 bottom-0 left-0 overflow-y-auto">
             {/* Step list */}
             <div className="p-5 flex-1">
                 <h4 className="text-xs font-black uppercase tracking-[0.2em] text-base-content/50 mb-4">
@@ -110,8 +110,8 @@ export function WizardHelpPanel({
                 </div>
             </div>
 
-            {/* Contextual help area */}
-            <div className="border-t border-base-300 p-5">
+            {/* Contextual help area — overflow-y-auto so it scrolls within fixed modal height */}
+            <div className="border-t border-base-300 p-5 overflow-y-auto">
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-base-content/50 mb-3">
                     {activeHelp ? "Field Guide" : "About This Step"}
                 </p>
