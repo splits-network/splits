@@ -1,5 +1,7 @@
 "use client";
 
+import { WizardHelpZone } from "@splits-network/basel-ui";
+
 interface RecruiterOption {
     id: string;
     recruiter_id: string;
@@ -12,16 +14,12 @@ interface StepRecruiterProps {
     recruiters: RecruiterOption[];
     selectedRecruiterId: string | null;
     onChange: (recruiterId: string) => void;
-    onNext: () => void;
-    onBack: () => void;
 }
 
 export default function StepRecruiter({
     recruiters,
     selectedRecruiterId,
     onChange,
-    onNext,
-    onBack,
 }: StepRecruiterProps) {
     return (
         <div className="space-y-6">
@@ -38,6 +36,16 @@ export default function StepRecruiter({
                 </p>
             </div>
 
+            <WizardHelpZone
+                title="Your Recruiter"
+                description="Choose which recruiter will represent you for this application. They'll advocate on your behalf with the hiring team."
+                icon="fa-duotone fa-regular fa-user-tie"
+                tips={[
+                    "Pick the recruiter who knows your strengths best for this type of role",
+                    "Your recruiter will be notified when you submit this application",
+                    "They may reach out to discuss strategy before forwarding your application",
+                ]}
+            >
             <div className="space-y-3">
                 {recruiters.map((recruiter) => {
                     const isSelected =
@@ -90,27 +98,8 @@ export default function StepRecruiter({
                     );
                 })}
             </div>
+            </WizardHelpZone>
 
-            {/* Navigation */}
-            <div className="flex justify-between items-center border-t border-base-200 pt-6">
-                <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={onBack}
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-left" />
-                    Back
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={onNext}
-                    disabled={!selectedRecruiterId}
-                >
-                    Continue
-                    <i className="fa-duotone fa-regular fa-arrow-right" />
-                </button>
-            </div>
         </div>
     );
 }

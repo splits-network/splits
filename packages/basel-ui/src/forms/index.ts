@@ -39,3 +39,21 @@ export {
     type BaselSkillPickerProps,
     type SkillOption,
 } from './basel-skill-picker';
+export {
+    WizardHelpProvider,
+    useWizardHelp,
+    type WizardHelpContent,
+} from './wizard-help-context';
+export {
+    WizardHelpZone,
+    type WizardHelpZoneProps,
+} from './wizard-help-zone';
+export {
+    WizardHelpPanel,
+    type WizardHelpPanelProps,
+    type WizardHelpPanelStep,
+} from './wizard-help-panel';
+export {
+    WizardHelpMobileBar,
+    type WizardHelpMobileBarProps,
+} from './wizard-help-mobile-bar';

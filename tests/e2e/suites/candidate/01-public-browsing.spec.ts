@@ -12,7 +12,7 @@ test.describe('Candidate — Public Browsing', () => {
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
     // Page should render with a heading
-    const heading = page.locator('h1, h2').first();
+    const heading = page.locator(':is(h1, h2):visible').first();
     await expect(heading).toBeVisible({ timeout: 15_000 });
   });
 

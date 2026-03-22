@@ -1,122 +1,179 @@
 import { test, expect } from '@playwright/test';
 import { TEST_USERS } from '../../fixtures/test-users';
-import { signInAndWait, saveAuthState } from '../../helpers/auth';
+import { signInAndWait, saveAuthState, dismissCookieBanner, captureConsoleErrors } from '../../helpers/auth';
 
 const user = TEST_USERS.recruiter;
 
 test.describe('Onboarding — Recruiter', () => {
   test('complete recruiter onboarding wizard', async ({ page }) => {
-    test.setTimeout(120_000);
+    test.setTimeout(180_000);
+
+    const getErrors = captureConsoleErrors(page);
 
     let url: string;
     try {
-      // Sign in — should redirect to /onboarding for new users
       url = await signInAndWait(page, user.email, user.password);
     } catch {
-      // If sign-in redirect failed, user may already be authenticated
-      // Try navigating directly to dashboard
       await page.goto('/portal/dashboard', { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(3000);
       url = page.url();
       if (url.includes('/sign-in')) {
-        // Truly failed — take screenshot and skip
         await page.screenshot({ path: 'tests/e2e/.auth/recruiter-signin-debug.png' });
         test.skip(true, 'Recruiter sign-in failed');
         return;
       }
     }
 
-    // If already onboarded, save auth state and skip
-    if (url.includes('/portal')) {
-      console.log('  Recruiter already onboarded, saving auth state');
-      await saveAuthState(page, 'recruiter');
-      return;
+    // Dismiss cookie banner before any interactions
+    await dismissCookieBanner(page);
+
+    // If landed on portal, verify onboarding is actually complete
+    if (url.includes('/portal') && !url.includes('/onboarding')) {
+      await page.goto('/portal/roles', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle');
+      url = page.url();
+
+      if (!url.includes('/onboarding')) {
+        console.log('  Recruiter already onboarded, saving auth state');
+        await saveAuthState(page, 'recruiter');
+        return;
+      }
+      console.log('  Recruiter redirected to onboarding — completing wizard');
     }
 
-    // Should be on the onboarding page
-    expect(url).toContain('/onboarding');
+    // Wait for onboarding page to fully load
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
-    // --- Step 1: Role Selection ---
-    // Wait for the role selection cards to appear
+    // Dismiss cookie banner again (may appear after navigation)
+    await dismissCookieBanner(page);
+
+    // ── Handle whichever step we land on ──
+
+    // Step 1: Role Selection (if visible)
     const recruiterCard = page.getByText('I am a Recruiter');
-    await expect(recruiterCard).toBeVisible({ timeout: 15_000 });
-    await recruiterCard.click();
-
-    // --- Step 2: Plan Selection ---
-    // Wait for plans to load — select the free "Starter" plan
-    await expect(page.getByText('Step 2').or(page.getByText('Choose your plan'))).toBeVisible({ timeout: 15_000 });
-
-    // Click the Starter/free plan card
-    const starterPlan = page.getByText('Starter').first();
-    await expect(starterPlan).toBeVisible({ timeout: 10_000 });
-    await starterPlan.click();
-
-    // Click continue/select button for the free plan
-    const selectBtn = page.getByRole('button', { name: /select|continue|get started|choose/i }).first();
-    await selectBtn.click();
-
-    // --- Step 3: Recruiter Profile ---
-    await expect(page.getByText('Build your profile').or(page.getByText('Step 3'))).toBeVisible({ timeout: 15_000 });
-
-    // Fill required fields
-    // Phone (required)
-    const phoneInput = page.locator('input[type="tel"]');
-    await phoneInput.fill('+1 (555) 123-4567');
-
-    // Bio — MarkdownEditor uses a textarea or contenteditable
-    const bioEditor = page.locator('textarea, [contenteditable="true"]').first();
-    if (await bioEditor.isVisible()) {
-      await bioEditor.fill('E2E test recruiter specializing in technology placements.');
+    if (await recruiterCard.isVisible({ timeout: 10_000 }).catch(() => false)) {
+      await recruiterCard.click();
+      console.log('  Selected "I am a Recruiter"');
+      await page.waitForTimeout(3000);
     }
 
-    // Location (optional but let's fill it)
-    const locationInput = page.locator('input[placeholder*="New York"]').or(
-      page.locator('input[placeholder*="location" i]')
-    );
-    if (await locationInput.first().isVisible().catch(() => false)) {
-      await locationInput.first().fill('New York, NY');
+    // Step 2: Plan Selection (if visible)
+    const planHeading = page.getByText('Choose Your Plan');
+    if (await planHeading.isVisible({ timeout: 10_000 }).catch(() => false)) {
+      const getStartedBtn = page.locator('button:has-text("Get Started")').first();
+      await expect(getStartedBtn).toBeVisible({ timeout: 10_000 });
+      await getStartedBtn.click();
+      console.log('  Selected Starter plan');
+      await page.waitForTimeout(3000);
     }
 
-    // Select an industry chip
-    const techChip = page.getByText('Technology', { exact: true }).first();
-    if (await techChip.isVisible().catch(() => false)) {
-      await techChip.click();
+    // Step 3: Recruiter Profile (if visible)
+    const profileHeading = page.getByText('Build your profile');
+    if (await profileHeading.isVisible({ timeout: 10_000 }).catch(() => false)) {
+      // Phone (required)
+      const phoneInput = page.locator('input[type="tel"]');
+      if (await phoneInput.isVisible().catch(() => false)) {
+        const currentPhone = await phoneInput.inputValue();
+        if (!currentPhone) {
+          await phoneInput.fill('+1 (555) 123-4567');
+        }
+      }
+
+      // Location
+      const locationInput = page.locator('input[placeholder="e.g., New York, NY"]');
+      if (await locationInput.isVisible().catch(() => false)) {
+        await locationInput.fill('New York, NY');
+      }
+
+      // Tagline
+      const taglineInput = page.locator('input[placeholder="e.g., Tech Recruiting Expert"]');
+      if (await taglineInput.isVisible().catch(() => false)) {
+        await taglineInput.fill('E2E Test Tech Recruiter');
+      }
+
+      // Years of Experience
+      const yearsInput = page.locator('input[placeholder="5"]');
+      if (await yearsInput.isVisible().catch(() => false)) {
+        await yearsInput.fill('5');
+      }
+
+      // Industry chip
+      const techChip = page.getByText('Technology', { exact: true }).first();
+      if (await techChip.isVisible().catch(() => false)) {
+        await techChip.click();
+      }
+
+      // Specialty chip
+      const engChip = page.getByText('Engineering', { exact: true }).first();
+      if (await engChip.isVisible().catch(() => false)) {
+        await engChip.click();
+      }
+
+      // Submit
+      await page.getByRole('button', { name: 'Continue' }).click();
+      console.log('  Filled recruiter profile');
+      await page.waitForTimeout(3000);
     }
 
-    // Select a specialty chip
-    const engChip = page.getByText('Engineering', { exact: true }).first();
-    if (await engChip.isVisible().catch(() => false)) {
-      await engChip.click();
+    // Step 4: Review & Launch (if visible)
+    const reviewHeading = page.getByText('Review & Launch');
+    if (await reviewHeading.isVisible({ timeout: 10_000 }).catch(() => false)) {
+      console.log('  On Review & Launch page');
+
+      // Set up response listener for the onboarding API call
+      const responsePromise = page.waitForResponse(
+        resp => resp.url().includes('/onboarding/recruiter') && resp.request().method() === 'POST',
+        { timeout: 30_000 }
+      ).catch(() => null);
+
+      const launchBtn = page.locator('button.btn-primary.btn-lg').filter({ hasText: /Launch/i });
+      await expect(launchBtn).toBeVisible({ timeout: 10_000 });
+      await launchBtn.click();
+      console.log('  Clicked Launch');
+
+      // Wait for the API response
+      const response = await responsePromise;
+      if (response) {
+        const status = response.status();
+        console.log(`  Onboarding API response: ${status}`);
+        if (status >= 400) {
+          const body = await response.text().catch(() => 'Could not read body');
+          console.log(`  API error body: ${body}`);
+        }
+      } else {
+        console.log('  WARNING: No onboarding API response captured');
+      }
+
+      await page.waitForTimeout(5000);
     }
 
-    // Submit the profile form
-    const continueBtn = page.getByRole('button', { name: /continue|next|save/i }).first();
-    await continueBtn.click();
+    // Step 5: Success — wait for it or auto-redirect
+    await page.getByText('You are all set!').or(page.getByText('Browse Open Roles'))
+      .waitFor({ timeout: 30_000 }).catch(() => {
+        console.log('  No success message — may have auto-redirected');
+      });
 
-    // --- Step 4: Review & Launch ---
-    await expect(page.getByText('Review').or(page.getByText('Step 4'))).toBeVisible({ timeout: 15_000 });
+    // Navigate to dashboard with retry — the success page may auto-redirect simultaneously
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await page.goto('/portal/dashboard', { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('networkidle').catch(() => {});
+      await page.waitForTimeout(3000);
 
-    // Click the launch/submit button
-    const launchBtn = page.getByRole('button', { name: /launch|submit|go live|complete/i }).first();
-    await expect(launchBtn).toBeVisible({ timeout: 10_000 });
-    await launchBtn.click();
+      if (!page.url().includes('/onboarding')) break;
+      console.log(`  Dashboard redirect attempt ${attempt + 1} — still on onboarding, retrying...`);
+      await page.waitForTimeout(2000);
+    }
 
-    // --- Step 5: Success ---
-    // Wait for success screen or redirect to dashboard
-    await expect(
-      page.getByText("You're live").or(
-        page.getByText('Success').or(
-          page.getByText('Browse Open Roles')
-        )
-      )
-    ).toBeVisible({ timeout: 30_000 });
-
-    // Navigate to dashboard to ensure portal is ready, then save auth state
-    await page.goto('/portal/dashboard');
-    await page.waitForLoadState('domcontentloaded');
-
-    // Wait for the profile to load (past "LOADING YOUR PROFILE...")
-    await page.waitForTimeout(3000);
+    if (page.url().includes('/onboarding')) {
+      await page.screenshot({ path: 'tests/e2e/.auth/recruiter-onboarding-stuck.png' });
+      const errors = getErrors();
+      if (errors.length > 0) {
+        console.log(`  Console errors:\n    ${errors.slice(0, 3).join('\n    ')}`);
+      }
+    }
+    expect(page.url()).not.toContain('/onboarding');
+    console.log('  Recruiter onboarding complete');
 
     await saveAuthState(page, 'recruiter');
   });

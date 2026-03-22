@@ -99,6 +99,14 @@ export {
     BaselSkillPicker,
     type BaselSkillPickerProps,
     type SkillOption,
+    WizardHelpProvider,
+    useWizardHelp,
+    type WizardHelpContent,
+    WizardHelpZone,
+    type WizardHelpZoneProps,
+    WizardHelpPanel,
+    type WizardHelpPanelProps,
+    type WizardHelpPanelStep,
 } from './forms';
 
 // Display components

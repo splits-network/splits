@@ -144,6 +144,11 @@ const atsV3Routes: V3RouteConfig[] = [
   { path: '/pre-screen/:jobId', method: 'PATCH', auth: 'required' },
   { path: '/pre-screen/:jobId', method: 'DELETE', auth: 'required' },
 
+  // ── Pre-Screen Templates ────────────────────────────────────────
+  { path: '/pre-screen-templates', method: 'GET', auth: 'required' },
+  { path: '/pre-screen-templates', method: 'POST', auth: 'required' },
+  { path: '/pre-screen-templates/:id', method: 'DELETE', auth: 'required' },
+
   // ── Skills (lookup table) ─────────────────────────────────────
   { path: '/skills', method: 'GET', auth: 'required' },
   { path: '/skills/:id', method: 'GET', auth: 'required' },

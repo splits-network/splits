@@ -373,9 +373,11 @@ export function registerOnboardingV3Routes(
           );
           recruiter = recruiterResponse?.data ?? recruiterResponse;
         } catch (createErr: any) {
+          // Check for duplicate recruiter — match on error message from service or jsonBody
+          const errMsg = createErr.jsonBody?.error?.message || createErr.message || '';
           const isDuplicate =
-            createErr.statusCode === 400 &&
-            createErr.jsonBody?.error?.message?.includes('already exists');
+            (createErr.statusCode === 400 || createErr.statusCode === 409) &&
+            errMsg.includes('already exists');
 
           if (isDuplicate) {
             request.log.info({ correlationId }, 'Recruiter already exists — reusing on retry');
@@ -388,7 +390,7 @@ export function registerOnboardingV3Routes(
           }
         }
 
-        // Step 3: Activate subscription
+        // Step 3: Activate subscription (non-blocking for starter plan)
         let subscription: any = null;
         const isPaidPlan = body.plan.tier !== 'starter' && body.plan.payment_method_id;
         const activateData: any = { plan_id: body.plan.plan_id };
@@ -401,13 +403,26 @@ export function registerOnboardingV3Routes(
           }
         }
 
-        const subResponse = await billingService().post<any>(
-          '/api/v3/subscriptions/activate',
-          activateData,
-          correlationId,
-          authHeaders
-        );
-        subscription = subResponse?.data ?? subResponse;
+        try {
+          const subResponse = await billingService().post<any>(
+            '/api/v3/subscriptions/activate',
+            activateData,
+            correlationId,
+            authHeaders
+          );
+          subscription = subResponse?.data ?? subResponse;
+        } catch (subErr: any) {
+          // For starter (free) plans, subscription activation failure is non-blocking
+          // The subscription can be activated later via billing service
+          if (!isPaidPlan) {
+            request.log.warn(
+              { error: subErr.message, correlationId },
+              'Starter subscription activation failed — continuing onboarding'
+            );
+          } else {
+            throw subErr;
+          }
+        }
 
         // Step 4: Mark onboarding complete
         const completeResponse = await identityService().patch<any>(

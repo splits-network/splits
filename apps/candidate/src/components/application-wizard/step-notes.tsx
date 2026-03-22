@@ -1,27 +1,21 @@
 "use client";
 
 import { MarkdownEditor } from "@splits-network/shared-ui";
+import { WizardHelpZone } from "@splits-network/basel-ui";
 
 interface StepNotesProps {
     notes: string;
     onChange: (notes: string) => void;
-    onNext: () => void;
-    onBack: () => void;
 }
 
 export default function StepNotes({
     notes,
     onChange,
-    onNext,
-    onBack,
 }: StepNotesProps) {
     return (
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
-                    Optional
-                </p>
                 <h3 className="text-xl font-black tracking-tight mb-2">
                     Additional notes
                 </h3>
@@ -33,6 +27,18 @@ export default function StepNotes({
             </div>
 
             {/* Editor */}
+            <WizardHelpZone
+                title="Additional Notes"
+                description="Share extra context, ask questions, or highlight things not covered elsewhere in your application. These notes are visible to the employer and your recruiter."
+                icon="fa-duotone fa-regular fa-message-lines"
+                tips={[
+                    "Mention specific skills or experiences relevant to this role",
+                    "Explain why you're interested in this opportunity",
+                    "Ask any questions you have about the position or company",
+                    "Highlight achievements that aren't on your resume",
+                    "This is optional — skip it if your cover letter already says everything",
+                ]}
+            >
             <div>
                 <label className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2 block">
                     Your Notes
@@ -50,54 +56,8 @@ export default function StepNotes({
                     recruiter
                 </p>
             </div>
+            </WizardHelpZone>
 
-            {/* Tips */}
-            <div className="bg-base-200 p-5">
-                <div className="flex items-start gap-3">
-                    <i className="fa-duotone fa-regular fa-lightbulb text-primary mt-0.5" />
-                    <div className="text-sm text-base-content/60">
-                        <p className="font-bold text-base-content/80 mb-1">
-                            Tips for strong notes
-                        </p>
-                        <ul className="space-y-1">
-                            <li>
-                                Mention specific skills or experiences relevant
-                                to this role
-                            </li>
-                            <li>
-                                Explain why you're interested in this opportunity
-                            </li>
-                            <li>
-                                Ask any questions you have about the position or
-                                company
-                            </li>
-                            <li>
-                                Highlight achievements that aren't on your resume
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex justify-between border-t border-base-200 pt-6">
-                <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={onBack}
-                >
-                    <i className="fa-duotone fa-regular fa-arrow-left" />
-                    Back
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={onNext}
-                >
-                    Continue to Review
-                    <i className="fa-duotone fa-regular fa-arrow-right" />
-                </button>
-            </div>
         </div>
     );
 }

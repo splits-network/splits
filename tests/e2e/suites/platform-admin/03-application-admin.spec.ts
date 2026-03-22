@@ -11,7 +11,7 @@ test.describe('Platform Admin — Application Administration', () => {
     await expect(heading).toBeVisible({ timeout: 15_000 });
 
     // Wait for page content to render
-    const heading2 = page.locator('h1, h2, h3').first();
+    const heading2 = page.locator(':is(h1, h2, h3):visible').first();
     await expect(heading2).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
   });

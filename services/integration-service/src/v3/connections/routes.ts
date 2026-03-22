@@ -43,14 +43,12 @@ export function registerConnectionRoutes(
         async (request, reply) => {
             const clerkUserId = request.headers["x-clerk-user-id"] as string;
             if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
+                return reply.status(401).send({
+                    error: {
+                        code: "AUTH_REQUIRED",
+                        message: "Authentication required",
+                    },
+                });
             }
             const result = await service.getAll(
                 request.query as ConnectionListParams,
@@ -72,20 +70,15 @@ export function registerConnectionRoutes(
         async (request, reply) => {
             const clerkUserId = request.headers["x-clerk-user-id"] as string;
             if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
+                return reply.status(401).send({
+                    error: {
+                        code: "AUTH_REQUIRED",
+                        message: "Authentication required",
+                    },
+                });
             }
             const { id } = request.params as { id: string };
-            const data = await service.getById(
-                id,
-                clerkUserId,
-            );
+            const data = await service.getById(id, clerkUserId);
             return reply.send({ data });
         },
     );
@@ -99,14 +92,12 @@ export function registerConnectionRoutes(
         async (request, reply) => {
             const clerkUserId = request.headers["x-clerk-user-id"] as string;
             if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
+                return reply.status(401).send({
+                    error: {
+                        code: "AUTH_REQUIRED",
+                        message: "Authentication required",
+                    },
+                });
             }
             const { id } = request.params as { id: string };
             await service.delete(id, clerkUserId);
@@ -141,18 +132,23 @@ export function registerConnectionRoutes(
         async (request, reply) => {
             const clerkUserId = request.headers["x-clerk-user-id"] as string;
             if (!clerkUserId) {
-                return reply
-                    .status(401)
-                    .send({
-                        error: {
-                            code: "AUTH_REQUIRED",
-                            message: "Authentication required",
-                        },
-                    });
+                return reply.status(401).send({
+                    error: {
+                        code: "AUTH_REQUIRED",
+                        message: "Authentication required",
+                    },
+                });
             }
 
             const body = request.body as InitiateConnectionInput;
 
+            // TODO: TEMPORARY BYPASS FOR GOOGLE OAUTH APPROVAL
+            // The subscription plan requirements for Gmail/Calendar integrations
+            // have been temporarily disabled to allow Google to test and approve
+            // our OAuth application during their review process.
+            //
+            // RESTORE AFTER GOOGLE APPROVAL by uncommenting the block below:
+            /*
             // Entitlement gate for email/calendar integrations
             const isEmail = EMAIL_PROVIDER_SLUGS.includes(body.provider_slug);
             const isCalendar = CALENDAR_PROVIDER_SLUGS.includes(
@@ -183,6 +179,7 @@ export function registerConnectionRoutes(
                     });
                 }
             }
+            */
 
             try {
                 const result = await oauthService.initiateOAuth(
@@ -193,14 +190,12 @@ export function registerConnectionRoutes(
                 );
                 return reply.send({ data: result });
             } catch (err: any) {
-                return reply
-                    .status(400)
-                    .send({
-                        error: {
-                            code: "INITIATE_FAILED",
-                            message: err.message,
-                        },
-                    });
+                return reply.status(400).send({
+                    error: {
+                        code: "INITIATE_FAILED",
+                        message: err.message,
+                    },
+                });
             }
         },
     );
@@ -221,14 +216,12 @@ export function registerConnectionRoutes(
                 );
                 return reply.send({ data: connection });
             } catch (err: any) {
-                return reply
-                    .status(400)
-                    .send({
-                        error: {
-                            code: "CALLBACK_FAILED",
-                            message: err.message,
-                        },
-                    });
+                return reply.status(400).send({
+                    error: {
+                        code: "CALLBACK_FAILED",
+                        message: err.message,
+                    },
+                });
             }
         },
     );

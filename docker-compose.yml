@@ -864,7 +864,7 @@ services:
       target: development
     container_name: splits-call-service
     ports:
-      - "3023:3020"
+      - "3024:3020"
     environment:
       NODE_ENV: development
       PORT: 3020

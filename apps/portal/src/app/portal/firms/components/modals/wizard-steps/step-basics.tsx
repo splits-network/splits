@@ -1,6 +1,6 @@
 "use client";
 
-import { BaselFormField } from "@splits-network/basel-ui";
+import { BaselFormField, WizardHelpZone } from "@splits-network/basel-ui";
 import type { FirmFormData } from "./types";
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
@@ -30,91 +30,125 @@ interface StepBasicsProps {
 export function StepBasics({ form, onChange, isEditMode, errors }: StepBasicsProps) {
     return (
         <div className="space-y-5">
-            {/* Firm Name */}
-            <BaselFormField label="Firm Name" required error={errors.name}>
-                <input
-                    type="text"
-                    className={`input w-full bg-base-200 border-base-300 ${errors.name ? "border-error" : ""}`}
-                    value={form.name}
-                    onChange={(e) => {
-                        const name = e.target.value;
-                        const updates: Partial<FirmFormData> = { name };
-                        if (!isEditMode && !form.slugManuallyEdited) {
-                            updates.slug = toSlug(name);
-                        }
-                        onChange(updates);
-                    }}
-                    placeholder="e.g. Apex Recruiting Partners"
-                />
-            </BaselFormField>
-
-            {/* URL Slug */}
-            <BaselFormField
-                label="URL Slug"
-                hint="Public profile URL. Lowercase letters, numbers, and hyphens only."
-                error={errors.slug}
+            <WizardHelpZone
+                title="Firm Identity"
+                description="Your firm name and URL slug form the foundation of your marketplace presence. The name appears on all listings, proposals, and search results."
+                icon="fa-duotone fa-regular fa-building"
+                tips={[
+                    "Use your official business name for credibility",
+                    "The URL slug auto-generates from your name but can be customized",
+                    "Keep slugs short and memorable — partners may share your profile link",
+                ]}
+                className="space-y-5"
             >
-                <div className="flex items-center gap-0">
-                    <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0 whitespace-nowrap">
-                        /firms/
-                    </span>
+                {/* Firm Name */}
+                <BaselFormField label="Firm Name" required error={errors.name}>
                     <input
                         type="text"
-                        className={`input w-full bg-base-200 border-base-300 ${errors.slug ? "border-error" : ""}`}
-                        value={form.slug}
-                        onChange={(e) =>
-                            onChange({
-                                slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
-                                slugManuallyEdited: true,
-                            })
-                        }
-                        placeholder="apex-recruiting-partners"
+                        className={`input w-full bg-base-200 border-base-300 ${errors.name ? "border-error" : ""}`}
+                        value={form.name}
+                        onChange={(e) => {
+                            const name = e.target.value;
+                            const updates: Partial<FirmFormData> = { name };
+                            if (!isEditMode && !form.slugManuallyEdited) {
+                                updates.slug = toSlug(name);
+                            }
+                            onChange(updates);
+                        }}
+                        placeholder="e.g. Apex Recruiting Partners"
                     />
-                </div>
-            </BaselFormField>
+                </BaselFormField>
 
-            {/* Tagline — custom label with character counter */}
-            <fieldset>
-                <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-semibold uppercase tracking-widest text-base-content/50">
-                        Tagline
-                    </label>
-                    <span
-                        className={`text-xs font-semibold tabular-nums ${
-                            form.tagline.length >= 140
-                                ? "text-warning"
-                                : "text-base-content/30"
-                        }`}
-                    >
-                        {form.tagline.length}/160
-                    </span>
-                </div>
-                <input
-                    type="text"
-                    className="input w-full bg-base-200 border-base-300"
-                    value={form.tagline}
-                    onChange={(e) => onChange({ tagline: e.target.value.slice(0, 160) })}
-                    placeholder="e.g. Specialized fintech recruiting in NYC and London"
-                    maxLength={160}
-                />
-                <p className="text-sm text-base-content/40 mt-1">
-                    One-liner shown on cards and in search results.
-                </p>
-            </fieldset>
+                {/* URL Slug */}
+                <BaselFormField
+                    label="URL Slug"
+                    hint="Public profile URL. Lowercase letters, numbers, and hyphens only."
+                    error={errors.slug}
+                >
+                    <div className="flex items-center gap-0">
+                        <span className="flex items-center h-10 px-3 bg-base-300 border border-base-300 border-r-0 text-sm text-base-content/40 shrink-0 whitespace-nowrap">
+                            /firms/
+                        </span>
+                        <input
+                            type="text"
+                            className={`input w-full bg-base-200 border-base-300 ${errors.slug ? "border-error" : ""}`}
+                            value={form.slug}
+                            onChange={(e) =>
+                                onChange({
+                                    slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                                    slugManuallyEdited: true,
+                                })
+                            }
+                            placeholder="apex-recruiting-partners"
+                        />
+                    </div>
+                </BaselFormField>
+            </WizardHelpZone>
 
-            {/* Description */}
-            <BaselFormField
-                label="Description"
-                hint="Full profile description shown to potential split partners."
+            <WizardHelpZone
+                title="Tagline"
+                description="A concise one-liner that appears on marketplace cards and search results. This is often the first thing potential split partners read about your firm."
+                icon="fa-duotone fa-regular fa-quote-left"
+                tips={[
+                    "Lead with your strongest differentiator — niche, geography, or methodology",
+                    "Keep it under 100 characters for the best display on cards",
+                    "Avoid generic phrases like 'leading recruiting firm' — be specific",
+                ]}
             >
-                <textarea
-                    className="textarea w-full bg-base-200 border-base-300 min-h-[120px]"
-                    value={form.description}
-                    onChange={(e) => onChange({ description: e.target.value })}
-                    placeholder="Tell potential split partners about your firm, your approach, and what makes you great to work with..."
-                    rows={5}
-                />
-            </BaselFormField>
+                {/* Tagline — custom label with character counter */}
+                <fieldset>
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-semibold uppercase tracking-widest text-base-content/50">
+                            Tagline
+                        </label>
+                        <span
+                            className={`text-xs font-semibold tabular-nums ${
+                                form.tagline.length >= 140
+                                    ? "text-warning"
+                                    : "text-base-content/30"
+                            }`}
+                        >
+                            {form.tagline.length}/160
+                        </span>
+                    </div>
+                    <input
+                        type="text"
+                        className="input w-full bg-base-200 border-base-300"
+                        value={form.tagline}
+                        onChange={(e) => onChange({ tagline: e.target.value.slice(0, 160) })}
+                        placeholder="e.g. Specialized fintech recruiting in NYC and London"
+                        maxLength={160}
+                    />
+                    <p className="text-sm text-base-content/40 mt-1">
+                        One-liner shown on cards and in search results.
+                    </p>
+                </fieldset>
+            </WizardHelpZone>
+
+            <WizardHelpZone
+                title="Description"
+                description="Your full profile description is shown when recruiters visit your firm page. Use this to explain your approach, track record, and what makes you a great split partner."
+                icon="fa-duotone fa-regular fa-align-left"
+                tips={[
+                    "Mention your key industries, specialties, and geographic coverage",
+                    "Highlight what makes working with your firm unique",
+                    "Include your split-fee philosophy or preferred deal structure if relevant",
+                ]}
+            >
+                {/* Description */}
+                <BaselFormField
+                    label="Description"
+                    hint="Full profile description shown to potential split partners."
+                >
+                    <textarea
+                        className="textarea w-full bg-base-200 border-base-300 min-h-[120px]"
+                        value={form.description}
+                        onChange={(e) => onChange({ description: e.target.value })}
+                        placeholder="Tell potential split partners about your firm, your approach, and what makes you great to work with..."
+                        rows={5}
+                    />
+                </BaselFormField>
+            </WizardHelpZone>
         </div>
     );
 }

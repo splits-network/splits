@@ -48,7 +48,7 @@ export class RecruiterService {
 
   async create(input: CreateRecruiterInput, clerkUserId: string) {
     const existing = await this.repository.findByUserId(input.user_id);
-    if (existing) throw new BadRequestError('Recruiter profile already exists for this user');
+    if (existing) return existing;
 
     let slug: string | undefined;
     if (input.name) slug = await this.generateUniqueSlug(input.name);

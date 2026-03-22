@@ -12,7 +12,7 @@ import type {
     CandidateDocument,
     StepId,
 } from "./submit-candidate/types";
-import { STEP_LABELS } from "./submit-candidate/types";
+import { STEP_LABELS, STEP_DESCRIPTIONS } from "./submit-candidate/types";
 import StepFindRole from "./submit-candidate/step-find-role";
 import StepSelectCandidate from "./submit-candidate/step-select-candidate";
 import StepBuildCase from "./submit-candidate/step-build-case";
@@ -105,7 +105,10 @@ export default function BaselSubmitCandidateWizard({
     }, [preSelectedJob, preSelectedCandidate]);
 
     const wizardSteps = useMemo(
-        () => activeStepIds.map((id) => ({ label: STEP_LABELS[id] })),
+        () => activeStepIds.map((id) => ({
+            label: STEP_LABELS[id],
+            description: STEP_DESCRIPTIONS[id],
+        })),
         [activeStepIds],
     );
 
@@ -342,6 +345,11 @@ export default function BaselSubmitCandidateWizard({
         if (currentStep > 0) setCurrentStep(currentStep - 1);
     }, [currentStep]);
 
+    const handleStepClick = useCallback((index: number) => {
+        setError(null);
+        setCurrentStep(index);
+    }, []);
+
     /* ── Submit ────────────────────────────────────────────────────────── */
 
     const handleSubmit = useCallback(async () => {
@@ -479,6 +487,8 @@ export default function BaselSubmitCandidateWizard({
             nextLabel={isLastContentStep ? "Review Submission" : "Continue"}
             submitLabel={isCompanyUser && !isRecruiter ? "Send Role to Candidate" : "Propose Candidate"}
             submittingLabel={isCompanyUser && !isRecruiter ? "Sending..." : "Submitting Proposal..."}
+            showHelpPanel
+            onStepClick={handleStepClick}
             maxWidth="max-w-4xl"
         >
             {error && (

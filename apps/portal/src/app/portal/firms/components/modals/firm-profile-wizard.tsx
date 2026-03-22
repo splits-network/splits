@@ -20,11 +20,11 @@ import { StepMarketplace } from "./wizard-steps/step-marketplace";
 /* ─── Constants ──────────────────────────────────────────────────────────── */
 
 const WIZARD_STEPS = [
-    { label: "Basics" },
-    { label: "Specialization" },
-    { label: "Location" },
-    { label: "Contact" },
-    { label: "Marketplace" },
+    { label: "Basics", description: "Set your firm's name, URL slug, tagline, and description." },
+    { label: "Specialization", description: "Define your recruiting focus — industries, specialties, and placement types." },
+    { label: "Location", description: "Where your firm is headquartered and basic company details." },
+    { label: "Contact", description: "Public contact information for your firm profile." },
+    { label: "Marketplace", description: "Control how your firm appears on the Splits Network marketplace." },
 ];
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
@@ -195,6 +195,11 @@ export function FirmProfileWizard({
         setCurrentStep((s) => Math.max(s - 1, 0));
     }, []);
 
+    const handleStepClick = useCallback((index: number) => {
+        setErrors({});
+        setCurrentStep(index);
+    }, []);
+
     const handleSubmit = useCallback(async () => {
         const stepErrors = validateStep(currentStep, form);
         if (Object.keys(stepErrors).length > 0) {
@@ -250,7 +255,8 @@ export function FirmProfileWizard({
                 submitLabel={isEditMode ? "Save Changes" : "Create Firm"}
                 submittingLabel={isEditMode ? "Saving..." : "Creating..."}
                 cancelLabel="Cancel"
-                maxWidth="max-w-2xl"
+                showHelpPanel
+                onStepClick={handleStepClick}
             >
                 {/* Global submit error */}
                 {submitError && (

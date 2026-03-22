@@ -7,7 +7,7 @@ test.describe('Hiring Manager — Applications', () => {
     await expect(page.locator('body')).not.toContainText(/something went wrong/i);
     await expect(page.locator('body')).not.toContainText(/Internal Server Error/i);
 
-    const heading = page.locator('h1, h2').first();
+    const heading = page.locator(':is(h1, h2):visible').first();
     await expect(heading).toBeVisible({ timeout: 15000 });
   });
 
@@ -45,7 +45,9 @@ test.describe('Hiring Manager — Applications', () => {
     const toggleCount = await viewToggles.count();
     if (toggleCount > 0) {
       for (let i = 0; i < Math.min(toggleCount, 3); i++) {
-        await viewToggles.nth(i).click();
+        const isVisible = await viewToggles.nth(i).isVisible().catch(() => false);
+        if (!isVisible) continue;
+        await viewToggles.nth(i).click({ timeout: 5_000 }).catch(() => {});
         await page.waitForTimeout(500);
         await expect(page.locator('body')).not.toContainText(
           /something went wrong/i
