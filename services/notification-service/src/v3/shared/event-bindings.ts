@@ -18,6 +18,7 @@ export const EVENT_BINDINGS = [
   'application.expiration_warning',
   'application.reactivated',
   'application.note.created',
+  'application.offer_accepted',
 
   // AI Review
   'ai_review.started',

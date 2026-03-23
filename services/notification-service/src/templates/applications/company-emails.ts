@@ -123,3 +123,58 @@ ${paragraph(
         source: 'portal',
     });
 }
+
+// ============================================================================
+// Offer Accepted by Candidate — Company Admin
+// ============================================================================
+
+export interface CompanyOfferAcceptedData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    applicationUrl: string;
+}
+
+export function companyOfferAcceptedEmail(data: CompanyOfferAcceptedData): string {
+    const content = `
+${heading({ level: 1, text: 'Offer accepted!' })}
+
+${alert({
+        type: 'success',
+        title: 'Candidate Accepted the Offer',
+        message: `<strong>${data.candidateName}</strong> has accepted the offer for <strong>${data.jobTitle}</strong>.`,
+    })}
+
+${infoCard({
+        title: 'Acceptance Details',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+            { label: 'Status', value: 'Offer Accepted', highlight: true },
+        ],
+    })}
+
+${paragraph(
+        'The candidate has formally accepted the offer. You can now proceed with the hiring process to finalize the placement.'
+    )}
+
+${button({
+        href: data.applicationUrl,
+        text: 'Complete Hiring Process \u2192',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph(
+        'Review the application and confirm the hire to create the placement record.'
+    )}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.candidateName} accepted the offer for ${data.jobTitle}`,
+        content,
+        source: 'portal',
+    });
+}
