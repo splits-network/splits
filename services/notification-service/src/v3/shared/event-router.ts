@@ -101,6 +101,9 @@ export async function routeEvent(
         case 'application.note.created':
             await c.applications.handleNoteCreated(event);
             return true;
+        case 'application.offer_accepted':
+            await c.applications.handleOfferAccepted(event);
+            return true;
         case 'application.proposal_accepted':
             await c.applications.handleApplicationProposalAccepted(event);
             return true;

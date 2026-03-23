@@ -46,10 +46,12 @@ import {
     recruiterCandidateRejectedEmail,
     recruiterApplicationExpiredEmail,
     recruiterExpirationWarningEmail,
+    recruiterOfferAcceptedEmail,
 } from '../../templates/applications/recruiter-emails';
 import {
     companyApplicationExpiredEmail,
     companyExpirationWarningEmail,
+    companyOfferAcceptedEmail,
 } from '../../templates/applications/company-emails';
 import type { EmailSource } from '../../templates/base';
 
@@ -77,9 +79,10 @@ export class ApplicationsEmailService {
             userId?: string;
             payload?: Record<string, any>;
             source?: EmailSource;
+            category?: string;
         }
     ): Promise<void> {
-        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', null);
+        const effectiveChannel = await this.repository.resolveChannelWithPreferences(options.userId, 'email', options.category ?? null);
         if (!effectiveChannel) return;
 
         const log = await this.repository.createNotificationLog({
@@ -202,6 +205,7 @@ export class ApplicationsEmailService {
             userId: options.userId,
             payload: options.payload,
             source: options.source,
+            category: options.category,
         });
 
         // Create in-app notification if we have a userId
@@ -1758,6 +1762,70 @@ export class ApplicationsEmailService {
             actionLabel: 'Review Applications',
             priority: 'high',
             category: 'application',
+        });
+    }
+
+    async sendOfferAcceptedToRecruiter(
+        recipientEmail: string,
+        data: {
+            recruiterName: string;
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Offer Accepted: ${data.candidateName} for ${data.jobTitle}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = recruiterOfferAcceptedEmail({
+            recruiterName: data.recruiterName,
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.offer_accepted',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'View Application',
+            priority: 'high',
+            category: 'offer',
+        });
+    }
+
+    async sendOfferAcceptedToCompany(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Offer Accepted: ${data.candidateName} for ${data.jobTitle}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = companyOfferAcceptedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.offer_accepted',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'Complete Hiring Process',
+            priority: 'high',
+            category: 'offer',
         });
     }
 }

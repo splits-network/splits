@@ -51,7 +51,11 @@ export class RecruiterService {
     if (existing) return existing;
 
     let slug: string | undefined;
-    if (input.name) slug = await this.generateUniqueSlug(input.name);
+    let nameForSlug = input.name;
+    if (!nameForSlug && input.user_id) {
+      nameForSlug = await this.repository.findUserNameByUserId(input.user_id) ?? undefined;
+    }
+    if (nameForSlug) slug = await this.generateUniqueSlug(nameForSlug);
 
     const now = new Date().toISOString();
     const recruiter = await this.repository.create({
@@ -84,10 +88,23 @@ export class RecruiterService {
       const taken = await this.repository.isSlugTaken(updates.slug, id);
       if (taken) throw new BadRequestError('This slug is already taken');
     }
+    // Fetch current recruiter for status validation and slug backfill
+    const current = await this.repository.findById(id);
+
     if (updates.status) {
-      const current = await this.repository.findById(id);
       if (!current) throw new NotFoundError('Recruiter', id);
       this.validateStatusTransition(current.status, updates.status);
+    }
+
+    // Auto-generate slug if recruiter has no slug and name is available
+    if (!updates.slug && current && !current.slug) {
+      const name = updates.name || current.name;
+      if (name) {
+        updates.slug = await this.generateUniqueSlug(name);
+      } else if (current.user_id) {
+        const userName = await this.repository.findUserNameByUserId(current.user_id);
+        if (userName) updates.slug = await this.generateUniqueSlug(userName);
+      }
     }
 
     const recruiter = await this.repository.update(id, updates);

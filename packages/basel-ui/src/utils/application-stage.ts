@@ -58,8 +58,9 @@ function baseStageDisplay(stage: string | null | undefined): StageDisplay {
         case 'draft':
             return { label: 'Draft', icon: 'fa-pen', color: 'neutral' };
         case 'ai_review':
-        case 'ai_reviewed':
             return { label: 'AI Review', icon: 'fa-robot', color: 'info' };
+        case 'ai_reviewed':
+            return { label: 'AI Reviewed', icon: 'fa-robot', color: 'success' };
         case 'gpt_review':
             return { label: 'GPT Review', icon: 'fa-robot', color: 'info' };
         case 'ai_failed':

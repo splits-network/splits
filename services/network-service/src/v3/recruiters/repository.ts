@@ -85,6 +85,12 @@ export class RecruiterRepository {
     if (error) throw error;
   }
 
+  async findUserNameByUserId(userId: string): Promise<string | null> {
+    const { data, error } = await this.supabase.from('users').select('name').eq('id', userId).maybeSingle();
+    if (error || !data) return null;
+    return data.name || null;
+  }
+
   async isSlugTaken(slug: string, excludeRecruiterId?: string): Promise<boolean> {
     let query = this.supabase.from('recruiters').select('id').eq('slug', slug);
     if (excludeRecruiterId) query = query.neq('id', excludeRecruiterId);

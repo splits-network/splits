@@ -574,3 +574,59 @@ ${button({
         source: 'portal',
     });
 }
+
+// ============================================================================
+// Offer Accepted by Candidate — Recruiter
+// ============================================================================
+
+export interface RecruiterOfferAcceptedData {
+    recruiterName: string;
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    applicationUrl: string;
+}
+
+export function recruiterOfferAcceptedEmail(data: RecruiterOfferAcceptedData): string {
+    const content = `
+${heading({ level: 1, text: 'Offer accepted!' })}
+
+${paragraph(`Hi <strong>${data.recruiterName}</strong>,`)}
+
+${alert({
+        type: 'success',
+        title: 'Candidate Accepted the Offer',
+        message: `<strong>${data.candidateName}</strong> has accepted the offer for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong>.`,
+    })}
+
+${infoCard({
+        title: 'Acceptance Details',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+            { label: 'Status', value: 'Offer Accepted', highlight: true },
+        ],
+    })}
+
+${paragraph(
+        'The next step is for the company to confirm the hire and finalize placement details.'
+    )}
+
+${button({
+        href: data.applicationUrl,
+        text: 'View Application \u2192',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph('Coordinate with the company to complete the hiring process and set up the placement.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.candidateName} accepted the offer for ${data.jobTitle}`,
+        content,
+        source: 'portal',
+    });
+}

@@ -780,7 +780,7 @@ export class ApplicationsEventConsumer {
                             applicationId: application_id,
                             hasRecruiter: true,
                             recruiterName: recruiterContact.name,
-                            userId: undefined,
+                            userId: admin.user_id || undefined,
                         });
                     }
                 }
@@ -856,7 +856,7 @@ export class ApplicationsEventConsumer {
                             jobTitle: job.title,
                             applicationId: application_id,
                             hasRecruiter: false,
-                            userId: undefined,
+                            userId: admin.user_id || undefined,
                         });
                     }
                 }
@@ -1705,6 +1705,86 @@ export class ApplicationsEventConsumer {
             this.logger.error(
                 { error, event_payload: event.payload },
                 'Failed to handle application reactivated notification'
+            );
+            throw error;
+        }
+    }
+
+    async handleOfferAccepted(event: DomainEvent): Promise<void> {
+        try {
+            const { application_id, candidate_id, job_id } = event.payload;
+
+            this.logger.info(
+                { application_id, candidate_id, job_id },
+                'Processing offer accepted notification'
+            );
+
+            const job = await this.dataLookup.getJob(job_id);
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            const application = await this.dataLookup.getApplication(application_id);
+
+            if (!job || !candidate) {
+                this.logger.error({ application_id, hasJob: !!job, hasCandidate: !!candidate }, 'Missing job or candidate for offer accepted');
+                throw new Error('Job or candidate not found');
+            }
+
+            const companyName = job.company?.name || 'the company';
+
+            // Notify the recruiter (if one is assigned)
+            const recruiterId = application?.candidate_recruiter_id;
+            if (recruiterId) {
+                const recruiterContact = await this.contactLookup.getRecruiterContact(recruiterId);
+                if (recruiterContact) {
+                    await this.emailService.sendOfferAcceptedToRecruiter(recruiterContact.email, {
+                        recruiterName: recruiterContact.name,
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName,
+                        applicationId: application_id,
+                        userId: recruiterContact.user_id || undefined,
+                    });
+
+                    this.logger.info(
+                        { application_id, recipient: recruiterContact.email },
+                        'Offer accepted notification sent to recruiter'
+                    );
+                } else {
+                    this.logger.warn(
+                        { application_id, recruiterId },
+                        'Cannot send offer accepted email - recruiter contact not found'
+                    );
+                }
+            }
+
+            // Notify company admins
+            const organizationId = job.company?.identity_organization_id;
+            if (organizationId) {
+                const companyAdmins = await this.contactLookup.getCompanyAdminContacts(organizationId);
+
+                for (const admin of companyAdmins) {
+                    await this.emailService.sendOfferAcceptedToCompany(admin.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName,
+                        applicationId: application_id,
+                        userId: admin.user_id || undefined,
+                    });
+
+                    this.logger.info(
+                        { application_id, recipient: admin.email },
+                        'Offer accepted notification sent to company admin'
+                    );
+                }
+            } else {
+                this.logger.warn(
+                    { application_id, job_id },
+                    'Cannot send offer accepted email to company - no organization linked'
+                );
+            }
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send offer accepted notification'
             );
             throw error;
         }
