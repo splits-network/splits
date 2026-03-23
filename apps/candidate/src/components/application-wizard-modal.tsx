@@ -140,7 +140,7 @@ export default function ApplicationWizardModal({
 
                 const allRecruiters = recruitersResponse.data || [];
                 const active = allRecruiters.filter(
-                    (r: any) => r.status === "active" && r.consent_given !== false,
+                    (r: any) => r.status === "active" && r.consent_given === true,
                 );
                 setActiveRecruiters(active);
 
