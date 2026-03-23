@@ -76,8 +76,13 @@ export default function ActionsToolbar({
     const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isRecruiter, isCompanyUser, hasPermissionForCompany } =
-        useUserProfile();
+    const {
+        profile,
+        isAdmin,
+        isRecruiter,
+        isCompanyUser,
+        hasPermissionForCompany,
+    } = useUserProfile();
     const chatSidebar = useChatSidebar();
     const filterContext = useFilterOptional();
     const refresh = onRefresh ?? filterContext?.refresh ?? (() => {});
@@ -123,19 +128,22 @@ export default function ActionsToolbar({
         if (!candidateUserId) return [];
         const candidate = application.candidate;
         const nameParts = (candidate?.full_name || "").split(" ");
-        return [{
-            user_id: candidateUserId,
-            first_name: nameParts[0] || "",
-            last_name: nameParts.slice(1).join(" ") || "",
-            email: candidate?.email || "",
-            avatar_url: null,
-            role: "participant" as const,
-        }];
+        return [
+            {
+                user_id: candidateUserId,
+                first_name: nameParts[0] || "",
+                last_name: nameParts.slice(1).join(" ") || "",
+                email: candidate?.email || "",
+                avatar_url: null,
+                role: "participant" as const,
+            },
+        ];
     }, [candidateUserId, application.candidate]);
 
     const callEntityLabel = `${application.candidate?.full_name || "Candidate"} — ${application.job?.title || "Application"}`;
 
-    const isFirmJob = !application.job?.company_id && !!application.job?.source_firm_id;
+    const isFirmJob =
+        !application.job?.company_id && !!application.job?.source_firm_id;
 
     const permissions = useMemo(() => {
         const base = canTakeActionOnApplication(
@@ -150,9 +158,14 @@ export default function ActionsToolbar({
 
         // Gate recruiter stage advancement by can_advance_candidates permission
         // Skip for recruiter-owned stages where the recruiter should always have control
-        const recruiterOwnedStages = ['recruiter_review', 'recruiter_request', 'company_feedback'];
-        const isRecruiterOwnedStage = recruiterOwnedStages.includes(application.stage as string)
-            && !!application.candidate_recruiter_id;
+        const recruiterOwnedStages = [
+            "recruiter_review",
+            "recruiter_request",
+            "company_feedback",
+        ];
+        const isRecruiterOwnedStage =
+            recruiterOwnedStages.includes(application.stage as string) &&
+            !!application.candidate_recruiter_id;
 
         if (
             isRecruiter &&
@@ -213,7 +226,9 @@ export default function ActionsToolbar({
             }
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Couldn't start conversation. Try again.");
+            toast.error(
+                err?.message || "Couldn't start conversation. Try again.",
+            );
         } finally {
             setStartingChat(false);
         }
@@ -288,9 +303,7 @@ export default function ActionsToolbar({
             }
 
             if (isAcceptingApplication) {
-                toast.success(
-                    "Application accepted. Moved to company review.",
-                );
+                toast.success("Application accepted. Moved to company review.");
             } else {
                 toast.success("Application advanced.");
             }
@@ -353,7 +366,7 @@ export default function ActionsToolbar({
 
             const client = createAuthenticatedClient(token);
             await client.post(`/application-notes`, {
-                        application_id: application.id,
+                application_id: application.id,
                 created_by_type: data.created_by_type,
                 note_type: data.note_type,
                 visibility: data.visibility,
@@ -386,7 +399,7 @@ export default function ActionsToolbar({
             // Create a stage transition note for the request
             try {
                 await client.post(`/application-notes`, {
-                        application_id: application.id,
+                    application_id: application.id,
                     created_by_type: getCreatorType(),
                     note_type: "stage_transition",
                     visibility: "shared",
@@ -400,9 +413,7 @@ export default function ActionsToolbar({
                 );
             }
 
-            toast.success(
-                "Changes requested. Candidate notified.",
-            );
+            toast.success("Changes requested. Candidate notified.");
             setShowRequestChangesModal(false);
             refresh();
         } catch (error: any) {
@@ -466,6 +477,7 @@ export default function ActionsToolbar({
                     loading={actionLoading}
                 />
             )}
+            {/*             
             {showPreScreenModal &&
                 application.job_id &&
                 application.job?.company?.id && (
@@ -481,6 +493,7 @@ export default function ActionsToolbar({
                         }}
                     />
                 )}
+                 */}
             <RequestChangesModal
                 isOpen={showRequestChangesModal}
                 onClose={() => setShowRequestChangesModal(false)}
@@ -532,16 +545,16 @@ export default function ActionsToolbar({
                 onClick: () => setShowNoteModal(true),
             });
         }
-        if (actions.requestPrescreen) {
-            speedDialActions.push({
-                key: "prescreen",
-                icon: "fa-duotone fa-regular fa-user-check",
-                label: "Request Pre-Screen",
-                variant: "btn-warning",
-                disabled: actionLoading,
-                onClick: () => setShowPreScreenModal(true),
-            });
-        }
+        // if (actions.requestPrescreen) {
+        //     speedDialActions.push({
+        //         key: "prescreen",
+        //         icon: "fa-duotone fa-regular fa-user-check",
+        //         label: "Request Pre-Screen",
+        //         variant: "btn-warning",
+        //         disabled: actionLoading,
+        //         onClick: () => setShowPreScreenModal(true),
+        //     });
+        // }
         if (actions.scheduleCall) {
             speedDialActions.push({
                 key: "schedule-call",
@@ -708,16 +721,16 @@ export default function ActionsToolbar({
                 onClick: () => setShowEmailModal(true),
             });
         }
-        if (actions.requestPrescreen) {
-            speedDialActions.push({
-                key: "prescreen",
-                icon: "fa-duotone fa-regular fa-user-check",
-                label: "Request Pre-Screen",
-                variant: "btn-warning",
-                disabled: actionLoading,
-                onClick: () => setShowPreScreenModal(true),
-            });
-        }
+        // if (actions.requestPrescreen) {
+        //     speedDialActions.push({
+        //         key: "prescreen",
+        //         icon: "fa-duotone fa-regular fa-user-check",
+        //         label: "Request Pre-Screen",
+        //         variant: "btn-warning",
+        //         disabled: actionLoading,
+        //         onClick: () => setShowPreScreenModal(true),
+        //     });
+        // }
         if (actions.requestChanges) {
             speedDialActions.push({
                 key: "request-changes",
@@ -764,7 +777,7 @@ export default function ActionsToolbar({
                         Add Note
                     </button>
                 )}
-                {actions.requestPrescreen && (
+                {/* {actions.requestPrescreen && (
                     <button
                         onClick={() => setShowPreScreenModal(true)}
                         className={`btn ${sizeClass} btn-warning gap-2`}
@@ -773,7 +786,7 @@ export default function ActionsToolbar({
                         <i className="fa-duotone fa-regular fa-user-check" />
                         Request Pre-Screen
                     </button>
-                )}
+                )} */}
                 {actions.scheduleCall && (
                     <button
                         onClick={() => setShowCallModal(true)}

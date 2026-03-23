@@ -8,8 +8,8 @@ export const pricingFaqs = [
         answer: "Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately, and you'll be charged a prorated amount. Downgrades take effect at the start of your next billing cycle.",
     },
     {
-        question: "Can I try Pro or Partner features before upgrading?",
-        answer: "Absolutely! Start with our free Starter plan to explore the platform and make placements. When you're ready for higher payout bonuses and premium features, you can upgrade at any time. Upgrades take effect immediately.",
+        question: "Are there free trials on paid plans?",
+        answer: "No. The Starter plan is permanently free with full marketplace access, unlimited submissions, and the complete ATS workflow. When you're ready for higher payout bonuses and premium tools, paid tiers charge immediately on subscription. Upgrades take effect instantly.",
     },
     {
         question: "What happens if I don't make any placements?",

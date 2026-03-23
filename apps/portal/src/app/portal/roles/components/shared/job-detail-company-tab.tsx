@@ -74,7 +74,7 @@ function useCompanyData(companyId: string | null | undefined) {
                 const [companyRes, membersRes, perksRes, cultureRes, skillsRes] =
                     await Promise.all([
                         client.get<{ data: CompanyProfile }>(`/companies/${companyId}`),
-                        client.get<{ data: CompanyMember[] }>("/memberships", {
+                        client.get<{ data: CompanyMember[] }>("/memberships/views/detail", {
                             params: { company_id: companyId, limit: 50 },
                         }),
                         client.get<{ data: any[] }>("/company-perks", {

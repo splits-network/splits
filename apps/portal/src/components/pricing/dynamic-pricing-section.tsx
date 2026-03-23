@@ -146,7 +146,7 @@ export function DynamicPricingSection({
                                     );
                                 }) && (
                                     <span className="ml-2 px-2 py-0.5 text-xs font-black bg-yellow text-dark">
-                                        Save 20%
+                                        Save ~16%
                                     </span>
                                 )}
                             </button>

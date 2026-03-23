@@ -22,7 +22,7 @@ export class EntitlementRepository {
       .from('subscriptions')
       .select('status, plan:plans(tier, entitlements)')
       .eq('user_id', userId)
-      .in('status', ['active', 'trialing'])
+      .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -40,7 +40,7 @@ export class EntitlementRepository {
     return {
       tier: row.plan.tier,
       entitlements: { ...STARTER_ENTITLEMENTS, ...row.plan.entitlements },
-      subscription_active: row.status === 'active' || row.status === 'trialing',
+      subscription_active: row.status === 'active',
     };
   }
 }

@@ -30,7 +30,7 @@ const plans = [
         name: "Pro",
         price: { monthly: 49, annual: 39 },
         description: "For active recruiters scaling their pipeline",
-        cta: "Start Pro Trial",
+        cta: "Get Started with Pro",
         ctaStyle: "btn-primary",
         popular: true,
         features: [
@@ -119,8 +119,8 @@ const faqs = [
         a: "Yes. Upgrades take effect immediately with prorated billing. Downgrades apply at the end of your current billing cycle.",
     },
     {
-        q: "Is there a free trial for Pro?",
-        a: "Yes, Pro comes with a 14-day free trial. No credit card required to start.",
+        q: "Do paid plans have a free trial?",
+        a: "No. Paid plans charge immediately on subscription. This ensures all recruiters on paid tiers have full commitment to the network.",
     },
     {
         q: "What happens to my data if I downgrade?",
@@ -197,7 +197,7 @@ export default function PricingOne() {
                         </span>
                         {billing === "annual" && (
                             <span className="px-2 py-0.5 bg-success/10 text-success text-sm font-bold uppercase">
-                                Save 20%
+                                Save ~16%
                             </span>
                         )}
                     </div>

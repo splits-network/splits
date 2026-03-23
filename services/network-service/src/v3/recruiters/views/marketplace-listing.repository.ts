@@ -82,7 +82,7 @@ export class MarketplaceListingRepository {
     if (recruiterIds.length === 0) return tierMap;
     const { data } = await this.supabase
       .from('subscriptions').select('recruiter_id, plan:plans(tier)')
-      .in('recruiter_id', recruiterIds).in('status', ['active', 'trialing']);
+      .in('recruiter_id', recruiterIds).eq('status', 'active');
     for (const row of data || []) {
       tierMap.set(row.recruiter_id, (row.plan as any)?.tier ?? 'starter');
     }

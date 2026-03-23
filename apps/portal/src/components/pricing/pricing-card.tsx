@@ -105,7 +105,7 @@ export function PricingCard({
             {/* Annual savings text */}
             {!isFree && isAnnual && monthlySavingsEquivalent && (
                 <div className={`text-xs font-bold uppercase tracking-wider mb-4 ${colors.cardText}/50`}>
-                    ${monthlySavingsEquivalent}/mo billed annually -- save 20%
+                    ${monthlySavingsEquivalent}/mo billed annually -- save ~16%
                 </div>
             )}
             {isFree && (

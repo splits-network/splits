@@ -77,7 +77,7 @@ export function TeamTab({ organizationId, companyId, isCompanyAdmin = false }: T
             if (!token) return;
             const client = createAuthenticatedClient(token);
             const response: any = await client.get(
-                `/memberships?organization_id=${organizationId}&company_id=${companyId}`,
+                `/memberships/views/detail?organization_id=${organizationId}&company_id=${companyId}`,
             );
             setMembers(response.data || []);
         } catch (error) {
@@ -105,8 +105,10 @@ export function TeamTab({ organizationId, companyId, isCompanyAdmin = false }: T
 
     useEffect(() => {
         fetchTeamMembers();
-        fetchInvitations();
-    }, [fetchTeamMembers, fetchInvitations]);
+        if (isCompanyAdmin) {
+            fetchInvitations();
+        }
+    }, [fetchTeamMembers, fetchInvitations, isCompanyAdmin]);
 
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();

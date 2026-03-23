@@ -366,9 +366,7 @@ export function UserProfileProvider({
     const planTier: PlanTier = plan?.tier || "starter";
     const planName = plan?.name || "Starter";
     const isPaidPlan = planTier !== "starter" && (plan?.price_monthly ?? 0) > 0;
-    const isSubscriptionActive =
-        subscription?.status === "active" ||
-        subscription?.status === "trialing";
+    const isSubscriptionActive = subscription?.status === "active";
 
     // Entitlement derived values
     const entitlements: PlanEntitlements = useMemo(

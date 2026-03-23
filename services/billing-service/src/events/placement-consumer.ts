@@ -265,7 +265,7 @@ export class BillingEventConsumer {
                 .from('subscriptions')
                 .select('plan:plans(tier)')
                 .eq('recruiter_id', recruiterId)
-                .in('status', ['active', 'trialing'])
+                .eq('status', 'active')
                 .limit(1)
                 .maybeSingle();
 

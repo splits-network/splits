@@ -29,4 +29,4 @@ This plan addresses several key issues: ensuring only recruiters see the subscri
 ### Further Considerations
 
 1.  **Safety Check**: Ensure `Plan` type in `types.ts` accurately reflects API response (specifically `price_monthly` vs `price_cents`).
-2.  **Toggle UX**: Ensure the annual toggle prominently shows savings (e.g., "Save 20%") if such data is available in `plan.features.annual_savings_text`.
+2.  **Toggle UX**: Ensure the annual toggle prominently shows savings (e.g., "Save ~16%") if such data is available in `plan.features.annual_savings_text`.

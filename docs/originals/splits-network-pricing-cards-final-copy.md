@@ -67,7 +67,7 @@ Designed for active recruiters who want better economics, faster access, and dee
 - Custom integrations
 
 **CTA Button:**  
-Start Pro Trial
+Get Started with Pro
 
 **Footnote:**  
 Subscription tier increases incentive potential but does not guarantee placements.
