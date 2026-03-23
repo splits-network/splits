@@ -4,12 +4,14 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-ne
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { EventPublisher as V2EventPublisher, OutboxPublisher } from './v2/shared/events';
-import { DomainEventConsumer } from './v2/shared/domain-consumer';
-import { ApplicationRepository } from './v2/applications/repository';
 import { CandidateRepository } from './v2/candidates/repository';
-import { CandidateSourcerRepository } from './v2/candidate-sourcers/repository';
+import { CandidateSourcerRepository as V2CandidateSourcerRepository } from './v2/candidate-sourcers/repository';
 import { registerV2Routes } from './v2/routes';
 import { registerV3Routes } from './v3/routes';
+import { DomainEventConsumerV3 } from './v3/shared/domain-consumer';
+import { ApplicationRepository as V3ApplicationRepository } from './v3/applications/repository';
+import { CandidateSourcerRepository as V3CandidateSourcerRepository } from './v3/candidate-sourcers/repository';
+import { AIReviewService } from './v3/applications/actions/ai-review.service';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -123,26 +125,26 @@ async function main() {
         throw error;
     }
 
-    // Initialize V2 domain event consumer to sync events from other services
-    const applicationRepository = new ApplicationRepository(
-        dbConfig.supabaseUrl,
-        supabaseKey
-    );
-
+    // Initialize repositories
     const candidateRepository = new CandidateRepository(
         dbConfig.supabaseUrl,
         supabaseKey
     );
 
-    const candidateSourcerRepository = new CandidateSourcerRepository(
+    const supabase = candidateRepository.getSupabase();
+    const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
+
+    // V2 candidate-sourcer repo (still needed by placement service)
+    const v2CandidateSourcerRepository = new V2CandidateSourcerRepository(
         candidateRepository.getSupabase()
     );
 
-    // Initialize outbox publisher (writes events to DB)
-    const supabase = applicationRepository.getSupabase();
-    const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
+    // V3 repositories + services for domain consumer
+    const v3ApplicationRepository = new V3ApplicationRepository(supabase);
+    const v3CandidateSourcerRepository = new V3CandidateSourcerRepository(supabase);
+    const aiReviewService = new AIReviewService(v3ApplicationRepository, supabase, outboxPublisher);
 
-    // Initialize placement service for domain consumer
+    // Initialize placement service (still used by V2 routes)
     const placementRepository = new (await import('./v2/placements/repository')).PlacementRepository(
         dbConfig.supabaseUrl,
         supabaseKey
@@ -154,29 +156,30 @@ async function main() {
         placementRepository.getSupabase(),
         placementRepository,
         companySourcerRepository,
-        candidateSourcerRepository,
+        v2CandidateSourcerRepository,
         outboxPublisher
     );
 
-    const domainConsumer = new DomainEventConsumer(
+    // Initialize V3 domain event consumer (replaces V2 consumer)
+    const domainConsumer = new DomainEventConsumerV3(
         rabbitConfig.url,
-        applicationRepository,
-        candidateRepository,
-        candidateSourcerRepository,
-        placementService,
+        supabase,
+        v3ApplicationRepository,
+        v3CandidateSourcerRepository,
+        aiReviewService,
         outboxPublisher,
         logger
     );
 
     try {
         await domainConsumer.connect();
-        logger.info('🐰 RabbitMQ DomainConsumer connected successfully');
+        logger.info('🐰 RabbitMQ V3 DomainConsumer connected successfully');
     } catch (error) {
-        logger.error({ err: error }, '❌ Failed to connect RabbitMQ DomainConsumer on startup');
+        logger.error({ err: error }, '❌ Failed to connect RabbitMQ V3 DomainConsumer on startup');
         throw error;
     }
 
-    logger.info('✅ RabbitMQ initialization complete - EventPublisher and DomainConsumer ready');
+    logger.info('✅ RabbitMQ initialization complete - EventPublisher and V3 DomainConsumer ready');
 
     // Register V2 routes (legacy — coexists with V3)
     registerV2Routes(app, {

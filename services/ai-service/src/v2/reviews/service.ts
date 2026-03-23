@@ -201,39 +201,33 @@ export class AIReviewServiceV2 {
             });
 
             // Publish ai_review.completed event
-            // ATS service will listen to this and decide whether to auto-transition stage
-            // Wrapped in try/catch so event publish failures don't crash a successful review
+            // ATS service listens to this and transitions the application to ai_reviewed.
+            // The review is already saved — if publish fails, we throw so the caller
+            // (domain consumer) nacks the message and RabbitMQ redelivers it.
             if (this.eventPublisher) {
-                try {
-                    await this.eventPublisher.publish('ai_review.completed', {
+                await this.eventPublisher.publish('ai_review.completed', {
+                    application_id: input.application_id,
+                    candidate_id: input.candidate_id,
+                    job_id: input.job_id,
+                    ai_review_id: review.id,
+                    fit_score: review.fit_score,
+                    recommendation: review.recommendation,
+                    confidence_level: review.confidence_level,
+                    auto_transition: input.auto_transition,
+                    processing_time_ms: processingTimeMs,
+                    timestamp: new Date().toISOString(),
+                });
+
+                this.logger.info(
+                    {
                         application_id: input.application_id,
-                        candidate_id: input.candidate_id,
-                        job_id: input.job_id,
                         ai_review_id: review.id,
                         fit_score: review.fit_score,
                         recommendation: review.recommendation,
-                        confidence_level: review.confidence_level,
                         auto_transition: input.auto_transition,
-                        processing_time_ms: processingTimeMs,
-                        timestamp: new Date().toISOString(),
-                    });
-
-                    this.logger.info(
-                        {
-                            application_id: input.application_id,
-                            ai_review_id: review.id,
-                            fit_score: review.fit_score,
-                            recommendation: review.recommendation,
-                            auto_transition: input.auto_transition,
-                        },
-                        'Published ai_review.completed event'
-                    );
-                } catch (eventErr) {
-                    this.logger.error(
-                        { err: eventErr, application_id: input.application_id, ai_review_id: review.id },
-                        'Failed to publish ai_review.completed event (review was saved successfully)'
-                    );
-                }
+                    },
+                    'Published ai_review.completed event'
+                );
             }
 
             this.logger.info(
@@ -243,7 +237,9 @@ export class AIReviewServiceV2 {
 
             return review;
         } catch (error) {
-            // Publish failed event — guarded so a RabbitMQ failure doesn't mask the real error
+            // Publish failed event so ATS can transition to ai_failed.
+            // If this also fails, both errors will propagate — the original review
+            // error is more important, so we log the publish failure but rethrow original.
             if (this.eventPublisher) {
                 try {
                     await this.eventPublisher.publish('ai_review.failed', {
@@ -253,8 +249,11 @@ export class AIReviewServiceV2 {
                         error: error instanceof Error ? error.message : 'Unknown error',
                         timestamp: new Date().toISOString(),
                     });
-                } catch {
-                    // Can't publish failure event either — just log
+                } catch (publishErr) {
+                    this.logger.error(
+                        { err: publishErr, application_id: input.application_id },
+                        'Failed to publish ai_review.failed event'
+                    );
                 }
             }
 

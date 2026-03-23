@@ -90,6 +90,7 @@ export class DomainEventConsumerV3 {
 
       // Bind to all events this consumer handles
       const bindings = [
+        'application.stage_changed',
         'ai_review.completed',
         'ai_review.failed',
         'candidate.link_requested',
@@ -175,6 +176,10 @@ export class DomainEventConsumerV3 {
       );
 
       switch (event.event_type) {
+        case 'application.stage_changed':
+          await this.handleStageChanged(event);
+          break;
+
         case 'ai_review.completed':
           await this.aiReviewService.handleAIReviewCompleted(event.payload as any);
           break;
@@ -186,10 +191,6 @@ export class DomainEventConsumerV3 {
         case 'candidate.link_requested':
           await this.handleCandidateLinkRequested(event);
           break;
-
-        // candidate.sourcer_assignment_requested — REMOVED
-        // Sourcer attribution is immutable, set only at signup via referral link/code.
-        // The event and handler have been removed to enforce this rule.
 
         case 'resume.metadata.extracted':
           await this.handleResumeMetadataExtracted(event);
@@ -208,6 +209,47 @@ export class DomainEventConsumerV3 {
       this.logger.error({ err: error }, 'Error handling domain event');
       this.channel?.nack(msg, false, true);
     }
+  }
+
+  /**
+   * Sync application stage changes from other services to the ATS database.
+   */
+  private async handleStageChanged(event: DomainEvent): Promise<void> {
+    const { application_id, old_stage, new_stage, changed_by } = event.payload;
+
+    const application = await this.applicationRepository.findById(application_id);
+    if (!application) {
+      this.logger.warn({ application_id }, 'Application not found for stage sync');
+      return;
+    }
+
+    if (application.stage === new_stage) {
+      this.logger.info(
+        { application_id, stage: new_stage },
+        'Application stage already at target, skipping update'
+      );
+      return;
+    }
+
+    await this.applicationRepository.update(application_id, { stage: new_stage });
+
+    await this.applicationRepository.createAuditLog({
+      application_id,
+      action: 'stage_changed',
+      performed_by_user_id: changed_by || '00000000-0000-0000-0000-000000000000',
+      performed_by_role: 'system',
+      old_value: { stage: old_stage },
+      new_value: { stage: new_stage },
+      metadata: {
+        source_event: event.event_type,
+        event_id: event.event_id,
+      },
+    });
+
+    this.logger.info(
+      { application_id, old_stage, new_stage, event_id: event.event_id },
+      'Synced application stage change from domain event'
+    );
   }
 
   /**

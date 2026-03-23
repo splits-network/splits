@@ -139,7 +139,7 @@ export class SubscriptionStripeOperations {
       payment_settings: { payment_method_types: ['card'], save_default_payment_method: 'on_subscription' },
       metadata: { user_id: userId, clerk_user_id: clerkUserId, plan_id: input.plan_id, billing_period: billingPeriod },
     };
-    if (input.promotion_code) params.promotion_code = input.promotion_code;
+    if (input.promotion_code) params.discounts = [{ promotion_code: input.promotion_code }];
 
     const stripeSub = await this.stripe.subscriptions.create(params);
     const periodEnd = (stripeSub as any).current_period_end;
@@ -276,7 +276,7 @@ export class SubscriptionStripeOperations {
       payment_settings: { payment_method_types: ['card'], save_default_payment_method: 'on_subscription' },
       metadata: { user_id: subscription.user_id, clerk_user_id: clerkUserId, plan_id: newPlanId, billing_period: billingPeriod },
     };
-    if (updates.promotion_code) { params.promotion_code = updates.promotion_code; delete updates.promotion_code; }
+    if (updates.promotion_code) { params.discounts = [{ promotion_code: updates.promotion_code }]; delete updates.promotion_code; }
 
     const stripeSub = await this.stripe.subscriptions.create(params);
     updates.stripe_subscription_id = stripeSub.id;
