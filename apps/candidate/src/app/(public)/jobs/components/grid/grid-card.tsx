@@ -2,7 +2,7 @@
 
 import type { Job } from "../../types";
 import { formatJobLevel, formatCommuteTypes } from "../../types";
-import { BaselBadge, BaselAvatar, BaselLevelIndicator } from "@splits-network/basel-ui";
+import { BaselBadge, BaselAvatar } from "@splits-network/basel-ui";
 import {
     salaryDisplay,
     formatEmploymentType,
@@ -15,9 +15,6 @@ import {
     truncateDescription,
     matchScoreTextColor,
 } from "../shared/helpers";
-import {
-    useGamification,
-} from "@splits-network/shared-gamification";
 
 interface GridCardProps {
     job: Job;
@@ -30,8 +27,6 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
     const salary = salaryDisplay(job);
     const jobLevel = formatJobLevel(job.job_level);
     const skills = requiredSkillNames(job);
-    const { getLevel } = useGamification();
-    const companyLevel = job.company?.id ? getLevel(job.company.id) : undefined;
     const logoUrl = job.company?.logo_url || job.firm?.logo_url;
     const firmJob = isFirmJob(job);
     const posted = postedAgo(job);
@@ -114,9 +109,6 @@ export function GridCard({ job, isSelected, onSelect }: GridCardProps) {
 
             {/* Inline metadata: salary · level · type · commute */}
             <div className="px-5 py-2.5 border-b border-base-300 text-sm flex flex-wrap items-center gap-x-3 gap-y-1">
-                {companyLevel && (
-                    <BaselLevelIndicator level={companyLevel.current_level} title={companyLevel.title} totalXp={companyLevel.total_xp} xpToNextLevel={companyLevel.xp_to_next_level} />
-                )}
                 {metaItems.map((item, i) => (
                     <span key={i} className={`tooltip tooltip-bottom flex items-center gap-1 ${item.muted ? "text-base-content/30" : "text-base-content/50"}`} data-tip={item.tooltip}>
                         <i className={`fa-duotone fa-regular ${item.icon} ${item.muted ? "text-base-content/20" : item.color} text-xs`} />
