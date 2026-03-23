@@ -98,6 +98,7 @@ export default function ApplicationsBaselPage() {
         defaultSortOrder: "desc",
         defaultLimit: 25,
         syncToUrl: true,
+        include: "ai_review",
     });
 
     const handleSelect = useCallback((application: Application) => {
