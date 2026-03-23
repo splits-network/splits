@@ -94,15 +94,14 @@ export class RecruiterServiceV2 {
             throw { statusCode: 409, message: 'Recruiter profile already exists for this user' };
         }
 
-        // Auto-generate slug from name if not provided
+        // Auto-generate slug from name — fall back to user's name from DB
         let slug: string | undefined;
-        if (data.user_id) {
-            const user = await this.repository.findRecruiterByUserId(data.user_id);
-            // If no existing recruiter, try to generate slug from any available name
-            const nameForSlug = (data as any).name;
-            if (nameForSlug) {
-                slug = await this.generateUniqueSlug(nameForSlug);
-            }
+        let nameForSlug = (data as any).name;
+        if (!nameForSlug && data.user_id) {
+            nameForSlug = await this.repository.findUserNameByUserId(data.user_id);
+        }
+        if (nameForSlug) {
+            slug = await this.generateUniqueSlug(nameForSlug);
         }
 
         const recruiter = await this.repository.createRecruiter({
@@ -161,6 +160,20 @@ export class RecruiterServiceV2 {
                 throw { statusCode: 404, message: 'Recruiter not found' };
             }
             this.validateStatusTransition(current.status, updates.status);
+        }
+
+        // Auto-generate slug if recruiter has no slug and name is available
+        if (!updates.slug) {
+            const current = await this.repository.findRecruiter(id, clerkUserId);
+            if (current && !current.slug) {
+                const name = updates.name || current.name;
+                if (name) {
+                    updates.slug = await this.generateUniqueSlug(name);
+                } else if (current.user_id) {
+                    const userName = await this.repository.findUserNameByUserId(current.user_id);
+                    if (userName) updates.slug = await this.generateUniqueSlug(userName);
+                }
+            }
         }
 
         const recruiter = await this.repository.updateRecruiter(id, updates);

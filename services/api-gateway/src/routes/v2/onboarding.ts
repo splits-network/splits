@@ -366,6 +366,7 @@ export function registerOnboardingRoutes(
                     '/api/v2/recruiters',
                     {
                         user_id: user.id,
+                        name: user.name || null,
                         bio: body.profile.bio,
                         phone: body.profile.phone,
                         industries: body.profile.industries || [],

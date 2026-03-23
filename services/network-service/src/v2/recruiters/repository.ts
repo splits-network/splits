@@ -317,6 +317,16 @@ export class RecruiterRepository {
         if (error) throw error;
     }
 
+    async findUserNameByUserId(userId: string): Promise<string | null> {
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('name')
+            .eq('id', userId)
+            .maybeSingle();
+        if (error || !data) return null;
+        return data.name || null;
+    }
+
     /**
      * Build select clause with optional includes
      * Supports: user (joins with identity.users table), reputation (joins with recruiter_reputation table)
