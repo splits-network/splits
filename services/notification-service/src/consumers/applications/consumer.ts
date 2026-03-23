@@ -780,7 +780,7 @@ export class ApplicationsEventConsumer {
                             applicationId: application_id,
                             hasRecruiter: true,
                             recruiterName: recruiterContact.name,
-                            userId: undefined,
+                            userId: admin.user_id || undefined,
                         });
                     }
                 }
@@ -856,7 +856,7 @@ export class ApplicationsEventConsumer {
                             jobTitle: job.title,
                             applicationId: application_id,
                             hasRecruiter: false,
-                            userId: undefined,
+                            userId: admin.user_id || undefined,
                         });
                     }
                 }
