@@ -22,7 +22,7 @@ const keyStats = [
         semantic: "border-primary",
     },
     {
-        value: "20%",
+        value: "~16%",
         label: "saved with annual billing",
         semantic: "border-accent",
     },

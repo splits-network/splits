@@ -14,7 +14,7 @@
 
 **Audience:** Recruiters and hiring companies
 **Purpose:** A collaborative marketplace designed specifically for recruiter-to-recruiter "split-fee" partnerships
-**Pricing:** Freemium — Starter (Free), Pro ($99/mo), Partner ($249/mo); 20% savings with annual billing
+**Pricing:** Freemium — Starter (Free), Pro ($99/mo), Partner ($249/mo); ~16% savings with annual billing
 
 ### What It Does
 

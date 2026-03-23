@@ -439,7 +439,7 @@ export function BaselPlanModal({
                                         color="success"
                                         className="ml-1"
                                     >
-                                        Save 20%
+                                        Save ~16%
                                     </BaselStatusPill>
                                 </button>
                             </div>

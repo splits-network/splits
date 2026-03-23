@@ -110,7 +110,7 @@ export function ReviewStep({ state, actions }: ReviewStepProps) {
     const nextSteps = isRecruiter
         ? [
               "Your recruiter profile goes live instantly",
-              "Free trial starts — no card charged until it ends",
+              "Your subscription activates immediately",
               "Browse roles and submit candidates immediately",
           ]
         : [

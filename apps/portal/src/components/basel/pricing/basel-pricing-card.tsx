@@ -133,7 +133,7 @@ export function BaselPricingCard({
                 <div
                     className={`text-xs font-bold uppercase tracking-wider mb-4 ${colors.cardTextMuted}`}
                 >
-                    ${monthlySavingsEquivalent}/mo billed annually -- save 20%
+                    ${monthlySavingsEquivalent}/mo billed annually -- save ~16%
                 </div>
             )}
             {isFree && (

@@ -29,12 +29,12 @@
 | Candidate submissions | Yes | Yes | Yes |
 | ATS pipeline | Yes | Yes | Yes |
 | Commission payout bonus | Base rates | Enhanced rates | Premium rates |
-| Annual billing discount | — | 20% savings | 20% savings |
+| Annual billing discount | — | ~16% savings | ~16% savings |
 
 - $0 hidden fees — the monthly subscription is the only recurring cost
 - No penalties for quiet months
 - Switch plans anytime
-- Free trial available for paid plans
+- No trial periods — immediate charge on paid plans
 
 ### Company Pricing
 

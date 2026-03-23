@@ -374,7 +374,7 @@ export class RecruiterRepository {
             .from('subscriptions')
             .select('recruiter_id, plan:plans(tier)')
             .in('recruiter_id', recruiterIds)
-            .in('status', ['active', 'trialing']);
+            .eq('status', 'active');
 
         for (const row of data || []) {
             const tier = (row.plan as any)?.tier ?? 'starter';

@@ -10,125 +10,189 @@ const plans = [
         id: "starter",
         name: "Starter",
         price: { monthly: 0, annual: 0 },
-        description: "For independent recruiters getting started",
+        description: "Full marketplace access for new recruiters",
         cta: "Get Started Free",
         ctaStyle: "btn-ghost border-base-content/20",
         features: [
-            { text: "Up to 5 active placements", included: true },
-            { text: "Basic candidate tracking", included: true },
-            { text: "Email support", included: true },
-            { text: "Marketplace access", included: true },
-            { text: "AI matching", included: false },
-            { text: "Custom branding", included: false },
-            { text: "Analytics dashboard", included: false },
-            { text: "Priority support", included: false },
+            { text: "Access to open roles", included: true },
+            { text: "Unlimited submissions", included: true },
+            { text: "Full ATS workflow", included: true },
+            { text: "5 messaging initiations/month", included: true },
+            { text: "10 saved candidates", included: true },
+            { text: "In-app support", included: true },
+            { text: "Early access to roles", included: false },
+            { text: "Advanced analytics", included: false },
+            { text: "AI features", included: false },
             { text: "API access", included: false },
         ],
     },
     {
         id: "pro",
         name: "Pro",
-        price: { monthly: 49, annual: 39 },
-        description: "For active recruiters scaling their pipeline",
-        cta: "Start Pro Trial",
+        price: { monthly: 99, annual: 83 },
+        description: "For serious recruiters scaling their pipeline",
+        cta: "Get Started with Pro",
         ctaStyle: "btn-primary",
         popular: true,
         features: [
-            { text: "Unlimited placements", included: true },
-            { text: "Advanced candidate tracking", included: true },
+            { text: "Everything in Starter", included: true },
+            { text: "Unlimited messaging", included: true },
+            { text: "100 saved candidates", included: true },
+            { text: "Early access to new roles", included: true },
+            { text: "Call recording & transcription", included: true },
+            { text: "Email & calendar integrations", included: true },
+            { text: "Advanced analytics & data export", included: true },
             { text: "Priority email support", included: true },
-            { text: "Marketplace access", included: true },
-            { text: "AI matching & scoring", included: true },
-            { text: "Custom branding", included: true },
-            { text: "Analytics dashboard", included: true },
-            { text: "Priority support", included: false },
+            { text: "Higher payout bonuses", included: true },
             { text: "API access", included: false },
         ],
     },
     {
-        id: "enterprise",
-        name: "Enterprise",
-        price: { monthly: 149, annual: 119 },
-        description: "For teams and agencies with advanced needs",
-        cta: "Contact Sales",
+        id: "partner",
+        name: "Partner",
+        price: { monthly: 249, annual: 208 },
+        description: "For firms and power users who want it all",
+        cta: "Upgrade to Partner",
         ctaStyle: "btn-ghost border-base-content/20",
         features: [
-            { text: "Unlimited placements", included: true },
-            { text: "Advanced candidate tracking", included: true },
-            { text: "Dedicated account manager", included: true },
-            { text: "Marketplace access", included: true },
-            { text: "AI matching & scoring", included: true },
-            { text: "Custom branding", included: true },
-            { text: "Analytics dashboard", included: true },
-            { text: "Priority support", included: true },
+            { text: "Everything in Pro", included: true },
+            { text: "Unlimited saved candidates & jobs", included: true },
+            { text: "Priority role access", included: true },
+            { text: "AI match scoring (True Score)", included: true },
+            { text: "AI call summaries", included: true },
+            { text: "Firm creation & management", included: true },
             { text: "API access", included: true },
+            { text: "Dedicated account manager", included: true },
+            { text: "Maximum payout bonuses", included: true },
         ],
     },
 ];
 
 const comparisonFeatures = [
     {
-        name: "Active Placements",
-        starter: "5",
-        pro: "Unlimited",
-        enterprise: "Unlimited",
+        name: "Monthly Price",
+        starter: "Free",
+        partner: "$249",
+        pro: "$99",
     },
     {
-        name: "Candidate Profiles",
-        starter: "50",
-        pro: "500",
-        enterprise: "Unlimited",
+        name: "Annual Price",
+        starter: "Free",
+        pro: "$999/yr",
+        partner: "$2,499/yr",
+    },
+    {
+        name: "Messaging",
+        starter: "5/month",
+        pro: "Unlimited",
+        partner: "Unlimited",
+    },
+    {
+        name: "Saved Candidates",
+        starter: "10",
+        pro: "100",
+        partner: "Unlimited",
+    },
+    {
+        name: "Saved Roles",
+        starter: "10",
+        pro: "50",
+        partner: "Unlimited",
+    },
+    {
+        name: "Referral Codes",
+        starter: "1",
+        pro: "5",
+        partner: "Unlimited",
+    },
+    {
+        name: "Payout Bonuses",
+        starter: "Base",
+        pro: "Higher",
+        partner: "Maximum",
+    },
+    {
+        name: "Early Access to Roles",
+        starter: "---",
+        pro: "Yes",
+        partner: "Yes",
+    },
+    {
+        name: "Priority Role Access",
+        starter: "---",
+        pro: "---",
+        partner: "Yes",
+    },
+    {
+        name: "Call Recording & Transcription",
+        starter: "---",
+        pro: "Yes",
+        partner: "Yes",
+    },
+    {
+        name: "Analytics & Data Export",
+        starter: "---",
+        pro: "Advanced",
+        partner: "Advanced",
+    },
+    {
+        name: "Email & Calendar Integrations",
+        starter: "---",
+        pro: "Yes",
+        partner: "Yes",
     },
     {
         name: "AI Match Scoring",
         starter: "---",
-        pro: "Standard",
-        enterprise: "Advanced",
+        pro: "---",
+        partner: "True Score",
     },
     {
-        name: "Custom Branding",
+        name: "AI Call Summaries",
         starter: "---",
-        pro: "Logo + Colors",
-        enterprise: "Full White-Label",
+        pro: "---",
+        partner: "Yes",
     },
     {
-        name: "Analytics",
-        starter: "Basic",
-        pro: "Advanced",
-        enterprise: "Custom Reports",
-    },
-    { name: "Team Members", starter: "1", pro: "5", enterprise: "Unlimited" },
-    {
-        name: "Integrations",
+        name: "Firm & Team Management",
         starter: "---",
-        pro: "Slack, Calendar",
-        enterprise: "All + API",
+        pro: "---",
+        partner: "Yes",
+    },
+    {
+        name: "API Access",
+        starter: "---",
+        pro: "---",
+        partner: "Yes",
     },
     {
         name: "Support",
-        starter: "Email",
+        starter: "In-App",
         pro: "Priority Email",
-        enterprise: "Dedicated Manager",
+        partner: "Account Manager",
     },
-    { name: "SLA", starter: "---", pro: "99.9%", enterprise: "99.99%" },
 ];
 
 const faqs = [
     {
         q: "Can I switch plans at any time?",
-        a: "Yes. Upgrades take effect immediately with prorated billing. Downgrades apply at the end of your current billing cycle.",
+        a: "Yes. Upgrades take effect immediately with prorated billing. Downgrades apply at the end of your current billing cycle. No commitments — cancel anytime.",
     },
     {
-        q: "Is there a free trial for Pro?",
-        a: "Yes, Pro comes with a 14-day free trial. No credit card required to start.",
+        q: "Are there free trials?",
+        a: "No. The Starter plan is permanently free with full marketplace access, unlimited submissions, and the complete ATS workflow. Paid tiers charge immediately on subscription.",
     },
     {
         q: "What happens to my data if I downgrade?",
         a: "Your data is preserved. You will lose access to premium features but nothing is deleted. You can upgrade again at any time.",
     },
     {
-        q: "Do you offer discounts for agencies?",
-        a: "Yes. Teams of 10+ get custom pricing. Contact our sales team for a tailored quote.",
+        q: "How do payout bonuses work?",
+        a: "When a placement is made, the company pays a placement fee. Your subscription tier determines your payout bonus level — Higher on Pro, Maximum on Partner. All payouts are finalized at hire time.",
+    },
+    {
+        q: "Are there any hidden fees?",
+        a: "No. Your subscription is the only recurring cost. Placement earnings follow the transparent split model with no platform deductions layered on top.",
     },
 ];
 
@@ -197,7 +261,7 @@ export default function PricingOne() {
                         </span>
                         {billing === "annual" && (
                             <span className="px-2 py-0.5 bg-success/10 text-success text-sm font-bold uppercase">
-                                Save 20%
+                                Save ~16%
                             </span>
                         )}
                     </div>
@@ -283,7 +347,7 @@ export default function PricingOne() {
                                     Pro
                                 </th>
                                 <th className="text-center text-xs font-semibold uppercase tracking-widest text-base-content/40">
-                                    Enterprise
+                                    Partner
                                 </th>
                             </tr>
                         </thead>
@@ -303,7 +367,7 @@ export default function PricingOne() {
                                         {f.pro}
                                     </td>
                                     <td className="text-center text-sm text-base-content/60">
-                                        {f.enterprise}
+                                        {f.partner}
                                     </td>
                                 </tr>
                             ))}

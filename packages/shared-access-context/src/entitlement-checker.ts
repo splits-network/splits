@@ -29,7 +29,7 @@ export class EntitlementChecker {
             .from('subscriptions')
             .select('plan:plans(entitlements)')
             .eq('user_id', userId)
-            .in('status', ['active', 'trialing'])
+            .eq('status', 'active')
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();

@@ -17,7 +17,7 @@ export class MySubscriptionRepository {
       .from('subscriptions')
       .select(WITH_PLAN_SELECT)
       .eq('user_id', userId)
-      .in('status', ['active', 'trialing'])
+      .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();

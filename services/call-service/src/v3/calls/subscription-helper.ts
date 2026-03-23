@@ -14,7 +14,7 @@ export async function getCreatorTier(
     .from('subscriptions')
     .select('plan:plans(tier)')
     .eq('user_id', userId)
-    .in('status', ['active', 'trialing'])
+    .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
