@@ -485,7 +485,7 @@ function RecruiterCard({ activeRecruiters, presence, loading }: RecruiterCardPro
                                     {/* Avatar */}
                                     <div className="shrink-0">
                                         <BaselAvatar
-                                            initials={rel.recruiter_name.charAt(0).toUpperCase()}
+                                            initials={(rel.recruiter_name || "?").charAt(0).toUpperCase()}
                                             size="md"
                                             presence={isOnline ? "online" : presenceEntry?.status || null}
                                         />

@@ -35,7 +35,9 @@ export function SectionConnections() {
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            const response = await client.get("/recruiter-candidates");
+            const response = await client.get<{ data: any[] }>(
+                "/recruiter-candidates/views/list-for-candidate",
+            );
             const all = response.data || [];
             setActiveRecruiters(
                 all.filter((r: RecruiterRelationship) => r.status === "active"),
@@ -218,7 +220,8 @@ export function SectionConnections() {
                                         AI Job Copilot
                                     </p>
                                     <p className="text-xs text-base-content/40">
-                                        Connected {formatDate(session.created_at)}{" "}
+                                        Connected{" "}
+                                        {formatDate(session.created_at)}{" "}
                                         &middot; Last active{" "}
                                         {formatDate(session.last_active)}
                                     </p>
@@ -241,9 +244,7 @@ export function SectionConnections() {
                                 </div>
                                 <button
                                     className="btn btn-xs btn-error btn-outline shrink-0"
-                                    onClick={() =>
-                                        revokeGptSession(session.id)
-                                    }
+                                    onClick={() => revokeGptSession(session.id)}
                                     disabled={revokingSessionId === session.id}
                                 >
                                     {revokingSessionId === session.id ? (

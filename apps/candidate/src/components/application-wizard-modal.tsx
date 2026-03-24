@@ -116,7 +116,7 @@ export default function ApplicationWizardModal({
                 const [jobResponse, documentsResponse, recruitersResponse] = await Promise.all([
                     authClient.get<{ data: any }>(`/jobs/${jobId}/view/candidate-detail`),
                     authClient.get<{ data: any[] }>("/documents"),
-                    authClient.get<{ data: any[] }>("/recruiter-candidates"),
+                    authClient.get<{ data: any[] }>("/recruiter-candidates/views/list-for-candidate"),
                 ]);
 
                 const jobData = jobResponse.data;

@@ -63,7 +63,7 @@ export function RecruiterCard({ relationship, showActions = true, onTerminate }:
                     <div className="flex items-center gap-3 flex-1">
                         <div>
                             <BaselAvatar
-                                initials={relationship.recruiter_name.charAt(0).toUpperCase()}
+                                initials={(relationship.recruiter_name || "?").charAt(0).toUpperCase()}
                                 alt={relationship.recruiter_name}
                                 size="md"
                             />
