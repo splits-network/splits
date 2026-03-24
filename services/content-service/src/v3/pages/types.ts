@@ -6,14 +6,20 @@
  *         seo_title, seo_description, og_image, published_at
  */
 
+import type { ContentPageType } from '@splits-network/shared-types';
+
+export type { ContentPageType };
+
 export type PageStatus = 'draft' | 'published' | 'archived';
+
+const PAGE_TYPE_ENUM = ['blog', 'article', 'help', 'partner', 'press', 'legal', 'page'] as const;
 
 export interface PageListParams {
   page?: number;
   limit?: number;
   status?: PageStatus;
   app?: string;
-  page_type?: string;
+  page_type?: ContentPageType;
   search?: string;
 }
 
@@ -24,7 +30,7 @@ export interface CreatePageInput {
   content_blocks?: any[];
   status?: PageStatus;
   app?: string;
-  page_type?: string;
+  page_type?: ContentPageType;
   seo_title?: string;
   seo_description?: string;
   og_image?: string;
@@ -37,7 +43,7 @@ export interface UpdatePageInput {
   content_blocks?: any[];
   status?: PageStatus;
   app?: string;
-  page_type?: string;
+  page_type?: ContentPageType;
   seo_title?: string;
   seo_description?: string;
   og_image?: string;
@@ -52,7 +58,7 @@ export const listQuerySchema = {
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
     status: { type: 'string', enum: ['draft', 'published', 'archived'] },
     app: { type: 'string' },
-    page_type: { type: 'string' },
+    page_type: { type: 'string', enum: PAGE_TYPE_ENUM },
     search: { type: 'string' },
   },
   additionalProperties: true,
@@ -68,7 +74,7 @@ export const createSchema = {
     content_blocks: { type: 'array' },
     status: { type: 'string', enum: ['draft', 'published', 'archived'] },
     app: { type: 'string', maxLength: 100 },
-    page_type: { type: 'string', maxLength: 100 },
+    page_type: { type: 'string', enum: PAGE_TYPE_ENUM, default: 'page' },
     seo_title: { type: 'string', maxLength: 200 },
     seo_description: { type: 'string', maxLength: 500 },
     og_image: { type: 'string', maxLength: 1000 },
@@ -85,7 +91,7 @@ export const updateSchema = {
     content_blocks: { type: 'array' },
     status: { type: 'string', enum: ['draft', 'published', 'archived'] },
     app: { type: 'string', maxLength: 100 },
-    page_type: { type: 'string', maxLength: 100 },
+    page_type: { type: 'string', enum: PAGE_TYPE_ENUM },
     seo_title: { type: 'string', maxLength: 200 },
     seo_description: { type: 'string', maxLength: 500 },
     og_image: { type: 'string', maxLength: 1000 },
