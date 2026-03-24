@@ -41,7 +41,7 @@ export function CreatePageModal({
         title: "",
         slug: "",
         app: "portal",
-        category: "",
+        page_type: "page" as string,
         description: "",
     });
 
@@ -50,7 +50,7 @@ export function CreatePageModal({
             title: "",
             slug: "",
             app: "portal",
-            category: "",
+            page_type: "page",
             description: "",
         });
         setSlugManuallyEdited(false);
@@ -89,7 +89,7 @@ export function CreatePageModal({
                 title: formData.title.trim(),
                 slug: formData.slug.trim(),
                 app: formData.app,
-                category: formData.category.trim() || undefined,
+                page_type: formData.page_type,
                 description: formData.description.trim() || undefined,
                 blocks: [],
                 status: "draft",
@@ -163,21 +163,27 @@ export function CreatePageModal({
                     </BaselFormField>
 
                     <BaselFormField
-                        label="Category"
-                        hint="Optional grouping (e.g., marketing, legal)"
+                        label="Page Type"
+                        hint="Determines how this page is categorized"
                     >
-                        <input
-                            type="text"
-                            className="input input-bordered w-full"
-                            value={formData.category}
+                        <select
+                            className="select w-full"
+                            value={formData.page_type}
                             onChange={(e) =>
                                 setFormData({
                                     ...formData,
-                                    category: e.target.value,
+                                    page_type: e.target.value,
                                 })
                             }
-                            placeholder="marketing"
-                        />
+                        >
+                            <option value="page">Page</option>
+                            <option value="blog">Blog</option>
+                            <option value="article">Article</option>
+                            <option value="help">Help</option>
+                            <option value="partner">Partner</option>
+                            <option value="press">Press</option>
+                            <option value="legal">Legal</option>
+                        </select>
                     </BaselFormField>
 
                     <BaselFormField

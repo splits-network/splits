@@ -10,6 +10,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { IEventPublisher } from "../../v2/shared/events";
 import { PageRepository } from "./repository";
 import { PageService } from "./service";
+import { registerTypedListingView } from "./views/typed-listing.route";
 import {
     CreatePageInput,
     UpdatePageInput,
@@ -29,7 +30,62 @@ export function registerPageRoutes(
     const repository = new PageRepository(supabase);
     const service = new PageService(repository, supabase, eventPublisher);
 
-    // GET /api/v3/pages/views/by-slug/:slug — public, no auth
+    // Register views before parameterized routes
+    registerTypedListingView(app, supabase);
+
+    // GET /api/v3/public/pages/by-slug/:slug — public, no auth (new /public/ convention)
+    app.get(
+        "/api/v3/public/pages/by-slug/:slug",
+        {
+            schema: { params: slugParamSchema },
+        },
+        async (request, reply) => {
+            const { slug } = request.params as { slug: string };
+            const data = await service.getBySlug(slug);
+            return reply.send({ data });
+        },
+    );
+
+    // GET /api/v3/public/pages/typed-listing — public typed listing view
+    app.get(
+        "/api/v3/public/pages/typed-listing",
+        {
+            schema: {
+                querystring: {
+                    type: "object",
+                    required: ["page_type"],
+                    properties: {
+                        page_type: { type: "string", enum: ["blog", "article", "help", "partner", "press", "legal", "page"] },
+                        app: { type: "string" },
+                        tag: { type: "string" },
+                        page: { type: "integer", minimum: 1, default: 1 },
+                        limit: { type: "integer", minimum: 1, maximum: 100, default: 25 },
+                    },
+                    additionalProperties: true,
+                },
+            },
+        },
+        async (request, reply) => {
+            const { TypedListingRepository } = await import("./views/typed-listing.repository");
+            const listingRepo = new TypedListingRepository(supabase);
+            const params = request.query as {
+                page_type: string;
+                app?: string;
+                tag?: string;
+                page?: number;
+                limit?: number;
+            };
+            const { data, total } = await listingRepo.findPublished(params);
+            const p = params.page || 1;
+            const l = Math.min(params.limit || 25, 100);
+            return reply.send({
+                data,
+                pagination: { total, page: p, limit: l, total_pages: Math.ceil(total / l) },
+            });
+        },
+    );
+
+    // GET /api/v3/pages/views/by-slug/:slug — legacy, still supported
     app.get(
         "/api/v3/pages/views/by-slug/:slug",
         {
