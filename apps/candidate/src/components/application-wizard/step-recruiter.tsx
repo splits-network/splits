@@ -71,7 +71,7 @@ export default function StepRecruiter({
                                         }`}
                                     >
                                         <span className="text-sm font-bold">
-                                            {recruiter.recruiter_name
+                                            {(recruiter.recruiter_name || "?")
                                                 .charAt(0)
                                                 .toUpperCase()}
                                         </span>
