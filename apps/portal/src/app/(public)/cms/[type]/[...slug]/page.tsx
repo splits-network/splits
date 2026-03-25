@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getContentPage } from "@/lib/content";
 import { JsonLd } from "@splits-network/shared-ui";
@@ -10,13 +10,15 @@ const PORTAL_BASE_URL = 'https://splits.network';
 const VALID_TYPES = ['blog', 'article', 'help', 'partner', 'press', 'legal', 'page'] as const;
 
 interface PageProps {
-    params: Promise<{ type: string; slug: string }>;
+    params: Promise<{ type: string; slug: string[] }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { type, slug } = await params;
+    const slugPath = slug.join("/");
+
     if (!VALID_TYPES.includes(type as any)) return {};
-    const page = await getContentPage(slug);
+    const page = await getContentPage(slugPath);
     if (!page) return {};
 
     return {
@@ -25,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         openGraph: {
             title: `${page.title} | Splits Network`,
             description: page.description || "",
-            url: `${PORTAL_BASE_URL}/cms/${type}/${slug}`,
+            url: `${PORTAL_BASE_URL}/cms/${type}/${slugPath}`,
             type: ['blog', 'article', 'press'].includes(type) ? "article" : "website",
             ...(page.published_at ? { publishedTime: page.published_at } : {}),
             ...(page.author ? { authors: [page.author] } : {}),
@@ -45,9 +47,16 @@ function getJsonLdType(type: string): string {
 
 export default async function CmsTypeSlugPage({ params }: PageProps) {
     const { type, slug } = await params;
-    if (!VALID_TYPES.includes(type as any)) notFound();
+    const slugPath = slug.join("/");
 
-    const page = await getContentPage(slug);
+    if (!VALID_TYPES.includes(type as any)) {
+        // Legacy URL redirect — try treating "type" as part of a multi-segment slug
+        const page = await getContentPage(`${type}/${slugPath}`);
+        if (page) redirect(`/cms/${page.page_type}/${page.slug}`);
+        notFound();
+    }
+
+    const page = await getContentPage(slugPath);
     if (!page) notFound();
     if (page.page_type !== type) notFound();
 
@@ -58,7 +67,7 @@ export default async function CmsTypeSlugPage({ params }: PageProps) {
         "@type": schemaType,
         headline: page.title,
         description: page.description,
-        url: `${PORTAL_BASE_URL}/cms/${type}/${slug}`,
+        url: `${PORTAL_BASE_URL}/cms/${type}/${slugPath}`,
         ...(page.published_at ? { datePublished: page.published_at } : {}),
         ...(page.updated_at ? { dateModified: page.updated_at } : {}),
         ...(page.author ? { author: { "@type": "Person", name: page.author } } : {}),
@@ -68,7 +77,7 @@ export default async function CmsTypeSlugPage({ params }: PageProps) {
             name: "Splits Network",
             url: "https://splits.network",
         },
-        mainEntityOfPage: { "@type": "WebPage", "@id": `${PORTAL_BASE_URL}/cms/${type}/${slug}` },
+        mainEntityOfPage: { "@type": "WebPage", "@id": `${PORTAL_BASE_URL}/cms/${type}/${slugPath}` },
     };
 
     if (['blog', 'article', 'press'].includes(type)) {
@@ -77,7 +86,7 @@ export default async function CmsTypeSlugPage({ params }: PageProps) {
 
     return (
         <>
-            <JsonLd data={jsonLd} id={`cms-${type}-${slug}-jsonld`} />
+            <JsonLd data={jsonLd} id={`cms-${type}-${slugPath}-jsonld`} />
             <BaselArticleAnimationWrapper>
                 <BaselArticleRenderer blocks={page.blocks} />
             </BaselArticleAnimationWrapper>

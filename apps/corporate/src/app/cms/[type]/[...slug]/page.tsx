@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getContentPage } from "@/lib/content";
 import { buildCanonical, CORPORATE_BASE_URL } from "@/lib/seo";
@@ -13,14 +13,16 @@ export const revalidate = 300;
 const VALID_TYPES = ['blog', 'article', 'help', 'partner', 'press', 'legal', 'page'] as const;
 
 interface PageProps {
-    params: Promise<{ type: string; slug: string }>;
+    params: Promise<{ type: string; slug: string[] }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { type, slug } = await params;
+    const slugPath = slug.join("/");
+
     if (!VALID_TYPES.includes(type as any)) return {};
 
-    const page = await getContentPage(slug);
+    const page = await getContentPage(slugPath);
     if (!page) return {};
 
     return {
@@ -29,13 +31,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         openGraph: {
             title: `${page.title} | Employment Networks`,
             description: page.description || "",
-            url: `${CORPORATE_BASE_URL}/cms/${type}/${slug}`,
+            url: `${CORPORATE_BASE_URL}/cms/${type}/${slugPath}`,
             type: ['blog', 'article', 'press'].includes(type) ? "article" : "website",
             ...(page.published_at ? { publishedTime: page.published_at } : {}),
             ...(page.author ? { authors: [page.author] } : {}),
             ...(page.og_image ? { images: [{ url: page.og_image }] } : {}),
         },
-        ...buildCanonical(`/cms/${type}/${slug}`),
+        ...buildCanonical(`/cms/${type}/${slugPath}`),
     };
 }
 
@@ -50,9 +52,16 @@ function getJsonLdType(type: string): string {
 
 export default async function CmsTypeSlugPage({ params }: PageProps) {
     const { type, slug } = await params;
-    if (!VALID_TYPES.includes(type as any)) notFound();
+    const slugPath = slug.join("/");
 
-    const page = await getContentPage(slug);
+    if (!VALID_TYPES.includes(type as any)) {
+        // Legacy URL redirect — try treating "type" as part of a multi-segment slug
+        const page = await getContentPage(`${type}/${slugPath}`);
+        if (page) redirect(`/cms/${page.page_type}/${page.slug}`);
+        notFound();
+    }
+
+    const page = await getContentPage(slugPath);
     if (!page) notFound();
 
     // Validate page_type matches URL type
@@ -66,7 +75,7 @@ export default async function CmsTypeSlugPage({ params }: PageProps) {
         "@type": schemaType,
         headline: page.title,
         description: page.description,
-        url: `${CORPORATE_BASE_URL}/cms/${type}/${slug}`,
+        url: `${CORPORATE_BASE_URL}/cms/${type}/${slugPath}`,
         ...(page.published_at ? { datePublished: page.published_at } : {}),
         ...(page.updated_at ? { dateModified: page.updated_at } : {}),
         ...(page.author
@@ -80,7 +89,7 @@ export default async function CmsTypeSlugPage({ params }: PageProps) {
         },
         mainEntityOfPage: {
             "@type": "WebPage",
-            "@id": `${CORPORATE_BASE_URL}/cms/${type}/${slug}`,
+            "@id": `${CORPORATE_BASE_URL}/cms/${type}/${slugPath}`,
         },
     };
 
@@ -90,7 +99,7 @@ export default async function CmsTypeSlugPage({ params }: PageProps) {
 
     return (
         <>
-            <JsonLd data={jsonLd} id={`cms-${type}-${slug}-jsonld`} />
+            <JsonLd data={jsonLd} id={`cms-${type}-${slugPath}-jsonld`} />
             <BaselArticleAnimationWrapper>
                 <BaselArticleRenderer blocks={page.blocks} />
             </BaselArticleAnimationWrapper>
