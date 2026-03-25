@@ -1,7 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getContentPagesByType, getContentTags } from "@/lib/content";
+import { getContentPage, getContentPagesByType, getContentTags } from "@/lib/content";
 import { buildCanonical } from "@/lib/seo";
 import type { ContentPageType } from "@splits-network/shared-types";
 
@@ -53,8 +53,12 @@ export default async function CmsTypePage({
     searchParams,
 }: PageProps) {
     const { type } = await params;
-    if (!VALID_TYPES.includes(type as (typeof VALID_TYPES)[number]))
+    if (!VALID_TYPES.includes(type as (typeof VALID_TYPES)[number])) {
+        // Legacy URL redirect — try treating "type" as a page slug
+        const page = await getContentPage(type);
+        if (page) redirect(`/cms/${page.page_type}/${page.slug}`);
         notFound();
+    }
 
     const { tag, page: pageParam } = await searchParams;
     const currentPage = pageParam ? parseInt(pageParam, 10) : 1;

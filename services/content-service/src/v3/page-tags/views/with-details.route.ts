@@ -1,5 +1,7 @@
 /**
  * GET /api/v3/content-page-tags/views/with-details — page tags with full tag info
+ *
+ * Registered at both /api/v3/* (api-gateway) and /* (admin-gateway).
  */
 
 import { FastifyInstance } from 'fastify';
@@ -13,9 +15,7 @@ export function registerWithDetailsView(app: FastifyInstance, supabase: Supabase
   const repository = new WithDetailsPageTagRepository(supabase);
   const accessResolver = new AccessContextResolver(supabase);
 
-  app.get('/api/v3/content-page-tags/views/with-details', {
-    schema: { querystring: listQuerySchema },
-  }, async (request, reply) => {
+  const handler = async (request: any, reply: any) => {
     const clerkUserId = request.headers['x-clerk-user-id'] as string;
     if (!clerkUserId) {
       return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
@@ -29,5 +29,15 @@ export function registerWithDetailsView(app: FastifyInstance, supabase: Supabase
     const { page_id } = request.query as { page_id: string };
     const data = await repository.findByPageId(page_id);
     return reply.send({ data });
-  });
+  };
+
+  // API Gateway route
+  app.get('/api/v3/content-page-tags/views/with-details', {
+    schema: { querystring: listQuerySchema },
+  }, handler);
+
+  // Admin Gateway route (no /api/v3 prefix)
+  app.get('/content-page-tags/views/with-details', {
+    schema: { querystring: listQuerySchema },
+  }, handler);
 }

@@ -47,12 +47,11 @@ export async function registerAdminRoutes(
             replyOptions,
         });
 
-        // V3 proxy routes — rewrite to /api/v3 so services receive their
-        // registered /api/v3/* paths (V3 routes include the /api/v3 prefix)
+        // V3 proxy routes
         await app.register(httpProxy, {
             upstream: serviceUrl,
             prefix: `/api/v3/${serviceName}`,
-            rewritePrefix: '/api/v3',
+            rewritePrefix: '',
             replyOptions,
         });
     }

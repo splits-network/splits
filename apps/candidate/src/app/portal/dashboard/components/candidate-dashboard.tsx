@@ -7,7 +7,6 @@ import {
     BaselChartCard,
     BaselKpiCard,
     BaselSectionHeading,
-    BaselAvatar,
 } from "@splits-network/basel-ui";
 import { usePresence } from "@/hooks/use-presence";
 import { useUserProfile } from "@/contexts";
@@ -27,6 +26,7 @@ import QuickActionsGrid from "./quick-actions-grid";
 import MatchPreviewWidget from "./match-preview-widget";
 import RecommendationsWidget from "./recommendations-widget";
 import UpcomingCallsWidget from "./upcoming-calls-widget";
+import { RecruiterCard } from "./recruiter-card";
 import { useUpcomingCalls } from "../hooks/use-upcoming-calls";
 import { relationshipColor } from "./status-color";
 
@@ -239,6 +239,7 @@ export default function CandidateDashboard({
                     <div className="lg:col-span-5 scroll-reveal fade-up">
                         <RecruiterCard
                             activeRecruiters={activeRecruiters}
+                            pendingInvitations={pendingInvitations}
                             presence={presence}
                             loading={loading}
                         />
@@ -396,181 +397,3 @@ export default function CandidateDashboard({
     );
 }
 
-/* ── Recruiter Card ── */
-
-type PresenceEntry = { status: "online" | "idle" | "offline"; lastSeenAt: string | null };
-
-interface RecruiterCardProps {
-    activeRecruiters: Array<{
-        id: string;
-        recruiter_name: string;
-        recruiter_email: string;
-        recruiter_user_id: string | null;
-        relationship_start_date: string;
-        days_until_expiry?: number;
-    }>;
-    presence: Record<string, PresenceEntry>;
-    loading: boolean;
-}
-
-function getPresenceLabel(entry?: PresenceEntry): string | null {
-    if (!entry) return null;
-    if (entry.status === "online") return "Online now";
-    if (entry.status === "idle") return "Away";
-    if (entry.lastSeenAt) {
-        const diffMs = Date.now() - new Date(entry.lastSeenAt).getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        if (diffMins < 60) return `Last seen ${diffMins}m ago`;
-        const diffHours = Math.floor(diffMins / 60);
-        if (diffHours < 24) return `Last seen ${diffHours}h ago`;
-        const diffDays = Math.floor(diffHours / 24);
-        return `Last seen ${diffDays}d ago`;
-    }
-    return null;
-}
-
-function RecruiterCard({ activeRecruiters, presence, loading }: RecruiterCardProps) {
-    const formatDate = (d: string) =>
-        new Date(d).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        });
-
-    const count = activeRecruiters.length;
-
-    return (
-        <div className="h-full">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-base-content">
-                    My Recruiter
-                </h3>
-                {count > 1 && (
-                    <Link
-                        href="/portal/recruiters"
-                        className="btn btn-ghost btn-sm text-primary"
-                        style={{ borderRadius: 0 }}
-                    >
-                        View all ({count})
-                        <i className="fa-duotone fa-regular fa-arrow-right" />
-                    </Link>
-                )}
-            </div>
-
-            {loading ? (
-                <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-base-content/10 animate-pulse" />
-                        <div className="flex-1 space-y-1.5">
-                            <div className="h-4 bg-base-content/10 animate-pulse w-36" />
-                            <div className="h-3 bg-base-content/5 animate-pulse w-24" />
-                        </div>
-                    </div>
-                </div>
-            ) : count > 0 ? (
-                <div className="space-y-4">
-                    {activeRecruiters.map((rel) => {
-                        const expiresSoon =
-                            rel.days_until_expiry !== undefined &&
-                            rel.days_until_expiry <= 30;
-                        const presenceEntry = rel.recruiter_user_id
-                            ? presence[rel.recruiter_user_id]
-                            : undefined;
-                        const isOnline = presenceEntry?.status === "online";
-                        const presenceLabel = getPresenceLabel(presenceEntry);
-
-                        return (
-                            <div key={rel.id} className="space-y-3">
-                                <div className="flex items-center gap-4">
-                                    {/* Avatar */}
-                                    <div className="shrink-0">
-                                        <BaselAvatar
-                                            initials={(rel.recruiter_name || "?").charAt(0).toUpperCase()}
-                                            size="md"
-                                            presence={isOnline ? "online" : presenceEntry?.status || null}
-                                        />
-                                    </div>
-
-                                    {/* Name + presence context */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-base font-bold text-base-content truncate">
-                                            {rel.recruiter_name}
-                                        </div>
-                                        <div className="text-sm text-base-content/60">
-                                            {presenceLabel ? (
-                                                <span className={isOnline ? "text-success font-medium" : ""}>
-                                                    {presenceLabel}
-                                                </span>
-                                            ) : (
-                                                <>Since {formatDate(rel.relationship_start_date)}</>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Status badge */}
-                                    {expiresSoon ? (
-                                        <span className="badge badge-warning badge-sm font-bold uppercase tracking-wider">
-                                            Expires Soon
-                                        </span>
-                                    ) : (
-                                        <span className="badge badge-soft badge-success badge-sm font-bold uppercase tracking-wider">
-                                            Active
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Since date (shown separately when presence replaces it) */}
-                                {presenceLabel && (
-                                    <p className="text-sm text-base-content/50 pl-16">
-                                        Working together since {formatDate(rel.relationship_start_date)}
-                                    </p>
-                                )}
-                            </div>
-                        );
-                    })}
-
-                    {/* Actions */}
-                    <div className="border-t border-base-content/5 pt-4 mt-1 flex flex-col sm:flex-row gap-2">
-                        <Link
-                            href="/portal/messages"
-                            className="btn btn-primary btn-sm flex-1"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i className="fa-duotone fa-regular fa-messages" />
-                            Message {count === 1 ? activeRecruiters[0].recruiter_name.split(" ")[0] : "Recruiter"}
-                        </Link>
-                        <Link
-                            href="/portal/recruiters"
-                            className="btn btn-outline btn-sm flex-1"
-                            style={{ borderRadius: 0 }}
-                        >
-                            <i className="fa-duotone fa-regular fa-clock-rotate-left" />
-                            Relationship History
-                        </Link>
-                    </div>
-                </div>
-            ) : (
-                <div className="py-6">
-                    <div className="w-14 h-14 bg-secondary/10 flex items-center justify-center mx-auto mb-4">
-                        <i className="fa-duotone fa-regular fa-user-tie text-2xl text-secondary/40" />
-                    </div>
-                    <p className="text-sm font-bold text-base-content text-center">
-                        You don&apos;t have a recruiter yet
-                    </p>
-                    <p className="text-sm text-base-content/60 mt-1 text-center leading-relaxed">
-                        A recruiter finds roles, preps you for interviews, and
-                        negotiates on your behalf — at no cost to you.
-                    </p>
-                    <Link
-                        href="/marketplace"
-                        className="btn btn-secondary btn-sm w-full mt-4"
-                        style={{ borderRadius: 0 }}
-                    >
-                        <i className="fa-duotone fa-regular fa-search" />
-                        Find a Recruiter
-                    </Link>
-                </div>
-            )}
-        </div>
-    );
-}
