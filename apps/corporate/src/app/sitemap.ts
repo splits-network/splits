@@ -52,10 +52,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const cmsPages = await getContentPages(undefined, 100);
         entries.push(
             ...cmsPages.map((page) => ({
-                url: `${baseUrl}/cms/${page.slug}`,
+                url: `${baseUrl}/cms/${page.page_type}/${page.slug}`,
                 lastModified: toDate(page.updated_at ?? page.published_at),
-                changeFrequency: "monthly" as MetadataRoute.Sitemap[number]["changeFrequency"],
-                priority: page.category === 'news' || page.category === 'article' ? 0.7 : 0.5,
+                changeFrequency: (page.page_type === 'blog' || page.page_type === 'press'
+                    ? 'weekly'
+                    : page.page_type === 'legal'
+                        ? 'yearly'
+                        : 'monthly') as MetadataRoute.Sitemap[number]["changeFrequency"],
+                priority: page.page_type === 'article' || page.page_type === 'blog'
+                    ? 0.7
+                    : page.page_type === 'press'
+                        ? 0.6
+                        : page.page_type === 'legal'
+                            ? 0.3
+                            : 0.5,
             })),
         );
     } catch (error) {

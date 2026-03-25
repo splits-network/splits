@@ -1,4 +1,4 @@
-import type { ContentPage, HeaderNavConfig, FooterNavConfig, ContentNavigation } from '@splits-network/shared-types';
+import type { ContentPage, ContentPageType, ContentTag, HeaderNavConfig, FooterNavConfig, ContentNavigation } from '@splits-network/shared-types';
 
 const API_BASE =
     process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
@@ -34,7 +34,7 @@ export async function getContentPage(slug: string): Promise<ContentPage | null> 
 }
 
 export async function getContentPages(
-    category?: string,
+    page_type?: string,
     limit = 50
 ): Promise<ContentPage[]> {
     try {
@@ -43,7 +43,7 @@ export async function getContentPages(
             status: 'published',
             limit: String(limit),
         });
-        if (category) params.set('category', category);
+        if (page_type) params.set('page_type', page_type);
 
         const res = await fetch(`${API_BASE}/api/v3/pages?${params}`, {
             next: { revalidate: 300 },
@@ -51,6 +51,58 @@ export async function getContentPages(
         if (!res.ok) return [];
         const json: ContentListResponse = await res.json();
         return json.data;
+    } catch {
+        return [];
+    }
+}
+
+export interface ContentPageWithTags extends ContentPage {
+    tags: ContentTag[];
+}
+
+interface TypedListingResponse {
+    data: ContentPageWithTags[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        total_pages: number;
+    };
+}
+
+export async function getContentPagesByType(
+    type: ContentPageType,
+    options?: { tag?: string; page?: number; limit?: number }
+): Promise<TypedListingResponse> {
+    try {
+        const params = new URLSearchParams({
+            page_type: type,
+            app: APP_NAME,
+        });
+        if (options?.tag) params.set('tag', options.tag);
+        if (options?.page) params.set('page', String(options.page));
+        if (options?.limit) params.set('limit', String(options.limit));
+
+        const res = await fetch(
+            `${API_BASE}/api/v3/public/pages/typed-listing?${params}`,
+            { next: { revalidate: 300 } }
+        );
+        if (!res.ok) return { data: [], pagination: { total: 0, page: 1, limit: 25, total_pages: 0 } };
+        return await res.json();
+    } catch {
+        return { data: [], pagination: { total: 0, page: 1, limit: 25, total_pages: 0 } };
+    }
+}
+
+export async function getContentTags(): Promise<ContentTag[]> {
+    try {
+        const res = await fetch(
+            `${API_BASE}/api/v3/public/content-tags?limit=100`,
+            { next: { revalidate: 300 } }
+        );
+        if (!res.ok) return [];
+        const json = await res.json();
+        return json.data || [];
     } catch {
         return [];
     }

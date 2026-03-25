@@ -268,6 +268,17 @@ export interface ContentNavigation {
 
 export type ContentApp = 'portal' | 'candidate' | 'corporate';
 export type ContentPageStatus = 'draft' | 'published' | 'archived';
+export type ContentPageType = 'blog' | 'article' | 'help' | 'partner' | 'press' | 'legal' | 'page';
+
+export const VALID_PAGE_TYPES: ContentPageType[] = [
+    'blog',
+    'article',
+    'help',
+    'partner',
+    'press',
+    'legal',
+    'page',
+];
 
 export interface ContentPage {
     id: string;
@@ -276,7 +287,7 @@ export interface ContentPage {
     title: string;
     description?: string;
     og_image?: string;
-    category?: string;
+    page_type: ContentPageType;
     status: ContentPageStatus;
     published_at?: string;
     author?: string;
@@ -286,4 +297,19 @@ export interface ContentPage {
     created_at: string;
     updated_at: string;
     deleted_at?: string;
+}
+
+export interface ContentTag {
+    id: string;
+    name: string;
+    slug: string;
+    is_approved: boolean;
+    created_by?: string;
+    created_at: string;
+}
+
+export interface ContentPageTag {
+    page_id: string;
+    tag_id: string;
+    created_at: string;
 }

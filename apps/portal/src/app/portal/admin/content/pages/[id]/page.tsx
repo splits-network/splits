@@ -12,7 +12,9 @@ import type {
     ContentPage,
     ContentBlock,
     ContentBlockType,
+    ContentPageType,
 } from "@splits-network/shared-types";
+import { BaselSkillPicker, type SkillOption } from "@splits-network/basel-ui";
 import { BlockPanel } from "@/components/basel/admin/pages/block-panel";
 import { LivePreviewPane } from "@/components/basel/admin/pages/live-preview-pane";
 import {
@@ -47,12 +49,13 @@ export default function PageEditorPage({ params }: PageEditorProps) {
         slug: "",
         description: "",
         og_image: "",
-        category: "",
+        page_type: "page" as ContentPageType,
         author: "",
         read_time: "",
         app: "portal",
     });
     const [isDirty, setIsDirty] = useState(false);
+    const [selectedTags, setSelectedTags] = useState<SkillOption[]>([]);
 
     // Modal state
     const [showSettings, setShowSettings] = useState(false);
@@ -82,12 +85,27 @@ export default function PageEditorPage({ params }: PageEditorProps) {
                 slug: p.slug || "",
                 description: p.description || "",
                 og_image: p.og_image || "",
-                category: p.category || "",
+                page_type: (p.page_type || "page") as ContentPageType,
                 author: p.author || "",
                 read_time: p.read_time || "",
                 app: p.app,
             });
             setIsDirty(false);
+
+            // Load tags for this page
+            try {
+                const tagsResult = await apiClient.get(
+                    `/content-page-tags/views/with-details?page_id=${id}`,
+                );
+                const tagData = (tagsResult.data || []).map((pt: any) => ({
+                    id: pt.tag?.id || pt.tag_id,
+                    name: pt.tag?.name || "",
+                    slug: pt.tag?.slug || "",
+                }));
+                setSelectedTags(tagData);
+            } catch {
+                // Tags are optional
+            }
         } catch (err) {
             console.error("Failed to load page:", err);
             toast.error("Page couldn't be loaded. Refresh to retry.");
@@ -174,6 +192,28 @@ export default function PageEditorPage({ params }: PageEditorProps) {
         setIsDirty(true);
     }, []);
 
+    // Tag operations
+    const searchTags = useCallback(async (query: string): Promise<SkillOption[]> => {
+        const token = await getToken();
+        if (!token) return [];
+        const apiClient = createAuthenticatedClient(token);
+        const result = await apiClient.get(`/content-tags?q=${encodeURIComponent(query)}&limit=10`);
+        return (result.data || []).map((t: any) => ({ id: t.id, name: t.name, slug: t.slug }));
+    }, [getToken]);
+
+    const createTag = useCallback(async (name: string): Promise<SkillOption> => {
+        const token = await getToken();
+        if (!token) throw new Error("No auth token");
+        const apiClient = createAuthenticatedClient(token);
+        const result = await apiClient.post("/content-tags", { name });
+        return { id: result.data.id, name: result.data.name, slug: result.data.slug };
+    }, [getToken]);
+
+    const handleTagsChange = useCallback((tags: SkillOption[]) => {
+        setSelectedTags(tags);
+        setIsDirty(true);
+    }, []);
+
     // Save
     async function handleSave() {
         setSaving(true);
@@ -187,11 +227,16 @@ export default function PageEditorPage({ params }: PageEditorProps) {
                 slug: pageMeta.slug,
                 description: pageMeta.description || undefined,
                 og_image: pageMeta.og_image || undefined,
-                category: pageMeta.category || undefined,
+                page_type: pageMeta.page_type,
                 author: pageMeta.author || undefined,
                 read_time: pageMeta.read_time || undefined,
                 blocks: draftBlocks,
             });
+
+            await apiClient.put(
+                `/content-page-tags/page/${id}/bulk-replace`,
+                { tags: selectedTags.map((t) => ({ tag_id: t.id })) },
+            );
 
             toast.success("Draft saved.");
             setIsDirty(false);
@@ -232,10 +277,15 @@ export default function PageEditorPage({ params }: PageEditorProps) {
                 slug: pageMeta.slug,
                 description: pageMeta.description || undefined,
                 og_image: pageMeta.og_image || undefined,
-                category: pageMeta.category || undefined,
+                page_type: pageMeta.page_type,
                 author: pageMeta.author || undefined,
                 read_time: pageMeta.read_time || undefined,
             });
+
+            await apiClient.put(
+                `/content-page-tags/page/${id}/bulk-replace`,
+                { tags: selectedTags.map((t) => ({ tag_id: t.id })) },
+            );
 
             toast.success(isPublishing ? "Page published." : "Page unpublished.");
             setIsDirty(false);
@@ -334,6 +384,19 @@ export default function PageEditorPage({ params }: PageEditorProps) {
                             </button>
                         </div>
                     }
+                />
+            </div>
+
+            {/* Tags */}
+            <div className="px-6 py-3 border-b border-base-300 bg-base-100 flex-shrink-0">
+                <BaselSkillPicker
+                    selectedSkills={selectedTags}
+                    onSkillsChange={handleTagsChange}
+                    searchFn={searchTags}
+                    createFn={createTag}
+                    placeholder="Add tags..."
+                    label="Tags"
+                    maxSkills={20}
                 />
             </div>
 

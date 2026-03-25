@@ -10,11 +10,30 @@ import { ServiceRegistry } from '../../clients';
 import { registerV3Routes, V3RouteConfig } from './proxy';
 
 const contentV3Routes: V3RouteConfig[] = [
-  // ── Pages Views ────────────────────────────────────────────────
+  // ── Pages Public Views ──────────────────────────────────────────
+  { path: '/public/pages/by-slug/:slug', method: 'GET', auth: 'none' },
+  { path: '/public/pages/typed-listing', method: 'GET', auth: 'none' },
+
+  // ── Pages Legacy View (backward compat) ────────────────────────
   { path: '/pages/views/by-slug/:slug', method: 'GET', auth: 'none' },
 
   // ── Pages Core CRUD ────────────────────────────────────────────
   { resource: 'pages', auth: 'required' },
+
+  // ── Content Tags Public ────────────────────────────────────────
+  { path: '/public/content-tags', method: 'GET', auth: 'none' },
+
+  // ── Content Tags Admin ─────────────────────────────────────────
+  { path: '/content-tags/:id', method: 'GET', auth: 'required' },
+  { path: '/content-tags', method: 'POST', auth: 'required' },
+  { path: '/content-tags/:id', method: 'DELETE', auth: 'required' },
+
+  // ── Content Page Tags ──────────────────────────────────────────
+  { path: '/content-page-tags/views/with-details', method: 'GET', auth: 'required' },
+  { path: '/content-page-tags', method: 'GET', auth: 'required' },
+  { path: '/content-page-tags', method: 'POST', auth: 'required' },
+  { path: '/content-page-tags/:pageId/:tagId', method: 'DELETE', auth: 'required' },
+  { path: '/content-page-tags/page/:pageId/bulk-replace', method: 'PUT', auth: 'required' },
 
   // ── Navigation ─────────────────────────────────────────────────
   { path: '/navigation', method: 'GET', auth: 'none' },

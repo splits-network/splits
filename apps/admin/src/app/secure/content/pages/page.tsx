@@ -22,6 +22,7 @@ import { ImportJsonModal } from './components/import-json-modal';
 interface PageFilters {
     app?: string;
     status?: string;
+    page_type?: string;
 }
 
 function getStatusBadge(status: string) {
@@ -76,6 +77,7 @@ export default function ContentPagesPage() {
             queryParams.set('limit', String(params.limit));
             if (params.search) queryParams.set('search', params.search);
             if (params.filters?.app) queryParams.set('app', params.filters.app);
+            if (params.filters?.page_type) queryParams.set('page_type', params.filters.page_type);
             if (params.filters?.status) queryParams.set('status', params.filters.status);
             else queryParams.set('status', 'all');
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
@@ -217,6 +219,20 @@ export default function ContentPagesPage() {
                     <option value="draft">Draft</option>
                     <option value="archived">Archived</option>
                 </select>
+                <select
+                    className="select select-sm"
+                    value={filters.page_type || ''}
+                    onChange={(e) => setFilters({ ...filters, page_type: e.target.value || undefined })}
+                >
+                    <option value="">All Types</option>
+                    <option value="page">Page</option>
+                    <option value="blog">Blog</option>
+                    <option value="article">Article</option>
+                    <option value="help">Help</option>
+                    <option value="partner">Partner</option>
+                    <option value="press">Press</option>
+                    <option value="legal">Legal</option>
+                </select>
             </div>
 
             {/* Table */}
@@ -244,7 +260,7 @@ export default function ContentPagesPage() {
                                         <th>Page</th>
                                         <th>App</th>
                                         <th>Status</th>
-                                        <th>Category</th>
+                                        <th>Type</th>
                                         <th>Updated</th>
                                         <th>Actions</th>
                                     </tr>
@@ -269,8 +285,8 @@ export default function ContentPagesPage() {
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className="text-sm text-base-content/70">
-                                                    {page.category || '\u2014'}
+                                                <span className="badge badge-sm badge-ghost">
+                                                    {page.page_type || 'page'}
                                                 </span>
                                             </td>
                                             <td>

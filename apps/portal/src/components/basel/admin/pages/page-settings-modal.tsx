@@ -7,14 +7,14 @@ import {
     BaselModalFooter,
     BaselFormField,
 } from "@splits-network/basel-ui";
-import type { ContentApp } from "@splits-network/shared-types";
+import type { ContentApp, ContentPageType } from "@splits-network/shared-types";
 
 export interface PageMetaForm {
     title: string;
     slug: string;
     description: string;
     og_image: string;
-    category: string;
+    page_type: ContentPageType;
     author: string;
     read_time: string;
     app: ContentApp;
@@ -79,14 +79,20 @@ export function PageSettingsModal({ isOpen, onClose, meta, onChange }: PageSetti
                     </BaselFormField>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <BaselFormField label="Category">
-                            <input
-                                type="text"
-                                className="input input-bordered w-full"
-                                value={meta.category}
-                                onChange={(e) => update({ category: e.target.value })}
-                                placeholder="marketing"
-                            />
+                        <BaselFormField label="Page Type">
+                            <select
+                                className="select w-full"
+                                value={meta.page_type}
+                                onChange={(e) => update({ page_type: e.target.value as ContentPageType })}
+                            >
+                                <option value="page">Page</option>
+                                <option value="blog">Blog</option>
+                                <option value="article">Article</option>
+                                <option value="help">Help</option>
+                                <option value="partner">Partner</option>
+                                <option value="press">Press</option>
+                                <option value="legal">Legal</option>
+                            </select>
                         </BaselFormField>
 
                         <BaselFormField label="App" hint="Read-only after creation">
