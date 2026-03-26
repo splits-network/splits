@@ -31,6 +31,7 @@ export interface ApplicationFilters {
     stage?: string;
     ai_score_filter?: string;
     scope?: "all" | "mine";
+    job_id?: string;
     application_source?: string;
     ai_reviewed?: string;
     company_accepted?: string;

@@ -53,6 +53,7 @@ interface ControlsBarProps {
     sortBy: string;
     sortOrder: "asc" | "desc";
     onSortChange: (field: string, order: "asc" | "desc") => void;
+    jobOptions: Array<{ value: string; label: string }>;
 }
 
 export function ControlsBar({
@@ -70,6 +71,7 @@ export function ControlsBar({
     sortBy,
     sortOrder,
     onSortChange,
+    jobOptions,
 }: ControlsBarProps) {
     const [expanded, setExpanded] = useState(false);
 
@@ -102,6 +104,14 @@ export function ControlsBar({
                         options={STAGE_OPTIONS}
                         placeholder="All Stages"
                     />
+                    {jobOptions.length > 0 && (
+                        <BaselFilterSelect
+                            value={filters.job_id}
+                            onChange={(v) => onFilterChange("job_id", v)}
+                            options={jobOptions}
+                            placeholder="All Jobs"
+                        />
+                    )}
                     <BaselFilterSelect
                         value={filters.ai_score_filter}
                         onChange={(v) => onFilterChange("ai_score_filter", v)}

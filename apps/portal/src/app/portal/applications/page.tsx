@@ -17,6 +17,7 @@ import { ControlsBar } from "./components/shared/controls-bar";
 import { TableView } from "./components/table/table-view";
 import { GridView } from "./components/grid/grid-view";
 import { SplitView } from "./components/split/split-view";
+import { BoardView } from "./components/board/board-view";
 import BaselSubmitCandidateWizard from "@/components/basel/applications/submit-candidate-wizard";
 
 export default function ApplicationsBaselPage() {
@@ -28,7 +29,9 @@ export default function ApplicationsBaselPage() {
 
     const [viewMode, setViewMode] = useState<ViewMode>(() => {
         const v = searchParams.get("view");
-        return v === "table" || v === "grid" || v === "split" ? v : "grid";
+        return v === "table" || v === "grid" || v === "split" || v === "board"
+            ? v
+            : "board";
     });
     const [selectedApplicationId, setSelectedApplicationId] = useState<
         string | null
@@ -46,7 +49,7 @@ export default function ApplicationsBaselPage() {
             params.delete("applicationId");
         }
 
-        if (viewMode !== "grid") {
+        if (viewMode !== "board") {
             params.set("view", viewMode);
         } else {
             params.delete("view");
@@ -93,6 +96,7 @@ export default function ApplicationsBaselPage() {
             stage: undefined,
             ai_score_filter: undefined,
             scope: undefined,
+            job_id: undefined,
         },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
@@ -118,6 +122,24 @@ export default function ApplicationsBaselPage() {
         },
         [setSortBy, setSortOrder],
     );
+
+    const jobOptions = useMemo(() => {
+        const seen = new Map<string, { value: string; label: string }>();
+        for (const app of applications) {
+            const jobId = app.job?.id;
+            if (!jobId || seen.has(jobId)) continue;
+            const title = app.job?.title || "Untitled";
+            const company =
+                app.job?.company?.name || app.job?.firm?.name || "";
+            seen.set(jobId, {
+                value: jobId,
+                label: company ? `${title} — ${company}` : title,
+            });
+        }
+        return Array.from(seen.values()).sort((a, b) =>
+            a.label.localeCompare(b.label),
+        );
+    }, [applications]);
 
     const stats = useMemo(
         () => ({
@@ -154,6 +176,7 @@ export default function ApplicationsBaselPage() {
                 sortBy={sortBy}
                 sortOrder={sortOrder}
                 onSortChange={handleSortChange}
+                jobOptions={jobOptions}
             />
 
             {/* Content area */}
@@ -183,6 +206,14 @@ export default function ApplicationsBaselPage() {
                         </div>
                     ) : (
                         <>
+                            {viewMode === "board" && (
+                                <BoardView
+                                    applications={applications}
+                                    onSelect={handleSelect}
+                                    selectedId={selectedApplicationId}
+                                    onRefresh={refresh}
+                                />
+                            )}
                             {viewMode === "table" && (
                                 <TableView
                                     applications={applications}

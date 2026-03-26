@@ -7,6 +7,7 @@ export interface BaselViewModeSelectorProps {
 }
 
 const DEFAULT_MODES: Array<{ mode: BaselViewMode; icon: string; label: string }> = [
+    { mode: 'board', icon: 'fa-objects-column', label: 'Board' },
     { mode: 'table', icon: 'fa-table-list', label: 'Table' },
     { mode: 'grid', icon: 'fa-grid-2', label: 'Grid' },
     { mode: 'split', icon: 'fa-columns-3', label: 'Split' },

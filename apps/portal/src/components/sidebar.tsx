@@ -22,7 +22,7 @@ interface NavItemData {
     label: string;
     icon: string;
     roles: string[];
-    section?: "main" | "management" | "settings";
+    section?: "main" | "pipeline" | "communication" | "network" | "settings";
     badge?: number;
     mobileDock?: boolean;
     children?: NavItemData[];
@@ -59,36 +59,32 @@ const navItems: NavItemData[] = [
         section: "main",
         shortcut: "S",
     },
+
+    // ── Pipeline ──────────────────────────────────────────────────────
     {
         href: "/portal/roles",
         label: "Roles",
         icon: "fa-duotone fa-regular fa-briefcase",
         roles: ["all"],
-        section: "management",
+        section: "pipeline",
         mobileDock: true,
         shortcut: "R",
     },
     {
-        href: "#recruiters",
-        label: "Recruiters",
-        icon: "fa-duotone fa-regular fa-users-viewfinder",
-        roles: ["company_admin", "hiring_manager"],
-        section: "management",
-        expandable: true,
-        children: [
-            {
-                href: "/portal/recruiters",
-                label: "Find",
-                icon: "fa-duotone fa-regular fa-magnifying-glass",
-                roles: ["company_admin", "hiring_manager"],
-            },
-            {
-                href: "/portal/company-invitations",
-                label: "Invitations",
-                icon: "fa-duotone fa-regular fa-envelope",
-                roles: ["company_admin", "hiring_manager"],
-            },
-        ],
+        href: "/portal/applications",
+        label: "Applications",
+        icon: "fa-duotone fa-regular fa-file-lines",
+        roles: ["company_admin", "hiring_manager", "recruiter"],
+        section: "pipeline",
+        mobileDock: true,
+        shortcut: "A",
+    },
+    {
+        href: "/portal/matches",
+        label: "Matches",
+        icon: "fa-duotone fa-regular fa-bullseye",
+        roles: ["recruiter"],
+        section: "pipeline",
     },
     {
         href: "#candidates",
@@ -100,7 +96,7 @@ const navItems: NavItemData[] = [
             "company_admin",
             "platform_admin",
         ],
-        section: "management",
+        section: "pipeline",
         mobileDock: true,
         expandable: true,
         children: [
@@ -125,11 +121,83 @@ const navItems: NavItemData[] = [
         ],
     },
     {
+        href: "/portal/placements",
+        label: "Placements",
+        icon: "fa-duotone fa-regular fa-trophy",
+        roles: [
+            "recruiter",
+            "company_admin",
+            "hiring_manager",
+            "platform_admin",
+        ],
+        section: "pipeline",
+        shortcut: "P",
+    },
+
+    // ── Communication ─────────────────────────────────────────────────
+    {
+        href: "/portal/messages",
+        label: "Messages",
+        icon: "fa-duotone fa-regular fa-messages",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "communication",
+        mobileDock: true,
+        shortcut: "M",
+    },
+    {
+        href: "/portal/email",
+        label: "Email",
+        icon: "fa-duotone fa-regular fa-envelope",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "communication",
+        isBeta: true,
+    },
+    {
+        href: "/portal/calendar",
+        label: "Calendar",
+        icon: "fa-duotone fa-regular fa-calendar",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "communication",
+        isBeta: true,
+    },
+    {
+        href: "/portal/calls",
+        label: "Calls",
+        icon: "fa-duotone fa-regular fa-video",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
+        section: "communication",
+        isBeta: true,
+    },
+
+    // ── Network ───────────────────────────────────────────────────────
+    {
+        href: "#recruiters",
+        label: "Recruiters",
+        icon: "fa-duotone fa-regular fa-users-viewfinder",
+        roles: ["company_admin", "hiring_manager"],
+        section: "network",
+        expandable: true,
+        children: [
+            {
+                href: "/portal/recruiters",
+                label: "Find",
+                icon: "fa-duotone fa-regular fa-magnifying-glass",
+                roles: ["company_admin", "hiring_manager"],
+            },
+            {
+                href: "/portal/company-invitations",
+                label: "Invitations",
+                icon: "fa-duotone fa-regular fa-envelope",
+                roles: ["company_admin", "hiring_manager"],
+            },
+        ],
+    },
+    {
         href: "#companies",
         label: "Companies",
         icon: "fa-duotone fa-regular fa-building",
         roles: ["recruiter"],
-        section: "management",
+        section: "network",
         expandable: true,
         children: [
             {
@@ -157,69 +225,7 @@ const navItems: NavItemData[] = [
         label: "Referral Codes",
         icon: "fa-duotone fa-regular fa-link",
         roles: ["recruiter"],
-        section: "management",
-    },
-    {
-        href: "/portal/applications",
-        label: "Applications",
-        icon: "fa-duotone fa-regular fa-file-lines",
-        roles: ["company_admin", "hiring_manager", "recruiter"],
-        section: "management",
-        mobileDock: true,
-        shortcut: "A",
-    },
-    {
-        href: "/portal/matches",
-        label: "Matches",
-        icon: "fa-duotone fa-regular fa-bullseye",
-        roles: ["recruiter"],
-        section: "management",
-    },
-    {
-        href: "/portal/messages",
-        label: "Messages",
-        icon: "fa-duotone fa-regular fa-messages",
-        roles: ["recruiter", "company_admin", "hiring_manager"],
-        section: "management",
-        mobileDock: true,
-        shortcut: "M",
-    },
-    {
-        href: "/portal/email",
-        label: "Email",
-        icon: "fa-duotone fa-regular fa-envelope",
-        roles: ["recruiter", "company_admin", "hiring_manager"],
-        section: "management",
-        isBeta: true,
-    },
-    {
-        href: "/portal/calendar",
-        label: "Calendar",
-        icon: "fa-duotone fa-regular fa-calendar",
-        roles: ["recruiter", "company_admin", "hiring_manager"],
-        section: "management",
-        isBeta: true,
-    },
-    {
-        href: "/portal/calls",
-        label: "Calls",
-        icon: "fa-duotone fa-regular fa-video",
-        roles: ["recruiter", "company_admin", "hiring_manager"],
-        section: "management",
-        isBeta: true,
-    },
-    {
-        href: "/portal/placements",
-        label: "Placements",
-        icon: "fa-duotone fa-regular fa-trophy",
-        roles: [
-            "recruiter",
-            "company_admin",
-            "hiring_manager",
-            "platform_admin",
-        ],
-        section: "management",
-        shortcut: "P",
+        section: "network",
     },
     {
         href: "/portal/leaderboard",
@@ -231,7 +237,7 @@ const navItems: NavItemData[] = [
             "hiring_manager",
             "platform_admin",
         ],
-        section: "management",
+        section: "network",
     },
     {
         href: "/portal/profile",
@@ -354,7 +360,11 @@ export function Sidebar() {
         const filtered = filterNavItems(navItems);
         return {
             main: filtered.filter((i) => i.section === "main"),
-            management: filtered.filter((i) => i.section === "management"),
+            pipeline: filtered.filter((i) => i.section === "pipeline"),
+            communication: filtered.filter(
+                (i) => i.section === "communication",
+            ),
+            network: filtered.filter((i) => i.section === "network"),
             settings: filtered.filter((i) => i.section === "settings"),
         };
     }, [filterNavItems]);
@@ -383,7 +393,9 @@ export function Sidebar() {
 
         checkActive([
             ...groupedItems.main,
-            ...groupedItems.management,
+            ...groupedItems.pipeline,
+            ...groupedItems.communication,
+            ...groupedItems.network,
             ...groupedItems.settings,
         ]);
 
@@ -421,7 +433,9 @@ export function Sidebar() {
         };
         collect([
             ...groupedItems.main,
-            ...groupedItems.management,
+            ...groupedItems.pipeline,
+            ...groupedItems.communication,
+            ...groupedItems.network,
             ...groupedItems.settings,
         ]);
         return flat;
@@ -485,10 +499,22 @@ export function Sidebar() {
         if (groupedItems.main.length > 0) {
             result.push({ items: groupedItems.main.map(mapItem) });
         }
-        if (groupedItems.management.length > 0) {
+        if (groupedItems.pipeline.length > 0) {
             result.push({
-                title: "Management",
-                items: groupedItems.management.map(mapItem),
+                title: "Pipeline",
+                items: groupedItems.pipeline.map(mapItem),
+            });
+        }
+        if (groupedItems.communication.length > 0) {
+            result.push({
+                title: "Communication",
+                items: groupedItems.communication.map(mapItem),
+            });
+        }
+        if (groupedItems.network.length > 0) {
+            result.push({
+                title: "Network",
+                items: groupedItems.network.map(mapItem),
             });
         }
         if (groupedItems.settings.length > 0) {
