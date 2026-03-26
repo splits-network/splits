@@ -35,31 +35,32 @@ export class RecruiterBoardRepository {
         job_owner_recruiter_id,
         company:companies(id, name, logo_url, industry, headquarters_location),
         firm:firms(id, name, logo_url)
-      `, { count: 'exact' })
-      .eq('status', 'active');
+      `, { count: 'exact' });
 
-    // Exclude early access jobs for non-partner tier
-    if (excludeEarlyAccess) {
-      query = query.eq('is_early_access', false);
-    }
-
-    // Assigned filter — jobs owned by recruiter, from recruiter's firms, or with active involvement
+    // Assigned filter — recruiter sees ALL statuses for jobs they own, their firm owns,
+    // or they have active involvement with. Marketplace jobs still require status='active'.
     if (params.job_owner_filter === 'assigned' && involvedJobIds) {
-      const orConditions = [
+      const ownedConditions = [
         `job_owner_recruiter_id.eq.${recruiterId}`,
       ];
       if (recruiterFirmIds && recruiterFirmIds.length > 0) {
-        orConditions.push(`source_firm_id.in.(${recruiterFirmIds.join(',')})`);
+        ownedConditions.push(`source_firm_id.in.(${recruiterFirmIds.join(',')})`);
       }
       if (involvedJobIds.length > 0) {
-        orConditions.push(`id.in.(${involvedJobIds.join(',')})`);
+        ownedConditions.push(`id.in.(${involvedJobIds.join(',')})`);
       }
-      query = query.or(orConditions.join(','));
+      query = query.or(ownedConditions.join(','));
+    } else if (params.job_owner_filter === 'saved' && savedJobIds) {
+      // Saved filter — only active jobs that were saved
+      query = query.eq('status', 'active').in('id', savedJobIds);
+    } else {
+      // Default marketplace — only active jobs
+      query = query.eq('status', 'active');
     }
 
-    // Saved filter
-    if (params.job_owner_filter === 'saved' && savedJobIds) {
-      query = query.in('id', savedJobIds);
+    // Exclude early access jobs for non-partner tier (only relevant for marketplace/active jobs)
+    if (excludeEarlyAccess) {
+      query = query.eq('is_early_access', false);
     }
 
     // Filters
