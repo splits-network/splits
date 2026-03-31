@@ -132,6 +132,22 @@ export default function ContentPagesAdminPage() {
             toast.error("JSON must include title, slug, app, and blocks");
             return;
         }
+
+        // Map legacy 'category' field to 'page_type' and strip unknown columns
+        if (pageData.category && !pageData.page_type) {
+            const categoryMap: Record<string, string> = {
+                blog: "blog", "blog post": "blog", "blog-post": "blog",
+                article: "article", articles: "article",
+                help: "help", "help center": "help", faq: "help",
+                partner: "partner", partners: "partner", "partner spotlight": "partner",
+                press: "press", "press release": "press", news: "press",
+                legal: "legal", terms: "legal", privacy: "legal",
+            };
+            const cat = String(pageData.category).toLowerCase().trim();
+            pageData.page_type = categoryMap[cat] || "page";
+        }
+        delete pageData.category;
+
         setImporting(true);
         try {
             const token = await getToken();
