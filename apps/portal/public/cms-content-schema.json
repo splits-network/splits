@@ -21,7 +21,7 @@
       "app": { "type": "string", "required": true, "enum": ["portal", "candidate", "corporate"], "description": "Which app this page belongs to" },
       "description": { "type": "string", "description": "SEO meta description (150-160 chars recommended)" },
       "og_image": { "type": "string", "description": "Open Graph image URL for social sharing" },
-      "category": { "type": "string", "description": "Content category (e.g., 'marketing', 'help', 'legal', 'blog')" },
+      "page_type": { "type": "string", "enum": ["blog", "article", "help", "partner", "press", "legal", "page"], "default": "page", "description": "Page type classification" },
       "status": { "type": "string", "enum": ["draft", "published", "archived"], "default": "draft" },
       "author": { "type": "string", "description": "Content author name" },
       "read_time": { "type": "string", "description": "Reading time estimate (e.g., '4 min read')" },
@@ -484,7 +484,7 @@
         "slug": "for-recruiters",
         "app": "portal",
         "description": "Learn how Splits Network helps independent recruiters grow their business.",
-        "category": "marketing",
+        "page_type": "page",
         "status": "draft",
         "blocks": [
           { "type": "hero", "headlineWords": [{ "text": "Your Page " }, { "text": "Here", "accent": true }], "subtitle": "..." },

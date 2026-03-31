@@ -10,11 +10,13 @@ import {
     InAppNotification,
 } from "@/lib/notifications";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
 import { PushPermissionBanner } from "@/components/notifications/push-permission-banner";
 
 export default function NotificationBell() {
     const router = useRouter();
     const { getToken } = useAuth();
+    const toast = useToast();
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -36,13 +38,25 @@ export default function NotificationBell() {
                 "/notifications/views/unread-count",
             );
             const count = response.data.count;
+
+            if (
+                previousUnreadCount.current !== null &&
+                count > previousUnreadCount.current
+            ) {
+                const newCount = count - previousUnreadCount.current;
+                toast.info(
+                    newCount === 1
+                        ? "You have a new notification"
+                        : `You have ${newCount} new notifications`,
+                );
+            }
             previousUnreadCount.current = count;
             setUnreadCount(count);
         } catch (error) {
             // Fail silently - notification bell should continue working
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [toast]);
 
     // Fetch recent notifications when dropdown opens
     const loadNotifications = useCallback(async () => {
