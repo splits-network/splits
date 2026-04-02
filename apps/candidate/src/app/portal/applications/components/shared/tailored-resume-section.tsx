@@ -11,11 +11,14 @@ interface TailoredResumeSectionProps {
 }
 
 /**
- * Displays the tailored resume stored on the application record.
+ * Displays the tailored resume stored on the application record (resume_data).
  * Falls back to Smart Resume matching-data if no tailored resume exists.
  * Does NOT generate — that only happens in the application wizard.
  */
-export function TailoredResumeSection({ candidateId, applicationId }: TailoredResumeSectionProps) {
+export function TailoredResumeSection({
+    candidateId,
+    applicationId,
+}: TailoredResumeSectionProps) {
     const { getToken } = useAuth();
     const [data, setData] = useState<any>(null);
     const [isTailored, setIsTailored] = useState(false);
@@ -23,6 +26,7 @@ export function TailoredResumeSection({ candidateId, applicationId }: TailoredRe
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!applicationId || !candidateId) return;
         loadResume();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [applicationId, candidateId]);
@@ -35,7 +39,7 @@ export function TailoredResumeSection({ candidateId, applicationId }: TailoredRe
             if (!token) return;
             const client = createAuthenticatedClient(token);
 
-            // Try to load tailored resume from application record
+            // Load tailored resume from application record
             const appResult = await client.get(`/applications/${applicationId}`);
             const resumeData = appResult.data?.resume_data;
 
@@ -78,7 +82,6 @@ export function TailoredResumeSection({ candidateId, applicationId }: TailoredRe
         );
     }
 
-    // Tailored resume uses different field names than matching-data
     const summary = isTailored ? data.summary : data.professional_summary;
     const experiences = isTailored ? data.experience : data.experiences;
     const projects = isTailored ? data.relevant_projects : data.projects;
