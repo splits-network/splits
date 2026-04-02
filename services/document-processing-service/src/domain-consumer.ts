@@ -529,6 +529,41 @@ export class DomainConsumer {
             if (pubError) logger.warn({ err: pubError, count: rows.length }, 'Failed to insert publications');
         }
 
+        // Update candidate profile with contact info and current role
+        try {
+            const candidateUpdates: Record<string, any> = {};
+
+            // Contact info from extraction
+            if (extraction.contact) {
+                if (extraction.contact.phone) candidateUpdates.phone = extraction.contact.phone;
+                if (extraction.contact.location) candidateUpdates.location = extraction.contact.location;
+                if (extraction.contact.linkedin_url) candidateUpdates.linkedin_url = extraction.contact.linkedin_url;
+                if (extraction.contact.github_url) candidateUpdates.github_url = extraction.contact.github_url;
+                if (extraction.contact.portfolio_url) candidateUpdates.portfolio_url = extraction.contact.portfolio_url;
+            }
+
+            // Current title and company from most recent experience
+            const currentRole = extraction.experiences.find(e => e.is_current) || extraction.experiences[0];
+            if (currentRole) {
+                candidateUpdates.current_title = currentRole.title;
+                candidateUpdates.current_company = currentRole.company;
+            }
+
+            if (Object.keys(candidateUpdates).length > 0) {
+                const { error: candidateError } = await sb
+                    .from('candidates')
+                    .update(candidateUpdates)
+                    .eq('id', candidateId);
+                if (candidateError) {
+                    logger.warn({ err: candidateError }, 'Failed to update candidate profile from resume');
+                } else {
+                    logger.info({ candidateId, fields: Object.keys(candidateUpdates) }, 'Candidate profile updated from resume');
+                }
+            }
+        } catch (err) {
+            logger.warn({ err }, 'Failed to update candidate profile (non-fatal)');
+        }
+
         // Publish event for matching service
         try {
             await this.eventPublisher.publish('smart_resume.updated', {

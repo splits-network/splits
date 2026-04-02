@@ -69,6 +69,15 @@ export interface SmartResumeExtraction {
   certifications: ExtractedCertification[];
   projects: Array<{ name: string; description: string | null; skills_used: string[] }>;
   publications: Array<{ title: string; description: string | null }>;
+  contact: ExtractedContact | null;
+}
+
+export interface ExtractedContact {
+  phone: string | null;
+  location: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  portfolio_url: string | null;
 }
 
 // ── Main class ──────────────────────────────────────────────────
@@ -99,12 +108,14 @@ export class SmartResumeExtractor {
       educationResult,
       skillsResult,
       otherResult,
+      contactResult,
     ] = await Promise.all([
       this.extractProfile(resumeText),
       this.extractExperiences(resumeText),
       this.extractEducation(resumeText),
       this.extractSkills(resumeText),
       this.extractOther(resumeText),
+      this.extractContact(resumeText),
     ]);
 
     const elapsed = Date.now() - startTime;
@@ -126,6 +137,7 @@ export class SmartResumeExtractor {
       certifications: otherResult.certifications,
       projects: otherResult.projects,
       publications: otherResult.publications,
+      contact: contactResult,
     };
   }
 
@@ -297,6 +309,41 @@ ${resumeText}
       };
     } catch {
       return { certifications: [], projects: [], publications: [] };
+    }
+  }
+
+  // ── Contact info extraction ────────────────────────────────────
+
+  private async extractContact(resumeText: string): Promise<ExtractedContact | null> {
+    const response = await this.callAI(
+      `Here is a complete resume. Extract contact information and profile URLs.
+
+Return JSON:
+{
+  "phone": "<phone number or null>",
+  "location": "<city, state/country or null>",
+  "linkedin_url": "<full LinkedIn URL or null>",
+  "github_url": "<full GitHub URL or null>",
+  "portfolio_url": "<personal website or portfolio URL or null>"
+}
+
+RULES:
+- For URLs, return the full URL including https:// if possible. If only a partial URL is shown (e.g., "linkedin.com/in/username"), prepend https://.
+- For location, extract the city and state/country from wherever it appears (header, contact section, or most recent job location).
+- Do not include email addresses — we already have that from authentication.
+- If a field is not found anywhere in the resume, return null.
+
+RESUME:
+---
+${resumeText}
+---`,
+      500
+    );
+
+    try {
+      return JSON.parse(response);
+    } catch {
+      return null;
     }
   }
 

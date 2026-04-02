@@ -103,7 +103,7 @@ export const ResumeActionDialogs = forwardRef<
 
             // Step 2: Wait for document processing (virus scan + text extraction + smart resume population)
             setStage("processing");
-            await waitForDocumentProcessing(client, documentId);
+            await waitForDocumentProcessing(documentId);
 
             // Done — document-processing-service already populated smart_resume tables via officeparser
             // Just notify parent to refresh the profile data
@@ -153,11 +153,15 @@ export const ResumeActionDialogs = forwardRef<
         }
     };
 
-    const waitForDocumentProcessing = async (client: any, documentId: string) => {
+    const waitForDocumentProcessing = async (documentId: string) => {
         const MAX_POLLS = 40; // 40 × 3s = 120s max wait
         const POLL_INTERVAL = 3000;
 
         for (let i = 0; i < MAX_POLLS; i++) {
+            const token = await getToken();
+            if (!token) throw new Error("Authentication expired. Please try again.");
+            const client = createAuthenticatedClient(token);
+
             const result = await client.get(`/documents/${documentId}`);
             const doc = result.data || result;
             const status = doc.processing_status;
