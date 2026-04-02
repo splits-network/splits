@@ -26,10 +26,10 @@ export function HeaderSection({
                     {/* Headline */}
                     <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[0.92] tracking-tight mb-6">
                         <span className="hero-headline-word inline-block scroll-reveal fade-up">
-                            Find your{" "}
+                            Find your&nbsp;
                         </span>
                         <span className="hero-headline-word inline-block scroll-reveal fade-up text-primary">
-                            next{" "}
+                            next&nbsp;
                         </span>
                         <span className="hero-headline-word inline-block scroll-reveal fade-up">
                             opportunity.
