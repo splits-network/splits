@@ -11,6 +11,7 @@ COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-fastify/package.json ./packages/shared-fastify/
 COPY packages/shared-logging/package.json ./packages/shared-logging/
 COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/shared-job-queue/package.json ./packages/shared-job-queue/
 COPY services/onboarding-service/package.json ./services/onboarding-service/
 RUN pnpm install --frozen-lockfile
 
@@ -20,7 +21,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/onboarding-service ./services/onboarding-service
 EXPOSE 3023
-RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/onboarding-service", "dev"]
 
 # Build stage
@@ -32,6 +33,7 @@ RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
+RUN pnpm --filter @splits-network/shared-job-queue build
 RUN pnpm --filter @splits-network/onboarding-service build
 RUN pnpm install --prod --frozen-lockfile
 
@@ -49,6 +51,8 @@ COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-lo
 COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
 COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-job-queue/
+COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 COPY --from=build /app/services/onboarding-service/package.json ./services/onboarding-service/
 COPY --from=build /app/services/onboarding-service/dist ./services/onboarding-service/dist

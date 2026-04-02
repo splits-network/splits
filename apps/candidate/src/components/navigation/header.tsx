@@ -329,6 +329,15 @@ export default function Header({ navItems }: { navItems?: NavItem[] }) {
                                         Saved Jobs
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link
+                                        href="/portal/smart-resume"
+                                        className="text-sm font-semibold text-base-content/70"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-file-user text-sm text-primary" />
+                                        Smart Resume
+                                    </Link>
+                                </li>
                             </>
                         )}
                     </ul>
