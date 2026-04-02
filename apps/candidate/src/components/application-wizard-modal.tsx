@@ -33,21 +33,50 @@ interface WizardStep {
 
 // ─── Step Builder ────────────────────────────────────────────────────────────
 
-function buildWizardSteps(hasQuestions: boolean, hasRecruiterChoice: boolean): WizardStep[] {
+function buildWizardSteps(
+    hasQuestions: boolean,
+    hasRecruiterChoice: boolean,
+): WizardStep[] {
     const steps: WizardStep[] = [
-        { label: "Get Started", description: "Overview of the application process." },
-        { label: "Documents", description: "Attach any supporting documents like portfolios or certifications." },
-        { label: "Cover Letter", description: "Add an optional cover letter to strengthen your application." },
+        {
+            label: "Get Started",
+            description: "Overview of the application process.",
+        },
+        {
+            label: "Documents",
+            description:
+                "Attach any supporting documents like portfolios or certifications.",
+        },
+        {
+            label: "Cover Letter",
+            description:
+                "Add an optional cover letter to strengthen your application.",
+        },
     ];
     if (hasQuestions) {
-        steps.push({ label: "Questions", description: "Answer screening questions from the hiring team." });
+        steps.push({
+            label: "Questions",
+            description: "Answer screening questions from the hiring team.",
+        });
     }
-    steps.push({ label: "Notes", description: "Share any additional context with the employer." });
+    steps.push({
+        label: "Notes",
+        description: "Share any additional context with the employer.",
+    });
     if (hasRecruiterChoice) {
-        steps.push({ label: "Recruiter", description: "Choose which recruiter should represent you." });
+        steps.push({
+            label: "Recruiter",
+            description: "Choose which recruiter should represent you.",
+        });
     }
-    steps.push({ label: "Review", description: "Review your application and get your AI fit analysis." });
-    steps.push({ label: "AI Results", description: "See your fit analysis and submit your application." });
+    steps.push({
+        label: "Review",
+        description: "Review your application and get your AI fit analysis.",
+    });
+    steps.push({
+        label: "AI Results",
+        description: "See your fit analysis and submit your application.",
+    });
     return steps;
 }
 
@@ -94,11 +123,13 @@ export default function ApplicationWizardModal({
             existingApplication?.candidate_notes ||
             "",
         candidate_recruiter_id:
-            existingApplication?.candidate_recruiter_id || (null as string | null),
+            existingApplication?.candidate_recruiter_id ||
+            (null as string | null),
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [showCoverLetterSkipWarning, setShowCoverLetterSkipWarning] = useState(false);
+    const [showCoverLetterSkipWarning, setShowCoverLetterSkipWarning] =
+        useState(false);
 
     // AI review state
     const [applicationId, setApplicationId] = useState<string | null>(
@@ -130,11 +161,16 @@ export default function ApplicationWizardModal({
                 if (!token) throw new Error("Authentication required");
 
                 const authClient = createAuthenticatedClient(token);
-                const [jobResponse, documentsResponse, recruitersResponse] = await Promise.all([
-                    authClient.get<{ data: any }>(`/jobs/${jobId}/view/candidate-detail`),
-                    authClient.get<{ data: any[] }>("/documents"),
-                    authClient.get<{ data: any[] }>("/recruiter-candidates/views/list-for-candidate"),
-                ]);
+                const [jobResponse, documentsResponse, recruitersResponse] =
+                    await Promise.all([
+                        authClient.get<{ data: any }>(
+                            `/jobs/${jobId}/view/candidate-detail`,
+                        ),
+                        authClient.get<{ data: any[] }>("/documents"),
+                        authClient.get<{ data: any[] }>(
+                            "/recruiter-candidates/views/list-for-candidate",
+                        ),
+                    ]);
 
                 const jobData = jobResponse.data;
                 const questionsData = jobData.pre_screen_questions || [];
@@ -146,22 +182,34 @@ export default function ApplicationWizardModal({
                     );
                     const appOriginalDocIds = new Set(
                         existingApplication.documents
-                            .map((doc: any) => doc.metadata?.original_document_id)
+                            .map(
+                                (doc: any) =>
+                                    doc.metadata?.original_document_id,
+                            )
                             .filter(Boolean),
                     );
                     documentsData = documentsData.filter(
-                        (doc: any) => !appDocIds.has(doc.id) && !appOriginalDocIds.has(doc.id),
+                        (doc: any) =>
+                            !appDocIds.has(doc.id) &&
+                            !appOriginalDocIds.has(doc.id),
                     );
-                    documentsData = [...documentsData, ...existingApplication.documents];
+                    documentsData = [
+                        ...documentsData,
+                        ...existingApplication.documents,
+                    ];
                 }
 
                 const allRecruiters = recruitersResponse.data || [];
                 const active = allRecruiters.filter(
-                    (r: any) => r.status === "active" && r.consent_given === true,
+                    (r: any) =>
+                        r.status === "active" && r.consent_given === true,
                 );
                 setActiveRecruiters(active);
 
-                if (active.length === 1 && !existingApplication?.candidate_recruiter_id) {
+                if (
+                    active.length === 1 &&
+                    !existingApplication?.candidate_recruiter_id
+                ) {
                     setFormData((prev) => ({
                         ...prev,
                         candidate_recruiter_id: active[0].recruiter_id,
@@ -207,17 +255,23 @@ export default function ApplicationWizardModal({
             }
 
             // Await the result so we know when it's done
-            authClient.post("/ai-reviews/actions/generate-resume", {
-                candidate_id: candidateId,
-                job_id: jobId,
-            }).then((response: any) => {
-                setTailoredResumeData(response.data || response);
-                setTailoredResumeReady(true);
-            }).catch((err: any) => {
-                console.warn("Tailored resume generation failed (non-blocking):", err);
-                // Still mark as ready — AI review can proceed without it
-                setTailoredResumeReady(true);
-            });
+            authClient
+                .post("/ai-reviews/actions/generate-resume", {
+                    candidate_id: candidateId,
+                    job_id: jobId,
+                })
+                .then((response: any) => {
+                    setTailoredResumeData(response.data || response);
+                    setTailoredResumeReady(true);
+                })
+                .catch((err: any) => {
+                    console.warn(
+                        "Tailored resume generation failed (non-blocking):",
+                        err,
+                    );
+                    // Still mark as ready — AI review can proceed without it
+                    setTailoredResumeReady(true);
+                });
         } catch (err) {
             console.warn("Failed to start tailored resume generation:", err);
             setTailoredResumeReady(true);
@@ -240,7 +294,9 @@ export default function ApplicationWizardModal({
             let appId = applicationId;
 
             const preScreenAnswers = questions.map((q: any, i: number) => {
-                const ans = formData.pre_screen_answers.find((a: any) => a.index === i);
+                const ans = formData.pre_screen_answers.find(
+                    (a: any) => a.index === i,
+                );
                 return {
                     question: q.question,
                     question_type: q.question_type,
@@ -252,11 +308,14 @@ export default function ApplicationWizardModal({
             });
 
             if (existingApplication) {
-                await authClient.patch(`/applications/${existingApplication.id}`, {
-                    document_ids: formData.documents.selected,
-                    cover_letter: formData.cover_letter,
-                    pre_screen_answers: preScreenAnswers,
-                });
+                await authClient.patch(
+                    `/applications/${existingApplication.id}`,
+                    {
+                        document_ids: formData.documents.selected,
+                        cover_letter: formData.cover_letter,
+                        pre_screen_answers: preScreenAnswers,
+                    },
+                );
                 appId = existingApplication.id;
             } else {
                 const payload: Record<string, any> = {
@@ -266,7 +325,8 @@ export default function ApplicationWizardModal({
                     pre_screen_answers: preScreenAnswers,
                 };
                 if (formData.candidate_recruiter_id) {
-                    payload.candidate_recruiter_id = formData.candidate_recruiter_id;
+                    payload.candidate_recruiter_id =
+                        formData.candidate_recruiter_id;
                     payload.application_source = "recruiter";
                 }
                 const result = await authClient.post("/applications", payload);
@@ -291,7 +351,9 @@ export default function ApplicationWizardModal({
 
             // Step 2: Trigger AI review by transitioning to ai_review stage
             setReviewProcessingStage("reviewing");
-            await authClient.patch(`/applications/${appId}`, { stage: "ai_review" });
+            await authClient.patch(`/applications/${appId}`, {
+                stage: "ai_review",
+            });
 
             // Step 3: Poll for AI review completion
             if (appId) {
@@ -302,33 +364,47 @@ export default function ApplicationWizardModal({
             setError(err.message || "Failed to process AI review");
             setReviewProcessingStage("error");
         }
-    }, [applicationId, existingApplication, jobId, formData, questions, getToken]);
+    }, [
+        applicationId,
+        existingApplication,
+        jobId,
+        formData,
+        questions,
+        getToken,
+    ]);
 
-    const pollForAiReview = useCallback(async (appId: string) => {
-        const MAX_POLLS = 30; // 30 × 3s = 90s max
-        const POLL_INTERVAL = 3000;
+    const pollForAiReview = useCallback(
+        async (appId: string) => {
+            const MAX_POLLS = 30; // 30 × 3s = 90s max
+            const POLL_INTERVAL = 3000;
 
-        for (let i = 0; i < MAX_POLLS; i++) {
-            const token = await getToken();
-            if (!token) throw new Error("Authentication expired");
+            for (let i = 0; i < MAX_POLLS; i++) {
+                const token = await getToken();
+                if (!token) throw new Error("Authentication expired");
 
-            const client = createAuthenticatedClient(token);
-            const response = await client.get("/ai-reviews", {
-                params: { application_id: appId, limit: 1 },
-            });
+                const client = createAuthenticatedClient(token);
+                const response = await client.get("/ai-reviews", {
+                    params: { application_id: appId, limit: 1 },
+                });
 
-            const reviews = response.data || [];
-            if (reviews.length > 0 && reviews[0].fit_score != null) {
-                setAiReview(reviews[0]);
-                setReviewProcessingStage("complete");
-                return;
+                const reviews = response.data || [];
+                if (reviews.length > 0 && reviews[0].fit_score != null) {
+                    setAiReview(reviews[0]);
+                    setReviewProcessingStage("complete");
+                    return;
+                }
+
+                await new Promise((resolve) =>
+                    setTimeout(resolve, POLL_INTERVAL),
+                );
             }
 
-            await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL));
-        }
-
-        throw new Error("AI review timed out. Your application was saved as a draft — you can check back later.");
-    }, [getToken]);
+            throw new Error(
+                "AI review timed out. Your application was saved as a draft — you can check back later.",
+            );
+        },
+        [getToken],
+    );
 
     /* ─── Step Validation & Navigation ─────────────────────────────────── */
 
@@ -341,9 +417,12 @@ export default function ApplicationWizardModal({
         const missingRequired = questions
             .filter((q: any) => q.is_required)
             .filter((_: any, idx: number) => {
-                const ans = formData.pre_screen_answers.find((a: any) => a.index === idx);
+                const ans = formData.pre_screen_answers.find(
+                    (a: any) => a.index === idx,
+                );
                 const answer = ans?.answer;
-                if (answer === undefined || answer === null || answer === "") return true;
+                if (answer === undefined || answer === null || answer === "")
+                    return true;
                 if (Array.isArray(answer) && answer.length === 0) return true;
                 return false;
             });
@@ -364,14 +443,22 @@ export default function ApplicationWizardModal({
 
         if (currentStepLabel === "Documents") {
             const validationError = validateDocuments();
-            if (validationError) { setError(validationError); return; }
+            if (validationError) {
+                setError(validationError);
+                return;
+            }
         }
 
         if (currentStepLabel === "Cover Letter") {
             const uploadedCoverLetterDocs = localDocuments.filter(
-                (doc: any) => doc.document_type === "cover_letter" && formData.documents.selected.includes(doc.id),
+                (doc: any) =>
+                    doc.document_type === "cover_letter" &&
+                    formData.documents.selected.includes(doc.id),
             );
-            if (!formData.cover_letter?.trim() && uploadedCoverLetterDocs.length === 0) {
+            if (
+                !formData.cover_letter?.trim() &&
+                uploadedCoverLetterDocs.length === 0
+            ) {
                 setShowCoverLetterSkipWarning(true);
                 return;
             }
@@ -379,11 +466,22 @@ export default function ApplicationWizardModal({
 
         if (currentStepLabel === "Questions") {
             const validationError = validateQuestions();
-            if (validationError) { setError(validationError); return; }
+            if (validationError) {
+                setError(validationError);
+                return;
+            }
         }
 
         setCurrentStep((prev) => Math.min(prev + 1, wizardSteps.length - 1));
-    }, [currentStepLabel, validateDocuments, validateQuestions, wizardSteps.length, localDocuments, formData, startTailoredResumeGeneration]);
+    }, [
+        currentStepLabel,
+        validateDocuments,
+        validateQuestions,
+        wizardSteps.length,
+        localDocuments,
+        formData,
+        startTailoredResumeGeneration,
+    ]);
 
     const handleCoverLetterSkipConfirm = useCallback(() => {
         setShowCoverLetterSkipWarning(false);
@@ -397,7 +495,12 @@ export default function ApplicationWizardModal({
     }, []);
 
     const handleClose = useCallback(() => {
-        if (submitting || reviewProcessingStage === "creating" || reviewProcessingStage === "reviewing") return;
+        if (
+            submitting ||
+            reviewProcessingStage === "creating" ||
+            reviewProcessingStage === "reviewing"
+        )
+            return;
         // Allow close even if tailored resume is still generating — it's non-blocking
         onClose();
     }, [submitting, reviewProcessingStage, onClose]);
@@ -439,7 +542,9 @@ export default function ApplicationWizardModal({
 
             const authClient = createAuthenticatedClient(token);
             const preScreenAnswers = questions.map((q: any, i: number) => {
-                const ans = formData.pre_screen_answers.find((a: any) => a.index === i);
+                const ans = formData.pre_screen_answers.find(
+                    (a: any) => a.index === i,
+                );
                 return {
                     question: q.question,
                     question_type: q.question_type,
@@ -452,11 +557,14 @@ export default function ApplicationWizardModal({
 
             let appId = applicationId;
             if (existingApplication) {
-                await authClient.patch(`/applications/${existingApplication.id}`, {
-                    document_ids: formData.documents.selected,
-                    cover_letter: formData.cover_letter,
-                    pre_screen_answers: preScreenAnswers,
-                });
+                await authClient.patch(
+                    `/applications/${existingApplication.id}`,
+                    {
+                        document_ids: formData.documents.selected,
+                        cover_letter: formData.cover_letter,
+                        pre_screen_answers: preScreenAnswers,
+                    },
+                );
                 appId = existingApplication.id;
             } else {
                 const payload: Record<string, any> = {
@@ -466,7 +574,8 @@ export default function ApplicationWizardModal({
                     pre_screen_answers: preScreenAnswers,
                 };
                 if (formData.candidate_recruiter_id) {
-                    payload.candidate_recruiter_id = formData.candidate_recruiter_id;
+                    payload.candidate_recruiter_id =
+                        formData.candidate_recruiter_id;
                     payload.application_source = "recruiter";
                 }
                 const result = await authClient.post("/applications", payload);
@@ -493,14 +602,24 @@ export default function ApplicationWizardModal({
             setError(err.message || "Failed to save draft");
             setSubmitting(false);
         }
-    }, [applicationId, existingApplication, jobId, formData, questions, getToken, onClose, router]);
+    }, [
+        applicationId,
+        existingApplication,
+        jobId,
+        formData,
+        questions,
+        getToken,
+        onClose,
+        router,
+    ]);
 
     /* ─── Derived: next disabled ──────────────────────────────────────── */
 
     const nextDisabled =
         loading ||
-        (currentStepLabel === "Recruiter" && !formData.candidate_recruiter_id) ||
-        (currentStepLabel === "AI Results"); // AI Results uses custom footer
+        (currentStepLabel === "Recruiter" &&
+            !formData.candidate_recruiter_id) ||
+        currentStepLabel === "AI Results"; // AI Results uses custom footer
 
     /* ─── Step Rendering ──────────────────────────────────────────────── */
 
@@ -521,7 +640,9 @@ export default function ApplicationWizardModal({
                     <StepDocuments
                         documents={localDocuments}
                         selected={formData.documents.selected}
-                        onChange={(docs: any) => setFormData({ ...formData, documents: docs })}
+                        onChange={(docs: any) =>
+                            setFormData({ ...formData, documents: docs })
+                        }
                         onDocumentsUpdated={setLocalDocuments}
                         error={error}
                     />
@@ -536,7 +657,10 @@ export default function ApplicationWizardModal({
                     <StepCoverLetter
                         coverLetter={formData.cover_letter}
                         onChange={(coverLetter: string) =>
-                            setFormData({ ...formData, cover_letter: coverLetter })
+                            setFormData({
+                                ...formData,
+                                cover_letter: coverLetter,
+                            })
                         }
                         onSkipConfirm={handleCoverLetterSkipConfirm}
                         showSkipWarning={showCoverLetterSkipWarning}
@@ -550,7 +674,10 @@ export default function ApplicationWizardModal({
                         questions={questions}
                         answers={formData.pre_screen_answers}
                         onChange={(answers: any) =>
-                            setFormData({ ...formData, pre_screen_answers: answers })
+                            setFormData({
+                                ...formData,
+                                pre_screen_answers: answers,
+                            })
                         }
                         error={error}
                     />
@@ -559,7 +686,9 @@ export default function ApplicationWizardModal({
                 return (
                     <StepNotes
                         notes={formData.notes}
-                        onChange={(notes: string) => setFormData({ ...formData, notes })}
+                        onChange={(notes: string) =>
+                            setFormData({ ...formData, notes })
+                        }
                     />
                 );
             case "Recruiter":
@@ -568,7 +697,10 @@ export default function ApplicationWizardModal({
                         recruiters={activeRecruiters}
                         selectedRecruiterId={formData.candidate_recruiter_id}
                         onChange={(id: string) =>
-                            setFormData({ ...formData, candidate_recruiter_id: id })
+                            setFormData({
+                                ...formData,
+                                candidate_recruiter_id: id,
+                            })
                         }
                     />
                 );
@@ -584,12 +716,15 @@ export default function ApplicationWizardModal({
                         additionalNotes={formData.notes}
                         selectedRecruiter={
                             activeRecruiters.find(
-                                (r: any) => r.recruiter_id === formData.candidate_recruiter_id,
+                                (r: any) =>
+                                    r.recruiter_id ===
+                                    formData.candidate_recruiter_id,
                             ) || null
                         }
                         error={error}
                         processingStage={
-                            !tailoredResumeReady && reviewProcessingStage === "idle"
+                            !tailoredResumeReady &&
+                            reviewProcessingStage === "idle"
                                 ? "tailoring"
                                 : reviewProcessingStage
                         }
@@ -598,10 +733,7 @@ export default function ApplicationWizardModal({
                 );
             case "AI Results":
                 return aiReview ? (
-                    <StepAiResults
-                        review={aiReview}
-                        jobTitle={jobTitle}
-                    />
+                    <StepAiResults review={aiReview} jobTitle={jobTitle} />
                 ) : null;
             default:
                 return null;
@@ -616,7 +748,10 @@ export default function ApplicationWizardModal({
                 <button
                     onClick={handleBack}
                     className="btn btn-ghost"
-                    disabled={reviewProcessingStage === "creating" || reviewProcessingStage === "reviewing"}
+                    disabled={
+                        reviewProcessingStage === "creating" ||
+                        reviewProcessingStage === "reviewing"
+                    }
                 >
                     <i className="fa-duotone fa-regular fa-arrow-left" />
                     Back
@@ -626,21 +761,24 @@ export default function ApplicationWizardModal({
                 <button
                     onClick={handleSaveAsDraft}
                     className="btn btn-ghost"
-                    disabled={reviewProcessingStage === "creating" || reviewProcessingStage === "reviewing"}
+                    disabled={
+                        reviewProcessingStage === "creating" ||
+                        reviewProcessingStage === "reviewing"
+                    }
                 >
                     <i className="fa-duotone fa-regular fa-floppy-disk" />
                     Save Draft
                 </button>
-                {!tailoredResumeReady && (reviewProcessingStage === "idle" || reviewProcessingStage === "error") ? (
+                {!tailoredResumeReady &&
+                (reviewProcessingStage === "idle" ||
+                    reviewProcessingStage === "error") ? (
                     <button className="btn btn-primary" disabled>
                         <span className="loading loading-spinner loading-sm" />
                         Preparing your tailored resume...
                     </button>
-                ) : reviewProcessingStage === "idle" || reviewProcessingStage === "error" ? (
-                    <button
-                        onClick={startAiReview}
-                        className="btn btn-primary"
-                    >
+                ) : reviewProcessingStage === "idle" ||
+                  reviewProcessingStage === "error" ? (
+                    <button onClick={startAiReview} className="btn btn-primary">
                         <i className="fa-duotone fa-regular fa-brain-circuit" />
                         Get Your AI Review
                     </button>
@@ -704,7 +842,11 @@ export default function ApplicationWizardModal({
         <BaselWizardModal
             isOpen={true}
             onClose={handleClose}
-            title={existingApplication ? "Edit Your Application" : "Apply to This Role"}
+            title={
+                existingApplication
+                    ? "Edit Your Application"
+                    : "Apply to This Role"
+            }
             icon="fa-duotone fa-regular fa-paper-plane"
             accentColor="primary"
             steps={wizardSteps}
@@ -737,7 +879,9 @@ export default function ApplicationWizardModal({
                 </div>
             ) : error && !job ? (
                 <BaselAlertBox variant="error">
-                    <p className="font-bold text-sm mb-1">Something went wrong</p>
+                    <p className="font-bold text-sm mb-1">
+                        Something went wrong
+                    </p>
                     <p className="text-sm text-base-content/60">{error}</p>
                 </BaselAlertBox>
             ) : (
