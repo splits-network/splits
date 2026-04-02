@@ -222,6 +222,7 @@ async function main() {
             resumeExtractionRepository,
             callPipelineService: callPipelineService,
             eventPublisher: resilientPublisher,
+            aiClient,
             logger,
         });
         await domainConsumer.connect();

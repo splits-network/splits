@@ -13,6 +13,9 @@ import { AIReviewServiceV2 } from '../../v2/reviews/service.js';
 import { ResumeExtractionService } from '../../v2/resume-extraction/service.js';
 import { ResumeExtractionRepository } from '../../v2/resume-extraction/repository.js';
 import { CallPipelineService } from '../../v2/call-pipeline/service.js';
+import { SmartResumeExtractor } from '../smart-resume/extractor.js';
+import { SmartResumePopulator } from '../smart-resume/populator.js';
+import type { IAiClient } from '@splits-network/shared-ai-client';
 
 export interface DomainConsumerConfig {
   rabbitMqUrl: string;
@@ -22,6 +25,7 @@ export interface DomainConsumerConfig {
   resumeExtractionRepository: ResumeExtractionRepository;
   callPipelineService: CallPipelineService;
   eventPublisher?: IEventPublisher;
+  aiClient?: IAiClient;
   logger: Logger;
 }
 
@@ -210,4 +214,66 @@ export async function handleCallRecordingReady(
     duration_seconds,
     file_size_bytes,
   });
+}
+
+/**
+ * Handle document.enriching — AI extracts structured data from resume text
+ * and populates smart_resume_* tables, then marks document as processed.
+ *
+ * Published by document-processing-service after text extraction for resume documents.
+ */
+export async function handleDocumentEnriching(
+  event: DomainEvent,
+  config: DomainConsumerConfig,
+): Promise<void> {
+  const {
+    document_id,
+    candidate_id,
+    extracted_text,
+    mime_type,
+  } = event.payload;
+
+  if (!document_id || !candidate_id || !extracted_text) {
+    config.logger.warn({ document_id, candidate_id }, 'Missing required fields in document.enriching event');
+    return;
+  }
+
+  config.logger.info(
+    { document_id, candidate_id, textLength: extracted_text.length },
+    'Starting smart resume AI extraction',
+  );
+
+  const extractor = new SmartResumeExtractor(config.aiClient);
+  const populator = new SmartResumePopulator(config.supabase, config.logger, config.eventPublisher);
+
+  try {
+    // 1. AI extraction — structure the raw text
+    const extraction = await extractor.extract(extracted_text, mime_type || 'text/plain');
+
+    // 2. Populate smart_resume tables
+    const profileId = await populator.populate(candidate_id, document_id, extraction);
+
+    config.logger.info(
+      { document_id, candidate_id, profileId },
+      'Smart resume populated successfully',
+    );
+  } catch (error) {
+    config.logger.error(
+      { err: error, document_id, candidate_id },
+      'Smart resume extraction failed',
+    );
+  }
+
+  // 3. Mark document as processed (whether extraction succeeded or failed)
+  try {
+    await config.supabase
+      .from('documents')
+      .update({
+        processing_status: 'processed',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', document_id);
+  } catch (error) {
+    config.logger.error({ err: error, document_id }, 'Failed to update document status to processed');
+  }
 }

@@ -1,8 +1,6 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { createLogger } from "@splits-network/shared-logging";
-import { createSupabaseClient, loadRedisConfig } from "@splits-network/shared-config";
-import { Redis } from "ioredis";
-import { AiClient } from "@splits-network/shared-ai-client";
+import { createSupabaseClient } from "@splits-network/shared-config";
 import * as amqp from "amqplib";
 
 // V2 Architecture imports
@@ -72,31 +70,6 @@ async function main() {
         });
         const repository = new DocumentRepositoryV2(supabase);
 
-        // Initialize Redis + AI client for provider-agnostic AI calls
-        const redisConfig = loadRedisConfig();
-        const redis = new Redis({
-            host: redisConfig.host,
-            port: redisConfig.port,
-            password: redisConfig.password || undefined,
-            db: redisConfig.db || 0,
-            maxRetriesPerRequest: 3,
-            lazyConnect: true,
-        });
-        try {
-            await redis.connect();
-        } catch (err) {
-            logger.warn({ err }, 'Redis connection failed — AI config will use DB/env fallback');
-        }
-
-        const aiClient = new AiClient({
-            supabase,
-            redis,
-            serviceName: 'document-processing-service',
-            logger,
-            openaiApiKey: process.env.OPENAI_API_KEY || '',
-            anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
-        });
-
         // Start HTTP server
         const server = await buildServer();
         const port = parseInt(process.env.PORT || "3006", 10);
@@ -157,7 +130,7 @@ async function main() {
                 "document.uploaded",
             );
 
-            consumer = new DomainConsumer(channel, eventPublisher, aiClient);
+            consumer = new DomainConsumer(channel, eventPublisher);
             await consumer.initialize();
         }
 
