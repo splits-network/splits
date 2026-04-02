@@ -5,7 +5,7 @@ import {
     EncodingOptionsPreset,
     S3Upload,
 } from 'livekit-server-sdk';
-import { CallRecordingRepository } from './call-repository';
+import { CallRecordingRepository } from './call-repository.js';
 
 interface SupabaseS3Config {
     endpoint: string;

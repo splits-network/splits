@@ -4,9 +4,9 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { FirmServiceV2 } from './service';
-import { requireUserContext } from '../shared/helpers';
-import { validatePaginationParams } from '../shared/pagination';
+import { FirmServiceV2 } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { validatePaginationParams } from '../shared/pagination.js';
 
 interface RegisterFirmRoutesConfig {
     firmService: FirmServiceV2;

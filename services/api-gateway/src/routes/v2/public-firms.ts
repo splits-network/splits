@@ -4,10 +4,10 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { optionalAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { getCorrelationId } from './common';
+import { ServiceRegistry } from '../../clients.js';
+import { optionalAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { getCorrelationId } from './common.js';
 
 export function registerPublicFirmGatewayRoutes(
     app: FastifyInstance,

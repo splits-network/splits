@@ -11,16 +11,16 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { EventPublisher } from '../v2/shared/events';
-import { PayoutScheduleServiceV2 } from '../v2/payout-schedules/service';
-import { PayoutAuditRepository } from '../v2/audit/repository';
+import { EventPublisher } from '../v2/shared/events.js';
+import { PayoutScheduleServiceV2 } from '../v2/payout-schedules/service.js';
+import { PayoutAuditRepository } from '../v2/audit/repository.js';
 import { createLogger, Logger } from '@splits-network/shared-logging';
-import { PayoutServiceV2 } from '../v2/payouts/service';
-import { PlacementSnapshotRepository } from '../v2/placement-snapshot/repository';
-import { PlacementSplitRepository } from '../v2/payouts/placement-split-repository';
-import { PlacementPayoutTransactionRepository } from '../v2/payouts/placement-payout-transaction-repository';
-import { RecruiterConnectRepository } from '../v2/payouts/recruiter-connect-repository';
-import { FirmStripeConnectRepository } from '../v2/firm-connect/repository';
+import { PayoutServiceV2 } from '../v2/payouts/service.js';
+import { PlacementSnapshotRepository } from '../v2/placement-snapshot/repository.js';
+import { PlacementSplitRepository } from '../v2/payouts/placement-split-repository.js';
+import { PlacementPayoutTransactionRepository } from '../v2/payouts/placement-payout-transaction-repository.js';
+import { RecruiterConnectRepository } from '../v2/payouts/recruiter-connect-repository.js';
+import { FirmStripeConnectRepository } from '../v2/firm-connect/repository.js';
 
 // Load and validate environment variables
 const SUPABASE_URL = process.env.SUPABASE_URL;

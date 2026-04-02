@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { SplitsRateRepository } from './repository';
-import { SplitsRateUpdateInput } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SplitsRateRepository } from './repository.js';
+import { SplitsRateUpdateInput } from './types.js';
 
 const SNAPSHOT_TIER_TO_PLAN_TIER: Record<string, string> = {
   free: 'starter',

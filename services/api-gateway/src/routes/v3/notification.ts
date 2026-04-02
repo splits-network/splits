@@ -6,12 +6,13 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { registerV3Routes, V3RouteConfig } from './proxy';
+import { ServiceRegistry } from '../../clients.js';
+import { registerV3Routes, V3RouteConfig } from './proxy.js';
 
 const notificationV3Routes: V3RouteConfig[] = [
   // ── Notifications Actions ──────────────────────────────────────
   { path: '/notifications/actions/mark-all-read', method: 'POST', auth: 'required' },
+  { path: '/notifications/actions/mark-category-read', method: 'POST', auth: 'required' },
 
   // ── Notifications Views ────────────────────────────────────────
   { path: '/notifications/views/unread-count', method: 'GET', auth: 'required' },

@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { ResourceDefinition, registerResourceRoutes, getCorrelationId } from './common';
-import { requireAuth } from '../../middleware/auth';
+import { ServiceRegistry } from '../../clients.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { ResourceDefinition, registerResourceRoutes, getCorrelationId } from './common.js';
+import { requireAuth } from '../../middleware/auth.js';
 
 const IDENTITY_RESOURCES: ResourceDefinition[] = [
     {

@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminBoardRepository } from './admin-board.repository';
-import { AdminBoardService } from './admin-board.service';
-import { listQuerySchema, JobListParams } from '../types';
+import { AdminBoardRepository } from './admin-board.repository.js';
+import { AdminBoardService } from './admin-board.service.js';
+import { listQuerySchema, JobListParams } from '../types.js';
 
 export function registerAdminBoardView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new AdminBoardRepository(supabase);

@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError, BadRequestError } from '@splits-network/shared-fastify';
-import { ModerateActionRepository, ChatModerationAudit } from './moderate.repository';
-import { ChatReport } from '../types';
-import { IEventPublisher } from '../../../v2/shared/events';
+import { ModerateActionRepository, ChatModerationAudit } from './moderate.repository.js';
+import { ChatReport } from '../types.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
 
 export interface ModerateInput {
   action: ChatModerationAudit['action'];

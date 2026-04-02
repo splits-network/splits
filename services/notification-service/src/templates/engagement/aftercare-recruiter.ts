@@ -3,8 +3,8 @@
  * Sent at milestone intervals after a candidate is hired to encourage recruiter check-ins.
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, infoCard, divider } from '../components.js';
 
 export type AftercareMilestone = 'day_3' | 'day_14' | 'day_30' | 'guarantee_expiring' | 'day_90';
 

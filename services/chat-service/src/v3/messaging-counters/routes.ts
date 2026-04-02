@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MessagingCounterRepository } from './repository';
-import { MessagingCounterService } from './service';
-import { MessagingCounterListParams, listQuerySchema, idParamSchema } from './types';
+import { MessagingCounterRepository } from './repository.js';
+import { MessagingCounterService } from './service.js';
+import { MessagingCounterListParams, listQuerySchema, idParamSchema } from './types.js';
 
 export function registerMessagingCounterRoutes(
   app: FastifyInstance,

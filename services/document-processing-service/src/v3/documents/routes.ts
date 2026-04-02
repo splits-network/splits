@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { DocumentRepository } from './repository';
-import { DocumentService } from './service';
-import { DocumentListParams, UpdateDocumentInput, idParamSchema, listQuerySchema, updateDocumentSchema } from './types';
+import { DocumentRepository } from './repository.js';
+import { DocumentService } from './service.js';
+import { DocumentListParams, UpdateDocumentInput, idParamSchema, listQuerySchema, updateDocumentSchema } from './types.js';
 
 export function registerDocumentRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new DocumentRepository(supabase);

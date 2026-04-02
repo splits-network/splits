@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContext, resolveAccessContext } from '@splits-network/shared-access-context';
-import { RecruiterCompany, CompanySourcerCreate, CompanySourcerFilters, CompanySourcerUpdate } from './types';
+import { RecruiterCompany, CompanySourcerCreate, CompanySourcerFilters, CompanySourcerUpdate } from './types.js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class CompanySourcerRepository {

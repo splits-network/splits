@@ -10,11 +10,11 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ReputationMetrics, TierChangeEvent } from '../../v2/reputation/types';
-import { calculateReputationScore } from '../../v2/reputation/calculator';
-import { getTierFromScore } from './types';
-import { MetricsGatherer } from './metrics-gatherer';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ReputationMetrics, TierChangeEvent } from '../../v2/reputation/types.js';
+import { calculateReputationScore } from '../../v2/reputation/calculator.js';
+import { getTierFromScore } from './types.js';
+import { MetricsGatherer } from './metrics-gatherer.js';
 
 export class RecalcService {
   private metricsGatherer: MetricsGatherer;

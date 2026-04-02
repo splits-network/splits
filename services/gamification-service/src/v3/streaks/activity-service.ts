@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
+import { IEventPublisher } from '../../v2/shared/events.js';
 
 type EntityType = 'recruiter' | 'candidate' | 'company' | 'firm';
 

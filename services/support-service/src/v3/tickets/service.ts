@@ -8,13 +8,13 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError, BadRequestError } from "@splits-network/shared-fastify";
-import { TicketRepository } from "./repository";
+import { TicketRepository } from "./repository.js";
 import {
     TicketListParams,
     CreateTicketInput,
     UpdateTicketInput,
-} from "./types";
-import { IEventPublisher } from "../../v2/shared/events";
+} from "./types.js";
+import { IEventPublisher } from "../../v2/shared/events.js";
 
 export class TicketService {
     private accessResolver: AccessContextResolver;

@@ -14,7 +14,7 @@ import {
   S3Upload,
 } from 'livekit-server-sdk';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
+import { IEventPublisher } from '../../../v2/shared/events.js';
 
 interface S3Config {
   endpoint: string;

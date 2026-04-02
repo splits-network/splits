@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { ATSRepository } from './repository';
-import { ATSService, SetupATSParams } from './service';
-import { IEventPublisher } from '../shared/events';
-import { requireUserContext } from '../shared/helpers';
+import { ATSRepository } from './repository.js';
+import { ATSService, SetupATSParams } from './service.js';
+import { IEventPublisher } from '../shared/events.js';
+import { requireUserContext } from '../shared/helpers.js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
 

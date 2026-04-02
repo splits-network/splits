@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Document, DocumentFilters, DocumentUpdate, ProcessingStatus } from './types';
-import { resolveAccessContext, AccessContext } from '../shared/access';
+import { Document, DocumentFilters, DocumentUpdate, ProcessingStatus } from './types.js';
+import { resolveAccessContext, AccessContext } from '../shared/access.js';
 
 export interface CreateDocumentRecord {
     entity_type: string;

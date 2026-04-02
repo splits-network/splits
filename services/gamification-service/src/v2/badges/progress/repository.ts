@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { BadgeProgress, BadgeProgressWithDefinition } from './types';
-import { BadgeEntityType } from '../definitions/types';
+import { BadgeProgress, BadgeProgressWithDefinition } from './types.js';
+import { BadgeEntityType } from '../definitions/types.js';
 
 export class BadgeProgressRepository {
     private supabase: SupabaseClient;

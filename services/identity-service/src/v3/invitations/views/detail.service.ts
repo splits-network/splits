@@ -10,8 +10,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { InvitationDetailViewRepository } from './detail.repository';
-import { InvitationListParams } from '../types';
+import { InvitationDetailViewRepository } from './detail.repository.js';
+import { InvitationListParams } from '../types.js';
 
 export class InvitationDetailViewService {
   private accessResolver: AccessContextResolver;

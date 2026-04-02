@@ -6,8 +6,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { registerV3Routes, V3RouteConfig } from './proxy';
+import { ServiceRegistry } from '../../clients.js';
+import { registerV3Routes, V3RouteConfig } from './proxy.js';
 
 const aiV3Routes: V3RouteConfig[] = [
   // ── AI Reviews — Views (before :id to avoid param collision) ──
@@ -15,6 +15,7 @@ const aiV3Routes: V3RouteConfig[] = [
 
   // ── AI Reviews — Actions ──────────────────────────────────────
   { path: '/ai-reviews/actions/analyze', method: 'POST', auth: 'required' },
+  { path: '/ai-reviews/actions/generate-resume', method: 'POST', auth: 'required' },
 
   // ── AI Reviews — Core CRUD ────────────────────────────────────
   { path: '/ai-reviews', method: 'GET', auth: 'required' },

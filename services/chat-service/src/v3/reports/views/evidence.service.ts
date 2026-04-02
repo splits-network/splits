@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { EvidenceViewRepository, ReportWithEvidence } from './evidence.repository';
+import { EvidenceViewRepository, ReportWithEvidence } from './evidence.repository.js';
 
 export class EvidenceViewService {
   private accessResolver: AccessContextResolver;

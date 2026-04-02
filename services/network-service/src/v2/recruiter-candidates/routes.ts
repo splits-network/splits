@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { RecruiterCandidateServiceV2 } from './service';
-import { TerminateRecruiterCandidateRequest } from './types';
-import { requireUserContext } from '../shared/helpers';
-import { validatePaginationParams } from '../shared/pagination';
+import { RecruiterCandidateServiceV2 } from './service.js';
+import { TerminateRecruiterCandidateRequest } from './types.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { validatePaginationParams } from '../shared/pagination.js';
 
 interface RegisterRecruiterCandidateRoutesConfig {
     recruiterCandidateService: RecruiterCandidateServiceV2;

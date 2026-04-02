@@ -7,9 +7,9 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PageServiceV2 } from '../pages/service';
-import { getUserContext } from '../shared/helpers';
-import { PageCreate, PageUpdate } from '../pages/types';
+import { PageServiceV2 } from '../pages/service.js';
+import { getUserContext } from '../shared/helpers.js';
+import { PageCreate, PageUpdate } from '../pages/types.js';
 
 interface PageRoutesConfig {
     supabase: SupabaseClient;

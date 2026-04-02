@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyReputationListParams } from '../types';
+import { CompanyReputationListParams } from '../types.js';
 
 const LIST_SELECT = '*, company:companies(id, name)';
 

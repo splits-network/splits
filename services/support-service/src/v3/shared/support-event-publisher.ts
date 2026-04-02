@@ -14,7 +14,7 @@
  * names and payload structures for backward compatibility.
  */
 
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { Logger } from '@splits-network/shared-logging';
 
 export interface SupportEventPayload {

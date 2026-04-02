@@ -7,9 +7,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import { createLogger } from '@splits-network/shared-logging';
 import type { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { WebhookRepository } from './repository';
-import { ClerkWebhookEvent, WebhookSourceApp } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { WebhookRepository } from './repository.js';
+import { ClerkWebhookEvent, WebhookSourceApp } from './types.js';
 
 export class WebhookService {
   private logger: Logger;

@@ -1,6 +1,6 @@
 import http from 'http';
 import WebSocket, { WebSocketServer } from 'ws';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { verifyToken } from '@clerk/backend';
 import { loadBaseConfig, loadMultiClerkConfig, loadRedisConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';

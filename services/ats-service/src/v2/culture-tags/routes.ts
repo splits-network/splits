@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { CultureTagService } from './service';
-import { requireUserContext } from '../shared/helpers';
+import { CultureTagService } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterCultureTagRoutesConfig {
     service: CultureTagService;

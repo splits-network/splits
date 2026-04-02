@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterCandidateListViewRepository } from './list.repository';
-import { RecruiterCandidateListViewService } from './list.service';
-import { RecruiterCandidateListParams, listQuerySchema } from '../types';
+import { RecruiterCandidateListViewRepository } from './list.repository.js';
+import { RecruiterCandidateListViewService } from './list.service.js';
+import { RecruiterCandidateListParams, listQuerySchema } from '../types.js';
 
 export function registerRecruiterCandidateListView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new RecruiterCandidateListViewRepository(supabase);

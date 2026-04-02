@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { FirmStripeAccount } from './types';
+import { FirmStripeAccount } from './types.js';
 
 export class FirmStripeConnectRepository {
     constructor(private supabase: SupabaseClient) { }

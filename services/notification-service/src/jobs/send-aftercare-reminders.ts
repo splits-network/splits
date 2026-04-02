@@ -22,17 +22,17 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import { NotificationRepository } from '../repository';
-import { EngagementEmailService } from '../services/engagement/service';
+import { NotificationRepository } from '../repository.js';
+import { EngagementEmailService } from '../services/engagement/service.js';
 import { Logger } from '@splits-network/shared-logging';
-import { AftercareMilestone } from '../templates/engagement';
+import { AftercareMilestone } from '../templates/engagement/index.js';
+import { PORTAL_URL, CANDIDATE_URL } from '../helpers/urls.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Splits Network <notifications@splits.network>';
 const CANDIDATE_FROM_EMAIL = process.env.RESEND_CANDIDATE_FROM_EMAIL || 'notifications@updates.applicant.network';
-const { PORTAL_URL, CANDIDATE_URL } = require('../helpers/urls');
 
 if (!SUPABASE_URL || !SUPABASE_KEY || !RESEND_API_KEY) {
     console.error('Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY');

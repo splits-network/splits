@@ -8,9 +8,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { McpServerDeps } from './types';
-import { createMcpServer } from './server';
-import { extractMcpAuth, McpAuthError } from './auth';
+import { McpServerDeps } from './types.js';
+import { createMcpServer } from './server.js';
+import { extractMcpAuth, McpAuthError } from './auth.js';
 
 /**
  * Register MCP transport routes on the Fastify instance.

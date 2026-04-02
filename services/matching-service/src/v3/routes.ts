@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerMatchRoutes } from './matches/routes';
-import { registerEmbeddingRoutes } from './embeddings/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerMatchRoutes } from './matches/routes.js';
+import { registerEmbeddingRoutes } from './embeddings/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

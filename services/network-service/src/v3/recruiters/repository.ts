@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterListParams, RecruiterUpdate } from './types';
+import { RecruiterListParams, RecruiterUpdate } from './types.js';
 
 const SORTABLE_FIELDS = new Set([
   'created_at', 'updated_at', 'name', 'status', 'specialization',

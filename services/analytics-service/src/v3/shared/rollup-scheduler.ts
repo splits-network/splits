@@ -13,14 +13,14 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { createLogger } from '@splits-network/shared-logging';
-import { CacheManager } from '../../cache/cache-manager';
-import { rollupHourlyMetrics } from '../../jobs/rollup-hourly';
-import { rollupDailyMetrics } from '../../jobs/rollup-daily';
-import { rollupMonthlyMetrics } from '../../jobs/rollup-monthly';
-import { computeMarketplaceHealth } from '../../jobs/marketplace-health';
-import { rollupActivitySnapshot } from '../../jobs/rollup-activity';
+import { CacheManager } from '../../cache/cache-manager.js';
+import { rollupHourlyMetrics } from '../../jobs/rollup-hourly.js';
+import { rollupDailyMetrics } from '../../jobs/rollup-daily.js';
+import { rollupMonthlyMetrics } from '../../jobs/rollup-monthly.js';
+import { computeMarketplaceHealth } from '../../jobs/marketplace-health.js';
+import { rollupActivitySnapshot } from '../../jobs/rollup-activity.js';
 
 const logger = createLogger('v3:RollupScheduler');
 

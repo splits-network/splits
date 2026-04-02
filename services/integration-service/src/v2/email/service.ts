@@ -1,10 +1,10 @@
 import { Logger } from '@splits-network/shared-logging';
-import { ConnectionRepository } from '../connections/repository';
-import { TokenRefreshService } from '../calendar/token-refresh';
-import { GmailClient, GmailMessage } from './gmail-client';
-import { MicrosoftMailClient, MicrosoftMailMessage } from './microsoft-mail-client';
-import { sanitizeEmailBody } from './sanitize';
-import type { EmailMessage, EmailThread, EmailListResponse, EmailListItem } from '@splits-network/shared-types';
+import { ConnectionRepository } from '../connections/repository.js';
+import { TokenRefreshService } from '../calendar/token-refresh.js';
+import { GmailClient, GmailMessage, GmailLabel } from './gmail-client.js';
+import { MicrosoftMailClient, MicrosoftMailMessage } from './microsoft-mail-client.js';
+import { sanitizeEmailBody } from './sanitize.js';
+import type { EmailMessage, EmailThread, EmailListResponse, EmailListItem, EmailLabel } from '@splits-network/shared-types';
 
 /* ── Unified send params ─────────────────────────────────────────────── */
 
@@ -213,6 +213,154 @@ export class EmailService {
 
             // Microsoft sendMail doesn't return the sent message
             return null;
+        }
+
+        throw new Error(`Unsupported email provider: ${connection.provider_slug}`);
+    }
+
+    /**
+     * Trash a message.
+     */
+    async trashMessage(
+        connectionId: string,
+        clerkUserId: string,
+        messageId: string,
+    ): Promise<void> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        if (connection.provider_slug.startsWith('google_')) {
+            await this.gmailClient.trashMessage(token, messageId);
+            return;
+        }
+
+        if (connection.provider_slug.startsWith('microsoft_')) {
+            await this.microsoftClient.deleteMessage(token, messageId);
+            return;
+        }
+
+        throw new Error(`Unsupported email provider: ${connection.provider_slug}`);
+    }
+
+    /**
+     * Archive a message (Gmail: remove INBOX label, Microsoft: move to Archive folder).
+     */
+    async archiveMessage(
+        connectionId: string,
+        clerkUserId: string,
+        messageId: string,
+    ): Promise<void> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        if (connection.provider_slug.startsWith('google_')) {
+            await this.gmailClient.modifyLabels(token, messageId, [], ['INBOX']);
+            return;
+        }
+
+        if (connection.provider_slug.startsWith('microsoft_')) {
+            await this.microsoftClient.moveMessage(token, messageId, 'archive');
+            return;
+        }
+
+        throw new Error(`Unsupported email provider: ${connection.provider_slug}`);
+    }
+
+    /**
+     * Mark a message as read.
+     */
+    async markAsRead(
+        connectionId: string,
+        clerkUserId: string,
+        messageId: string,
+    ): Promise<void> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        if (connection.provider_slug.startsWith('google_')) {
+            await this.gmailClient.modifyLabels(token, messageId, [], ['UNREAD']);
+            return;
+        }
+
+        if (connection.provider_slug.startsWith('microsoft_')) {
+            await this.microsoftClient.updateMessage(token, messageId, { isRead: true });
+            return;
+        }
+
+        throw new Error(`Unsupported email provider: ${connection.provider_slug}`);
+    }
+
+    /**
+     * Mark a message as unread.
+     */
+    async markAsUnread(
+        connectionId: string,
+        clerkUserId: string,
+        messageId: string,
+    ): Promise<void> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        if (connection.provider_slug.startsWith('google_')) {
+            await this.gmailClient.modifyLabels(token, messageId, ['UNREAD'], []);
+            return;
+        }
+
+        if (connection.provider_slug.startsWith('microsoft_')) {
+            await this.microsoftClient.updateMessage(token, messageId, { isRead: false });
+            return;
+        }
+
+        throw new Error(`Unsupported email provider: ${connection.provider_slug}`);
+    }
+
+    /**
+     * Modify labels on a message (Gmail-specific; Microsoft uses folders).
+     */
+    async modifyLabels(
+        connectionId: string,
+        clerkUserId: string,
+        messageId: string,
+        addLabelIds: string[],
+        removeLabelIds: string[],
+    ): Promise<void> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        if (connection.provider_slug.startsWith('google_')) {
+            await this.gmailClient.modifyLabels(token, messageId, addLabelIds, removeLabelIds);
+            return;
+        }
+
+        if (connection.provider_slug.startsWith('microsoft_')) {
+            // Microsoft uses folders, not labels — move to the first "add" folder if provided
+            if (addLabelIds.length > 0) {
+                await this.microsoftClient.moveMessage(token, messageId, addLabelIds[0]);
+            }
+            return;
+        }
+
+        throw new Error(`Unsupported email provider: ${connection.provider_slug}`);
+    }
+
+    /**
+     * List labels/folders for the connected mailbox.
+     */
+    async listLabels(
+        connectionId: string,
+        clerkUserId: string,
+    ): Promise<EmailLabel[]> {
+        const connection = await this.authorize(connectionId, clerkUserId);
+        const token = await this.tokenRefresh.getValidToken(connectionId);
+
+        if (connection.provider_slug.startsWith('google_')) {
+            const labels = await this.gmailClient.listLabels(token);
+            return labels.map(l => ({ id: l.id, name: l.name, type: l.type }));
+        }
+
+        if (connection.provider_slug.startsWith('microsoft_')) {
+            const folders = await this.microsoftClient.listFolders(token);
+            return folders.map(f => ({ id: f.id, name: f.displayName, type: 'system' as const }));
         }
 
         throw new Error(`Unsupported email provider: ${connection.provider_slug}`);

@@ -1,8 +1,8 @@
 import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { JobQueue, JobMessage, JobResult } from '@splits-network/shared-job-queue';
-import { ChatRepository } from '../v2/chat/repository';
-import { ChatEventPublisher } from '../v2/chat/events';
+import { ChatRepository } from '../v2/chat/repository.js';
+import { ChatEventPublisher } from '../v2/chat/events.js';
 
 type AttachmentJob = {
     attachmentId: string;

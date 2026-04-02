@@ -12,9 +12,9 @@ import {
     ForbiddenError,
     BadRequestError,
 } from "@splits-network/shared-fastify";
-import { PageRepository } from "./repository";
-import { CreatePageInput, UpdatePageInput, PageListParams } from "./types";
-import { IEventPublisher } from "../../v2/shared/events";
+import { PageRepository } from "./repository.js";
+import { CreatePageInput, UpdatePageInput, PageListParams } from "./types.js";
+import { IEventPublisher } from "../../v2/shared/events.js";
 
 export class PageService {
     private accessResolver: AccessContextResolver;

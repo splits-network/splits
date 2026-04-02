@@ -6,7 +6,7 @@ import { ApplicationDetailHeader } from "./application-detail-header";
 import { ApplicationOverviewTab } from "./application-overview-tab";
 import { ApplicationCandidateDetail } from "./application-candidate-detail";
 import { ApplicationRoleDetail } from "./application-role-detail";
-import { ResumeSummaryTab } from "./resume-summary-tab";
+import { TailoredResumeTab } from "./tailored-resume-tab";
 import { ApplicationDocumentsTab } from "./application-documents-tab";
 import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
 import { ApplicationNotesTab } from "./application-notes-tab";
@@ -30,7 +30,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "overview", label: "Overview", icon: "fa-clipboard" },
     { key: "candidate", label: "Candidate", icon: "fa-user" },
     { key: "job", label: "Role", icon: "fa-briefcase" },
-    { key: "resume", label: "Resume", icon: "fa-file-user" },
+    { key: "resume", label: "Smart Resume", icon: "fa-file-user" },
     { key: "documents", label: "Documents", icon: "fa-file" },
     { key: "ai_review", label: "AI Analysis", icon: "fa-brain" },
     { key: "calls", label: "Calls", icon: "fa-phone" },
@@ -111,7 +111,11 @@ export function ApplicationDetailPanel({
                         />
                     ))}
                 {activeTab === "resume" && (
-                    <ResumeSummaryTab resumeData={application.resume_data} />
+                    <TailoredResumeTab
+                        candidateId={(application as any).candidate_id || application.candidate?.id}
+                        jobId={(application as any).job_id || application.job?.id}
+                        applicationId={application.id}
+                    />
                 )}
                 {activeTab === "documents" && (
                     <ApplicationDocumentsTab application={application} />

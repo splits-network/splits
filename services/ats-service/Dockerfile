@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/ats-service ./services/ats-service
 EXPOSE 3002
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/ats-service", "dev"]
 
 # Build stage
@@ -64,6 +65,7 @@ COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 # Copy built service
+COPY --from=build /app/services/ats-service/package.json ./services/ats-service/
 COPY --from=build /app/services/ats-service/dist ./services/ats-service/dist
 
 EXPOSE 3002

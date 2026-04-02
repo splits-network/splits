@@ -2,7 +2,7 @@
  * Content Pages — Filter and Update Types
  */
 
-import { PaginationParams, SortParams } from '../shared/pagination';
+import { PaginationParams, SortParams } from '../shared/pagination.js';
 
 export interface PageFilters extends PaginationParams, SortParams {
     app?: string;

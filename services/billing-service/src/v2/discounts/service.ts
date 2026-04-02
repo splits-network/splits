@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
-import { IEventPublisher } from '../shared/events';
-import type { AccessContext } from '../shared/access';
-import { DiscountRepository } from './repository';
-import { PlanRepository } from '../plans/repository';
+import { IEventPublisher } from '../shared/events.js';
+import type { AccessContext } from '../shared/access.js';
+import { DiscountRepository } from './repository.js';
+import { PlanRepository } from '../plans/repository.js';
 import {
     DiscountValidationRequest,
     DiscountValidationResponse,
@@ -10,7 +10,7 @@ import {
     DiscountValidationError,
     SubscriptionDiscount,
     ApplyDiscountRequest
-} from './types';
+} from './types.js';
 
 interface CacheEntry {
     data: DiscountValidationResponse;

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { CompanyServiceV2 } from './service';
-import { CompanyUpdate } from './types';
-import { requireUserContext } from '../shared/helpers';
+import { CompanyServiceV2 } from './service.js';
+import { CompanyUpdate } from './types.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterCompanyRoutesConfig {
     companyService: CompanyServiceV2;

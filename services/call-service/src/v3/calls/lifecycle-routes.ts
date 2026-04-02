@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { CallRepository } from './repository';
-import { CallLifecycleService } from './lifecycle-service';
-import { idParamSchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { CallRepository } from './repository.js';
+import { CallLifecycleService } from './lifecycle-service.js';
+import { idParamSchema } from './types.js';
 
 const rescheduleBodySchema = {
   type: 'object',

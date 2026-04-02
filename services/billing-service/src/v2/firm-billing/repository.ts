@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { FirmBillingProfile, FirmBillingProfileCreate, FirmBillingProfileUpdate } from './types';
+import { FirmBillingProfile, FirmBillingProfileCreate, FirmBillingProfileUpdate } from './types.js';
 
 export class FirmBillingProfileRepository {
     constructor(private supabase: SupabaseClient) { }

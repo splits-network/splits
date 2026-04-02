@@ -1,10 +1,10 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Logger } from "@splits-network/shared-logging";
-import { HealthChecker } from "./health-checker";
-import { SlidingWindowManager } from "./sliding-window";
-import { IncidentManager } from "./incident-manager";
-import { NotificationManager } from "./notification-manager";
-import { EventPublisher } from "./event-publisher";
+import { HealthChecker } from "./health-checker.js";
+import { SlidingWindowManager } from "./sliding-window.js";
+import { IncidentManager } from "./incident-manager.js";
+import { NotificationManager } from "./notification-manager.js";
+import type { IEventPublisher } from "./event-publisher.js";
 
 const CHECK_INTERVAL_MS = 15_000;
 
@@ -18,7 +18,7 @@ export class MonitorLoop {
         private slidingWindow: SlidingWindowManager,
         private incidentManager: IncidentManager | null,
         private notificationManager: NotificationManager | null,
-        private eventPublisher: EventPublisher | null,
+        private eventPublisher: IEventPublisher | null,
         supabaseUrl: string,
         supabaseKey: string,
         private logger: Logger,
@@ -120,7 +120,7 @@ export class MonitorLoop {
     }
 
     private async persistHealthChecks(
-        results: import("./types").ServiceCheckResult[],
+        results: import("./types.js").ServiceCheckResult[],
     ): Promise<void> {
         if (!this.supabase) {
             this.logger.debug(

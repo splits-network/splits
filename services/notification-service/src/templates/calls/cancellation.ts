@@ -3,8 +3,8 @@
  * Sent to all participants when a call is cancelled.
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, infoCard, alert } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, infoCard, alert } from '../components.js';
 
 export interface CallCancellationData {
     title?: string;

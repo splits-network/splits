@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ExecutionRepository } from './repository';
-import { ExecutionService } from './service';
-import { ExecutionListParams, idParamSchema, listQuerySchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ExecutionRepository } from './repository.js';
+import { ExecutionService } from './service.js';
+import { ExecutionListParams, idParamSchema, listQuerySchema } from './types.js';
 
 export function registerExecutionRoutes(app: FastifyInstance, supabase: SupabaseClient, eventPublisher?: IEventPublisher) {
   const repository = new ExecutionRepository(supabase);

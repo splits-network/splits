@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
 import {
     jobCreatedConfirmationEmail,
     JobCreatedConfirmationData,
@@ -17,7 +17,7 @@ import {
     JobDeletedData,
     jobRecommendationEmail,
     JobRecommendationData,
-} from '../../templates/jobs';
+} from '../../templates/jobs/index.js';
 
 export class JobsEmailService {
     constructor(

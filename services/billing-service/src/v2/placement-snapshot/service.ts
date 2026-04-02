@@ -1,7 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementSnapshotRepository } from './repository';
-import { PlacementSnapshotCreate, PlacementSnapshot } from './types';
-import { SplitsRateService } from '../splits-rates/service';
+import { PlacementSnapshotRepository } from './repository.js';
+import { PlacementSnapshotCreate, PlacementSnapshot } from './types.js';
+import { SplitsRateService } from '../splits-rates/service.js';
 
 interface FirmContext {
     firm_id: string | null;

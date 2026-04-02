@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ViewService } from './service';
-import { ViewRepository } from './repository';
-import { ViewType, viewTypeParamSchema, viewQuerySchema } from './types';
+import { ViewService } from './service.js';
+import { ViewRepository } from './repository.js';
+import { ViewType, viewTypeParamSchema, viewQuerySchema } from './types.js';
 
 export function registerViewRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new ViewRepository(supabase);

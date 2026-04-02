@@ -1,4 +1,4 @@
-import { CompanyPerkRepository } from './repository';
+import { CompanyPerkRepository } from './repository.js';
 
 export class CompanyPerkService {
     constructor(private repository: CompanyPerkRepository) {}

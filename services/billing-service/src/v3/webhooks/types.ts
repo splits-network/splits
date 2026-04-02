@@ -5,7 +5,7 @@
 import Stripe from 'stripe';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
+import { IEventPublisher } from '../../v2/shared/events.js';
 
 export interface StripeWebhookPayload {
   type: string;

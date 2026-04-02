@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { CallRecordingRepository } from "./repository";
-import { CallRecordingService } from "./service";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { CallRecordingRepository } from "./repository.js";
+import { CallRecordingService } from "./service.js";
 import {
     CallRecordingListParams,
     CreateCallRecordingInput,
@@ -18,15 +18,15 @@ import {
     createSchema,
     updateSchema,
     idParamSchema,
-} from "./types";
+} from "./types.js";
 
 // View routes
-import { registerPlaybackView } from "./views/playback.route";
+import { registerPlaybackView } from "./views/playback.route.js";
 
 // Action routes
-import { registerStartAction } from "./actions/start.route";
-import { registerStopAction } from "./actions/stop.route";
-import { registerLivekitWebhookAction } from "./actions/livekit-webhook.route";
+import { registerStartAction } from "./actions/start.route.js";
+import { registerStopAction } from "./actions/stop.route.js";
+import { registerLivekitWebhookAction } from "./actions/livekit-webhook.route.js";
 
 export interface CallRecordingRoutesConfig {
     supabase: SupabaseClient;

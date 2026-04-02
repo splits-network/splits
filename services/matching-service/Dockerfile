@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/matching-service ./services/matching-service
 EXPOSE 3017
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/matching-service", "dev"]
 
 # Build stage
@@ -61,6 +62,7 @@ COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-acc
 COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-job-queue/
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
+COPY --from=build /app/services/matching-service/package.json ./services/matching-service/
 COPY --from=build /app/services/matching-service/dist ./services/matching-service/dist
 
 EXPOSE 3017

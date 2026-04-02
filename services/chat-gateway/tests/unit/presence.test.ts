@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { setPresence, PRESENCE_TTL_SECONDS } from '../../src/index';
+import { setPresence, PRESENCE_TTL_SECONDS } from '../../src/index.js';
 
 describe('setPresence (unit)', () => {
     it('sets redis key with ttl', async () => {

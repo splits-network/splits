@@ -8,10 +8,10 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ApplicationRepository } from '../applications/repository';
-import { AIReviewService } from '../applications/actions/ai-review.service';
-import { CandidateSourcerRepository } from '../candidate-sourcers/repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ApplicationRepository } from '../applications/repository.js';
+import { AIReviewService } from '../applications/actions/ai-review.service.js';
+import { CandidateSourcerRepository } from '../candidate-sourcers/repository.js';
 
 interface DomainEvent {
   event_id: string;

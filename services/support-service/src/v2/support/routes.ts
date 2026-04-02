@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import Redis from 'ioredis';
-import { SupportRepository } from './repository';
-import { SupportServiceV2 } from './service';
-import { SupportEventPublisher } from './events';
-import { requireSupportIdentity, requireAdminContext, getSupportContext } from '../shared/helpers';
+import { Redis } from 'ioredis';
+import { SupportRepository } from './repository.js';
+import { SupportServiceV2 } from './service.js';
+import { SupportEventPublisher } from './events.js';
+import { requireSupportIdentity, requireAdminContext, getSupportContext } from '../shared/helpers.js';
 
 interface RegisterSupportRoutesConfig {
     supabaseUrl: string;

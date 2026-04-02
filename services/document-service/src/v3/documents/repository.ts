@@ -7,7 +7,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { DocumentListParams } from './types';
+import { DocumentListParams } from './types.js';
 
 export class DocumentRepository {
   constructor(private supabase: SupabaseClient) {}

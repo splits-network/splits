@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FirmBillingRepository } from './repository';
-import { FirmBillingService } from './service';
-import { firmIdParamSchema, createSchema, updateSchema, updatePaymentMethodSchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FirmBillingRepository } from './repository.js';
+import { FirmBillingService } from './service.js';
+import { firmIdParamSchema, createSchema, updateSchema, updatePaymentMethodSchema } from './types.js';
 
 export function registerFirmBillingRoutes(
   app: FastifyInstance,

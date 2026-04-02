@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { verifyClerkToken } from '../../src/index';
+import { verifyClerkToken } from '../../src/index.js';
 
 vi.mock('@clerk/backend', () => ({
     createClerkClient: () => ({

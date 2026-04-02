@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementListParams } from './types';
+import { PlacementListParams } from './types.js';
 
 export class PlacementRepository {
   constructor(private supabase: SupabaseClient) {}

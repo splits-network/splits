@@ -9,8 +9,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import type { NotificationChannel } from './email-entitlement-gate';
-import { PREFERENCE_CATEGORIES, resolvePreferenceCategory } from './preference-categories';
+import type { NotificationChannel } from './email-entitlement-gate.js';
+import { PREFERENCE_CATEGORIES, resolvePreferenceCategory } from './preference-categories.js';
 
 export class PreferenceGate {
     constructor(

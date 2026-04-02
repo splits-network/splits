@@ -1,4 +1,4 @@
-import { SkillRepository } from './repository';
+import { SkillRepository } from './repository.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 

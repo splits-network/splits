@@ -5,8 +5,8 @@
  * The V2 repo has 900+ lines of parallel queries across source tables.
  */
 
-import { StatsServiceV2 } from '../../v2/stats/service';
-import { StatsQueryParams } from './types';
+import { StatsServiceV2 } from '../../v2/stats/service.js';
+import { StatsQueryParams } from './types.js';
 
 export class StatsV3Repository {
   constructor(private statsServiceV2: StatsServiceV2) {}

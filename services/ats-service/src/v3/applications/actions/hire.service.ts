@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { ApplicationRepository } from '../repository';
-import { authorizeStageTransition } from './stage-validation';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { ApplicationRepository } from '../repository.js';
+import { authorizeStageTransition } from './stage-validation.js';
 
 export class HireService {
   private accessResolver: AccessContextResolver;

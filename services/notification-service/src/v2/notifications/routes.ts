@@ -1,11 +1,11 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { NotificationServiceV2 } from './service';
-import { NotificationRepositoryV2 } from './repository';
-import { NotificationUpdate } from './types';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { resolveAccessContext } from '../shared/access';
+import { NotificationServiceV2 } from './service.js';
+import { NotificationRepositoryV2 } from './repository.js';
+import { NotificationUpdate } from './types.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 interface RegisterNotificationRoutesConfig {
     supabaseUrl: string;

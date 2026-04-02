@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterProfileRepository } from './profile.repository';
-import { RecruiterProfileService } from './profile.service';
-import { idParamSchema, slugParamSchema } from '../types';
+import { RecruiterProfileRepository } from './profile.repository.js';
+import { RecruiterProfileService } from './profile.service.js';
+import { idParamSchema, slugParamSchema } from '../types.js';
 
 export function registerRecruiterProfileView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new RecruiterProfileRepository(supabase);

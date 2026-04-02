@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PageListParams } from './types';
+import { PageListParams } from './types.js';
 
 export class PageRepository {
   constructor(private supabase: SupabaseClient) {}

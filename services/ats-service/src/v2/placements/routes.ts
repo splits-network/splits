@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { PlacementServiceV2 } from './service';
-import { PlacementUpdate } from './types';
-import { requireUserContext } from '../shared/helpers';
+import { PlacementServiceV2 } from './service.js';
+import { PlacementUpdate } from './types.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterPlacementRoutesConfig {
     placementService: PlacementServiceV2;

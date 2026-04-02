@@ -7,9 +7,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { TemplateRepository } from './repository';
-import { CreateTemplateInput, UpdateTemplateInput, TemplateListParams } from './types';
-import { IEventPublisher } from '../../v2/shared/events';
+import { TemplateRepository } from './repository.js';
+import { CreateTemplateInput, UpdateTemplateInput, TemplateListParams } from './types.js';
+import { IEventPublisher } from '../../v2/shared/events.js';
 
 export class TemplateService {
   private accessResolver: AccessContextResolver;

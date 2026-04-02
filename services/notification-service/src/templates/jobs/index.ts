@@ -3,8 +3,8 @@
  * Templates for job creation, status changes, and expiration notifications.
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, infoCard, divider } from '../components.js';
 
 // ─── Job Created Confirmation ────────────────────────────────────────────────
 

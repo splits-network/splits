@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyListParams } from './types';
+import { CompanyListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'updated_at', 'name', 'industry', 'company_size', 'stage'] as const;
 

@@ -6,9 +6,9 @@
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterBoardRepository } from './recruiter-board.repository';
-import { RecruiterSavedJobRepository } from '../../recruiter-saved-jobs/repository';
-import { JobListParams } from '../types';
+import { RecruiterBoardRepository } from './recruiter-board.repository.js';
+import { RecruiterSavedJobRepository } from '../../recruiter-saved-jobs/repository.js';
+import { JobListParams } from '../types.js';
 
 export class RecruiterBoardService {
     private accessResolver: AccessContextResolver;

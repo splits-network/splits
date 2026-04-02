@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
-import { ConnectionRepository } from '../connections/repository';
-import { TokenRefreshService } from './token-refresh';
-import { CalendarService } from './service';
-import { CallCalendarService } from './call-calendar-service';
-import { CallCalendarRepository } from './call-calendar-repository';
-import { IEventPublisher } from '../shared/events';
+import { ConnectionRepository } from '../connections/repository.js';
+import { TokenRefreshService } from './token-refresh.js';
+import { CalendarService } from './service.js';
+import { CallCalendarService } from './call-calendar-service.js';
+import { CallCalendarRepository } from './call-calendar-repository.js';
+import { IEventPublisher } from '../shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
 

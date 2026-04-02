@@ -1,6 +1,6 @@
-import { AdminAtsRepository, AdminListParams, AdminListResponse } from './repository';
-import { AdminAtsStatsResult, getAtsAdminStats } from './stats-repository';
-import { AdminAtsChartDataResult, getAtsAdminChartData } from './chart-repository';
+import { AdminAtsRepository, AdminListParams, AdminListResponse } from './repository.js';
+import { AdminAtsStatsResult, getAtsAdminStats } from './stats-repository.js';
+import { AdminAtsChartDataResult, getAtsAdminChartData } from './chart-repository.js';
 
 export class AdminAtsService {
     constructor(private repository: AdminAtsRepository) {}

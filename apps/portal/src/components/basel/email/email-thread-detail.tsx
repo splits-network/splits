@@ -10,8 +10,17 @@ import { useEmail } from "./email-context";
 import EmailMessageCard from "./email-message-card";
 
 export default function EmailThreadDetail() {
-    const { thread, loadingThread, closeThread, openCompose, selectedConnection } =
-        useEmail();
+    const {
+        thread,
+        loadingThread,
+        closeThread,
+        openCompose,
+        selectedConnection,
+        trashMessage,
+        archiveMessage,
+        markAsRead,
+        markAsUnread,
+    } = useEmail();
 
     if (loadingThread) {
         return (
@@ -74,6 +83,20 @@ export default function EmailThreadDetail() {
                         Back
                     </button>
                     <button
+                        onClick={() => archiveMessage(thread.messages[0].id)}
+                        className="btn btn-ghost btn-sm rounded-none"
+                        title="Archive"
+                    >
+                        <i className="fa-duotone fa-regular fa-box-archive" />
+                    </button>
+                    <button
+                        onClick={() => trashMessage(thread.messages[0].id)}
+                        className="btn btn-ghost btn-sm rounded-none text-error"
+                        title="Trash"
+                    >
+                        <i className="fa-duotone fa-regular fa-trash" />
+                    </button>
+                    <button
                         onClick={() => handleReply(thread.messages[thread.messages.length - 1].id)}
                         className="btn btn-primary btn-sm rounded-none font-bold uppercase tracking-wider"
                     >
@@ -91,6 +114,10 @@ export default function EmailThreadDetail() {
                         message={msg}
                         isLast={i === thread.messages.length - 1}
                         onReply={handleReply}
+                        onTrash={trashMessage}
+                        onArchive={archiveMessage}
+                        onMarkRead={markAsRead}
+                        onMarkUnread={markAsUnread}
                     />
                 ))}
             </div>

@@ -3,8 +3,8 @@
  * Professional branded templates for candidate-related notifications
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider, badge, list } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider, badge, list } from '../components.js';
 
 export interface CandidateSourcedData {
     candidateName: string;

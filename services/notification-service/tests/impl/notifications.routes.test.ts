@@ -7,8 +7,8 @@ vi.mock('@supabase/supabase-js', () => {
     };
 });
 
-import { NotificationServiceV2 } from '../../src/v2/notifications/service';
-import { registerNotificationRoutes } from '../../src/v2/notifications/routes';
+import { NotificationServiceV2 } from '../../src/v2/notifications/service.js';
+import { registerNotificationRoutes } from '../../src/v2/notifications/routes.js';
 
 describe('Notification routes (integration)', () => {
     const config = {

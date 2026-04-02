@@ -7,8 +7,8 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { evaluateBadgeCriteria, BadgeCriteria } from './evaluator';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { evaluateBadgeCriteria, BadgeCriteria } from './evaluator.js';
 
 type EntityType = 'recruiter' | 'candidate' | 'company' | 'firm';
 

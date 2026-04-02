@@ -1,5 +1,5 @@
-import { StatsRepository } from './repository';
-import { StatsQueryParams, StatsRange, StatsResponse, PlatformActivityEvent, TopPerformer } from './types';
+import { StatsRepository } from './repository.js';
+import { StatsQueryParams, StatsRange, StatsResponse, PlatformActivityEvent, TopPerformer } from './types.js';
 
 function startOfYear(date: Date) {
     return new Date(date.getFullYear(), 0, 1);

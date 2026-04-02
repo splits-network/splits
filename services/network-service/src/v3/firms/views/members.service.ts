@@ -3,8 +3,8 @@
  * GET /api/v3/firms/:firmId/views/members
  */
 
-import { FirmMemberListParams } from '../types';
-import { FirmMembersViewRepository } from './members.repository';
+import { FirmMemberListParams } from '../types.js';
+import { FirmMembersViewRepository } from './members.repository.js';
 
 export class FirmMembersViewService {
   constructor(private repository: FirmMembersViewRepository) {}

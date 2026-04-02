@@ -5,7 +5,7 @@
  */
 
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { RecruiterProfileRepository } from './profile.repository';
+import { RecruiterProfileRepository } from './profile.repository.js';
 
 export class RecruiterProfileService {
   constructor(private repository: RecruiterProfileRepository) {}

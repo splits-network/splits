@@ -3,8 +3,8 @@
  * Notifications for the "Invite to Apply" feature on matched candidates
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider } from '../components.js';
 
 /* ─── Recruiter Invite ──────────────────────────────────────────────────────── */
 

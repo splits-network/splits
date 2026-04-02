@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RuleRepository } from './repository';
-import { RuleService } from './service';
-import { CreateRuleInput, UpdateRuleInput, RuleListParams, idParamSchema, listQuerySchema, createRuleSchema, updateRuleSchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RuleRepository } from './repository.js';
+import { RuleService } from './service.js';
+import { CreateRuleInput, UpdateRuleInput, RuleListParams, idParamSchema, listQuerySchema, createRuleSchema, updateRuleSchema } from './types.js';
 
 export function registerRuleRoutes(app: FastifyInstance, supabase: SupabaseClient, eventPublisher?: IEventPublisher) {
   const repository = new RuleRepository(supabase);

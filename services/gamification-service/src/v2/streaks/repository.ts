@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { EntityStreak } from './types';
-import { BadgeEntityType } from '../badges/definitions/types';
+import { EntityStreak } from './types.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
 
 export class StreakRepository {
     private supabase: SupabaseClient;

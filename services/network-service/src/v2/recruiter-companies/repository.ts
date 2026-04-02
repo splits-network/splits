@@ -6,7 +6,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { RecruiterCompany, RecruiterCompanyCreate, RecruiterCompanyUpdate, RecruiterCompanyFilters, RecruiterCompanyPermissions } from './types';
+import { RecruiterCompany, RecruiterCompanyCreate, RecruiterCompanyUpdate, RecruiterCompanyFilters, RecruiterCompanyPermissions } from './types.js';
 
 export class RecruiterCompanyRepository {
     constructor(private supabase: SupabaseClient) {}

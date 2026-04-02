@@ -3,10 +3,10 @@
  * Handles ALL application updates with smart validation
  */
 
-import { ApplicationRepository } from './repository';
-import { ApplicationFilters, ApplicationUpdate } from './types';
-import { IEventPublisher } from '../shared/events';
-import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { ApplicationRepository } from './repository.js';
+import { ApplicationFilters, ApplicationUpdate } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
+import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 

@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { CandidateDashboardStatsRepository } from './dashboard-stats.repository';
+import { CandidateDashboardStatsRepository } from './dashboard-stats.repository.js';
 
 export class CandidateDashboardStatsService {
   private accessResolver: AccessContextResolver;

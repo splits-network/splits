@@ -5,8 +5,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminChartsRepository } from './charts.repository';
-import { periodQuerySchema } from '../types';
+import { AdminChartsRepository } from './charts.repository.js';
+import { periodQuerySchema } from '../types.js';
 
 export function registerAdminChartsView(app: FastifyInstance, supabase: SupabaseClient) {
     const repository = new AdminChartsRepository(supabase);

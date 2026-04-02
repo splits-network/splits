@@ -3,9 +3,9 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams } from '@splits-network/shared-types';
-import { PayoutScheduleServiceV2 } from './service';
-import { PayoutScheduleStatsRepository } from './stats-repository';
-import { PayoutScheduleFilters, PayoutScheduleCreate, PayoutScheduleUpdate } from './types';
+import { PayoutScheduleServiceV2 } from './service.js';
+import { PayoutScheduleStatsRepository } from './stats-repository.js';
+import { PayoutScheduleFilters, PayoutScheduleCreate, PayoutScheduleUpdate } from './types.js';
 
 export async function payoutScheduleRoutes(
     app: FastifyInstance,

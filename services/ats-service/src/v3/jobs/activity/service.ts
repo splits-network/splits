@@ -8,8 +8,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { JobActivityRepository } from './repository';
-import { JobActivityInsert, ActivityListParams } from './types';
+import { JobActivityRepository } from './repository.js';
+import { JobActivityInsert, ActivityListParams } from './types.js';
 
 /** Fields worth tracking in the activity log (skip noisy/internal ones) */
 const TRACKED_FIELDS = [

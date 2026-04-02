@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ReputationListParams } from '../types';
+import { ReputationListParams } from '../types.js';
 
 const LIST_SELECT = '*, recruiter:recruiters(id, name, email)';
 

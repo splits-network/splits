@@ -10,8 +10,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { MembershipDetailViewRepository } from './detail.repository';
-import { MembershipListParams } from '../types';
+import { MembershipDetailViewRepository } from './detail.repository.js';
+import { MembershipListParams } from '../types.js';
 
 export class MembershipDetailViewService {
   private accessResolver: AccessContextResolver;

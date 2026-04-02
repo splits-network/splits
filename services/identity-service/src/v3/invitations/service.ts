@@ -5,12 +5,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { InvitationRepository } from './repository';
-import { InvitationDetailViewRepository } from './views/detail.repository';
-import { MembershipRepository } from '../memberships/repository';
-import { UserRepository } from '../users/repository';
-import { CreateInvitationInput, UpdateInvitationInput, InvitationListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { InvitationRepository } from './repository.js';
+import { InvitationDetailViewRepository } from './views/detail.repository.js';
+import { MembershipRepository } from '../memberships/repository.js';
+import { UserRepository } from '../users/repository.js';
+import { CreateInvitationInput, UpdateInvitationInput, InvitationListParams } from './types.js';
 
 export class InvitationService {
   private accessResolver: AccessContextResolver;

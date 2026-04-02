@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FraudSignalRepository } from './repository';
-import { CreateFraudSignalInput, UpdateFraudSignalInput, FraudSignalListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FraudSignalRepository } from './repository.js';
+import { CreateFraudSignalInput, UpdateFraudSignalInput, FraudSignalListParams } from './types.js';
 
 export class FraudSignalService {
   private accessResolver: AccessContextResolver;

@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { AdminBillingService } from './service';
+import { AdminBillingService } from './service.js';
 
 interface AdminBillingRoutesConfig {
     adminService: AdminBillingService;

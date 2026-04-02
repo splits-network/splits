@@ -1,7 +1,7 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { OnboardingEmailService } from '../../services/onboarding/service';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { OnboardingEmailService } from '../../services/onboarding/service.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
 
 export class OnboardingEventConsumer {
     constructor(

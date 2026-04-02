@@ -7,8 +7,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { registerAuditLogRoutes } from './audit-log/routes';
-import { registerMetricsView } from './views/metrics.route';
+import { registerAuditLogRoutes } from './audit-log/routes.js';
+import { registerMetricsView } from './views/metrics.route.js';
 
 export function registerModerationRoutes(
   app: FastifyInstance,

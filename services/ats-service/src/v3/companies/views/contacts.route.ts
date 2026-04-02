@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyContactsRepository } from './contacts.repository';
-import { CompanyContactsService } from './contacts.service';
-import { idParamSchema } from '../types';
+import { CompanyContactsRepository } from './contacts.repository.js';
+import { CompanyContactsService } from './contacts.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerCompanyContactsView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CompanyContactsRepository(supabase);

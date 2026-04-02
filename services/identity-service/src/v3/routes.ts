@@ -7,15 +7,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerUserRoutes } from './users/routes';
-import { registerOrganizationRoutes } from './organizations/routes';
-import { registerMembershipRoutes } from './memberships/routes';
-import { registerUserRoleRoutes } from './user-roles/routes';
-import { registerInvitationRoutes } from './invitations/routes';
-import { registerConsentRoutes } from './consent/routes';
-import { registerWebhookRoutes } from './webhooks/routes';
-import { registerAdminRoutes } from './admin/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerUserRoutes } from './users/routes.js';
+import { registerOrganizationRoutes } from './organizations/routes.js';
+import { registerMembershipRoutes } from './memberships/routes.js';
+import { registerUserRoleRoutes } from './user-roles/routes.js';
+import { registerInvitationRoutes } from './invitations/routes.js';
+import { registerConsentRoutes } from './consent/routes.js';
+import { registerWebhookRoutes } from './webhooks/routes.js';
+import { registerAdminRoutes } from './admin/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

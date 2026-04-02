@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError } from '@splits-network/shared-fastify';
-import { ConsentRepository } from './repository';
-import { SaveConsentInput } from './types';
+import { ConsentRepository } from './repository.js';
+import { SaveConsentInput } from './types.js';
 
 export class ConsentService {
   private accessResolver: AccessContextResolver;

@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminListParams } from './types';
+import { AdminListParams } from './types.js';
 
 const SITE_SORTABLE = ['created_at', 'title', 'severity'];
 const LOG_SORTABLE = ['created_at', 'sent_at', 'status'];

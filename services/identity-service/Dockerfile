@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/identity-service ./services/identity-service
 EXPOSE 3001
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/identity-service", "dev"]
 
 # Build stage
@@ -64,6 +65,7 @@ COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 # Copy built service
+COPY --from=build /app/services/identity-service/package.json ./services/identity-service/
 COPY --from=build /app/services/identity-service/dist ./services/identity-service/dist
 
 EXPOSE 3001

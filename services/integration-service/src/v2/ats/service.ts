@@ -1,9 +1,9 @@
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { ATSRepository } from './repository';
-import { GreenhouseClient } from './greenhouse-client';
-import { LeverClient } from './lever-client';
-import { IEventPublisher } from '../shared/events';
+import { ATSRepository } from './repository.js';
+import { GreenhouseClient } from './greenhouse-client.js';
+import { LeverClient } from './lever-client.js';
+import { IEventPublisher } from '../shared/events.js';
 import type {
     ATSIntegration,
     ATSPlatform,

@@ -9,10 +9,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { UnauthorizedError } from '@splits-network/shared-fastify';
 import Stripe from 'stripe';
-import { IEventPublisher } from '../../v2/shared/events';
-import { WebhookRepository } from './repository';
-import { WebhookEventRepository } from '../webhook-events/repository';
-import { WebhookService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { WebhookRepository } from './repository.js';
+import { WebhookEventRepository } from '../webhook-events/repository.js';
+import { WebhookService } from './service.js';
 
 export function registerWebhookRoutes(
   app: FastifyInstance,

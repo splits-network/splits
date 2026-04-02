@@ -6,8 +6,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { EnrichedSavedJobRepository } from './enriched.repository';
-import { SavedJobListParams } from '../types';
+import { EnrichedSavedJobRepository } from './enriched.repository.js';
+import { SavedJobListParams } from '../types.js';
 
 export class EnrichedSavedJobService {
   private accessResolver: AccessContextResolver;

@@ -6,46 +6,128 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
+import { SupabaseClient } from '@supabase/supabase-js';
+import type { IAiClient } from '@splits-network/shared-ai-client';
 
 const MAX_TEXT_LENGTH = 8000;
 
 export class EmbeddingService {
-    private apiKey: string;
-    private model = 'text-embedding-3-small';
-
-    constructor(private logger: Logger) {
-        this.apiKey = process.env.OPENAI_API_KEY || '';
-    }
+    constructor(
+        private logger: Logger,
+        private supabase?: SupabaseClient,
+        private aiClient?: IAiClient,
+    ) {}
 
     async generateEmbedding(text: string): Promise<number[]> {
-        if (!this.apiKey) {
-            throw new Error('OPENAI_API_KEY not configured');
+        if (!this.aiClient) {
+            throw new Error('AI client is not configured');
         }
 
         const truncated = text.substring(0, MAX_TEXT_LENGTH);
-
-        const response = await fetch('https://api.openai.com/v1/embeddings', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.apiKey}`,
-            },
-            body: JSON.stringify({
-                model: this.model,
-                input: truncated,
-            }),
-        });
-
-        if (!response.ok) {
-            const body = await response.text();
-            throw new Error(`OpenAI embeddings API error: ${response.status} ${body}`);
-        }
-
-        const data = await response.json() as any;
-        return data.data[0].embedding;
+        const result = await this.aiClient.embedding('embedding', truncated);
+        return result.embedding;
     }
 
-    buildCandidateText(candidate: any): string {
+    async buildCandidateTextFromSmartResume(candidateId: string): Promise<string | null> {
+        if (!this.supabase) {
+            this.logger.warn('No Supabase client available for smart resume lookup');
+            return null;
+        }
+
+        const { data: profile } = await this.supabase
+            .from('smart_resume_profiles')
+            .select('*')
+            .eq('candidate_id', candidateId)
+            .is('deleted_at', null)
+            .maybeSingle();
+
+        if (!profile) return null;
+
+        const profileId = profile.id;
+        const parts: string[] = [];
+
+        if (profile.headline) parts.push(profile.headline);
+        if (profile.professional_summary) parts.push(profile.professional_summary);
+
+        // Parallel fetch all visible child data
+        const [experiences, projects, tasks, skills, education, certifications, publications] = await Promise.all([
+            this.supabase.from('smart_resume_experiences').select('*').eq('profile_id', profileId).eq('visible_to_matching', true).is('deleted_at', null).order('sort_order'),
+            this.supabase.from('smart_resume_projects').select('*').eq('profile_id', profileId).eq('visible_to_matching', true).is('deleted_at', null).order('sort_order'),
+            this.supabase.from('smart_resume_tasks').select('*').eq('profile_id', profileId).eq('visible_to_matching', true).is('deleted_at', null).order('sort_order'),
+            this.supabase.from('smart_resume_skills').select('*').eq('profile_id', profileId).eq('visible_to_matching', true).is('deleted_at', null).order('sort_order'),
+            this.supabase.from('smart_resume_education').select('*').eq('profile_id', profileId).eq('visible_to_matching', true).is('deleted_at', null).order('sort_order'),
+            this.supabase.from('smart_resume_certifications').select('*').eq('profile_id', profileId).eq('visible_to_matching', true).is('deleted_at', null).order('sort_order'),
+            this.supabase.from('smart_resume_publications').select('*').eq('profile_id', profileId).eq('visible_to_matching', true).is('deleted_at', null).order('sort_order'),
+        ]);
+
+        if (experiences.data?.length) {
+            const expText = experiences.data.map((e: any) => {
+                const items = [e.title, e.company].filter(Boolean).join(' at ');
+                const desc = e.description ? `: ${e.description.substring(0, 300)}` : '';
+                const achievements = e.achievements?.length
+                    ? ` | Achievements: ${e.achievements.join('; ')}` : '';
+                return `${items}${desc}${achievements}`;
+            }).join('. ');
+            parts.push(`Experience: ${expText}`);
+        }
+
+        if (projects.data?.length) {
+            const projText = projects.data.map((p: any) => {
+                const items = [p.name, p.description?.substring(0, 200)].filter(Boolean).join(': ');
+                const outcome = p.outcomes ? ` | Outcome: ${p.outcomes}` : '';
+                const pSkills = p.skills_used?.length ? ` | Skills: ${p.skills_used.join(', ')}` : '';
+                return `${items}${outcome}${pSkills}`;
+            }).join('. ');
+            parts.push(`Projects: ${projText}`);
+        }
+
+        if (tasks.data?.length) {
+            const taskText = tasks.data.map((t: any) => {
+                const desc = t.description || '';
+                const impact = t.impact ? ` (Impact: ${t.impact})` : '';
+                return `${desc}${impact}`;
+            }).join('; ');
+            parts.push(`Tasks: ${taskText}`);
+        }
+
+        if (skills.data?.length) {
+            const skillText = skills.data.map((s: any) => {
+                const level = s.proficiency ? ` (${s.proficiency})` : '';
+                return `${s.name}${level}`;
+            }).join(', ');
+            parts.push(`Skills: ${skillText}`);
+        }
+
+        if (education.data?.length) {
+            const eduText = education.data.map((e: any) =>
+                `${e.degree || ''} ${e.field_of_study || ''} from ${e.institution || ''}`.trim()
+            ).join(', ');
+            parts.push(`Education: ${eduText}`);
+        }
+
+        if (certifications.data?.length) {
+            const certText = certifications.data.map((c: any) => c.name).filter(Boolean).join(', ');
+            parts.push(`Certifications: ${certText}`);
+        }
+
+        if (publications.data?.length) {
+            const pubText = publications.data.map((p: any) => p.title).filter(Boolean).join(', ');
+            parts.push(`Publications: ${pubText}`);
+        }
+
+        if (profile.total_years_experience) {
+            parts.push(`${profile.total_years_experience} years of experience`);
+        }
+
+        this.logger.info({ candidateId, sections: parts.length }, 'Built candidate text from smart resume');
+        return parts.join('. ').substring(0, MAX_TEXT_LENGTH);
+    }
+
+    buildCandidateText(candidate: any, smartResumeText?: string): string {
+        if (smartResumeText) {
+            return smartResumeText.substring(0, MAX_TEXT_LENGTH);
+        }
+
         const parts: string[] = [];
         const meta = candidate.resume_metadata;
 

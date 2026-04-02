@@ -3,27 +3,20 @@
  * Core AI logic for candidate-job fit analysis
  */
 
-import { AIReviewRepository } from './repository';
-import { AIReviewInput, AIReviewResult } from './types';
-import { IEventPublisher } from '../shared/events';
+import { AIReviewRepository } from './repository.js';
+import { AIReviewInput, AIReviewResult } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
+import type { IAiClient } from '@splits-network/shared-ai-client';
 
 export class AIReviewServiceV2 {
-    private openaiApiKey: string;
-    private modelVersion: string;
-
     constructor(
         private repository: AIReviewRepository,
         private eventPublisher: IEventPublisher | undefined,
-        private logger: Logger
+        private logger: Logger,
+        private aiClient?: IAiClient,
     ) {
-        this.openaiApiKey = process.env.OPENAI_API_KEY || '';
-        this.modelVersion = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-
-        if (!this.openaiApiKey) {
-            this.logger.warn('OPENAI_API_KEY not set. AI review service will not function.');
-        }
-        this.logger.info(`AI Review Service initialized with model: ${this.modelVersion}`);
+        this.logger.info('AI Review Service initialized');
     }
 
     /**
@@ -124,12 +117,62 @@ export class AIReviewServiceV2 {
             resumeData = application.resume_data;
         }
 
+        // Fetch smart resume data if candidate has one (richer than document-based data)
+        const candidateId = input.candidate_id || application.candidate_id;
+        let smartResumeData: any = null;
+        if (candidateId) {
+            try {
+                smartResumeData = await this.repository.getSmartResumeData(candidateId);
+            } catch (err) {
+                this.logger.warn({ err, candidate_id: candidateId }, 'Failed to fetch smart resume data for AI review');
+            }
+        }
+
+        // If smart resume exists, build richer resume_data from it
+        if (smartResumeData) {
+            resumeData = {
+                summary: smartResumeData.profile.professional_summary,
+                headline: smartResumeData.profile.headline,
+                total_years_experience: smartResumeData.profile.total_years_experience,
+                highest_degree: smartResumeData.profile.highest_degree,
+                experience: smartResumeData.experiences.map((exp: any) => ({
+                    title: exp.title,
+                    company: exp.company,
+                    location: exp.location,
+                    duration: [exp.start_date, exp.is_current ? 'Present' : exp.end_date].filter(Boolean).join(' - '),
+                    description: exp.description,
+                    achievements: exp.achievements || [],
+                })),
+                projects: smartResumeData.projects.map((proj: any) => ({
+                    name: proj.name,
+                    description: proj.description,
+                    outcomes: proj.outcomes,
+                    skills_used: proj.skills_used || [],
+                })),
+                tasks: smartResumeData.tasks.map((task: any) => ({
+                    description: task.description,
+                    impact: task.impact,
+                    skills_used: task.skills_used || [],
+                })),
+                skills: smartResumeData.skills.map((s: any) =>
+                    `${s.name}${s.proficiency ? ` (${s.proficiency})` : ''}${s.years_used ? ` - ${s.years_used}yr` : ''}`
+                ),
+                education: smartResumeData.education.map((edu: any) => ({
+                    degree: edu.degree,
+                    field: edu.field_of_study,
+                    institution: edu.institution,
+                })),
+                certifications: smartResumeData.certifications.map((c: any) => c.name),
+                publications: smartResumeData.publications.map((p: any) => p.title),
+            };
+        }
+
         return {
             application_id: input.application_id!,
-            candidate_id: input.candidate_id || application.candidate_id,
+            candidate_id: candidateId,
             job_id: input.job_id || application.job_id,
             resume_text: resumeText,
-            resume_data: application.resume_data || undefined,
+            resume_data: resumeData || application.resume_data || undefined,
             cover_letter: application.cover_letter || undefined,
             documents_count: application.documents?.length || 0,
             job_description: input.job_description || application.job?.recruiter_description || application.job?.description || '',
@@ -196,7 +239,7 @@ export class AIReviewServiceV2 {
                 candidate_years: result.candidate_years,
                 meets_experience_requirement: result.meets_experience_requirement,
                 location_compatibility: result.location_compatibility,
-                model_version: this.modelVersion,
+                model_version: result.model_version,
                 processing_time_ms: processingTimeMs,
             });
 
@@ -279,93 +322,33 @@ export class AIReviewServiceV2 {
     }
 
     /**
-     * Call OpenAI API to analyze candidate-job fit
+     * Analyze candidate-job fit via the shared AI client (provider-agnostic).
      */
-    private async analyzeCandidateJobFit(input: AIReviewInput): Promise<AIReviewResult> {
-        if (!this.openaiApiKey) {
-            throw new Error('OPENAI_API_KEY is not configured');
+    private async analyzeCandidateJobFit(input: AIReviewInput): Promise<AIReviewResult & { model_version: string }> {
+        if (!this.aiClient) {
+            throw new Error('AI client is not configured');
         }
 
         const prompt = this.buildPrompt(input);
-        const body = JSON.stringify({
-            model: this.modelVersion,
-            messages: [
-                {
-                    role: 'system',
-                    content:
-                        'You are an expert recruiter assistant analyzing candidate-job fit. Provide detailed, honest assessments in valid JSON format.',
-                },
-                {
-                    role: 'user',
-                    content: prompt,
-                },
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.3,
-            max_tokens: 2000,
+        const messages = [
+            {
+                role: 'system' as const,
+                content: 'You are an expert recruiter assistant analyzing candidate-job fit. Provide detailed, honest assessments in valid JSON format.',
+            },
+            {
+                role: 'user' as const,
+                content: prompt,
+            },
+        ];
+
+        const response = await this.aiClient.chatCompletion('fit_review', messages, {
+            jsonMode: true,
         });
 
-        // Retry with exponential backoff for transient failures (429, 5xx)
-        const MAX_RETRIES = 2;
-        let lastError: Error | null = null;
+        const result = JSON.parse(response.content) as AIReviewResult;
+        this.validateResult(result);
 
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-            if (attempt > 0) {
-                const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
-                await new Promise(resolve => setTimeout(resolve, delayMs));
-                this.logger.info({ attempt, application_id: input.application_id }, 'Retrying OpenAI request');
-            }
-
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${this.openaiApiKey}`,
-                },
-                body,
-                signal: AbortSignal.timeout(60_000),
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => '');
-                lastError = new Error(`OpenAI API error: ${response.status} ${errorText}`);
-
-                // Retry on 429 (rate limit) or 5xx (server error)
-                if (response.status === 429 || response.status >= 500) {
-                    continue;
-                }
-                // Non-retryable error (400, 401, 403, etc.)
-                throw lastError;
-            }
-
-            // Safe JSON parsing of OpenAI response
-            let data: any;
-            try {
-                data = await response.json();
-            } catch {
-                lastError = new Error('OpenAI returned invalid JSON response');
-                continue;
-            }
-
-            const content = data?.choices?.[0]?.message?.content;
-            if (!content) {
-                lastError = new Error('OpenAI response missing choices[0].message.content');
-                continue;
-            }
-
-            let result: AIReviewResult;
-            try {
-                result = JSON.parse(content) as AIReviewResult;
-            } catch {
-                lastError = new Error('OpenAI returned non-JSON content in message');
-                continue;
-            }
-
-            this.validateResult(result);
-            return result;
-        }
-
-        throw lastError || new Error('OpenAI request failed after retries');
+        return { ...result, model_version: `${response.provider}/${response.model}` };
     }
 
     private buildPrompt(input: AIReviewInput): string {
@@ -418,7 +401,25 @@ export class AIReviewServiceV2 {
                     resumeSection += `    - ${edu.degree || ''} ${edu.field || ''} from ${edu.institution || edu.school || ''}\n`;
                 });
             }
+            if (rd.projects?.length) {
+                resumeSection += '  Key Projects:\n';
+                rd.projects.slice(0, 8).forEach((proj: any) => {
+                    resumeSection += `    - ${proj.name || 'Project'}: ${proj.description || ''}`;
+                    if (proj.outcomes) resumeSection += ` | Outcomes: ${proj.outcomes}`;
+                    if (proj.skills_used?.length) resumeSection += ` | Skills: ${proj.skills_used.join(', ')}`;
+                    resumeSection += '\n';
+                });
+            }
+            if (rd.tasks?.length) {
+                resumeSection += '  Key Responsibilities:\n';
+                rd.tasks.slice(0, 10).forEach((task: any) => {
+                    resumeSection += `    - ${task.description || ''}`;
+                    if (task.impact) resumeSection += ` → ${task.impact}`;
+                    resumeSection += '\n';
+                });
+            }
             if (rd.certifications?.length) resumeSection += `  Certifications: ${rd.certifications.join(', ')}\n`;
+            if (rd.publications?.length) resumeSection += `  Publications: ${rd.publications.join(', ')}\n`;
             if (rd.total_years_experience) resumeSection += `  Total Years Experience: ${rd.total_years_experience}\n`;
             if (rd.highest_degree) resumeSection += `  Highest Degree: ${rd.highest_degree}\n`;
         }

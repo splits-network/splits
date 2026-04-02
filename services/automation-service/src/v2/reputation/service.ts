@@ -5,10 +5,10 @@
  * and event publishing.
  */
 
-import { ReputationRepository } from './repository';
-import { calculateReputationScore } from './calculator';
-import { getTierFromScore, TierChangeEvent, RecruiterReputation } from './types';
-import { IEventPublisher } from '../shared/events';
+import { ReputationRepository } from './repository.js';
+import { calculateReputationScore } from './calculator.js';
+import { getTierFromScore, TierChangeEvent, RecruiterReputation } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
 
 export class ReputationService {

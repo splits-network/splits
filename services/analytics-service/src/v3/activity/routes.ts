@@ -6,10 +6,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ActivityService } from '../../v2/activity/service';
-import { ActivityRepository } from './repository';
-import { ActivityV3Service } from './service';
-import { HeartbeatInput, heartbeatSchema } from './types';
+import { ActivityService } from '../../v2/activity/service.js';
+import { ActivityRepository } from './repository.js';
+import { ActivityV3Service } from './service.js';
+import { HeartbeatInput, heartbeatSchema } from './types.js';
 
 export function registerActivityRoutes(
   app: FastifyInstance,

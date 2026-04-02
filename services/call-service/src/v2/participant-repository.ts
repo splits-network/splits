@@ -3,7 +3,7 @@ import {
     CallParticipant,
     CallParticipantRole,
     CallParticipantWithUser,
-} from './types';
+} from './types.js';
 
 export class ParticipantRepository {
     constructor(private supabase: SupabaseClient) {}

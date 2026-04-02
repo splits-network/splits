@@ -3,7 +3,7 @@
  */
 
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { BulkReplaceSkillsRepository, BulkSkillItem } from './bulk-replace.repository';
+import { BulkReplaceSkillsRepository, BulkSkillItem } from './bulk-replace.repository.js';
 
 export class BulkReplaceSkillsService {
   constructor(private repository: BulkReplaceSkillsRepository) {}

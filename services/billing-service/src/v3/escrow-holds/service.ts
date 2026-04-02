@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { EscrowHoldRepository } from './repository';
-import { CreateEscrowHoldInput, UpdateEscrowHoldInput, EscrowHoldListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { EscrowHoldRepository } from './repository.js';
+import { CreateEscrowHoldInput, UpdateEscrowHoldInput, EscrowHoldListParams } from './types.js';
 
 export class EscrowHoldService {
   private accessResolver: AccessContextResolver;

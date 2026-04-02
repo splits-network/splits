@@ -7,7 +7,7 @@
  */
 
 import Stripe from 'stripe';
-import { WebhookHandler, WebhookHandlerDeps } from './types';
+import { WebhookHandler, WebhookHandlerDeps } from './types.js';
 
 export class BalanceWebhookHandler implements WebhookHandler {
   constructor(private deps: WebhookHandlerDeps) {}

@@ -1,4 +1,4 @@
-import { PaymentMethodDetails } from '../company-billing/types';
+import { PaymentMethodDetails } from '../company-billing/types.js';
 
 export { PaymentMethodDetails };
 

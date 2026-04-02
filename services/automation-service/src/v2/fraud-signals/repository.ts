@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { FraudSignal, FraudSignalFilters, FraudSignalUpdate } from './types';
+import { FraudSignal, FraudSignalFilters, FraudSignalUpdate } from './types.js';
 
 export interface CreateFraudSignalInput {
     signal_type: string;

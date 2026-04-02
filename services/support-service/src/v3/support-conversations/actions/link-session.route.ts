@@ -9,7 +9,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { LinkSessionService } from './link-session.service';
+import { LinkSessionService } from './link-session.service.js';
 
 export function registerLinkSessionAction(
   app: FastifyInstance,

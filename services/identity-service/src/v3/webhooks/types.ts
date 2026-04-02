@@ -9,7 +9,7 @@ export type {
   WebhookHeaders,
   ClerkUserData,
   WebhookSourceApp,
-} from '../../v2/webhooks/types';
+} from '../../v2/webhooks/types.js';
 
 // --- JSON Schemas ---
 

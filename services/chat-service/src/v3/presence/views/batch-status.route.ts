@@ -6,10 +6,10 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import Redis from 'ioredis';
-import { BatchStatusRepository } from './batch-status.repository';
-import { BatchStatusService } from './batch-status.service';
-import { batchStatusQuerySchema, BatchStatusQuery } from '../types';
+import { Redis } from 'ioredis';
+import { BatchStatusRepository } from './batch-status.repository.js';
+import { BatchStatusService } from './batch-status.service.js';
+import { batchStatusQuerySchema, BatchStatusQuery } from '../types.js';
 
 export function registerBatchStatusView(app: FastifyInstance, redis: Redis) {
   const repository = new BatchStatusRepository(redis);

@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { InvitationFilters } from './types';
+import { InvitationFilters } from './types.js';
 
 export class InvitationRepository {
     private supabase: SupabaseClient;

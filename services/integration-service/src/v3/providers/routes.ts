@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ProviderRepository } from './repository';
-import { ProviderService } from './service';
-import { ProviderListParams, slugParamSchema, listQuerySchema } from './types';
+import { ProviderRepository } from './repository.js';
+import { ProviderService } from './service.js';
+import { ProviderListParams, slugParamSchema, listQuerySchema } from './types.js';
 
 export function registerProviderRoutes(
   app: FastifyInstance,

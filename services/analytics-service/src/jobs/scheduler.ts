@@ -8,11 +8,11 @@
 import cron from 'node-cron';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createLogger } from '@splits-network/shared-logging';
-import { rollupHourlyMetrics } from './rollup-hourly';
-import { rollupDailyMetrics } from './rollup-daily';
-import { rollupMonthlyMetrics } from './rollup-monthly';
-import { computeMarketplaceHealth } from './marketplace-health';
-import { computeRecruiterResponseMetrics } from './recruiter-response-metrics';
+import { rollupHourlyMetrics } from './rollup-hourly.js';
+import { rollupDailyMetrics } from './rollup-daily.js';
+import { rollupMonthlyMetrics } from './rollup-monthly.js';
+import { computeMarketplaceHealth } from './marketplace-health.js';
+import { computeRecruiterResponseMetrics } from './recruiter-response-metrics.js';
 
 const logger = createLogger('analytics-service:scheduler');
 

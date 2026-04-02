@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EscrowHoldListParams } from './types';
+import { EscrowHoldListParams } from './types.js';
 
 export interface EscrowHoldScopeFilters {
   recruiter_id?: string;

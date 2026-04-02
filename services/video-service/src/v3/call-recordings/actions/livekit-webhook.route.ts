@@ -7,8 +7,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { LivekitWebhookService } from './livekit-webhook.service';
-import { CallRecordingRoutesConfig } from '../routes';
+import { LivekitWebhookService } from './livekit-webhook.service.js';
+import { CallRecordingRoutesConfig } from '../routes.js';
 
 export function registerLivekitWebhookAction(app: FastifyInstance, config: CallRecordingRoutesConfig) {
   const service = new LivekitWebhookService(

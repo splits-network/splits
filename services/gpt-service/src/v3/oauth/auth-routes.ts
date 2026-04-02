@@ -7,9 +7,9 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { OAuthAuthService } from './auth-service';
-import { OAuthError } from '../../v2/oauth/types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { OAuthAuthService } from './auth-service.js';
+import { OAuthError } from '../../v2/oauth/types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

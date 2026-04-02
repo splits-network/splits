@@ -9,9 +9,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ApplicationDetailRepository } from './detail.repository';
-import { ApplicationDetailService } from './detail.service';
-import { idParamSchema } from '../types';
+import { ApplicationDetailRepository } from './detail.repository.js';
+import { ApplicationDetailService } from './detail.service.js';
+import { idParamSchema } from '../types.js';
 
 const detailQuerySchema = {
   type: 'object',

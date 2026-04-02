@@ -12,10 +12,10 @@ import {
     registerHealthCheck,
 } from "@splits-network/shared-fastify";
 import formbody from "@fastify/formbody";
-import { EventPublisher } from "./v2/shared/events";
-import { AuditEventConsumer } from "./v3/shared/audit-consumer";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from './v3/routes';
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
+import { AuditEventConsumer } from "./v3/shared/audit-consumer.js";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from './v3/routes.js';
 
 async function main() {
     const baseConfig = loadBaseConfig("gpt-service");
@@ -51,23 +51,21 @@ async function main() {
     // Register @fastify/formbody for OAuth token endpoint (application/x-www-form-urlencoded)
     await app.register(formbody);
 
-    // Initialize EventPublisher
+    // Initialize EventPublisher (non-fatal — ResilientPublisher falls back to outbox)
     const eventPublisher = new EventPublisher(
         rabbitConfig.url,
         logger,
         baseConfig.serviceName,
     );
-
     try {
         await eventPublisher.connect();
-        logger.info("RabbitMQ EventPublisher connected successfully");
     } catch (error) {
-        logger.error(
-            { err: error },
-            "Failed to connect RabbitMQ EventPublisher on startup",
-        );
-        throw error;
+        logger.warn({ err: error }, "Failed to connect event publisher - ResilientPublisher will use outbox only");
     }
+
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
 
     // Initialize AuditEventConsumer to write gpt.oauth.* and gpt.action.* events to DB
     const auditConsumer = new AuditEventConsumer(
@@ -93,16 +91,15 @@ async function main() {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         gptConfig,
-        eventPublisher,
+        eventPublisher: resilientPublisher,
         clerkWebhookSecret: process.env.GPT_CLERK_WEBHOOK_SECRET,
     });
 
     // Register V3 routes
-    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
     registerV3Routes(app, {
         supabase: supabaseClient,
         gptConfig,
-        eventPublisher,
+        eventPublisher: resilientPublisher,
         logger,
         clerkWebhookSecret: process.env.GPT_CLERK_WEBHOOK_SECRET,
     });

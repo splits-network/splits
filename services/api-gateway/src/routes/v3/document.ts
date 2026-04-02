@@ -6,10 +6,10 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { registerV3Routes, V3RouteConfig } from './proxy';
-import { requireAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
+import { ServiceRegistry } from '../../clients.js';
+import { registerV3Routes, V3RouteConfig } from './proxy.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
 
 const documentV3Routes: V3RouteConfig[] = [
   // ── Views (before parameterized routes) ────────────────────────

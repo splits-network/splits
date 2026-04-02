@@ -4,10 +4,10 @@
  */
 
 import { Resend } from 'resend';
-import { NotificationRepository } from '../../repository';
+import { NotificationRepository } from '../../repository.js';
 import { Logger } from '@splits-network/shared-logging';
-import { firmInvitationEmail, invitationRevokedEmail, invitationAcceptedEmail } from '../../templates/invitations';
-import type { EmailSource } from '../../templates/base';
+import { firmInvitationEmail, invitationRevokedEmail, invitationAcceptedEmail } from '../../templates/invitations/index.js';
+import type { EmailSource } from '../../templates/base.js';
 
 export class InvitationsEmailService {
     constructor(

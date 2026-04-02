@@ -4,11 +4,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { HireService } from './hire.service';
-import { PlacementRepository } from '../../placements/repository';
-import { PlacementService } from '../../placements/service';
-import { idParamSchema } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { HireService } from './hire.service.js';
+import { PlacementRepository } from '../../placements/repository.js';
+import { PlacementService } from '../../placements/service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerHireRoutes(
   app: FastifyInstance,

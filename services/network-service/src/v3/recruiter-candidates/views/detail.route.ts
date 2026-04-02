@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { DetailViewRepository } from './detail.repository';
-import { DetailViewService } from './detail.service';
-import { idParamSchema } from '../types';
+import { DetailViewRepository } from './detail.repository.js';
+import { DetailViewService } from './detail.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerRecruiterCandidateDetailView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new DetailViewRepository(supabase);

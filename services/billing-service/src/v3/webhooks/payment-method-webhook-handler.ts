@@ -9,8 +9,8 @@
  */
 
 import Stripe from 'stripe';
-import { WebhookHandler, WebhookHandlerDeps } from './types';
-import { revertJobsToDraft } from './billing-utils';
+import { WebhookHandler, WebhookHandlerDeps } from './types.js';
+import { revertJobsToDraft } from './billing-utils.js';
 
 export class PaymentMethodWebhookHandler implements WebhookHandler {
   constructor(private deps: WebhookHandlerDeps) {}

@@ -6,8 +6,8 @@
  */
 
 import { ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
-import { PreScreenTemplateRepository } from './repository';
-import { CreateTemplateInput, TemplateListParams } from './types';
+import { PreScreenTemplateRepository } from './repository.js';
+import { CreateTemplateInput, TemplateListParams } from './types.js';
 
 export class PreScreenTemplateService {
   constructor(private repository: PreScreenTemplateRepository) {}

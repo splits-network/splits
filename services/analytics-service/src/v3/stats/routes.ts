@@ -6,10 +6,10 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { StatsServiceV2 } from '../../v2/stats/service';
-import { StatsV3Repository } from './repository';
-import { StatsV3Service } from './service';
-import { StatsQueryParams, statsQuerySchema } from './types';
+import { StatsServiceV2 } from '../../v2/stats/service.js';
+import { StatsV3Repository } from './repository.js';
+import { StatsV3Service } from './service.js';
+import { StatsQueryParams, statsQuerySchema } from './types.js';
 
 export function registerStatsRoutes(
   app: FastifyInstance,

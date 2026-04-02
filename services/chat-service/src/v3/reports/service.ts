@@ -7,9 +7,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { ReportRepository } from './repository';
-import { ReportListParams, UpdateReportInput } from './types';
-import { IEventPublisher } from '../../v2/shared/events';
+import { ReportRepository } from './repository.js';
+import { ReportListParams, UpdateReportInput } from './types.js';
+import { IEventPublisher } from '../../v2/shared/events.js';
 
 export class ReportService {
   private accessResolver: AccessContextResolver;

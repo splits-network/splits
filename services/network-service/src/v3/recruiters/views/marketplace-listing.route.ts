@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MarketplaceListingRepository } from './marketplace-listing.repository';
-import { MarketplaceListingService } from './marketplace-listing.service';
-import { listQuerySchema, RecruiterListParams } from '../types';
+import { MarketplaceListingRepository } from './marketplace-listing.repository.js';
+import { MarketplaceListingService } from './marketplace-listing.service.js';
+import { listQuerySchema, RecruiterListParams } from '../types.js';
 
 export function registerMarketplaceListingView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new MarketplaceListingRepository(supabase);

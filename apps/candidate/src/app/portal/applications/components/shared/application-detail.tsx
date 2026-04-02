@@ -28,6 +28,7 @@ import AIReviewPanel from "./ai-review-panel";
 import { ApplicationCallsSection } from "./application-calls-section";
 import ApplicationTimeline from "./application-timeline";
 import DocumentViewerModal from "../modals/document-viewer-modal";
+import { TailoredResumeSection } from "./tailored-resume-section";
 
 /* ─── Detail Panel ───────────────────────────────────────────────────────── */
 
@@ -487,6 +488,16 @@ export function ApplicationDetail({
                             </div>
                         </div>
                     )}
+
+                {/* Smart Resume */}
+                {(application as any).candidate_id && (application as any).job_id && (
+                    <div>
+                        <TailoredResumeSection
+                            candidateId={(application as any).candidate_id}
+                            jobId={(application as any).job_id}
+                        />
+                    </div>
+                )}
 
                 {/* Documents */}
                 {documents.length > 0 && (

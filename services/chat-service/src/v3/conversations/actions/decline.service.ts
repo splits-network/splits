@@ -5,10 +5,10 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { DeclineActionRepository } from './decline.repository';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from '../lib/participant-helper';
+import { DeclineActionRepository } from './decline.repository.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { resolveAndValidateParticipant } from '../lib/participant-helper.js';
 
 export class DeclineActionService {
   constructor(

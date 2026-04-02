@@ -1,11 +1,11 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { AIReviewServiceV2 } from './v2/reviews/service';
-import { ResumeExtractionService } from './v2/resume-extraction/service';
-import { ResumeExtractionRepository } from './v2/resume-extraction/repository';
-import { CallPipelineService } from './v2/call-pipeline/service';
-import { EventPublisher, IEventPublisher } from './v2/shared/events';
+import { AIReviewServiceV2 } from './v2/reviews/service.js';
+import { ResumeExtractionService } from './v2/resume-extraction/service.js';
+import { ResumeExtractionRepository } from './v2/resume-extraction/repository.js';
+import { CallPipelineService } from './v2/call-pipeline/service.js';
+import { EventPublisher, IEventPublisher } from './v2/shared/events.js';
 
 /**
  * Domain Event Consumer for AI Service

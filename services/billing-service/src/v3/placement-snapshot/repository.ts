@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementSnapshotListParams } from './types';
+import { PlacementSnapshotListParams } from './types.js';
 
 export class PlacementSnapshotRepository {
   constructor(private supabase: SupabaseClient) {}

@@ -5,7 +5,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext, AccessContext } from '@splits-network/shared-access-context';
-import { RecruiterFilters, RecruiterUpdate, RepositoryListResponse } from './types';
+import { RecruiterFilters, RecruiterUpdate, RepositoryListResponse } from './types.js';
 
 export class RecruiterRepository {
     private supabase: SupabaseClient;

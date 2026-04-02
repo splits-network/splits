@@ -13,9 +13,9 @@ import {
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import multipart from "@fastify/multipart";
-import { EventPublisher } from "./v2/shared/events";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
 import * as Sentry from "@sentry/node";
 
 if (process.env.SENTRY_DSN) {
@@ -109,36 +109,33 @@ async function main() {
         },
     });
 
-    // Initialize event publisher
+    // Initialize event publisher (non-fatal — ResilientPublisher falls back to outbox)
     const eventPublisher = new EventPublisher(
         rabbitConfig.url,
         logger,
         baseConfig.serviceName,
     );
-
     try {
         await eventPublisher.connect();
-        logger.info("RabbitMQ EventPublisher connected successfully");
     } catch (error) {
-        logger.error(
-            { err: error },
-            "Failed to connect RabbitMQ EventPublisher on startup",
-        );
-        throw error;
+        logger.warn({ err: error }, "Failed to connect event publisher - ResilientPublisher will use outbox only");
     }
+
+    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
 
     // Register V2 routes
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Register V3 routes (coexist with V2)
-    const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Health check

@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse, parseFilters } from '@splits-network/shared-types';
-import { resolveAccessContext } from '../shared/access';
+import { resolveAccessContext } from '../shared/access.js';
 
 export class UserRepository {
     private supabase: SupabaseClient;

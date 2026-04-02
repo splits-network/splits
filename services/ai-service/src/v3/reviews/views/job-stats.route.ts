@@ -5,8 +5,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobStatsRepository } from './job-stats.repository';
-import { JobStatsService } from './job-stats.service';
+import { JobStatsRepository } from './job-stats.repository.js';
+import { JobStatsService } from './job-stats.service.js';
 
 const jobStatsQuerySchema = {
   type: 'object',

@@ -2,12 +2,23 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "./dist",
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext"
     },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist"],
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
     "references": [
-        { "path": "../../packages/shared-config" },
-        { "path": "../../packages/shared-logging" }
+        {
+            "path": "../../packages/shared-config"
+        },
+        {
+            "path": "../../packages/shared-logging"
+        }
     ]
 }

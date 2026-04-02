@@ -7,14 +7,14 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ActivityService } from '../v2/activity/service';
-import { ChartServiceV2 } from '../v2/charts/service';
-import { StatsServiceV2 } from '../v2/stats/service';
-import { registerActivityRoutes } from './activity/routes';
-import { registerChartRoutes } from './charts/routes';
-import { registerMarketplaceMetricRoutes } from './marketplace-metrics/routes';
-import { registerStatsRoutes } from './stats/routes';
-import { registerViewRoutes } from './views/routes';
+import { ActivityService } from '../v2/activity/service.js';
+import { ChartServiceV2 } from '../v2/charts/service.js';
+import { StatsServiceV2 } from '../v2/stats/service.js';
+import { registerActivityRoutes } from './activity/routes.js';
+import { registerChartRoutes } from './charts/routes.js';
+import { registerMarketplaceMetricRoutes } from './marketplace-metrics/routes.js';
+import { registerStatsRoutes } from './stats/routes.js';
+import { registerViewRoutes } from './views/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

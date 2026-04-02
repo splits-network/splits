@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { CallRepository } from "./repository";
-import { CallService } from "./service";
-import { registerCallLifecycleRoutes } from "./lifecycle-routes";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { CallRepository } from "./repository.js";
+import { CallService } from "./service.js";
+import { registerCallLifecycleRoutes } from "./lifecycle-routes.js";
 import {
     CreateCallInput,
     UpdateCallInput,
@@ -16,8 +16,8 @@ import {
     listQuerySchema,
     createCallSchema,
     updateCallSchema,
-} from "./types";
-import { registerMyCallsView } from "./views/my-calls.route";
+} from "./types.js";
+import { registerMyCallsView } from "./views/my-calls.route.js";
 
 export function registerCallRoutes(
     app: FastifyInstance,

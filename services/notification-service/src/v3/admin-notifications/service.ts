@@ -8,13 +8,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { AdminNotificationRepository } from './repository';
+import { AdminNotificationRepository } from './repository.js';
 import {
   AdminListParams,
   CreateSiteNotificationInput,
   UpdateSiteNotificationInput,
-} from './types';
-import { IEventPublisher } from '../../v2/shared/events';
+} from './types.js';
+import { IEventPublisher } from '../../v2/shared/events.js';
 
 export class AdminNotificationService {
   private accessResolver: AccessContextResolver;

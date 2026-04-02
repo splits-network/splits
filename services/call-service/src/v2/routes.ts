@@ -1,12 +1,12 @@
 import { FastifyInstance } from 'fastify';
-import { CallRepository } from './repository';
-import { CallService } from './service';
-import { TokenService } from './token-service';
-import { requireUserContext } from './shared/helpers';
-import { IEventPublisher } from './shared/events';
-import { CallListFilters } from './types';
+import { CallRepository } from './repository.js';
+import { CallService } from './service.js';
+import { TokenService } from './token-service.js';
+import { requireUserContext } from './shared/helpers.js';
+import { IEventPublisher } from './shared/events.js';
+import { CallListFilters } from './types.js';
 import { StandardListParams } from '@splits-network/shared-types';
-import { registerCallActionRoutes } from './call-action-routes';
+import { registerCallActionRoutes } from './call-action-routes.js';
 
 export interface RegisterConfig {
     supabaseUrl: string;

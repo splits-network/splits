@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterScoreRow, RoleBreakdownRow, PendingReviewRow } from './types';
+import { RecruiterScoreRow, RoleBreakdownRow, PendingReviewRow } from './types.js';
 
 const INTERVIEW_STAGES = ['interview', 'screen'];
 const HIRE_STAGES = ['hired'];

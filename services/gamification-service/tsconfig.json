@@ -2,7 +2,9 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "outDir": "./dist",
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext"
     },
     "include": [
         "src/**/*"
@@ -12,11 +14,23 @@
         "dist"
     ],
     "references": [
-        { "path": "../../packages/shared-config" },
-        { "path": "../../packages/shared-logging" },
-        { "path": "../../packages/shared-fastify" },
-        { "path": "../../packages/shared-types" },
-        { "path": "../../packages/shared-access-context" },
-        { "path": "../../packages/shared-job-queue" }
+        {
+            "path": "../../packages/shared-config"
+        },
+        {
+            "path": "../../packages/shared-logging"
+        },
+        {
+            "path": "../../packages/shared-fastify"
+        },
+        {
+            "path": "../../packages/shared-types"
+        },
+        {
+            "path": "../../packages/shared-access-context"
+        },
+        {
+            "path": "../../packages/shared-job-queue"
+        }
     ]
 }

@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from "@supabase/supabase-js";
-import { SupportConversationListParams } from "./types";
+import { SupportConversationListParams } from "./types.js";
 
 export class SupportConversationRepository {
     constructor(private supabase: SupabaseClient) {}

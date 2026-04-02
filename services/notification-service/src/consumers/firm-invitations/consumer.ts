@@ -3,10 +3,10 @@
  * Listens for firm invitation events and sends emails via InvitationsEmailService
  */
 
-import { NotificationService } from '../../service';
+import { NotificationService } from '../../service.js';
 import { Logger } from '@splits-network/shared-logging';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
 
 export class FirmInvitationsConsumer {
     constructor(

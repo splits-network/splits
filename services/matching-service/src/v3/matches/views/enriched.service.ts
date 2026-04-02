@@ -5,8 +5,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { EnrichedMatchRepository } from './enriched.repository';
-import { MatchListParams } from '../types';
+import { EnrichedMatchRepository } from './enriched.repository.js';
+import { MatchListParams } from '../types.js';
 
 export class EnrichedMatchService {
   private accessResolver: AccessContextResolver;

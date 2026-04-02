@@ -2,11 +2,11 @@
  * Recruiter Service - Business logic for recruiters
  */
 
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { RecruiterRepository } from './repository';
-import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { RecruiterFilters, RecruiterUpdate } from './types';
-import { RecruiterActivityService } from '../recruiter-activity/service';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { RecruiterRepository } from './repository.js';
+import { buildPaginationResponse, PaginationResponse } from '../shared/pagination.js';
+import { RecruiterFilters, RecruiterUpdate } from './types.js';
+import { RecruiterActivityService } from '../recruiter-activity/service.js';
 
 export class RecruiterServiceV2 {
     constructor(

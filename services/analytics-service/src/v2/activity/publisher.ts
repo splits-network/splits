@@ -1,5 +1,5 @@
-import Redis from 'ioredis';
-import { ActivityService } from './service';
+import { Redis } from 'ioredis';
+import { ActivityService } from './service.js';
 
 const PUBLISH_CHANNEL = 'dashboard:activity';
 const PUBLISH_INTERVAL_MS = 15_000; // 15 seconds

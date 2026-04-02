@@ -7,8 +7,8 @@
  */
 
 import { NotFoundError } from "@splits-network/shared-fastify";
-import { ImageRepository } from "./repository";
-import { ImageListParams, UpdateImageInput } from "./types";
+import { ImageRepository } from "./repository.js";
+import { ImageListParams, UpdateImageInput } from "./types.js";
 
 export class ImageService {
     constructor(private repository: ImageRepository) {}

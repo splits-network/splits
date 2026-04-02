@@ -1,7 +1,7 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { HealthEmailService } from '../../services/health/service';
-import { ServiceAlertData } from '../../templates/health';
+import { HealthEmailService } from '../../services/health/service.js';
+import { ServiceAlertData } from '../../templates/health/index.js';
 
 const DEFAULT_RECIPIENTS = [
     'support@employment-networks.com',

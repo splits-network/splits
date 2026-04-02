@@ -4,8 +4,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EntitlementRepository } from './repository';
-import { EntitlementService } from './service';
+import { EntitlementRepository } from './repository.js';
+import { EntitlementService } from './service.js';
 
 export function registerEntitlementRoutes(
   app: FastifyInstance,

@@ -7,8 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { AuditLogRepository } from './repository';
-import { AuditLogListParams } from '../types';
+import { AuditLogRepository } from './repository.js';
+import { AuditLogListParams } from '../types.js';
 
 export class AuditLogService {
   private accessResolver: AccessContextResolver;

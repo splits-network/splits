@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MarketplaceMetricListParams } from './types';
+import { MarketplaceMetricListParams } from './types.js';
 
 export class MarketplaceMetricRepository {
   constructor(private supabase: SupabaseClient) {}

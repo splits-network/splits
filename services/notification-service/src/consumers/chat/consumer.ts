@@ -1,7 +1,7 @@
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationService } from '../../service';
-import { NotificationRepository } from '../../repository';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { NotificationService } from '../../service.js';
+import { NotificationRepository } from '../../repository.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
 
 export interface ChatMessageCreatedEvent {
     conversation_id: string;

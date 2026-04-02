@@ -4,12 +4,12 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobSkillRepository } from './repository';
-import { JobSkillService } from './service';
+import { JobSkillRepository } from './repository.js';
+import { JobSkillService } from './service.js';
 import { CreateJobSkillInput, JobSkillListParams,
-  listQuerySchema, createSchema, deleteParamsSchema } from './types';
-import { registerBulkReplaceAction } from './actions/bulk-replace.route';
-import { registerWithDetailsView } from './views/with-details.route';
+  listQuerySchema, createSchema, deleteParamsSchema } from './types.js';
+import { registerBulkReplaceAction } from './actions/bulk-replace.route.js';
+import { registerWithDetailsView } from './views/with-details.route.js';
 
 export function registerJobSkillRoutes(
   app: FastifyInstance,

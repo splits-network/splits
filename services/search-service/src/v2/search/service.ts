@@ -1,6 +1,6 @@
 import { buildPaginationResponse } from '@splits-network/shared-types';
-import { SearchRepository } from './repository';
-import { SearchParams, TypeaheadResponse } from './types';
+import { SearchRepository } from './repository.js';
+import { SearchParams, TypeaheadResponse } from './types.js';
 
 interface FullSearchResponse {
     data: any[];

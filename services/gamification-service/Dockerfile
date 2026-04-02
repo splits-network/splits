@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/gamification-service ./services/gamification-service
 EXPOSE 3018
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/gamification-service", "dev"]
 
 # Build stage
@@ -64,6 +65,7 @@ COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 # Copy built service
+COPY --from=build /app/services/gamification-service/package.json ./services/gamification-service/
 COPY --from=build /app/services/gamification-service/dist ./services/gamification-service/dist
 
 EXPOSE 3018

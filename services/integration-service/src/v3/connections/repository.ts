@@ -5,7 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { OAuthConnection, OAuthConnectionStatus } from '@splits-network/shared-types';
-import { ConnectionListParams } from './types';
+import { ConnectionListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at'];
 

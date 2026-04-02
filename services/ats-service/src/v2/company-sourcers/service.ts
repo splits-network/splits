@@ -1,8 +1,8 @@
-import { CompanySourcerRepository } from './repository';
-import { IEventPublisher } from '../shared/events';
+import { CompanySourcerRepository } from './repository.js';
+import { IEventPublisher } from '../shared/events.js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterCompany, CompanySourcerFilters, CompanySourcerUpdate } from './types';
+import { RecruiterCompany, CompanySourcerFilters, CompanySourcerUpdate } from './types.js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 /**

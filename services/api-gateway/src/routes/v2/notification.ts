@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { ResourceDefinition, buildQueryString, getCorrelationId, registerResourceRoutes } from './common';
-import { requireAuth } from '../../middleware/auth';
+import { ServiceRegistry } from '../../clients.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { ResourceDefinition, buildQueryString, getCorrelationId, registerResourceRoutes } from './common.js';
+import { requireAuth } from '../../middleware/auth.js';
 
 const NOTIFICATION_RESOURCES: ResourceDefinition[] = [
     {

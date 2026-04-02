@@ -12,7 +12,7 @@ import {
   UpdateSubscriptionInput,
   SetupIntentRequest,
   ActivateSubscriptionRequest,
-} from './types';
+} from './types.js';
 
 export class SubscriptionStripeOperations {
   private stripe: Stripe;

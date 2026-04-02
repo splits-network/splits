@@ -119,6 +119,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     volumes:
       - ./services/ats-service/src:/app/services/ats-service/src
       - ./packages:/app/packages
@@ -127,6 +129,8 @@ services:
       - splits-network
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   ats-sync-worker:
@@ -602,6 +606,8 @@ services:
       OPENAI_MODEL: gpt-4o-mini
       ATS_SERVICE_URL: http://ats-service:3002
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     volumes:
       - ./services/ai-service/src:/app/services/ai-service/src
       - ./packages:/app/packages
@@ -610,6 +616,8 @@ services:
       - splits-network
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   matching-service:
@@ -629,6 +637,8 @@ services:
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     volumes:
       - ./services/matching-service/src:/app/services/matching-service/src
       - ./packages:/app/packages
@@ -637,6 +647,8 @@ services:
       - splits-network
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   document-service:
@@ -681,6 +693,9 @@ services:
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - ./services/document-processing-service/src:/app/services/document-processing-service/src
       - ./packages:/app/packages
@@ -690,8 +705,35 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     command:
       ["pnpm", "--filter", "@splits-network/document-processing-service", "dev"]
+
+  outbox-service:
+    build:
+      context: .
+      dockerfile: services/outbox-service/Dockerfile
+      target: development
+    container_name: splits-outbox-service
+    ports:
+      - "3026:3026"
+    environment:
+      NODE_ENV: development
+      PORT: 3026
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+    volumes:
+      - ./services/outbox-service/src:/app/services/outbox-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   search-service:
     build:

@@ -5,8 +5,8 @@ vi.mock('@supabase/supabase-js', () => ({
     createClient: () => ({}),
 }));
 
-import { AutomationRuleServiceV2 } from '../../src/v2/rules/service';
-import { registerRuleRoutes } from '../../src/v2/rules/routes';
+import { AutomationRuleServiceV2 } from '../../src/v2/rules/service.js';
+import { registerRuleRoutes } from '../../src/v2/rules/routes.js';
 
 describe('Automation rules routes (integration)', () => {
     const config = {

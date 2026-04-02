@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { AIReviewRepository } from './repository';
-import { CreateReviewInput, AIReviewListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { AIReviewRepository } from './repository.js';
+import { CreateReviewInput, AIReviewListParams } from './types.js';
 
 export class AIReviewService {
   private accessResolver: AccessContextResolver;

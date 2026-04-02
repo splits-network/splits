@@ -8,10 +8,10 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { EngagementEmailService } from '../../../services/engagement/service';
-import { PORTAL_URL, CANDIDATE_URL } from '../../../helpers/urls';
-import { AftercareMilestone } from '../../../templates/engagement';
-import { JobResult } from '../scheduler';
+import { EngagementEmailService } from '../../../services/engagement/service.js';
+import { PORTAL_URL, CANDIDATE_URL } from '../../../helpers/urls.js';
+import { AftercareMilestone } from '../../../templates/engagement/index.js';
+import { JobResult } from '../scheduler.js';
 
 interface MilestoneConfig {
     milestone: AftercareMilestone;

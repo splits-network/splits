@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { EntitlementService } from './service';
-import { requireUserContext } from '../shared/helpers';
+import { EntitlementService } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterEntitlementRoutesConfig {
     entitlementService: EntitlementService;

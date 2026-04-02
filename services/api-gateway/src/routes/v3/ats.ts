@@ -6,10 +6,10 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { registerV3Routes, V3RouteConfig } from './proxy';
-import { requireAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
+import { ServiceRegistry } from '../../clients.js';
+import { registerV3Routes, V3RouteConfig } from './proxy.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
 
 const atsV3Routes: V3RouteConfig[] = [
   // ── Jobs Core CRUD ─────────────────────────────────────────────
@@ -148,6 +148,26 @@ const atsV3Routes: V3RouteConfig[] = [
   { path: '/pre-screen-templates', method: 'GET', auth: 'required' },
   { path: '/pre-screen-templates', method: 'POST', auth: 'required' },
   { path: '/pre-screen-templates/:id', method: 'DELETE', auth: 'required' },
+
+  // ── Smart Resume Profiles Core CRUD ────────────────────────────
+  { resource: 'smart-resume-profiles', auth: 'required' },
+
+  // ── Smart Resume Profiles Views ───────────────────────────────
+  { path: '/smart-resume-profiles/views/matching-data', method: 'GET', auth: 'required' },
+  { path: '/smart-resume-profiles/:id/view/full', method: 'GET', auth: 'required' },
+
+  // ── Smart Resume Profiles Actions ─────────────────────────────
+  { path: '/smart-resume-profiles/actions/parse-resume', method: 'POST', auth: 'required' },
+  { path: '/smart-resume-profiles/actions/commit-import', method: 'POST', auth: 'required' },
+
+  // ── Smart Resume Sub-Resources Core CRUD ──────────────────────
+  { resource: 'smart-resume-experiences', auth: 'required' },
+  { resource: 'smart-resume-projects', auth: 'required' },
+  { resource: 'smart-resume-tasks', auth: 'required' },
+  { resource: 'smart-resume-education', auth: 'required' },
+  { resource: 'smart-resume-certifications', auth: 'required' },
+  { resource: 'smart-resume-skills', auth: 'required' },
+  { resource: 'smart-resume-publications', auth: 'required' },
 
   // ── Skills (lookup table) ─────────────────────────────────────
   { path: '/skills', method: 'GET', auth: 'required' },

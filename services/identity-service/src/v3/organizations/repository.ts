@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { OrganizationListParams } from './types';
+import { OrganizationListParams } from './types.js';
 
 export class OrganizationRepository {
   constructor(private supabase: SupabaseClient) {}

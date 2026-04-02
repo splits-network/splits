@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Call, CallParticipantWithUser } from './types';
+import { Call, CallParticipantWithUser } from './types.js';
 
 export interface CallWithParticipantsForReminder extends Call {
     participants: CallParticipantWithUser[];

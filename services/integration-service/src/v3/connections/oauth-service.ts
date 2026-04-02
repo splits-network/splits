@@ -11,9 +11,9 @@ import {
   InitiateOAuthResponse,
   IntegrationEvent,
 } from '@splits-network/shared-types';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ConnectionRepository } from './repository';
-import { ProviderRepository } from '../providers/repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ConnectionRepository } from './repository.js';
+import { ProviderRepository } from '../providers/repository.js';
 
 /** In-memory state store for pending OAuth flows */
 const pendingStates = new Map<string, {

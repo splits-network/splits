@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ATSIntegrationRepository } from "./repository";
-import { ATSIntegrationService } from "./service";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ATSIntegrationRepository } from "./repository.js";
+import { ATSIntegrationService } from "./service.js";
 import {
     CreateATSInput,
     UpdateATSInput,
@@ -15,7 +15,7 @@ import {
     listQuerySchema,
     createATSSchema,
     updateATSSchema,
-} from "./types";
+} from "./types.js";
 
 export function registerATSIntegrationRoutes(
     app: FastifyInstance,

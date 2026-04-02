@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { InvitationListParams } from './types';
+import { InvitationListParams } from './types.js';
 
 export class InvitationRepository {
   constructor(private supabase: SupabaseClient) {}

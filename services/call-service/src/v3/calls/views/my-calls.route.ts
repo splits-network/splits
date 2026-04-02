@@ -6,10 +6,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { idParamSchema, listQuerySchema, CallListParams } from '../types';
-import { CallRepository } from '../repository';
-import { MyCallsViewRepository } from './my-calls.repository';
-import { MyCallsViewService } from './my-calls.service';
+import { idParamSchema, listQuerySchema, CallListParams } from '../types.js';
+import { CallRepository } from '../repository.js';
+import { MyCallsViewRepository } from './my-calls.repository.js';
+import { MyCallsViewService } from './my-calls.service.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

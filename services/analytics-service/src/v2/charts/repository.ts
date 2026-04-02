@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChartType, ChartFilters, CHART_METRIC_MAPPING } from './types';
+import { ChartType, ChartFilters, CHART_METRIC_MAPPING } from './types.js';
 
 interface MetricRow {
     metric_type: string;

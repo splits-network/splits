@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ATSListParams } from './types';
+import { ATSListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'platform'];
 

@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { SplitsRateRepository } from './repository';
-import { SplitsRateService } from './service';
-import { SplitsRateUpdateInput, planIdParamSchema, updateSchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SplitsRateRepository } from './repository.js';
+import { SplitsRateService } from './service.js';
+import { SplitsRateUpdateInput, planIdParamSchema, updateSchema } from './types.js';
 
 export function registerSplitsRateRoutes(
   app: FastifyInstance,

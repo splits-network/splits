@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { PayoutAuditRepository } from './repository';
-import { AuditListParams } from './types';
+import { PayoutAuditRepository } from './repository.js';
+import { AuditListParams } from './types.js';
 
 export class PayoutAuditService {
   private accessResolver: AccessContextResolver;

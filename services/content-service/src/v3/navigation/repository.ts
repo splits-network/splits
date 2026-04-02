@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from "@supabase/supabase-js";
-import { NavigationListParams } from "./types";
+import { NavigationListParams } from "./types.js";
 
 export class NavigationRepository {
     constructor(private supabase: SupabaseClient) {}

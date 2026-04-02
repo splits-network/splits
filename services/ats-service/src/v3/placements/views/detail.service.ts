@@ -9,7 +9,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { PlacementDetailRepository } from './detail.repository';
+import { PlacementDetailRepository } from './detail.repository.js';
 
 export class PlacementDetailService {
   private accessResolver: AccessContextResolver;

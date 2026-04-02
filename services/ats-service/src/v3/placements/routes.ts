@@ -4,11 +4,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PlacementRepository } from './repository';
-import { PlacementService } from './service';
-import { registerPlacementDetailView } from './views/detail.route';
-import { registerEnrichedPlacementView } from './views/enriched.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PlacementRepository } from './repository.js';
+import { PlacementService } from './service.js';
+import { registerPlacementDetailView } from './views/detail.route.js';
+import { registerEnrichedPlacementView } from './views/enriched.route.js';
 import {
   CreatePlacementInput,
   UpdatePlacementInput,
@@ -17,7 +17,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerPlacementRoutes(
   app: FastifyInstance,

@@ -7,7 +7,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { ImageFilters, ImageCreate, ImageUpdate } from './types';
+import { ImageFilters, ImageCreate, ImageUpdate } from './types.js';
 
 export interface RepositoryListResponse<T> {
     data: T[];

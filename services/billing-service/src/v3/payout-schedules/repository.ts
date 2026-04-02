@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PayoutScheduleListParams } from './types';
+import { PayoutScheduleListParams } from './types.js';
 
 export interface PayoutScheduleScopeFilters {
   placement_ids?: string[];

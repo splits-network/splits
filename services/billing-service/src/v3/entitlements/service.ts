@@ -7,8 +7,8 @@ import { STARTER_ENTITLEMENTS } from '@splits-network/shared-types';
 import type { BooleanEntitlement, NumericEntitlement } from '@splits-network/shared-types';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { EntitlementRepository } from './repository';
-import type { ResolvedEntitlements } from './types';
+import { EntitlementRepository } from './repository.js';
+import type { ResolvedEntitlements } from './types.js';
 
 export class EntitlementService {
   private accessResolver: AccessContextResolver;

@@ -3,8 +3,8 @@
  * Sent to ops when services go down or recover
  */
 
-import { baseEmailTemplate } from '../base';
-import { heading, alert, infoCard, paragraph, divider } from '../components';
+import { baseEmailTemplate } from '../base.js';
+import { heading, alert, infoCard, paragraph, divider } from '../components.js';
 
 export interface ServiceAlertData {
     serviceName: string;

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NotificationServiceV2 } from '../../src/v2/notifications/service';
-import type { AccessContext } from '../../src/v2/shared/access';
-import type { Notification } from '../../src/v2/notifications/types';
+import { NotificationServiceV2 } from '../../src/v2/notifications/service.js';
+import type { AccessContext } from '../../src/v2/shared/access.js';
+import type { Notification } from '../../src/v2/notifications/types.js';
 
 const baseAccess: AccessContext = {
     identityUserId: 'user-1',

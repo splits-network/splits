@@ -9,11 +9,11 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { EntitlementChecker } from "@splits-network/shared-access-context";
 import { Logger } from "@splits-network/shared-logging";
 import { CryptoService } from "@splits-network/shared-config/src/crypto";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ConnectionRepository } from "./repository";
-import { ConnectionService } from "./service";
-import { OAuthService } from "./oauth-service";
-import { ProviderRepository } from "../providers/repository";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ConnectionRepository } from "./repository.js";
+import { ConnectionService } from "./service.js";
+import { OAuthService } from "./oauth-service.js";
+import { ProviderRepository } from "../providers/repository.js";
 import {
     ConnectionListParams,
     InitiateConnectionInput,
@@ -22,7 +22,7 @@ import {
     listQuerySchema,
     initiateSchema,
     callbackSchema,
-} from "./types";
+} from "./types.js";
 
 export function registerConnectionRoutes(
     app: FastifyInstance,

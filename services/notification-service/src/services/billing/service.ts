@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
+import { NotificationRepository } from '../../repository.js';
 import {
     stripeConnectOnboardedEmail,
     StripeConnectOnboardedData,
@@ -22,8 +22,8 @@ import {
     InvoicePaidData,
     subscriptionCancelledEmail,
     SubscriptionCancelledData,
-} from '../../templates/billing';
-import type { EmailSource } from '../../templates/base';
+} from '../../templates/billing/index.js';
+import type { EmailSource } from '../../templates/base.js';
 
 export class BillingEmailService {
     constructor(

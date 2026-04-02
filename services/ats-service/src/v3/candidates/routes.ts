@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { CandidateRepository } from './repository';
-import { CandidateService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { CandidateRepository } from './repository.js';
+import { CandidateService } from './service.js';
 import {
   CreateCandidateInput,
   UpdateCandidateInput,
@@ -15,12 +15,12 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
-import { registerCandidateDetailView } from './views/detail.route';
-import { registerCandidateEnrichedView } from './views/enriched.route';
-import { registerCandidateDashboardStatsView } from './views/dashboard-stats.route';
-import { registerCandidateRecentApplicationsView } from './views/recent-applications.route';
-import { registerCandidatePrimaryResumeView } from './views/primary-resume.route';
+} from './types.js';
+import { registerCandidateDetailView } from './views/detail.route.js';
+import { registerCandidateEnrichedView } from './views/enriched.route.js';
+import { registerCandidateDashboardStatsView } from './views/dashboard-stats.route.js';
+import { registerCandidateRecentApplicationsView } from './views/recent-applications.route.js';
+import { registerCandidatePrimaryResumeView } from './views/primary-resume.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

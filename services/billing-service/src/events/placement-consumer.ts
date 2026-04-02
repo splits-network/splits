@@ -1,7 +1,7 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
-import { PlacementSnapshotService } from '../v2/placement-snapshot/service';
-import { PayoutServiceV2 } from '../v2/payouts/service';
+import { PlacementSnapshotService } from '../v2/placement-snapshot/service.js';
+import { PayoutServiceV2 } from '../v2/payouts/service.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 interface PlacementCreatedEvent {

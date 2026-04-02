@@ -6,8 +6,8 @@
  */
 
 import { NotFoundError } from "@splits-network/shared-fastify";
-import { BadgeRepository } from "./repository";
-import { BadgeListParams } from "./types";
+import { BadgeRepository } from "./repository.js";
+import { BadgeListParams } from "./types.js";
 
 export class BadgeService {
     constructor(private repository: BadgeRepository) {}

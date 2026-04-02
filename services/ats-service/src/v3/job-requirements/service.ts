@@ -3,8 +3,8 @@
  */
 
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { JobRequirementRepository } from './repository';
-import { CreateJobRequirementInput, UpdateJobRequirementInput, JobRequirementListParams } from './types';
+import { JobRequirementRepository } from './repository.js';
+import { CreateJobRequirementInput, UpdateJobRequirementInput, JobRequirementListParams } from './types.js';
 
 export class JobRequirementService {
   constructor(private repository: JobRequirementRepository) {}

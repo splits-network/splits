@@ -4,17 +4,17 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerRecruiterRoutes } from './recruiters/routes';
-import { registerAssignmentRoutes } from './assignments/routes';
-import { registerRecruiterCandidateRoutes } from './recruiter-candidates/routes';
-import { registerRecruiterCompanyRoutes } from './recruiter-companies/routes';
-import { registerReputationRoutes } from './reputation/routes';
-import { registerCompanyReputationRoutes } from './company-reputation/routes';
-import { registerRecruiterCodeRoutes } from './recruiter-codes/routes';
-import { registerFirmRoutes } from './firms/routes';
-import { registerCompanyInvitationRoutes } from './company-invitations/routes';
-import { registerAdminRoutes } from './admin/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerRecruiterRoutes } from './recruiters/routes.js';
+import { registerAssignmentRoutes } from './assignments/routes.js';
+import { registerRecruiterCandidateRoutes } from './recruiter-candidates/routes.js';
+import { registerRecruiterCompanyRoutes } from './recruiter-companies/routes.js';
+import { registerReputationRoutes } from './reputation/routes.js';
+import { registerCompanyReputationRoutes } from './company-reputation/routes.js';
+import { registerRecruiterCodeRoutes } from './recruiter-codes/routes.js';
+import { registerFirmRoutes } from './firms/routes.js';
+import { registerCompanyInvitationRoutes } from './company-invitations/routes.js';
+import { registerAdminRoutes } from './admin/routes.js';
 
 export function registerV3Routes(
   app: FastifyInstance,

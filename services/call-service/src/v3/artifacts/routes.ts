@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ArtifactRepository } from "./repository";
-import { ArtifactService } from "./service";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ArtifactRepository } from "./repository.js";
+import { ArtifactService } from "./service.js";
 import {
     AddEntityLinkInput,
     ArtifactListParams,
@@ -15,7 +15,7 @@ import {
     entityLinkIdParamSchema,
     listQuerySchema,
     addEntityLinkSchema,
-} from "./types";
+} from "./types.js";
 
 export function registerArtifactRoutes(
     app: FastifyInstance,

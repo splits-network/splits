@@ -3,8 +3,8 @@
  * Processes reminders, instant call timeouts, and no-shows on an interval.
  */
 
-import { IEventPublisher } from '../../v2/shared/events';
-import { SchedulerRepository } from './scheduler-repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SchedulerRepository } from './scheduler-repository.js';
 
 interface Logger {
   info(msg: string, ...args: unknown[]): void;

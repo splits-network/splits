@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanySourcerListParams } from './types';
+import { CompanySourcerListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'sourced_at', 'protection_expires_at'];
 

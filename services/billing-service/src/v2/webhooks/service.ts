@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/node';
-import { IEventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events.js';
 
 /**
  * V2 Webhook Service

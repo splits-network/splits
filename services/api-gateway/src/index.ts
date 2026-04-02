@@ -4,14 +4,14 @@ import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-ne
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { randomUUID } from 'crypto';
-import { AuthMiddleware } from './auth';
-import { ServiceRegistry } from './clients';
-import { registerV2GatewayRoutes } from './routes/v2/routes';
-import { registerV3GatewayRoutes } from './routes/v3/routes';
+import { AuthMiddleware } from './auth.js';
+import { ServiceRegistry } from './clients.js';
+import { registerV2GatewayRoutes } from './routes/v2/routes.js';
+import { registerV3GatewayRoutes } from './routes/v3/routes.js';
 import * as Sentry from '@sentry/node';
-import { EventPublisher } from './events/event-publisher';
+import { EventPublisher } from './events/event-publisher.js';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
 if (process.env.SENTRY_DSN) {

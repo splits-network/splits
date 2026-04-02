@@ -4,8 +4,8 @@
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
-import { SearchRepository } from "./repository";
-import { SearchParams } from "./types";
+import { SearchRepository } from "./repository.js";
+import { SearchParams } from "./types.js";
 
 export class SearchService {
     private accessResolver: AccessContextResolver;

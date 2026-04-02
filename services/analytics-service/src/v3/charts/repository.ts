@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChartType, ChartFilters } from './types';
+import { ChartType, ChartFilters } from './types.js';
 
 export class ChartV3Repository {
   constructor(private supabase: SupabaseClient) {}

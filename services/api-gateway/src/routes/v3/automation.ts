@@ -7,8 +7,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { registerV3Routes, V3RouteConfig } from './proxy';
+import { ServiceRegistry } from '../../clients.js';
+import { registerV3Routes, V3RouteConfig } from './proxy.js';
 
 const automationV3Routes: V3RouteConfig[] = [
   // ── Automation Rules Core CRUD ─────────────────────────────────

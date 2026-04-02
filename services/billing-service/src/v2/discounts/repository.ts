@@ -1,9 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { resolveAccessContext, AccessContext } from '../shared/access';
+import { resolveAccessContext, AccessContext } from '../shared/access.js';
 import { 
     SubscriptionDiscount,
     ApplyDiscountRequest 
-} from './types';
+} from './types.js';
 
 export class DiscountRepository {
     private supabase: SupabaseClient;

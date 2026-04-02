@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { MembershipRepository } from './repository';
-import { MembershipService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { MembershipRepository } from './repository.js';
+import { MembershipService } from './service.js';
 import {
   CreateMembershipInput,
   UpdateMembershipInput,
@@ -15,8 +15,8 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
-import { registerMembershipDetailView } from './views/detail.route';
+} from './types.js';
+import { registerMembershipDetailView } from './views/detail.route.js';
 
 export function registerMembershipRoutes(
   app: FastifyInstance,

@@ -3,8 +3,8 @@
  */
 
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { JobSkillRepository } from './repository';
-import { CreateJobSkillInput, JobSkillListParams } from './types';
+import { JobSkillRepository } from './repository.js';
+import { CreateJobSkillInput, JobSkillListParams } from './types.js';
 
 export class JobSkillService {
   constructor(private repository: JobSkillRepository) {}

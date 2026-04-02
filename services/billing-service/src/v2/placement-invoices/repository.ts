@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementInvoice, PlacementInvoiceCreate, PlacementInvoiceUpdate } from './types';
+import { PlacementInvoice, PlacementInvoiceCreate, PlacementInvoiceUpdate } from './types.js';
 
 interface PlacementInvoiceListResult {
     data: PlacementInvoice[];

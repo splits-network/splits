@@ -8,8 +8,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { DownloadViewRepository } from './download.repository';
-import { AttachmentStorageClient } from '../storage';
+import { DownloadViewRepository } from './download.repository.js';
+import { AttachmentStorageClient } from '../storage.js';
 
 export class DownloadViewService {
   private accessResolver: AccessContextResolver;

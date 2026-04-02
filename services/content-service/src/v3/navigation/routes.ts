@@ -4,15 +4,15 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { NavigationRepository } from "./repository";
-import { NavigationService } from "./service";
+import { NavigationRepository } from "./repository.js";
+import { NavigationService } from "./service.js";
 import {
     NavigationListParams,
     UpsertNavigationInput,
     listQuerySchema,
     upsertSchema,
     idParamSchema,
-} from "./types";
+} from "./types.js";
 
 export function registerNavigationRoutes(
     app: FastifyInstance,

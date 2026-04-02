@@ -9,7 +9,7 @@ import {
     PlacementPayoutTransactionInsert,
     PlacementPayoutTransactionUpdate,
     TransactionStatus
-} from './types';
+} from './types.js';
 
 export interface TransactionListFilters {
     status?: TransactionStatus;

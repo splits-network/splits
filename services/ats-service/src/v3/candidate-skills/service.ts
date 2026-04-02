@@ -7,8 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { CandidateSkillRepository } from './repository';
-import { CreateCandidateSkillInput } from './types';
+import { CandidateSkillRepository } from './repository.js';
+import { CreateCandidateSkillInput } from './types.js';
 
 export class CandidateSkillService {
   private accessResolver: AccessContextResolver;

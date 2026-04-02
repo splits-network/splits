@@ -5,8 +5,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError } from "@splits-network/shared-fastify";
-import { XpRepository } from "./repository";
-import { XpListParams } from "./types";
+import { XpRepository } from "./repository.js";
+import { XpListParams } from "./types.js";
 
 export class XpService {
     private accessResolver: AccessContextResolver;

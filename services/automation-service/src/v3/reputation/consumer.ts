@@ -11,8 +11,8 @@ import * as amqp from 'amqplib';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecalcService } from './recalc-service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecalcService } from './recalc-service.js';
 
 interface ReputationConsumerConfig {
   rabbitMqUrl: string;

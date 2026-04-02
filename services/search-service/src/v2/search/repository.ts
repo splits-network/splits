@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver, AccessContext } from '@splits-network/shared-access-context';
-import { SearchableEntityType, SearchResult, TypeaheadGroup, ENTITY_TYPE_LABELS, SearchFilters } from './types';
+import { SearchableEntityType, SearchResult, TypeaheadGroup, ENTITY_TYPE_LABELS, SearchFilters } from './types.js';
 
 export class SearchRepository {
     private accessResolver: AccessContextResolver;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Fastify from 'fastify';
-import { registerAIReviewRoutes } from '../../src/v2/reviews/routes';
+import { registerAIReviewRoutes } from '../../src/v2/reviews/routes.js';
 
 describe('AI Review Routes (integration)', () => {
     beforeEach(() => {

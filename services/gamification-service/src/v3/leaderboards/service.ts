@@ -7,8 +7,8 @@
  */
 
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { LeaderboardRepository } from './repository';
-import { LeaderboardListParams } from './types';
+import { LeaderboardRepository } from './repository.js';
+import { LeaderboardListParams } from './types.js';
 
 export class LeaderboardService {
   constructor(private repository: LeaderboardRepository) {}

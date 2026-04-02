@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CultureTagListParams } from './types';
+import { CultureTagListParams } from './types.js';
 
 export class CultureTagRepository {
   constructor(private supabase: SupabaseClient) {}

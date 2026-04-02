@@ -1,6 +1,6 @@
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
-import Redis from "ioredis";
+import { Redis } from 'ioredis';
 import { createClerkClient, verifyToken } from "@clerk/backend";
 import {
     loadBaseConfig,

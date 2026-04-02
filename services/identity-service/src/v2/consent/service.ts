@@ -1,6 +1,6 @@
-import { AccessContext } from '../shared/access';
-import { ConsentRepository } from './repository';
-import { ConsentRecord, SaveConsentRequest } from './types';
+import { AccessContext } from '../shared/access.js';
+import { ConsentRepository } from './repository.js';
+import { ConsentRecord, SaveConsentRequest } from './types.js';
 
 export class ConsentServiceV2 {
     constructor(

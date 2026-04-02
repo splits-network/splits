@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
 import {
     connectionRequestedEmail,
     ConnectionRequestedData,
@@ -9,7 +9,7 @@ import {
     RelationshipTerminatedData,
     invitationCancelledEmail,
     InvitationCancelledData,
-} from '../../templates/relationships';
+} from '../../templates/relationships/index.js';
 
 export class RelationshipsEmailService {
     constructor(

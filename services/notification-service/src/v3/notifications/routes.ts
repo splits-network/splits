@@ -7,16 +7,16 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { NotificationRepository } from './repository';
-import { NotificationService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { NotificationRepository } from './repository.js';
+import { NotificationService } from './service.js';
 import {
     NotificationListParams,
     NotificationUpdateInput,
     listQuerySchema,
     updateSchema,
     idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerNotificationRoutes(
     app: FastifyInstance,
@@ -33,6 +33,20 @@ export function registerNotificationRoutes(
             return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
         }
         const result = await service.markAllAsRead(clerkUserId);
+        return reply.send({ data: result });
+    });
+
+    // POST /api/v3/notifications/actions/mark-category-read
+    app.post('/api/v3/notifications/actions/mark-category-read', async (request, reply) => {
+        const clerkUserId = request.headers['x-clerk-user-id'] as string;
+        if (!clerkUserId) {
+            return reply.status(401).send({ error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } });
+        }
+        const { category } = request.body as { category: string };
+        if (!category) {
+            return reply.status(400).send({ error: { code: 'BAD_REQUEST', message: 'category is required' } });
+        }
+        const result = await service.markAsReadByCategory(clerkUserId, category);
         return reply.send({ data: result });
     });
 

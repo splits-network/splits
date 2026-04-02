@@ -8,10 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecruiterRepository } from './repository';
-import { RecruiterActivityService } from '../recruiter-activity/service';
-import { RecruiterListParams, RecruiterUpdate, CreateRecruiterInput } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecruiterRepository } from './repository.js';
+import { RecruiterActivityService } from '../recruiter-activity/service.js';
+import { RecruiterListParams, RecruiterUpdate, CreateRecruiterInput } from './types.js';
 
 export class RecruiterService {
   private accessResolver: AccessContextResolver;

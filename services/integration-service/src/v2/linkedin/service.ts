@@ -1,7 +1,7 @@
 import { Logger } from '@splits-network/shared-logging';
-import { ConnectionRepository } from '../connections/repository';
-import { TokenRefreshService } from '../calendar/token-refresh';
-import { LinkedInClient, LinkedInProfile } from './client';
+import { ConnectionRepository } from '../connections/repository.js';
+import { TokenRefreshService } from '../calendar/token-refresh.js';
+import { LinkedInClient, LinkedInProfile } from './client.js';
 import type { LinkedInProfilePublic } from '@splits-network/shared-types';
 
 /* ── Service ─────────────────────────────────────────────────────────── */

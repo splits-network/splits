@@ -7,7 +7,7 @@ vi.mock('../../src/middleware/auth', () => ({
     },
 }));
 
-import { registerAnalyticsRoutes } from '../../src/routes/v2/analytics';
+import { registerAnalyticsRoutes } from '../../src/routes/v2/analytics.js';
 
 describe('Analytics routes (integration)', () => {
     const analyticsClient = {

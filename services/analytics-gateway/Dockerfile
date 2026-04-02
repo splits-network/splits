@@ -18,6 +18,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/analytics-gateway ./services/analytics-gateway
 EXPOSE 3025
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-logging build
 CMD ["pnpm", "--filter", "@splits-network/analytics-gateway", "dev"]
 
 # Build stage
@@ -47,6 +48,7 @@ COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-lo
 COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
 
 # Copy built service
+COPY --from=build /app/services/analytics-gateway/package.json ./services/analytics-gateway/
 COPY --from=build /app/services/analytics-gateway/dist ./services/analytics-gateway/dist
 
 EXPOSE 3025

@@ -7,10 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { ReadReceiptActionRepository } from './read-receipt.repository';
-import { ReadReceiptActionService } from './read-receipt.service';
-import { idParamSchema } from '../types';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { ReadReceiptActionRepository } from './read-receipt.repository.js';
+import { ReadReceiptActionService } from './read-receipt.service.js';
+import { idParamSchema } from '../types.js';
 
 const bodySchema = {
   type: 'object',

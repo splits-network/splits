@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { registerPresenceRoutes as registerGlobalPresenceRoutes } from '../presence';
+import { ServiceRegistry } from '../../clients.js';
+import { registerPresenceRoutes as registerGlobalPresenceRoutes } from '../presence.js';
 
 export function registerPresenceRoutes(
     app: FastifyInstance,

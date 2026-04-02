@@ -176,6 +176,14 @@ export interface EmailListResponse {
     next_page_token?: string;
 }
 
+/* ─── Email Label Types ────────────────────────────────────────────────── */
+
+export interface EmailLabel {
+    id: string;
+    name: string;
+    type: 'system' | 'user';
+}
+
 /* ─── LinkedIn Types ───────────────────────────────────────────────────── */
 
 export interface LinkedInProfilePublic {

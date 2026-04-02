@@ -1,9 +1,9 @@
 import amqp, { Channel, Connection, ConsumeMessage } from 'amqplib';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { ChatRepository } from '../v2/chat/repository';
-import { ChatEventPublisher } from '../v2/chat/events';
+import { ChatRepository } from '../v2/chat/repository.js';
+import { ChatEventPublisher } from '../v2/chat/events.js';
 
 type DomainEvent = {
     event_type: string;

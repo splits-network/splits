@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EnrichedMatchRepository } from './enriched.repository';
-import { EnrichedMatchService } from './enriched.service';
-import { listQuerySchema, MatchListParams } from '../types';
+import { EnrichedMatchRepository } from './enriched.repository.js';
+import { EnrichedMatchService } from './enriched.service.js';
+import { listQuerySchema, MatchListParams } from '../types.js';
 
 export function registerEnrichedMatchView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new EnrichedMatchRepository(supabase);

@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SkillRepository } from './repository';
-import { SkillService } from './service';
-import { CreateSkillInput, SkillListParams, listQuerySchema, createSchema, idParamSchema } from './types';
+import { SkillRepository } from './repository.js';
+import { SkillService } from './service.js';
+import { CreateSkillInput, SkillListParams, listQuerySchema, createSchema, idParamSchema } from './types.js';
 
 export function registerSkillRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new SkillRepository(supabase);

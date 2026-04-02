@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
+import { NotificationRepository } from '../../repository.js';
 import {
     candidateSourcedEmail,
     candidateAddedToNetworkEmail,
@@ -9,10 +9,10 @@ import {
     candidateInvitationEmail,
     consentGivenEmail,
     consentDeclinedEmail,
-} from '../../templates/candidates';
-import type { EmailSource } from '../../templates/base';
+} from '../../templates/candidates/index.js';
+import type { EmailSource } from '../../templates/base.js';
+import { PORTAL_URL as _PORTAL_URL, CANDIDATE_URL as _CANDIDATE_URL } from '../../helpers/urls.js';
 
-const { PORTAL_URL: _PORTAL_URL, CANDIDATE_URL: _CANDIDATE_URL } = require('../../helpers/urls');
 
 export class CandidatesEmailService {
     constructor(

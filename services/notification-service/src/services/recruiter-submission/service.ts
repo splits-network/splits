@@ -5,7 +5,7 @@
 
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
+import { NotificationRepository } from '../../repository.js';
 import {
     newOpportunityEmail,
     candidateApprovedEmail,
@@ -15,8 +15,8 @@ import {
     CandidateApprovedData,
     CandidateDeclinedData,
     OpportunityExpiredData,
-} from '../../templates/recruiter-submission';
-import type { EmailSource } from '../../templates/base';
+} from '../../templates/recruiter-submission/index.js';
+import type { EmailSource } from '../../templates/base.js';
 
 export class RecruiterSubmissionEmailService {
     constructor(

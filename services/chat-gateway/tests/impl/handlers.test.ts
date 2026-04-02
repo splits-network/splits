@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handleClientMessage, publishEphemeral, authorizeConversation } from '../../src/index';
+import { handleClientMessage, publishEphemeral, authorizeConversation } from '../../src/index.js';
 
 describe('handleClientMessage (integration-ish)', () => {
     const redis = { publish: vi.fn(), setex: vi.fn() };

@@ -6,9 +6,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver, EntitlementChecker } from '@splits-network/shared-access-context';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecruiterSavedCandidateRepository } from './repository';
-import { CreateRecruiterSavedCandidateInput, RecruiterSavedCandidateListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecruiterSavedCandidateRepository } from './repository.js';
+import { CreateRecruiterSavedCandidateInput, RecruiterSavedCandidateListParams } from './types.js';
 
 export class RecruiterSavedCandidateService {
   private accessResolver: AccessContextResolver;

@@ -22,9 +22,10 @@
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
-import { NotificationRepository } from '../../repository';
-import { EngagementEmailService } from '../../services/engagement/service';
-import { PORTAL_URL, CANDIDATE_URL } from '../../helpers/urls';
+import { NotificationRepository } from '../../repository.js';
+import { EngagementEmailService } from '../../services/engagement/service.js';
+import { PORTAL_URL, CANDIDATE_URL } from '../../helpers/urls.js';
+import { createClient } from '@supabase/supabase-js';
 
 export interface SchedulerConfig {
     supabaseUrl: string;
@@ -59,7 +60,6 @@ export class NotificationScheduler {
     private emailService: EngagementEmailService;
 
     constructor(private config: SchedulerConfig) {
-        const { createClient } = require('@supabase/supabase-js');
         this.supabase = createClient(config.supabaseUrl, config.supabaseKey);
         this.repository = new NotificationRepository(config.supabaseUrl, config.supabaseKey);
 
@@ -199,32 +199,32 @@ export class NotificationScheduler {
     // ── Job implementations delegate to dedicated runner modules ──
 
     private async runWeeklyDigest(): Promise<JobResult> {
-        const { executeWeeklyDigest } = await import('./jobs/weekly-digest');
+        const { executeWeeklyDigest } = await import('./jobs/weekly-digest.js');
         return executeWeeklyDigest(this.supabase, this.emailService, this.config.logger);
     }
 
     private async runMonthlyReport(): Promise<JobResult> {
-        const { executeMonthlyReport } = await import('./jobs/monthly-report');
+        const { executeMonthlyReport } = await import('./jobs/monthly-report.js');
         return executeMonthlyReport(this.supabase, this.emailService, this.config.logger);
     }
 
     private async runRecruiterReminders(): Promise<JobResult> {
-        const { executeRecruiterReminders } = await import('./jobs/recruiter-reminders');
+        const { executeRecruiterReminders } = await import('./jobs/recruiter-reminders.js');
         return executeRecruiterReminders(this.supabase, this.emailService, this.config.logger);
     }
 
     private async runCandidateReminders(): Promise<JobResult> {
-        const { executeCandidateReminders } = await import('./jobs/candidate-reminders');
+        const { executeCandidateReminders } = await import('./jobs/candidate-reminders.js');
         return executeCandidateReminders(this.supabase, this.emailService, this.config.logger);
     }
 
     private async runCandidateMatchDigest(): Promise<JobResult> {
-        const { executeCandidateMatchDigest } = await import('./jobs/candidate-match-digest');
+        const { executeCandidateMatchDigest } = await import('./jobs/candidate-match-digest.js');
         return executeCandidateMatchDigest(this.supabase, this.emailService, this.config.logger);
     }
 
     private async runAftercareReminders(): Promise<JobResult> {
-        const { executeAftercareReminders } = await import('./jobs/aftercare-reminders');
+        const { executeAftercareReminders } = await import('./jobs/aftercare-reminders.js');
         return executeAftercareReminders(this.supabase, this.emailService, this.config.logger);
     }
 }

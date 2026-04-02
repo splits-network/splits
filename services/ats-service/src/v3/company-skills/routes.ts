@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanySkillRepository } from './repository';
-import { CompanySkillService } from './service';
-import { registerWithDetailsView } from './views/with-details.route';
+import { CompanySkillRepository } from './repository.js';
+import { CompanySkillService } from './service.js';
+import { registerWithDetailsView } from './views/with-details.route.js';
 import {
   CreateCompanySkillInput,
   BulkReplaceCompanySkillsInput,
@@ -15,7 +15,7 @@ import {
   bulkReplaceSchema,
   companyIdParamSchema,
   deleteParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerCompanySkillRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CompanySkillRepository(supabase);

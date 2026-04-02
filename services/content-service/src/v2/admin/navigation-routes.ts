@@ -6,8 +6,8 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { NavigationRepository } from '../navigation/repository';
-import { getUserContext } from '../shared/helpers';
+import { NavigationRepository } from '../navigation/repository.js';
+import { getUserContext } from '../shared/helpers.js';
 import type { HeaderNavConfig, FooterNavConfig } from '@splits-network/shared-types';
 
 interface NavigationRoutesConfig {

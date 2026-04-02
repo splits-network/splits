@@ -15,12 +15,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
+import { PORTAL_URL } from '../helpers/urls.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Splits Network <notifications@splits.network>';
-const { PORTAL_URL } = require('../helpers/urls');
 
 if (!SUPABASE_URL || !SUPABASE_KEY || !RESEND_API_KEY) {
     console.error('Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY');

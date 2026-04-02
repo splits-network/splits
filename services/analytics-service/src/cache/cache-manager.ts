@@ -1,6 +1,6 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { createLogger } from '@splits-network/shared-logging';
-import { CacheTTL } from '../v2/types';
+import { CacheTTL } from '../v2/types.js';
 
 const logger = createLogger('CacheManager');
 

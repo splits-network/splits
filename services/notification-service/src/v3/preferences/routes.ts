@@ -7,8 +7,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PreferenceRepository } from './repository';
-import { PreferenceService } from './service';
+import { PreferenceRepository } from './repository.js';
+import { PreferenceService } from './service.js';
 import {
   PreferenceUpdateInput,
   BulkPreferenceUpdateInput,
@@ -16,7 +16,7 @@ import {
   categoryParamSchema,
   updateSchema,
   bulkUpdateSchema,
-} from './types';
+} from './types.js';
 
 export function registerPreferenceRoutes(
   app: FastifyInstance,

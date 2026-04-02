@@ -1,4 +1,4 @@
-import { AdminBillingRepository, AdminListParams, AdminListResponse } from './repository';
+import { AdminBillingRepository, AdminListParams, AdminListResponse } from './repository.js';
 
 export class AdminBillingService {
     constructor(private repository: AdminBillingRepository) {}

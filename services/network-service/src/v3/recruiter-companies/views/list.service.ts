@@ -7,8 +7,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { RecruiterCompanyListRepository } from './list.repository';
-import { RecruiterCompanyListParams } from '../types';
+import { RecruiterCompanyListRepository } from './list.repository.js';
+import { RecruiterCompanyListParams } from '../types.js';
 
 export class RecruiterCompanyListService {
   private accessResolver: AccessContextResolver;

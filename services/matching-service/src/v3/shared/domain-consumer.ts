@@ -14,7 +14,7 @@
 import * as amqp from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { MatchingOrchestrator } from './matching-orchestrator';
+import { MatchingOrchestrator } from './matching-orchestrator.js';
 
 interface DomainConsumerConfig {
   rabbitMqUrl: string;

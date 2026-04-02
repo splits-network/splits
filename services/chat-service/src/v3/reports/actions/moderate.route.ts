@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ModerateActionRepository } from './moderate.repository';
-import { ModerateActionService, ModerateInput } from './moderate.service';
-import { IEventPublisher } from '../../../v2/shared/events';
+import { ModerateActionRepository } from './moderate.repository.js';
+import { ModerateActionService, ModerateInput } from './moderate.service.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
 
 const paramsSchema = {
   type: 'object',

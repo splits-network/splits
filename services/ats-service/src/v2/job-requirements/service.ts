@@ -1,5 +1,5 @@
-import { JobRequirementRepository } from './repository';
-import { JobRequirementBulkItem } from '../types';
+import { JobRequirementRepository } from './repository.js';
+import { JobRequirementBulkItem } from '../types.js';
 
 export class JobRequirementService {
     constructor(private repository: JobRequirementRepository) { }

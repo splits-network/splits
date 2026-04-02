@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminListParams } from './types';
+import { AdminListParams } from './types.js';
 
 export class AdminRepository {
   constructor(private supabase: SupabaseClient) {}

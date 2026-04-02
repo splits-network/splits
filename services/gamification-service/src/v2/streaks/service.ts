@@ -1,6 +1,6 @@
-import { StreakRepository } from './repository';
-import { BadgeEntityType } from '../badges/definitions/types';
-import { IEventPublisher } from '../shared/events';
+import { StreakRepository } from './repository.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
+import { IEventPublisher } from '../shared/events.js';
 
 const STREAK_MILESTONES = [7, 14, 30, 60, 90, 180, 365];
 

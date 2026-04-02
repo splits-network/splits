@@ -1,11 +1,11 @@
-import Redis from "ioredis";
+import { Redis } from 'ioredis';
 import { Logger } from "@splits-network/shared-logging";
 import {
     ServiceCheckResult,
     ServiceStatus,
     AggregatedServiceStatus,
     ServiceDefinition,
-} from "./types";
+} from "./types.js";
 
 const WINDOW_SIZE = 5;
 const CONSECUTIVE_THRESHOLD = 5; // require N failures IN A ROW before alerting

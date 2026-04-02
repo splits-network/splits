@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChatReport, ReportListParams } from './types';
+import { ChatReport, ReportListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'updated_at', 'status'];
 

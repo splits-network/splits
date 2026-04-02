@@ -7,15 +7,16 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { MatchRepository } from '../matches/repository';
-import { MatchUpsert, MatchFactors } from '../matches/types';
-import { computeRuleScore, RuleScoringInput } from '../../v2/matches/rule-scorer';
-import { computeSkillsScore } from '../../v2/matches/skills-scorer';
-import { computeAiScore } from '../../v2/matches/ai-scorer';
-import { EmbeddingService } from '../../v2/embeddings/service';
-import { EmbeddingRepository } from '../../v2/embeddings/repository';
-import { MatchDataFetcher } from './match-data-fetcher';
+import type { IAiClient } from '@splits-network/shared-ai-client';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { MatchRepository } from '../matches/repository.js';
+import { MatchUpsert, MatchFactors } from '../matches/types.js';
+import { computeRuleScore, RuleScoringInput } from '../../v2/matches/rule-scorer.js';
+import { computeSkillsScore } from '../../v2/matches/skills-scorer.js';
+import { computeAiScore } from '../../v2/matches/ai-scorer.js';
+import { EmbeddingService } from '../../v2/embeddings/service.js';
+import { EmbeddingRepository } from '../../v2/embeddings/repository.js';
+import { MatchDataFetcher } from './match-data-fetcher.js';
 
 export interface MatchingOrchestratorConfig {
   repository: MatchRepository;
@@ -24,6 +25,7 @@ export interface MatchingOrchestratorConfig {
   supabase: SupabaseClient;
   eventPublisher?: IEventPublisher;
   logger: Logger;
+  aiClient?: IAiClient;
 }
 
 export class MatchingOrchestrator {
@@ -31,11 +33,13 @@ export class MatchingOrchestrator {
   private fetcher: MatchDataFetcher;
   private eventPublisher?: IEventPublisher;
   private logger: Logger;
+  private aiClient?: IAiClient;
 
   constructor(config: MatchingOrchestratorConfig) {
     this.repository = config.repository;
     this.eventPublisher = config.eventPublisher;
     this.logger = config.logger;
+    this.aiClient = config.aiClient;
     this.fetcher = new MatchDataFetcher(
       config.supabase, config.embeddingService,
       config.embeddingRepository, config.logger,
@@ -203,6 +207,7 @@ export class MatchingOrchestrator {
       const aiResult = await computeAiScore(
         { candidate, job, requirements, cosine_similarity: similarity },
         this.logger,
+        this.aiClient,
       );
       aiScore = aiResult.score;
       aiSummary = aiResult.summary;

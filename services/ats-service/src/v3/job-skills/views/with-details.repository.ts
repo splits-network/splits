@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobSkillListParams } from '../types';
+import { JobSkillListParams } from '../types.js';
 
 const WITH_DETAILS_SELECT = '*, skill:skills(id, name, slug)';
 

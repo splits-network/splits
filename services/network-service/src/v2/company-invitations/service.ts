@@ -4,8 +4,8 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyInvitationRepository } from './repository';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
+import { CompanyInvitationRepository } from './repository.js';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 import {
@@ -14,7 +14,7 @@ import {
     CreateCompanyInvitationRequest,
     AcceptCompanyInvitationRequest,
     InvitationLookupResult
-} from './types';
+} from './types.js';
 
 export class CompanyInvitationServiceV2 {
     private accessResolver: AccessContextResolver;

@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
+import { NotificationRepository } from '../../repository.js';
 
 interface InAppCallNotification {
     userId: string;

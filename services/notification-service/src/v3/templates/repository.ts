@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TemplateListParams } from './types';
+import { TemplateListParams } from './types.js';
 
 export class TemplateRepository {
   constructor(private supabase: SupabaseClient) {}

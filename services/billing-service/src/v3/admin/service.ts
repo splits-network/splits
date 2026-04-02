@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { AdminBillingRepository } from './repository';
-import { AdminListParams } from './types';
+import { AdminBillingRepository } from './repository.js';
+import { AdminListParams } from './types.js';
 
 export class AdminBillingService {
   private accessResolver: AccessContextResolver;

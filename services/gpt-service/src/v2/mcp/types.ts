@@ -4,9 +4,9 @@
  * Shared types and dependencies for the MCP server implementation.
  */
 
-import { GptActionRepository } from '../actions/repository';
-import { OAuthService } from '../oauth/oauth-service';
-import { IEventPublisher } from '../shared/events';
+import { GptActionRepository } from '../actions/repository.js';
+import { OAuthService } from '../oauth/oauth-service.js';
+import { IEventPublisher } from '../shared/events.js';
 import { FastifyBaseLogger } from 'fastify';
 
 /**

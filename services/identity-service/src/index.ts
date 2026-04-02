@@ -3,9 +3,9 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, registerHealthCheck, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { registerV2Routes } from './v2/routes';
-import { registerV3Routes } from './v3/routes';
-import { EventPublisherV2, OutboxPublisher } from './v2/shared/events';
+import { registerV2Routes } from './v2/routes.js';
+import { registerV3Routes } from './v3/routes.js';
+import { EventPublisherV2, OutboxPublisher, ResilientPublisher } from './v2/shared/events.js';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -149,18 +149,21 @@ async function main() {
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
 
+    // Resilient publisher: tries direct RabbitMQ first, falls back to outbox
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
+
     // Register V2 routes (legacy — both versions coexist)
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         logger,
     });
 
     // Register V3 routes (new standard)
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Register standardized health check

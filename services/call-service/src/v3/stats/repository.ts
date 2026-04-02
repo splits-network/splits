@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CallStats } from './types';
+import { CallStats } from './types.js';
 
 export class StatsRepository {
   constructor(private supabase: SupabaseClient) {}

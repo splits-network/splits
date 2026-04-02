@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ImageListParams } from './types';
+import { ImageListParams } from './types.js';
 
 export class ImageRepository {
   constructor(private supabase: SupabaseClient) {}

@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { UserRoleFilters } from './types';
+import { UserRoleFilters } from './types.js';
 
 export class UserRoleRepository {
     private supabase: SupabaseClient;

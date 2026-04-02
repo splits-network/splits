@@ -4,7 +4,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { registerDocumentRoutes } from './documents/routes';
+import { registerDocumentRoutes } from './documents/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

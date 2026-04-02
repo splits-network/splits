@@ -1,8 +1,8 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { CollaborationEmailService } from '../../services/collaboration/service';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { CollaborationEmailService } from '../../services/collaboration/service.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
 
 export class CollaborationEventConsumer {
     constructor(

@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { UserRepository } from './repository';
-import { CreateUserInput, UpdateUserInput, RegisterUserInput, UserListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { UserRepository } from './repository.js';
+import { CreateUserInput, UpdateUserInput, RegisterUserInput, UserListParams } from './types.js';
 
 export type SourceApp = 'portal' | 'candidate';
 

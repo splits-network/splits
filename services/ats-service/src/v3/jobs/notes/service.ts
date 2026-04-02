@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { JobNoteRepository } from './repository';
-import { JobNoteCreate, JobNoteUpdate, JobNoteFilters, JobNoteCreatorType } from './types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { JobNoteRepository } from './repository.js';
+import { JobNoteCreate, JobNoteUpdate, JobNoteFilters, JobNoteCreatorType } from './types.js';
 
 export class JobNoteService {
   private accessResolver: AccessContextResolver;

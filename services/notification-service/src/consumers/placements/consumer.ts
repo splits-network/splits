@@ -1,8 +1,8 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { PlacementsEmailService } from '../../services/placements/service';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { PlacementsEmailService } from '../../services/placements/service.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
 
 export class PlacementsEventConsumer {
     constructor(

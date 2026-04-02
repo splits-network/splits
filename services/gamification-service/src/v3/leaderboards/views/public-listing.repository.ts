@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { LeaderboardListParams } from '../types';
+import { LeaderboardListParams } from '../types.js';
 
 const SORTABLE_FIELDS = ['rank', 'score'];
 

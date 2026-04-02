@@ -6,7 +6,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../shared/events';
+import { IEventPublisher } from '../shared/events.js';
 import { SignJWT, jwtVerify, importPKCS8, type KeyLike } from 'jose';
 import { randomBytes, createHash } from 'crypto';
 import {
@@ -18,7 +18,7 @@ import {
     GptSession,
     ValidatedToken,
     OAuthError,
-} from './types';
+} from './types.js';
 
 export class OAuthService {
     private privateKey: KeyLike | null = null;

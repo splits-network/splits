@@ -12,9 +12,9 @@
  */
 
 import { BadRequestError, ConflictError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../shared/events';
-import { BusinessOnboardingRepository } from './repository';
-import { BusinessOnboardingInput, BusinessOnboardingResult } from './types';
+import { IEventPublisher } from '../../shared/events.js';
+import { BusinessOnboardingRepository } from './repository.js';
+import { BusinessOnboardingInput, BusinessOnboardingResult } from './types.js';
 
 export class BusinessOnboardingService {
     constructor(

@@ -7,12 +7,12 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PageServiceV2 } from '../pages/service';
-import { NavigationRepository } from '../navigation/repository';
-import { ImageServiceV2 } from '../images/service';
-import { registerAdminPageRoutes } from './page-routes';
-import { registerAdminNavigationRoutes } from './navigation-routes';
-import { registerAdminImageRoutes } from './image-routes';
+import { PageServiceV2 } from '../pages/service.js';
+import { NavigationRepository } from '../navigation/repository.js';
+import { ImageServiceV2 } from '../images/service.js';
+import { registerAdminPageRoutes } from './page-routes.js';
+import { registerAdminNavigationRoutes } from './navigation-routes.js';
+import { registerAdminImageRoutes } from './image-routes.js';
 
 export interface AdminContentRoutesConfig {
     supabase: SupabaseClient;

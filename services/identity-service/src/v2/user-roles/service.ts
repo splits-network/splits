@@ -6,11 +6,11 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { UserRoleUpdate } from './types';
-import { UserRoleRepository } from './repository';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { UserRoleUpdate } from './types.js';
+import { UserRoleRepository } from './repository.js';
 import { v4 as uuidv4 } from 'uuid';
-import type { AccessContext } from '../shared/access';
+import type { AccessContext } from '../shared/access.js';
 
 export class UserRoleServiceV2 {
     constructor(

@@ -6,8 +6,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { StartRecordingService } from './start.service';
-import { CallRecordingRoutesConfig } from '../routes';
+import { StartRecordingService } from './start.service.js';
+import { CallRecordingRoutesConfig } from '../routes.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

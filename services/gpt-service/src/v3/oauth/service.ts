@@ -2,8 +2,8 @@
  * OAuth Sessions V3 Service
  */
 
-import { OAuthSessionRepository } from './repository';
-import { OAuthSessionListParams } from './types';
+import { OAuthSessionRepository } from './repository.js';
+import { OAuthSessionListParams } from './types.js';
 
 export class OAuthSessionService {
   constructor(private repository: OAuthSessionRepository) {}

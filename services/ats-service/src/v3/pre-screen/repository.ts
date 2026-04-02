@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PreScreenListParams, PreScreenQuestion } from './types';
+import { PreScreenListParams, PreScreenQuestion } from './types.js';
 
 export class PreScreenRepository {
   constructor(private supabase: SupabaseClient) {}

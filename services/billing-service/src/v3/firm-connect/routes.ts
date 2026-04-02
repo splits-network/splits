@@ -6,10 +6,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FirmConnectRepository } from './repository';
-import { FirmConnectService } from './service';
-import { onboardingLinkSchema, firmIdParamSchema, payoutsQuerySchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FirmConnectRepository } from './repository.js';
+import { FirmConnectService } from './service.js';
+import { onboardingLinkSchema, firmIdParamSchema, payoutsQuerySchema } from './types.js';
 
 export function registerFirmConnectRoutes(
   app: FastifyInstance,

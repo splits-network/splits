@@ -7,14 +7,14 @@ import * as amqp from 'amqplib';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { AutomationRuleRepository } from '../rules/repository';
-import { AutomationExecutionRepository } from '../executions/repository';
-import { AutomationExecutionServiceV2 } from '../executions/service';
-import { evaluateConditions, TriggerConditions } from '../executions/rule-engine';
-import { FraudSignalRepository } from '../fraud-signals/repository';
-import { runFraudAnalysis } from '../fraud-signals/analyzers';
-import { IEventPublisher } from './events';
-import type { AccessContext } from './access';
+import { AutomationRuleRepository } from '../rules/repository.js';
+import { AutomationExecutionRepository } from '../executions/repository.js';
+import { AutomationExecutionServiceV2 } from '../executions/service.js';
+import { evaluateConditions, TriggerConditions } from '../executions/rule-engine.js';
+import { FraudSignalRepository } from '../fraud-signals/repository.js';
+import { runFraudAnalysis } from '../fraud-signals/analyzers/index.js';
+import { IEventPublisher } from './events.js';
+import type { AccessContext } from './access.js';
 
 interface DomainConsumerConfig {
     rabbitMqUrl: string;

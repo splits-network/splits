@@ -3,9 +3,9 @@
  * Professional branded templates for placement-related notifications
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider, badge } from '../components';
-const { PORTAL_URL } = require('../../helpers/urls');
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider, badge } from '../components.js';
+import { PORTAL_URL } from '../../helpers/urls.js';
 
 export interface PlacementCreatedData {
     candidateName: string;

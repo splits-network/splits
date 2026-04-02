@@ -20,6 +20,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/onboarding-service ./services/onboarding-service
 EXPOSE 3023
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build
 CMD ["pnpm", "--filter", "@splits-network/onboarding-service", "dev"]
 
 # Build stage
@@ -49,6 +50,7 @@ COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/di
 COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 
+COPY --from=build /app/services/onboarding-service/package.json ./services/onboarding-service/
 COPY --from=build /app/services/onboarding-service/dist ./services/onboarding-service/dist
 
 EXPOSE 3023

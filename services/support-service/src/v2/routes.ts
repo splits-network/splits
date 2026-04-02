@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { registerSupportRoutes } from './support/routes';
-import { registerTicketRoutes } from './tickets/routes';
+import { registerSupportRoutes } from './support/routes.js';
+import { registerTicketRoutes } from './tickets/routes.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
-import { DiscountServiceV2 } from './service';
+import { DiscountServiceV2 } from './service.js';
 import { 
     DiscountValidationRequest,
     ApplyDiscountRequest
-} from './types';
-import { requireUserContext } from '../shared/helpers';
+} from './types.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 export function discountRoutes(app: FastifyInstance, discountService: DiscountServiceV2) {
     // Validate discount code

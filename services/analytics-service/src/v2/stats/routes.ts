@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { requireUserContext } from '../shared/access';
-import { StatsServiceV2 } from './service';
-import { StatsQueryParams } from './types';
+import { requireUserContext } from '../shared/access.js';
+import { StatsServiceV2 } from './service.js';
+import { StatsQueryParams } from './types.js';
 
 interface RegisterStatsRoutesConfig {
     statsService: StatsServiceV2;

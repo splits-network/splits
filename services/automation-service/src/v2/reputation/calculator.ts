@@ -18,7 +18,7 @@
  * - New recruiters start at 50 (neutral)
  */
 
-import { ReputationMetrics, CalculationResult } from './types';
+import { ReputationMetrics, CalculationResult } from './types.js';
 
 // Weight constants
 const WEIGHT_COMPLETION = 0.30;

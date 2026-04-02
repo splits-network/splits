@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CallRecordingRepository } from './call-repository';
-import { CallRecordingService } from './call-recording-service';
-import { requireUserContext } from '../shared/helpers';
-import { generateSignedUrl, extractStoragePath } from '../shared/signed-url-helper';
+import { CallRecordingRepository } from './call-repository.js';
+import { CallRecordingService } from './call-recording-service.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { generateSignedUrl, extractStoragePath } from '../shared/signed-url-helper.js';
 
 interface CallRecordingRoutesConfig {
     repository: CallRecordingRepository;

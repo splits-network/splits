@@ -7,7 +7,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementListParams } from '../types';
+import { PlacementListParams } from '../types.js';
 
 export interface PlacementScopeFilters {
   candidate_id?: string;

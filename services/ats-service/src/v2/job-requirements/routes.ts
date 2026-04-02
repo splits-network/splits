@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { JobRequirementService } from './service';
-import { requireUserContext } from '../shared/helpers';
-import { BulkReplaceRequirementsRequest } from '../types';
+import { JobRequirementService } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { BulkReplaceRequirementsRequest } from '../types.js';
 
 interface RegisterJobRequirementRoutesConfig {
     service: JobRequirementService;

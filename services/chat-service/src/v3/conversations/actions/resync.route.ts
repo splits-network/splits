@@ -11,10 +11,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { resolveAndValidateParticipant } from '../lib/participant-helper';
-import { DetailViewRepository } from '../views/detail.repository';
-import { idParamSchema } from '../types';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { resolveAndValidateParticipant } from '../lib/participant-helper.js';
+import { DetailViewRepository } from '../views/detail.repository.js';
+import { idParamSchema } from '../types.js';
 
 const querySchema = {
   type: 'object',

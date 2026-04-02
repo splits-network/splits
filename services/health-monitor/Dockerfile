@@ -20,6 +20,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/health-monitor ./services/health-monitor
 EXPOSE 3012
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build
 CMD ["pnpm", "--filter", "@splits-network/health-monitor", "dev"]
 
 # Build stage
@@ -56,6 +57,7 @@ COPY --from=build /app/packages/shared-types/package.json ./packages/shared-type
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 
 # Copy built service
+COPY --from=build /app/services/health-monitor/package.json ./services/health-monitor/
 COPY --from=build /app/services/health-monitor/dist ./services/health-monitor/dist
 
 EXPOSE 3012

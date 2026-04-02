@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ReputationRepository } from './repository';
-import { ReputationService } from './service';
-import { ReputationListParams, recruiterIdParamSchema, listQuerySchema } from './types';
+import { ReputationRepository } from './repository.js';
+import { ReputationService } from './service.js';
+import { ReputationListParams, recruiterIdParamSchema, listQuerySchema } from './types.js';
 
 export function registerReputationRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new ReputationRepository(supabase);

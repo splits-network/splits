@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobRecommendationDetailRepository } from './detail.repository';
-import { JobRecommendationDetailService } from './detail.service';
-import { idParamSchema } from '../types';
+import { JobRecommendationDetailRepository } from './detail.repository.js';
+import { JobRecommendationDetailService } from './detail.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerJobRecommendationDetailView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new JobRecommendationDetailRepository(supabase);

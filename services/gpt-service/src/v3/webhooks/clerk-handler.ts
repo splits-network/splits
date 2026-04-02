@@ -7,7 +7,7 @@
 import { FastifyInstance } from 'fastify';
 import { Logger } from '@splits-network/shared-logging';
 import { Webhook } from 'svix';
-import { OAuthAuthService } from '../oauth/auth-service';
+import { OAuthAuthService } from '../oauth/auth-service.js';
 
 interface ClerkHandlerDeps {
   authService: OAuthAuthService;

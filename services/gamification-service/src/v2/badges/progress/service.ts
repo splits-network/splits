@@ -1,5 +1,5 @@
-import { BadgeProgressRepository } from './repository';
-import { BadgeEntityType } from '../definitions/types';
+import { BadgeProgressRepository } from './repository.js';
+import { BadgeEntityType } from '../definitions/types.js';
 
 export class BadgeProgressService {
     constructor(private repository: BadgeProgressRepository) {}

@@ -7,8 +7,8 @@ import { FastifyInstance, FastifyRequest } from 'fastify';
 import { Webhook } from 'svix';
 import { createLogger } from '@splits-network/shared-logging';
 import type { Logger } from '@splits-network/shared-logging';
-import { WebhooksServiceV2 } from './service';
-import { ClerkWebhookEvent, WebhookHeaders, WebhookSourceApp } from './types';
+import { WebhooksServiceV2 } from './service.js';
+import { ClerkWebhookEvent, WebhookHeaders, WebhookSourceApp } from './types.js';
 
 // Webhook secrets for each Clerk instance (portal + candidate app)
 const SPLITS_WEBHOOK_SECRET = process.env.SPLITS_CLERK_WEBHOOK_SECRET;

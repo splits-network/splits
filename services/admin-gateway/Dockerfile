@@ -21,6 +21,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/admin-gateway ./services/admin-gateway
 EXPOSE 3030
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build
 CMD ["pnpm", "--filter", "@splits-network/admin-gateway", "dev"]
 
 # Build stage
@@ -60,6 +61,7 @@ COPY --from=build /app/packages/shared-access-context/package.json ./packages/sh
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 
 # Copy built service
+COPY --from=build /app/services/admin-gateway/package.json ./services/admin-gateway/
 COPY --from=build /app/services/admin-gateway/dist ./services/admin-gateway/dist
 
 EXPOSE 3030

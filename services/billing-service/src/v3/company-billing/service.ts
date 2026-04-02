@@ -6,8 +6,8 @@ import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError, NotFoundError, BadRequestError } from '@splits-network/shared-fastify';
-import { CompanyBillingRepository } from './repository';
-import { CompanyBillingCreateInput, CompanyBillingUpdateInput } from './types';
+import { CompanyBillingRepository } from './repository.js';
+import { CompanyBillingCreateInput, CompanyBillingUpdateInput } from './types.js';
 
 export class CompanyBillingService {
   private accessResolver: AccessContextResolver;

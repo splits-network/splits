@@ -7,17 +7,17 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import Redis from 'ioredis';
-import { IEventPublisher } from '../v2/shared/events';
-import { IChatEventPublisher } from './shared/chat-event-publisher';
-import { registerConversationRoutes } from './conversations/routes';
-import { registerMessageRoutes } from './messages/routes';
-import { registerMessagingCounterRoutes } from './messaging-counters/routes';
-import { registerPresenceRoutes } from './presence/routes';
-import { registerBlockRoutes } from './blocks/routes';
-import { registerAttachmentRoutes } from './attachments/routes';
-import { registerReportRoutes } from './reports/routes';
-import { registerModerationRoutes } from './moderation/routes';
+import { Redis } from 'ioredis';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { IChatEventPublisher } from './shared/chat-event-publisher.js';
+import { registerConversationRoutes } from './conversations/routes.js';
+import { registerMessageRoutes } from './messages/routes.js';
+import { registerMessagingCounterRoutes } from './messaging-counters/routes.js';
+import { registerPresenceRoutes } from './presence/routes.js';
+import { registerBlockRoutes } from './blocks/routes.js';
+import { registerAttachmentRoutes } from './attachments/routes.js';
+import { registerReportRoutes } from './reports/routes.js';
+import { registerModerationRoutes } from './moderation/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

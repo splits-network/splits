@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { CandidateRepository } from './repository';
-import { CreateCandidateInput, UpdateCandidateInput, CandidateListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { CandidateRepository } from './repository.js';
+import { CreateCandidateInput, UpdateCandidateInput, CandidateListParams } from './types.js';
 
 export class CandidateService {
   private accessResolver: AccessContextResolver;

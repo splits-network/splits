@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { CandidateSourcerServiceV2 } from './service';
-import { requireUserContext } from '../helpers';
+import { CandidateSourcerServiceV2 } from './service.js';
+import { requireUserContext } from '../helpers.js';
 
 /**
  * Candidate Sourcers V2 Routes — Read-only + notes update + check-protection

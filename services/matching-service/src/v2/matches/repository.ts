@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { CandidateRoleMatch, EnrichedCandidateRoleMatch, MatchListFilters, MatchUpsert } from './types';
+import { CandidateRoleMatch, EnrichedCandidateRoleMatch, MatchListFilters, MatchUpsert } from './types.js';
 
 export class MatchRepository {
     private supabase: SupabaseClient;

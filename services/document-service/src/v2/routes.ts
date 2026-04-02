@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { registerDocumentRoutes } from './documents/routes';
-import { StorageClient } from '../storage';
-import { IEventPublisher } from './shared/events';
+import { registerDocumentRoutes } from './documents/routes.js';
+import { StorageClient } from '../storage.js';
+import { IEventPublisher } from './shared/events.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

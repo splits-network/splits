@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AIReviewServiceV2 } from '../../src/v2/reviews/service';
+import { AIReviewServiceV2 } from '../../src/v2/reviews/service.js';
 import { Logger } from '@splits-network/shared-logging';
 
 function createLoggerMock(): Logger {

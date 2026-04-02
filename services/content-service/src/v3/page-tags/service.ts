@@ -7,8 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { PageTagRepository } from './repository';
-import { CreatePageTagInput } from './types';
+import { PageTagRepository } from './repository.js';
+import { CreatePageTagInput } from './types.js';
 
 export class PageTagService {
   private accessResolver: AccessContextResolver;

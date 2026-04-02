@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Fastify from 'fastify';
-import { registerJobRequirementRoutes } from '../../src/v2/job-requirements/routes';
+import { registerJobRequirementRoutes } from '../../src/v2/job-requirements/routes.js';
 
 describe('Job requirements routes (integration)', () => {
     let service: any;

@@ -10,9 +10,9 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, ForbiddenError } from '@splits-network/shared-fastify';
-import { InitUploadRepository } from './init-upload.repository';
-import { AttachmentStorageClient } from '../storage';
-import { InitUploadInput, ChatAttachment } from '../types';
+import { InitUploadRepository } from './init-upload.repository.js';
+import { AttachmentStorageClient } from '../storage.js';
+import { InitUploadInput, ChatAttachment } from '../types.js';
 
 export interface InitUploadResult {
   attachment: ChatAttachment;

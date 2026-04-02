@@ -8,8 +8,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, ForbiddenError } from '@splits-network/shared-fastify';
-import { SubmitActionRepository } from './submit.repository';
-import { IEventPublisher } from '../../../v2/shared/events';
+import { SubmitActionRepository } from './submit.repository.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
 
 export interface SubmitReportInput {
   conversationId: string;

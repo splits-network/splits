@@ -3,8 +3,8 @@
  * Notifications for recruiter-initiated opportunity proposals and candidate responses
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider } from '../components.js';
 
 /**
  * Email sent to candidate when recruiter proposes a job opportunity

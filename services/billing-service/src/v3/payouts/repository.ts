@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TransactionListParams } from './types';
+import { TransactionListParams } from './types.js';
 
 export interface PayoutScopeFilters {
   recruiter_id?: string;

@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyPerkRepository } from './repository';
-import { CompanyPerkService } from './service';
-import { registerWithDetailsView } from './views/with-details.route';
+import { CompanyPerkRepository } from './repository.js';
+import { CompanyPerkService } from './service.js';
+import { registerWithDetailsView } from './views/with-details.route.js';
 import {
   CreateCompanyPerkInput,
   BulkReplaceCompanyPerksInput,
@@ -15,7 +15,7 @@ import {
   bulkReplaceSchema,
   companyIdParamSchema,
   deleteParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerCompanyPerkRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CompanyPerkRepository(supabase);

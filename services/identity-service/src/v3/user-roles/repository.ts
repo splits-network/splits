@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { UserRoleListParams } from './types';
+import { UserRoleListParams } from './types.js';
 
 export class UserRoleRepository {
   constructor(private supabase: SupabaseClient) {}

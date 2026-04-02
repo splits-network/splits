@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementInvoice } from '../placement-invoices/types';
+import { PlacementInvoice } from '../placement-invoices/types.js';
 
 export class InvoiceEligibilityRepository {
     constructor(private supabase: SupabaseClient) { }

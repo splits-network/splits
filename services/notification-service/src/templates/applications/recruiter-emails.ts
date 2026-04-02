@@ -3,8 +3,8 @@
  * Tailored notifications for recruiters at key application milestones
  */
 
-import { baseEmailTemplate } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider } from '../components';
+import { baseEmailTemplate } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider } from '../components.js';
 
 // ============================================================================
 // Formatting Helpers

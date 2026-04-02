@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { AssignmentRepository } from './repository';
-import { AssignmentListParams, AssignmentUpdate, CreateAssignmentInput } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { AssignmentRepository } from './repository.js';
+import { AssignmentListParams, AssignmentUpdate, CreateAssignmentInput } from './types.js';
 
 export class AssignmentService {
   private accessResolver: AccessContextResolver;

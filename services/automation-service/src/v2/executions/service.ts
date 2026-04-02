@@ -1,9 +1,9 @@
-import { buildPaginationResponse } from '../shared/helpers';
-import { AutomationExecution, ExecutionFilters, CreateExecutionInput } from './types';
-import { AutomationExecutionRepository } from './repository';
-import { executeAction, ActionResult } from './rule-engine';
-import { IEventPublisher } from '../shared/events';
-import type { AccessContext } from '../shared/access';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { AutomationExecution, ExecutionFilters, CreateExecutionInput } from './types.js';
+import { AutomationExecutionRepository } from './repository.js';
+import { executeAction, ActionResult } from './rule-engine.js';
+import { IEventPublisher } from '../shared/events.js';
+import type { AccessContext } from '../shared/access.js';
 import { Logger } from '@splits-network/shared-logging';
 
 export class AutomationExecutionServiceV2 {

@@ -8,21 +8,21 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { IChatEventPublisher } from '../shared/chat-event-publisher';
-import { AttachmentRepository } from './repository';
-import { AttachmentService } from './service';
-import { AttachmentStorageClient } from './storage';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { IChatEventPublisher } from '../shared/chat-event-publisher.js';
+import { AttachmentRepository } from './repository.js';
+import { AttachmentService } from './service.js';
+import { AttachmentStorageClient } from './storage.js';
 import {
   AttachmentListParams,
   listQuerySchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 // --- View/Action registrations ---
-import { registerInitUploadAction } from './actions/init-upload.route';
-import { registerCompleteUploadAction } from './actions/complete-upload.route';
-import { registerDownloadView } from './views/download.route';
+import { registerInitUploadAction } from './actions/init-upload.route.js';
+import { registerCompleteUploadAction } from './actions/complete-upload.route.js';
+import { registerDownloadView } from './views/download.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

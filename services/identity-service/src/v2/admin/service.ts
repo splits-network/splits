@@ -1,6 +1,6 @@
-import { AdminIdentityRepository, AdminListParams, AdminListResponse } from './repository';
-import { AdminStatsResult, getIdentityAdminStats } from './stats-repository';
-import { AdminChartDataResult, getIdentityAdminChartData } from './chart-repository';
+import { AdminIdentityRepository, AdminListParams, AdminListResponse } from './repository.js';
+import { AdminStatsResult, getIdentityAdminStats } from './stats-repository.js';
+import { AdminChartDataResult, getIdentityAdminChartData } from './chart-repository.js';
 
 export class AdminIdentityService {
     constructor(private repository: AdminIdentityRepository) {}

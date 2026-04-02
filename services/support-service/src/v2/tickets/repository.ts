@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { SupportTicket, SupportTicketReply, SupportTicketStatus, CreateTicketInput } from './types';
+import { SupportTicket, SupportTicketReply, SupportTicketStatus, CreateTicketInput } from './types.js';
 
 export class TicketRepository {
     constructor(private supabase: SupabaseClient) {}

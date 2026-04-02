@@ -5,9 +5,9 @@
  * from the immutable placement snapshot.
  */
 
-import { IEventPublisher } from '../../v2/shared/events';
-import { PayoutRepository } from './repository';
-import { PayoutRole } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PayoutRepository } from './repository.js';
+import { PayoutRole } from './types.js';
 
 interface SnapshotRoleMapping {
   idKey: string;

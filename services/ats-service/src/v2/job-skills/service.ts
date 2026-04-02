@@ -1,4 +1,4 @@
-import { JobSkillRepository } from './repository';
+import { JobSkillRepository } from './repository.js';
 
 export class JobSkillService {
     constructor(private repository: JobSkillRepository) {}

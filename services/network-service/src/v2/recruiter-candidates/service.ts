@@ -3,12 +3,13 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { RecruiterCandidateRepository } from './repository';
-import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { RecruiterCandidateFilters, RecruiterCandidateUpdate, TerminateRecruiterCandidateRequest } from './types';
-import { resolveAccessContext } from '../shared/access';
-import { RecruiterActivityService } from '../recruiter-activity/service';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { RecruiterCandidateRepository } from './repository.js';
+import { buildPaginationResponse, PaginationResponse } from '../shared/pagination.js';
+import { RecruiterCandidateFilters, RecruiterCandidateUpdate, TerminateRecruiterCandidateRequest } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
+import { RecruiterActivityService } from '../recruiter-activity/service.js';
+import crypto from 'node:crypto';
 
 export class RecruiterCandidateServiceV2 {
 
@@ -167,7 +168,6 @@ export class RecruiterCandidateServiceV2 {
     }
 
     private generateInvitationToken(): string {
-        const crypto = require('crypto');
         return crypto.randomBytes(32).toString('hex');
     }
 

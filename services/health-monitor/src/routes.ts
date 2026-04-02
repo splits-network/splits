@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
-import Redis from "ioredis";
+import { Redis } from 'ioredis';
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { EventPublisher } from "./event-publisher";
+import type { IEventPublisher } from "./event-publisher.js";
 
 const AGGREGATED_KEY = "health-monitor:aggregated";
 
@@ -26,7 +26,7 @@ export function registerHealthRoutes(
         redis: Redis;
         supabaseUrl: string;
         supabaseKey: string;
-        eventPublisher: EventPublisher | null;
+        eventPublisher: IEventPublisher | null;
     },
 ) {
     const { redis, eventPublisher } = options;
@@ -168,7 +168,7 @@ export function registerHealthRoutes(
                 });
             }
 
-            if (!eventPublisher || !eventPublisher.isConnected()) {
+            if (!eventPublisher) {
                 request.log.error(
                     "Event publisher unavailable for status contact submission",
                 );

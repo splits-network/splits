@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SearchRepository } from './search/repository';
-import { SearchService, ValidationError } from './search/service';
-import { SearchMode, SearchableEntityType, SearchFilters } from './search/types';
+import { SearchRepository } from './search/repository.js';
+import { SearchService, ValidationError } from './search/service.js';
+import { SearchMode, SearchableEntityType, SearchFilters } from './search/types.js';
 
 interface RouteOptions extends FastifyPluginOptions {
     supabase: SupabaseClient;

@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlanListParams } from './types';
+import { PlanListParams } from './types.js';
 
 export interface PlanScopeFilters {
   // Plans are generally public; scope filters reserved for future use

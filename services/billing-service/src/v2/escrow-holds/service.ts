@@ -2,16 +2,16 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { IEventPublisher } from '../shared/events';
-import { resolveAccessContext, AccessContext } from '../shared/access';
-import { EscrowHoldRepository } from './repository';
-import { PayoutAuditRepository } from '../audit/repository';
+import { IEventPublisher } from '../shared/events.js';
+import { resolveAccessContext, AccessContext } from '../shared/access.js';
+import { EscrowHoldRepository } from './repository.js';
+import { PayoutAuditRepository } from '../audit/repository.js';
 import {
     EscrowHold,
     EscrowHoldCreate,
     EscrowHoldUpdate,
     EscrowHoldFilters,
-} from './types';
+} from './types.js';
 
 export class EscrowHoldServiceV2 {
     private supabase: SupabaseClient;

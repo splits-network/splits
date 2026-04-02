@@ -3,7 +3,7 @@
  * Per-call-type prompt templates with entity context injection.
  */
 
-import { CallContext } from './repository';
+import { CallContext } from './repository.js';
 
 interface PromptOutput {
     systemPrompt: string;

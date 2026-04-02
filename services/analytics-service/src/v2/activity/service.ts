@@ -1,5 +1,5 @@
-import Redis from 'ioredis';
-import { HeartbeatPayload, ActivitySnapshot, UserType, ALL_USER_TYPES, ALL_APPS, TimelinePoint } from './types';
+import { Redis } from 'ioredis';
+import { HeartbeatPayload, ActivitySnapshot, UserType, ALL_USER_TYPES, ALL_APPS, TimelinePoint } from './types.js';
 
 const ONLINE_KEY = 'activity:online';
 const SESSION_PREFIX = 'activity:session:';

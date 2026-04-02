@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { FraudSignalListParams } from './types';
+import { FraudSignalListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'severity', 'confidence_score'];
 

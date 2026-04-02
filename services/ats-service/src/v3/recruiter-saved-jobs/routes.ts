@@ -5,13 +5,13 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecruiterSavedJobRepository } from './repository';
-import { RecruiterSavedJobService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecruiterSavedJobRepository } from './repository.js';
+import { RecruiterSavedJobService } from './service.js';
 import {
   CreateRecruiterSavedJobInput, RecruiterSavedJobListParams,
   idParamSchema, listQuerySchema, createSchema,
-} from './types';
+} from './types.js';
 
 export function registerRecruiterSavedJobRoutes(
   app: FastifyInstance,

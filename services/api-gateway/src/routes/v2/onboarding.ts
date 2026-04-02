@@ -6,10 +6,10 @@
  */
 
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { requireAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { getCorrelationId } from './common';
+import { ServiceRegistry } from '../../clients.js';
+import { requireAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { getCorrelationId } from './common.js';
 
 export function registerOnboardingRoutes(
     app: FastifyInstance,

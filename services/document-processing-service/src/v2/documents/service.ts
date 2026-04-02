@@ -1,5 +1,5 @@
-import { DocumentRepositoryV2 } from './repository';
-import { DocumentUpdate } from '../shared/types';
+import { DocumentRepositoryV2 } from './repository.js';
+import { DocumentUpdate } from '../shared/types.js';
 
 export class DocumentServiceV2 {
     constructor(
@@ -33,7 +33,7 @@ export class DocumentServiceV2 {
     }
 
     private validateStatusTransition(status: string) {
-        const validStatuses = ['pending', 'processing', 'processed', 'failed'];
+        const validStatuses = ['pending', 'processing', 'processed', 'failed', 'enriching'];
         if (!validStatuses.includes(status)) {
             throw new Error(`Invalid processing status: ${status}. Must be one of: ${validStatuses.join(', ')}`);
         }

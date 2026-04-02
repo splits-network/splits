@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RuleRepository } from './repository';
-import { CreateRuleInput, UpdateRuleInput, RuleListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RuleRepository } from './repository.js';
+import { CreateRuleInput, UpdateRuleInput, RuleListParams } from './types.js';
 
 export class RuleService {
   private accessResolver: AccessContextResolver;

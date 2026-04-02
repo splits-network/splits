@@ -2,9 +2,9 @@
  * Company Reputation Service - Business logic for company reputation reads
  */
 
-import { CompanyReputationRepository } from './repository';
-import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { CompanyReputationFilters } from './types';
+import { CompanyReputationRepository } from './repository.js';
+import { buildPaginationResponse, PaginationResponse } from '../shared/pagination.js';
+import { CompanyReputationFilters } from './types.js';
 
 export class CompanyReputationServiceV2 {
     constructor(private repository: CompanyReputationRepository) {}

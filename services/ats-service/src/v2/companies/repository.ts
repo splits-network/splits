@@ -3,8 +3,8 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { CompanyFilters, CompanyUpdate } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { CompanyFilters, CompanyUpdate } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 export interface RepositoryListResponse<T> {
     data: T[];

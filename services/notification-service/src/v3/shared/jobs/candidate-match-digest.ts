@@ -7,10 +7,10 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { EngagementEmailService } from '../../../services/engagement/service';
-import { PORTAL_URL } from '../../../helpers/urls';
-import { MatchItem } from '../../../templates/engagement';
-import { JobResult } from '../scheduler';
+import { EngagementEmailService } from '../../../services/engagement/service.js';
+import { PORTAL_URL } from '../../../helpers/urls.js';
+import { MatchItem } from '../../../templates/engagement/index.js';
+import { JobResult } from '../scheduler.js';
 
 const MAX_MATCHES_PER_CANDIDATE = 5;
 

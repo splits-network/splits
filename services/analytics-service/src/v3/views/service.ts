@@ -6,9 +6,9 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { resolveAccessContext } from '../../v2/shared/access';
-import { ViewRepository } from './repository';
-import { ViewType, RecruiterScoreRow, RoleBreakdownRow, PendingReviewRow } from './types';
+import { resolveAccessContext } from '../../v2/shared/access.js';
+import { ViewRepository } from './repository.js';
+import { ViewType, RecruiterScoreRow, RoleBreakdownRow, PendingReviewRow } from './types.js';
 
 export class ViewService {
   constructor(

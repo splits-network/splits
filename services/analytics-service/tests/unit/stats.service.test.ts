@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { StatsServiceV2 } from '../../src/v2/stats/service';
+import { StatsServiceV2 } from '../../src/v2/stats/service.js';
 
 describe('StatsServiceV2 (unit)', () => {
     const repository = {

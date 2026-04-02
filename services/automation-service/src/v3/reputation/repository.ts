@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ReputationListParams } from './types';
+import { ReputationListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['reputation_score', 'updated_at'];
 

@@ -11,7 +11,7 @@ import {
     ConfirmationToken,
     GptJobSearchResult,
     GptResumeDataInput,
-} from "./types";
+} from "./types.js";
 
 // ============================================================================
 // Error Response Builder

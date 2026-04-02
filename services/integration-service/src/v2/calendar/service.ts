@@ -1,8 +1,8 @@
 import { Logger } from '@splits-network/shared-logging';
-import { ConnectionRepository } from '../connections/repository';
-import { TokenRefreshService } from './token-refresh';
-import { GoogleCalendarClient, CreateEventParams as GoogleCreateParams } from './google-client';
-import { MicrosoftCalendarClient, MicrosoftCreateEventParams } from './microsoft-client';
+import { ConnectionRepository } from '../connections/repository.js';
+import { TokenRefreshService } from './token-refresh.js';
+import { GoogleCalendarClient, CreateEventParams as GoogleCreateParams } from './google-client.js';
+import { MicrosoftCalendarClient, MicrosoftCreateEventParams } from './microsoft-client.js';
 import type { CalendarInfo, CalendarEvent, CalendarBusySlot } from '@splits-network/shared-types';
 
 /* ── Unified update-event params ─────────────────────────────────────── */

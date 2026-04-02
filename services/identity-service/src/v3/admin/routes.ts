@@ -6,15 +6,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminRepository } from './repository';
-import { AdminService } from './service';
+import { AdminRepository } from './repository.js';
+import { AdminService } from './service.js';
 import {
   AdminListParams,
   adminListQuerySchema,
   adminActivityQuerySchema,
   adminPeriodQuerySchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerAdminRoutes(
   app: FastifyInstance,

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { StreakService } from './service';
-import { BadgeEntityType } from '../badges/definitions/types';
+import { StreakService } from './service.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
 
 export function registerStreakRoutes(
     app: FastifyInstance,

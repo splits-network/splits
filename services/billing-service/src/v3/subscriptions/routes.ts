@@ -6,10 +6,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { SubscriptionRepository } from './repository';
-import { SubscriptionService } from './service';
-import { registerMySubscriptionView } from './views/my-subscription.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SubscriptionRepository } from './repository.js';
+import { SubscriptionService } from './service.js';
+import { registerMySubscriptionView } from './views/my-subscription.route.js';
 import {
   CreateSubscriptionInput,
   UpdateSubscriptionInput,
@@ -25,7 +25,7 @@ import {
   updatePaymentMethodSchema,
   invoicesQuerySchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerSubscriptionRoutes(
   app: FastifyInstance,

@@ -5,13 +5,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecruiterCompanyRepository } from './repository';
-import { RecruiterActivityService } from '../recruiter-activity/service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecruiterCompanyRepository } from './repository.js';
+import { RecruiterActivityService } from '../recruiter-activity/service.js';
 import {
   RecruiterCompanyListParams, RecruiterCompanyUpdate, RecruiterCompanyPermissions,
   DEFAULT_PERMISSIONS, InviteRecruiterInput, RespondInput, TerminateInput, RequestConnectionInput,
-} from './types';
+} from './types.js';
 
 export class RecruiterCompanyService {
   private accessResolver: AccessContextResolver;

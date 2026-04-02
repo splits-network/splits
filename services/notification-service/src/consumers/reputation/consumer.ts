@@ -5,9 +5,9 @@
 
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { ReputationEmailService } from '../../services/reputation/service';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
-import { DataLookupHelper } from '../../helpers/data-lookup';
+import { ReputationEmailService } from '../../services/reputation/service.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
 
 // Tier ordering for determining promotion vs demotion
 const tierOrder: Record<string, number> = {

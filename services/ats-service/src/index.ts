@@ -1,17 +1,19 @@
-import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
+import { Redis } from 'ioredis';
+import { AiClient } from '@splits-network/shared-ai-client';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { EventPublisher as V2EventPublisher, OutboxPublisher } from './v2/shared/events';
-import { CandidateRepository } from './v2/candidates/repository';
-import { CandidateSourcerRepository as V2CandidateSourcerRepository } from './v2/candidate-sourcers/repository';
-import { registerV2Routes } from './v2/routes';
-import { registerV3Routes } from './v3/routes';
-import { DomainEventConsumerV3 } from './v3/shared/domain-consumer';
-import { ApplicationRepository as V3ApplicationRepository } from './v3/applications/repository';
-import { CandidateSourcerRepository as V3CandidateSourcerRepository } from './v3/candidate-sourcers/repository';
-import { AIReviewService } from './v3/applications/actions/ai-review.service';
+import { EventPublisher as V2EventPublisher, OutboxPublisher, ResilientPublisher } from './v2/shared/events.js';
+import { CandidateRepository } from './v2/candidates/repository.js';
+import { CandidateSourcerRepository as V2CandidateSourcerRepository } from './v2/candidate-sourcers/repository.js';
+import { registerV2Routes } from './v2/routes.js';
+import { registerV3Routes } from './v3/routes.js';
+import { DomainEventConsumerV3 } from './v3/shared/domain-consumer.js';
+import { ApplicationRepository as V3ApplicationRepository } from './v3/applications/repository.js';
+import { CandidateSourcerRepository as V3CandidateSourcerRepository } from './v3/candidate-sourcers/repository.js';
+import { AIReviewService } from './v3/applications/actions/ai-review.service.js';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -134,6 +136,34 @@ async function main() {
     const supabase = candidateRepository.getSupabase();
     const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
 
+    // Resilient publisher: tries RabbitMQ first, falls back to outbox
+    const resilientPublisher = new ResilientPublisher(v2EventPublisher, outboxPublisher, logger);
+
+    // Initialize Redis + AI client for provider-agnostic AI calls
+    const redisConfig = loadRedisConfig();
+    const redis = new Redis({
+        host: redisConfig.host,
+        port: redisConfig.port,
+        password: redisConfig.password || undefined,
+        db: redisConfig.db || 0,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+    });
+    try {
+        await redis.connect();
+    } catch (err) {
+        logger.warn({ err }, 'Redis connection failed — AI config will use DB/env fallback');
+    }
+
+    const aiClient = new AiClient({
+        supabase,
+        redis,
+        serviceName: 'ats-service',
+        logger,
+        openaiApiKey: process.env.OPENAI_API_KEY || '',
+        anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
+    });
+
     // V2 candidate-sourcer repo (still needed by placement service)
     const v2CandidateSourcerRepository = new V2CandidateSourcerRepository(
         candidateRepository.getSupabase()
@@ -142,22 +172,22 @@ async function main() {
     // V3 repositories + services for domain consumer
     const v3ApplicationRepository = new V3ApplicationRepository(supabase);
     const v3CandidateSourcerRepository = new V3CandidateSourcerRepository(supabase);
-    const aiReviewService = new AIReviewService(v3ApplicationRepository, supabase, outboxPublisher);
+    const aiReviewService = new AIReviewService(v3ApplicationRepository, supabase, resilientPublisher);
 
     // Initialize placement service (still used by V2 routes)
-    const placementRepository = new (await import('./v2/placements/repository')).PlacementRepository(
+    const placementRepository = new (await import('./v2/placements/repository.js')).PlacementRepository(
         dbConfig.supabaseUrl,
         supabaseKey
     );
-    const companySourcerRepository = new (await import('./v2/company-sourcers/repository')).CompanySourcerRepository(
+    const companySourcerRepository = new (await import('./v2/company-sourcers/repository.js')).CompanySourcerRepository(
         candidateRepository.getSupabase()
     );
-    const placementService = new (await import('./v2/placements/service')).PlacementServiceV2(
+    const placementService = new (await import('./v2/placements/service.js')).PlacementServiceV2(
         placementRepository.getSupabase(),
         placementRepository,
         companySourcerRepository,
         v2CandidateSourcerRepository,
-        outboxPublisher
+        resilientPublisher
     );
 
     // Initialize V3 domain event consumer (replaces V2 consumer)
@@ -167,7 +197,7 @@ async function main() {
         v3ApplicationRepository,
         v3CandidateSourcerRepository,
         aiReviewService,
-        outboxPublisher,
+        resilientPublisher,
         logger
     );
 
@@ -185,13 +215,14 @@ async function main() {
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Register V3 routes (jobs, job-requirements, job-skills, saved-jobs)
     registerV3Routes(app, {
         supabase,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
+        aiClient,
     });
 
     // Health check endpoint

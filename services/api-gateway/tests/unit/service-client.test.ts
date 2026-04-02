@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ServiceClient } from '../../src/clients';
+import { ServiceClient } from '../../src/clients.js';
 
 const logger = {
     debug: vi.fn(),

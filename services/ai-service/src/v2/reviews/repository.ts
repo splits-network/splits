@@ -4,7 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { AIReviewFilters } from './types';
+import { AIReviewFilters } from './types.js';
 
 /**
  * Transform flat database structure to nested API structure
@@ -223,6 +223,51 @@ export class AIReviewRepository {
             documents: documentsResult.data || [],
             pre_screen_answers: preScreenResult.data || [],
             job_requirements: jobRequirementsResult.data || [],
+        };
+    }
+
+    /**
+     * Fetch smart resume data for a candidate (visible entries only).
+     * Returns null if the candidate has no smart resume profile.
+     */
+    async getSmartResumeData(candidateId: string): Promise<any | null> {
+        const { data: profile } = await this.supabase
+            .from('smart_resume_profiles')
+            .select('*')
+            .eq('candidate_id', candidateId)
+            .is('deleted_at', null)
+            .maybeSingle();
+
+        if (!profile) return null;
+
+        const visibleQuery = (table: string) =>
+            this.supabase
+                .from(table)
+                .select('*')
+                .eq('profile_id', profile.id)
+                .eq('visible_to_matching', true)
+                .is('deleted_at', null)
+                .order('sort_order', { ascending: true });
+
+        const [experiences, projects, tasks, education, certifications, skills, publications] = await Promise.all([
+            visibleQuery('smart_resume_experiences'),
+            visibleQuery('smart_resume_projects'),
+            visibleQuery('smart_resume_tasks'),
+            visibleQuery('smart_resume_education'),
+            visibleQuery('smart_resume_certifications'),
+            visibleQuery('smart_resume_skills'),
+            visibleQuery('smart_resume_publications'),
+        ]);
+
+        return {
+            profile,
+            experiences: experiences.data || [],
+            projects: projects.data || [],
+            tasks: tasks.data || [],
+            education: education.data || [],
+            certifications: certifications.data || [],
+            skills: skills.data || [],
+            publications: publications.data || [],
         };
     }
 

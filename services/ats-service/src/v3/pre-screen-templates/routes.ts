@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PreScreenTemplateRepository } from './repository';
-import { PreScreenTemplateService } from './service';
-import { CreateTemplateInput, TemplateListParams, listQuerySchema, createSchema, idParamSchema } from './types';
+import { PreScreenTemplateRepository } from './repository.js';
+import { PreScreenTemplateService } from './service.js';
+import { CreateTemplateInput, TemplateListParams, listQuerySchema, createSchema, idParamSchema } from './types.js';
 
 export function registerPreScreenTemplateRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new PreScreenTemplateRepository(supabase);

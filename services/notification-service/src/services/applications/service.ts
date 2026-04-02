@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
+import { NotificationRepository } from '../../repository.js';
 import {
     applicationCreatedEmail,
     applicationStageChangedEmail,
@@ -16,7 +16,7 @@ import {
     proposalAcceptedByApplicationEmail,
     proposalDeclinedByApplicationEmail,
     applicationNoteCreatedEmail,
-} from '../../templates/applications';
+} from '../../templates/applications/index.js';
 import {
     candidateApplicationWithRecruiterEmail,
     candidateDirectApplicationEmail,
@@ -36,7 +36,7 @@ import {
     candidateExpirationWarningEmail,
     jobProposalToCandidateEmail,
     recruiterRequestChangesEmail,
-} from '../../templates/applications/candidate-emails';
+} from '../../templates/applications/candidate-emails.js';
 import {
     recruiterCompanyReviewEmail,
     recruiterCompanyFeedbackEmail,
@@ -47,16 +47,16 @@ import {
     recruiterApplicationExpiredEmail,
     recruiterExpirationWarningEmail,
     recruiterOfferAcceptedEmail,
-} from '../../templates/applications/recruiter-emails';
+} from '../../templates/applications/recruiter-emails.js';
 import {
     companyApplicationExpiredEmail,
     companyExpirationWarningEmail,
     companyOfferAcceptedEmail,
-} from '../../templates/applications/company-emails';
-import type { EmailSource } from '../../templates/base';
+} from '../../templates/applications/company-emails.js';
+import type { EmailSource } from '../../templates/base.js';
+import { PORTAL_URL as _PORTAL_URL, CANDIDATE_URL as _CANDIDATE_URL } from '../../helpers/urls.js';
 
 // Centralized URL imports — never read NEXT_PUBLIC_* env vars for user-facing links
-const { PORTAL_URL: _PORTAL_URL, CANDIDATE_URL: _CANDIDATE_URL } = require('../../helpers/urls');
 
 export class ApplicationsEmailService {
     constructor(

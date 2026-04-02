@@ -7,12 +7,12 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ConnectionAdapter } from '../connections/connection-adapter';
-import { TokenRefreshService } from './token-refresh-service';
-import { CallCalendarRepository } from './call-calendar-repository';
-import { CalendarService } from '../../v2/calendar/service';
-import { CallCalendarService } from '../../v2/calendar/call-calendar-service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ConnectionAdapter } from '../connections/connection-adapter.js';
+import { TokenRefreshService } from './token-refresh-service.js';
+import { CallCalendarRepository } from './call-calendar-repository.js';
+import { CalendarService } from '../../v2/calendar/service.js';
+import { CallCalendarService } from '../../v2/calendar/call-calendar-service.js';
 
 interface CallCalendarRouteConfig {
   supabase: SupabaseClient;

@@ -4,27 +4,27 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { JobRepository } from './repository';
-import { JobService } from './service';
-import { JobActivityRepository } from './activity/repository';
-import { JobActivityService } from './activity/service';
-import { registerActivityRoute } from './activity/route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { JobRepository } from './repository.js';
+import { JobService } from './service.js';
+import { JobActivityRepository } from './activity/repository.js';
+import { JobActivityService } from './activity/service.js';
+import { registerActivityRoute } from './activity/route.js';
 import { CreateJobInput, UpdateJobInput, JobListParams,
-  idParamSchema, listQuerySchema, createJobSchema, updateJobSchema } from './types';
-import { registerRecruiterBoardView } from './views/recruiter-board.route';
-import { registerCompanyBoardView } from './views/company-board.route';
-import { registerCandidateListingView } from './views/candidate-listing.route';
-import { registerAdminBoardView } from './views/admin-board.route';
-import { registerTerminationImpactView } from './views/termination-impact.route';
-import { registerRecruiterDetailView } from './views/recruiter-detail.route';
-import { registerCompanyDetailView } from './views/company-detail.route';
-import { registerCandidateDetailView } from './views/candidate-detail.route';
-import { registerEditorView } from './views/editor.route';
-import { registerProcessTerminationAction } from './actions/process-termination.route';
-import { JobNoteRepository } from './notes/repository';
-import { JobNoteService } from './notes/service';
-import { registerJobNoteRoutes } from './notes/routes';
+  idParamSchema, listQuerySchema, createJobSchema, updateJobSchema } from './types.js';
+import { registerRecruiterBoardView } from './views/recruiter-board.route.js';
+import { registerCompanyBoardView } from './views/company-board.route.js';
+import { registerCandidateListingView } from './views/candidate-listing.route.js';
+import { registerAdminBoardView } from './views/admin-board.route.js';
+import { registerTerminationImpactView } from './views/termination-impact.route.js';
+import { registerRecruiterDetailView } from './views/recruiter-detail.route.js';
+import { registerCompanyDetailView } from './views/company-detail.route.js';
+import { registerCandidateDetailView } from './views/candidate-detail.route.js';
+import { registerEditorView } from './views/editor.route.js';
+import { registerProcessTerminationAction } from './actions/process-termination.route.js';
+import { JobNoteRepository } from './notes/repository.js';
+import { JobNoteService } from './notes/service.js';
+import { registerJobNoteRoutes } from './notes/routes.js';
 
 export function registerJobRoutes(
   app: FastifyInstance,

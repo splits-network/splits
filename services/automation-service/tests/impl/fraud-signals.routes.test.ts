@@ -5,8 +5,8 @@ vi.mock('@supabase/supabase-js', () => ({
     createClient: () => ({}),
 }));
 
-import { FraudSignalServiceV2 } from '../../src/v2/fraud-signals/service';
-import { registerFraudRoutes } from '../../src/v2/fraud-signals/routes';
+import { FraudSignalServiceV2 } from '../../src/v2/fraud-signals/service.js';
+import { registerFraudRoutes } from '../../src/v2/fraud-signals/routes.js';
 
 describe('Fraud signals routes (integration)', () => {
     const config = {

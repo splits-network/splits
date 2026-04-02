@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MetricListParams } from './types';
+import { MetricListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['metric_date', 'created_at'];
 

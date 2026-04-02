@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TagRepository } from './repository';
-import { TagService } from './service';
-import { CreateTagInput, TagListParams, listQuerySchema, createSchema, idParamSchema } from './types';
+import { TagRepository } from './repository.js';
+import { TagService } from './service.js';
+import { CreateTagInput, TagListParams, listQuerySchema, createSchema, idParamSchema } from './types.js';
 
 export function registerTagRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new TagRepository(supabase);

@@ -1,8 +1,8 @@
-import { NotificationFilters, NotificationUpdate, Notification } from './types';
-import { buildPaginationResponse } from '../shared/helpers';
-import { NotificationRepositoryV2 } from './repository';
-import { IEventPublisher } from '../shared/events';
-import type { AccessContext } from '../shared/access';
+import { NotificationFilters, NotificationUpdate, Notification } from './types.js';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { NotificationRepositoryV2 } from './repository.js';
+import { IEventPublisher } from '../shared/events.js';
+import type { AccessContext } from '../shared/access.js';
 
 export class NotificationServiceV2 {
     constructor(

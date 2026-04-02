@@ -1,8 +1,8 @@
 import { STARTER_ENTITLEMENTS } from '@splits-network/shared-types';
 import type { BooleanEntitlement, NumericEntitlement } from '@splits-network/shared-types';
-import type { AccessContext } from '../shared/access';
-import { EntitlementRepository } from './repository';
-import type { ResolvedEntitlements } from './types';
+import type { AccessContext } from '../shared/access.js';
+import { EntitlementRepository } from './repository.js';
+import type { ResolvedEntitlements } from './types.js';
 
 export class EntitlementService {
     constructor(

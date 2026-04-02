@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateSkillRepository } from './repository';
-import { CandidateSkillService } from './service';
-import { registerWithDetailsView } from './views/with-details.route';
+import { CandidateSkillRepository } from './repository.js';
+import { CandidateSkillService } from './service.js';
+import { registerWithDetailsView } from './views/with-details.route.js';
 import {
   CreateCandidateSkillInput,
   BulkReplaceCandidateSkillsInput,
@@ -15,7 +15,7 @@ import {
   bulkReplaceSchema,
   candidateIdParamSchema,
   deleteParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerCandidateSkillRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CandidateSkillRepository(supabase);

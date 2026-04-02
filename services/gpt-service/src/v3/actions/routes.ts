@@ -5,18 +5,18 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { GptActionsRepository } from "./repository";
-import { GptActionsService } from "./service";
-import { registerSubmitApplicationAction } from "./actions/submit-application.route";
-import { registerAnalyzeResumeAction } from "./actions/analyze-resume.route";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { GptActionsRepository } from "./repository.js";
+import { GptActionsService } from "./service.js";
+import { registerSubmitApplicationAction } from "./actions/submit-application.route.js";
+import { registerAnalyzeResumeAction } from "./actions/analyze-resume.route.js";
 import {
     JobSearchParams,
     ApplicationListParams,
     jobSearchQuerySchema,
     jobIdParamSchema,
     applicationListQuerySchema,
-} from "./types";
+} from "./types.js";
 
 export function registerGptActionRoutes(
     app: FastifyInstance,

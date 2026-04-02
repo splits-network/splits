@@ -1,9 +1,9 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ApplicationServiceV2 } from './service';
-import { PlacementServiceV2 } from '../placements/service';
-import { ApplicationNoteServiceV2 } from '../application-notes/service';
-import { ApplicationUpdate } from './types';
-import { requireUserContext } from '../shared/helpers';
+import { ApplicationServiceV2 } from './service.js';
+import { PlacementServiceV2 } from '../placements/service.js';
+import { ApplicationNoteServiceV2 } from '../application-notes/service.js';
+import { ApplicationUpdate } from './types.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterApplicationRoutesConfig {
     applicationService: ApplicationServiceV2;

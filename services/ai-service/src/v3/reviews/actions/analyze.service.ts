@@ -8,9 +8,9 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { AIReviewRepository } from '../../../v2/reviews/repository';
-import { AIReviewServiceV2 } from '../../../v2/reviews/service';
-import { IEventPublisher } from '../../../v2/shared/events';
+import { AIReviewRepository } from '../../../v2/reviews/repository.js';
+import { AIReviewServiceV2 } from '../../../v2/reviews/service.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
 import { createLogger } from '@splits-network/shared-logging';
 
 export class AnalyzeService {

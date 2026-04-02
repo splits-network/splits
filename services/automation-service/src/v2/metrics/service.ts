@@ -1,8 +1,8 @@
-import { buildPaginationResponse } from '../shared/helpers';
-import { MetricFilters, MetricUpdate } from './types';
-import { CreateMetricInput, MarketplaceMetricsRepository } from './repository';
-import { IEventPublisher } from '../shared/events';
-import type { AccessContext } from '../shared/access';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { MetricFilters, MetricUpdate } from './types.js';
+import { CreateMetricInput, MarketplaceMetricsRepository } from './repository.js';
+import { IEventPublisher } from '../shared/events.js';
+import type { AccessContext } from '../shared/access.js';
 
 export class MarketplaceMetricsServiceV2 {
     constructor(

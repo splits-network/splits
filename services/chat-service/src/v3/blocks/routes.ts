@@ -7,17 +7,17 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { IChatEventPublisher } from '../shared/chat-event-publisher';
-import { BlockRepository } from './repository';
-import { BlockService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { IChatEventPublisher } from '../shared/chat-event-publisher.js';
+import { BlockRepository } from './repository.js';
+import { BlockService } from './service.js';
 import {
   BlockListParams,
   CreateBlockInput,
   listQuerySchema,
   createBlockSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

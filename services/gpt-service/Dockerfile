@@ -21,6 +21,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/gpt-service ./services/gpt-service
 EXPOSE 3014
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build
 CMD ["pnpm", "--filter", "@splits-network/gpt-service", "dev"]
 
 # Build stage
@@ -59,6 +60,7 @@ COPY --from=build /app/packages/shared-access-context/package.json ./packages/sh
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 
 # Copy built service
+COPY --from=build /app/services/gpt-service/package.json ./services/gpt-service/
 COPY --from=build /app/services/gpt-service/dist ./services/gpt-service/dist
 COPY --from=build /app/services/gpt-service/src/openapi.yaml ./services/gpt-service/dist/openapi.yaml
 COPY --from=build /app/services/gpt-service/src/v2/mcp/widgets/*.html ./services/gpt-service/dist/v2/mcp/widgets/

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { CompanySourcerServiceV2 } from '../../src/v2/company-sourcers/service';
+import { CompanySourcerServiceV2 } from '../../src/v2/company-sourcers/service.js';
 
 vi.mock('@splits-network/shared-access-context', () => {
     return {

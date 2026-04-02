@@ -3,8 +3,8 @@
  * Templates for tier promotion and demotion notifications
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, infoCard, divider } from '../components.js';
 
 export interface TierChangeData {
     recruiterName: string;

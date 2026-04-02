@@ -1,13 +1,13 @@
 import cron from 'node-cron';
 import { SupabaseClient } from '@supabase/supabase-js';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { createLogger } from '@splits-network/shared-logging';
-import { CacheManager } from '../cache/cache-manager';
-import { rollupHourlyMetrics } from './rollup-hourly';
-import { rollupDailyMetrics } from './rollup-daily';
-import { rollupMonthlyMetrics } from './rollup-monthly';
-import { computeMarketplaceHealth } from './marketplace-health';
-import { rollupActivitySnapshot } from './rollup-activity';
+import { CacheManager } from '../cache/cache-manager.js';
+import { rollupHourlyMetrics } from './rollup-hourly.js';
+import { rollupDailyMetrics } from './rollup-daily.js';
+import { rollupMonthlyMetrics } from './rollup-monthly.js';
+import { computeMarketplaceHealth } from './marketplace-health.js';
+import { rollupActivitySnapshot } from './rollup-activity.js';
 
 const logger = createLogger('BackgroundJobs');
 

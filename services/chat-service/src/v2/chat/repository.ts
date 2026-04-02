@@ -9,7 +9,7 @@ import {
     ChatConversationWithParticipants,
     ChatConversationListItemWithParticipants,
     ParticipantDetails,
-} from './types';
+} from './types.js';
 
 /**
  * Derive a user's primary role from Supabase relation expansion data.

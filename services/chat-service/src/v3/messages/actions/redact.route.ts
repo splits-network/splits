@@ -6,10 +6,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { RedactActionRepository } from './redact.repository';
-import { RedactActionService, RedactInput } from './redact.service';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { RedactActionRepository } from './redact.repository.js';
+import { RedactActionService, RedactInput } from './redact.service.js';
 
 const paramsSchema = {
   type: 'object',

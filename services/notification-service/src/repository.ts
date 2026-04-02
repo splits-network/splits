@@ -1,10 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NotificationLog, NotificationLogInsert } from '@splits-network/shared-types';
 import { Logger } from '@splits-network/shared-logging';
-import { EmailEntitlementGate, type NotificationChannel } from './helpers/email-entitlement-gate';
-import { PreferenceGate } from './helpers/preference-gate';
-import { PushSender } from './services/push-sender';
-import type { PushPayload } from './v3/push/types';
+import { EmailEntitlementGate, type NotificationChannel } from './helpers/email-entitlement-gate.js';
+import { PreferenceGate } from './helpers/preference-gate.js';
+import { PushSender } from './services/push-sender.js';
+import type { PushPayload } from './v3/push/types.js';
 
 export class NotificationRepository {
     private supabase: SupabaseClient;

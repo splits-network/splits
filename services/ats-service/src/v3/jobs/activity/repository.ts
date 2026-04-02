@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobActivityInsert, JobActivityRecord, ActivityListParams } from './types';
+import { JobActivityInsert, JobActivityRecord, ActivityListParams } from './types.js';
 
 export class JobActivityRepository {
   constructor(private supabase: SupabaseClient) {}

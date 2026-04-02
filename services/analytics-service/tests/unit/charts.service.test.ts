@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ChartServiceV2 } from '../../src/v2/charts/service';
+import { ChartServiceV2 } from '../../src/v2/charts/service.js';
 
 vi.mock('../../src/v2/shared/access', () => ({
     resolveAccessContext: vi.fn(),
 }));
 
-import { resolveAccessContext } from '../../src/v2/shared/access';
+import { resolveAccessContext } from '../../src/v2/shared/access.js';
 
 describe('ChartServiceV2 (unit)', () => {
     const repository = {

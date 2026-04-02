@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { requireUserContext } from '../shared/helpers';
-import { FirmBillingProfileService } from './service';
-import { FirmBillingProfileCreate, FirmBillingProfileUpdate } from './types';
+import { requireUserContext } from '../shared/helpers.js';
+import { FirmBillingProfileService } from './service.js';
+import { FirmBillingProfileCreate, FirmBillingProfileUpdate } from './types.js';
 
 export function firmBillingProfileRoutes(
     app: FastifyInstance,

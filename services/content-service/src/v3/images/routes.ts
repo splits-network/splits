@@ -7,15 +7,15 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { ImageRepository } from "./repository";
-import { ImageService } from "./service";
+import { ImageRepository } from "./repository.js";
+import { ImageService } from "./service.js";
 import {
     ImageListParams,
     UpdateImageInput,
     listQuerySchema,
     updateSchema,
     idParamSchema,
-} from "./types";
+} from "./types.js";
 
 export function registerImageRoutes(
     app: FastifyInstance,

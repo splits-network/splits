@@ -55,6 +55,10 @@ spec:
                         value: "clamav"
                       - name: CLAMAV_PORT
                         value: "3310"
+                      - name: REDIS_HOST
+                        value: "redis"
+                      - name: REDIS_PORT
+                        value: "6379"
                   resources:
                       requests:
                           memory: "512Mi"

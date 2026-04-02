@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyBillingProfile, CompanyBillingProfileCreate, CompanyBillingProfileUpdate } from './types';
+import { CompanyBillingProfile, CompanyBillingProfileCreate, CompanyBillingProfileUpdate } from './types.js';
 
 interface CompanyBillingProfileListResult {
     data: Array<CompanyBillingProfile & { company?: { id: string; name: string } | null }>;

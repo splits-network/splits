@@ -4,14 +4,14 @@
  */
 
 import { Resend } from 'resend';
-import { NotificationRepository } from '../../repository';
+import { NotificationRepository } from '../../repository.js';
 import { Logger } from '@splits-network/shared-logging';
 import {
     recruiterCompanyInvitationEmail,
     recruiterCompanyAcceptedEmail,
     recruiterCompanyDeclinedEmail
-} from '../../templates/recruiter-company-invitations';
-import type { EmailSource } from '../../templates/base';
+} from '../../templates/recruiter-company-invitations/index.js';
+import type { EmailSource } from '../../templates/base.js';
 
 export class RecruiterCompanyInvitationsEmailService {
     constructor(

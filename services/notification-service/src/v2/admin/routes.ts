@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { AdminNotificationService } from './service';
+import { AdminNotificationService } from './service.js';
 
 interface AdminNotificationRoutesConfig {
     adminService: AdminNotificationService;

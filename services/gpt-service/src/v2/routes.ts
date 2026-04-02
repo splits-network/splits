@@ -2,15 +2,15 @@ import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
 import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from './shared/events';
-import { registerOAuthRoutes } from './oauth/routes';
-import { registerWebhookRoutes } from './oauth/webhook-handler';
-import { OAuthService } from './oauth/oauth-service';
-import { GptActionRepository } from './actions/repository';
-import { registerActionRoutes } from './actions/routes';
-import { registerOpenapiRoute } from '../openapi-route';
-import { registerMcpRoutes } from './mcp/transport';
-import { registerWellKnownRoutes } from './mcp/well-known';
+import { IEventPublisher } from './shared/events.js';
+import { registerOAuthRoutes } from './oauth/routes.js';
+import { registerWebhookRoutes } from './oauth/webhook-handler.js';
+import { OAuthService } from './oauth/oauth-service.js';
+import { GptActionRepository } from './actions/repository.js';
+import { registerActionRoutes } from './actions/routes.js';
+import { registerOpenapiRoute } from '../openapi-route.js';
+import { registerMcpRoutes } from './mcp/transport.js';
+import { registerWellKnownRoutes } from './mcp/well-known.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

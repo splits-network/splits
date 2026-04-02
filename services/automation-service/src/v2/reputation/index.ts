@@ -2,12 +2,12 @@
  * Reputation Domain - Exports
  */
 
-export * from './types';
-export * from './calculator';
-export * from './repository';
-export * from './service';
-export * from './consumer';
-export * from './company-types';
-export * from './company-calculator';
-export * from './company-repository';
-export * from './company-service';
+export * from './types.js';
+export * from './calculator.js';
+export * from './repository.js';
+export * from './service.js';
+export * from './consumer.js';
+export * from './company-types.js';
+export * from './company-calculator.js';
+export * from './company-repository.js';
+export * from './company-service.js';

@@ -6,11 +6,11 @@
 
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
-import { ApplicationRepository } from '../applications/repository';
-import { CandidateRepository } from '../candidates/repository';
-import { CandidateSourcerRepository } from '../candidate-sourcers/repository';
-import { PlacementServiceV2 } from '../placements/service';
-import { EventPublisher, IEventPublisher } from './events';
+import { ApplicationRepository } from '../applications/repository.js';
+import { CandidateRepository } from '../candidates/repository.js';
+import { CandidateSourcerRepository } from '../candidate-sourcers/repository.js';
+import { PlacementServiceV2 } from '../placements/service.js';
+import { EventPublisher, IEventPublisher } from './events.js';
 
 interface DomainEvent {
     event_id: string;

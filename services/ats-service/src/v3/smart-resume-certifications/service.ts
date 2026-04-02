@@ -1,0 +1,139 @@
+/**
+ * Smart Resume Certifications V3 Service — Business Logic
+ *
+ * Candidates own their certifications via profile ownership.
+ * Recruiters and admins can read.
+ */
+
+import { SupabaseClient } from '@supabase/supabase-js';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SmartResumeCertificationRepository } from './repository.js';
+import {
+  CreateSmartResumeCertificationInput,
+  UpdateSmartResumeCertificationInput,
+  SmartResumeCertificationListParams,
+} from './types.js';
+
+export class SmartResumeCertificationService {
+  private accessResolver: AccessContextResolver;
+
+  constructor(
+    private repository: SmartResumeCertificationRepository,
+    private supabase: SupabaseClient,
+    private eventPublisher?: IEventPublisher
+  ) {
+    this.accessResolver = new AccessContextResolver(supabase);
+  }
+
+  async getAll(params: SmartResumeCertificationListParams, clerkUserId: string) {
+    await this.assertReadAccess(clerkUserId);
+    const { data, total } = await this.repository.findAll(params);
+    const page = params.page || 1;
+    const limit = Math.min(params.limit || 25, 100);
+    return { data, pagination: { total, page, limit, total_pages: Math.ceil(total / limit) } };
+  }
+
+  async getById(id: string, clerkUserId: string) {
+    await this.assertReadAccess(clerkUserId);
+    const certification = await this.repository.findById(id);
+    if (!certification) throw new NotFoundError('SmartResumeCertification', id);
+    return certification;
+  }
+
+  async create(input: CreateSmartResumeCertificationInput, clerkUserId: string) {
+    await this.assertOwnership(clerkUserId, input.profile_id);
+
+    const record: Record<string, any> = {
+      profile_id: input.profile_id,
+      name: input.name,
+    };
+    if (input.issuer !== undefined) record.issuer = input.issuer;
+    if (input.date_obtained !== undefined) record.date_obtained = input.date_obtained;
+    if (input.expiry_date !== undefined) record.expiry_date = input.expiry_date;
+    if (input.credential_url !== undefined) record.credential_url = input.credential_url;
+    if (input.visible_to_matching !== undefined) record.visible_to_matching = input.visible_to_matching;
+    if (input.sort_order !== undefined) record.sort_order = input.sort_order;
+
+    const created = await this.repository.create(record);
+
+    await this.eventPublisher?.publish('smart_resume.updated', {
+      profileId: input.profile_id,
+      candidateId: await this.getProfileCandidateId(input.profile_id),
+    }, 'ats-service');
+
+    return created;
+  }
+
+  async update(id: string, input: UpdateSmartResumeCertificationInput, clerkUserId: string) {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new NotFoundError('SmartResumeCertification', id);
+
+    await this.assertOwnership(clerkUserId, existing.profile_id);
+
+    const updates: Record<string, any> = {};
+    if (input.name !== undefined) updates.name = input.name;
+    if (input.issuer !== undefined) updates.issuer = input.issuer;
+    if (input.date_obtained !== undefined) updates.date_obtained = input.date_obtained;
+    if (input.expiry_date !== undefined) updates.expiry_date = input.expiry_date;
+    if (input.credential_url !== undefined) updates.credential_url = input.credential_url;
+    if (input.visible_to_matching !== undefined) updates.visible_to_matching = input.visible_to_matching;
+    if (input.sort_order !== undefined) updates.sort_order = input.sort_order;
+
+    const updated = await this.repository.update(id, updates);
+    if (!updated) throw new NotFoundError('SmartResumeCertification', id);
+
+    await this.eventPublisher?.publish('smart_resume.updated', {
+      profileId: existing.profile_id,
+      candidateId: await this.getProfileCandidateId(existing.profile_id),
+    }, 'ats-service');
+
+    return updated;
+  }
+
+  async delete(id: string, clerkUserId: string) {
+    const existing = await this.repository.findById(id);
+    if (!existing) throw new NotFoundError('SmartResumeCertification', id);
+
+    await this.assertOwnership(clerkUserId, existing.profile_id);
+    await this.repository.softDelete(id);
+
+    await this.eventPublisher?.publish('smart_resume.updated', {
+      profileId: existing.profile_id,
+      candidateId: await this.getProfileCandidateId(existing.profile_id),
+    }, 'ats-service');
+  }
+
+  private async assertOwnership(clerkUserId: string, profileId: string) {
+    const context = await this.accessResolver.resolve(clerkUserId);
+    if (context.isPlatformAdmin) return;
+
+    const { data: profile } = await this.supabase
+      .from('smart_resume_profiles')
+      .select('candidate_id')
+      .eq('id', profileId)
+      .is('deleted_at', null)
+      .single();
+
+    if (!profile || context.candidateId !== profile.candidate_id) {
+      throw new ForbiddenError('You can only manage your own Smart Resume');
+    }
+  }
+
+  private async assertReadAccess(clerkUserId: string) {
+    const context = await this.accessResolver.resolve(clerkUserId);
+    if (!context.isPlatformAdmin && !context.recruiterId && !context.candidateId) {
+      throw new ForbiddenError('Insufficient permissions');
+    }
+  }
+
+  private async getProfileCandidateId(profileId: string): Promise<string> {
+    const { data: profile } = await this.supabase
+      .from('smart_resume_profiles')
+      .select('candidate_id')
+      .eq('id', profileId)
+      .single();
+    return profile?.candidate_id;
+  }
+}

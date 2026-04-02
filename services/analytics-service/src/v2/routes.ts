@@ -1,17 +1,17 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CacheManager } from '../cache/cache-manager';
-import { StatsRepository } from './stats/repository';
-import { StatsServiceV2 } from './stats/service';
-import { registerStatsRoutes } from './stats/routes';
-import { MarketplaceMetricsRepository } from './marketplace-metrics/repository';
-import { MarketplaceMetricsServiceV2 } from './marketplace-metrics/service';
-import { registerMarketplaceMetricsRoutes } from './marketplace-metrics/routes';
-import { ChartRepository } from './charts/repository';
-import { ChartServiceV2 } from './charts/service';
-import { registerChartRoutes } from './charts/routes';
-import { ActivityService } from './activity/service';
-import { registerActivityRoutes } from './activity/routes';
+import { CacheManager } from '../cache/cache-manager.js';
+import { StatsRepository } from './stats/repository.js';
+import { StatsServiceV2 } from './stats/service.js';
+import { registerStatsRoutes } from './stats/routes.js';
+import { MarketplaceMetricsRepository } from './marketplace-metrics/repository.js';
+import { MarketplaceMetricsServiceV2 } from './marketplace-metrics/service.js';
+import { registerMarketplaceMetricsRoutes } from './marketplace-metrics/routes.js';
+import { ChartRepository } from './charts/repository.js';
+import { ChartServiceV2 } from './charts/service.js';
+import { registerChartRoutes } from './charts/routes.js';
+import { ActivityService } from './activity/service.js';
+import { registerActivityRoutes } from './activity/routes.js';
 
 // Domain route imports (will be created)
 // import { marketplaceHealthRoutes } from './marketplace-health/routes';
@@ -20,7 +20,7 @@ interface RouteOptions extends FastifyPluginOptions {
     supabase: SupabaseClient;
     cache: CacheManager;
     config: any;
-    redis?: import('ioredis').default;
+    redis?: import('ioredis').Redis;
     activityService?: ActivityService;
 }
 

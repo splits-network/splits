@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementDetailRepository } from './detail.repository';
-import { PlacementDetailService } from './detail.service';
-import { idParamSchema } from '../types';
+import { PlacementDetailRepository } from './detail.repository.js';
+import { PlacementDetailService } from './detail.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerPlacementDetailView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new PlacementDetailRepository(supabase);

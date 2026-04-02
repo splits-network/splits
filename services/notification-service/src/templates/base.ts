@@ -1,3 +1,4 @@
+import { PORTAL_URL, CANDIDATE_URL, CORPORATE_URL } from '../helpers/urls.js';
 /**
  * Base HTML Email Template for Splits Network
  * Basel Design System — editorial layouts, DaisyUI semantic tokens, deep indigo palette.
@@ -84,7 +85,9 @@ interface SourceMeta {
 function getSourceMeta(source?: EmailSource): SourceMeta {
     // homeUrl uses centralized URL helper so links always resolve correctly per environment.
     // logoUrl is a fixed public URL — the file must exist at that path in each app.
-    const { PORTAL_URL: portalUrl, CANDIDATE_URL: candidateUrl, CORPORATE_URL: corporateUrl } = require('../helpers/urls');
+    const portalUrl = PORTAL_URL;
+    const candidateUrl = CANDIDATE_URL;
+    const corporateUrl = CORPORATE_URL;
 
     switch (source) {
         case 'candidate':
@@ -132,7 +135,7 @@ function getSourceMeta(source?: EmailSource): SourceMeta {
 export function baseEmailTemplate({ preheader, content, source, theme }: BaseEmailProps): string {
     const t = { ...defaultTheme, ...theme };
     const meta = getSourceMeta(source);
-    const { PORTAL_URL: portalUrl } = require('../helpers/urls');
+    const portalUrl = PORTAL_URL;
     return `
 <!DOCTYPE html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">

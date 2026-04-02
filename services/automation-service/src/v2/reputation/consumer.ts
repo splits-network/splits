@@ -10,8 +10,8 @@
 import * as amqp from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { ReputationService } from './service';
-import { CompanyReputationService } from './company-service';
+import { ReputationService } from './service.js';
+import { CompanyReputationService } from './company-service.js';
 
 export class ReputationEventConsumer {
     private connection: amqp.ChannelModel | null = null;

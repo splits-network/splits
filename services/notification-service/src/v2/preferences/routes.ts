@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { PreferenceServiceV2 } from './service';
-import { PreferenceRepositoryV2 } from './repository';
-import { PreferenceUpdate, BulkPreferenceUpdate } from './types';
-import { requireUserContext } from '../shared/helpers';
-import { resolveAccessContext } from '../shared/access';
+import { PreferenceServiceV2 } from './service.js';
+import { PreferenceRepositoryV2 } from './repository.js';
+import { PreferenceUpdate, BulkPreferenceUpdate } from './types.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 interface RegisterPreferenceRoutesConfig {
     supabaseUrl: string;

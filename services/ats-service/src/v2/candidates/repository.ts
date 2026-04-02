@@ -3,9 +3,9 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { CandidateFilters, CandidateUpdate, CandidateDashboardStats, RecentCandidateApplication } from './types';
+import { CandidateFilters, CandidateUpdate, CandidateDashboardStats, RecentCandidateApplication } from './types.js';
 import { StandardListParams, StandardListResponse, parseFilters } from '@splits-network/shared-types';
-import { resolveAccessContext } from '../shared/access';
+import { resolveAccessContext } from '../shared/access.js';
 
 const DEFAULT_CANDIDATE_STATS: CandidateDashboardStats = {
     applications: 0,

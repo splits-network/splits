@@ -6,9 +6,9 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { ImageServiceV2 } from '../images/service';
-import { getUserContext } from '../shared/helpers';
-import { ImageFilters, ImageUpdate } from '../images/types';
+import { ImageServiceV2 } from '../images/service.js';
+import { getUserContext } from '../shared/helpers.js';
+import { ImageFilters, ImageUpdate } from '../images/types.js';
 
 interface ImageRoutesConfig {
     imageService: ImageServiceV2;

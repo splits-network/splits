@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { JobServiceV2 } from '../../src/v2/jobs/service';
+import { JobServiceV2 } from '../../src/v2/jobs/service.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 
 function mockAccessContext(identityUserId = 'user-1') {

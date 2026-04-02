@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { PerkService } from './service';
-import { requireUserContext } from '../shared/helpers';
+import { PerkService } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterPerkRoutesConfig {
     service: PerkService;

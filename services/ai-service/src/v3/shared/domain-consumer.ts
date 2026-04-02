@@ -20,7 +20,7 @@ import {
   handleDocumentProcessed,
   handleCallRecordingReady,
   handleResumeAnalyzeRequested,
-} from './event-handlers';
+} from './event-handlers.js';
 
 const SUBSCRIBED_EVENTS = [
   'application.stage_changed',

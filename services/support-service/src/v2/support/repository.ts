@@ -5,7 +5,7 @@ import {
     SupportMessage,
     CreateConversationInput,
     SupportConversationStatus,
-} from './types';
+} from './types.js';
 
 export class SupportRepository {
     constructor(private supabase: SupabaseClient) {}

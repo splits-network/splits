@@ -8,10 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError, BadRequestError } from '@splits-network/shared-fastify';
-import { MessageRepository } from './repository';
-import { MessageListParams, SendMessageInput } from './types';
-import { IEventPublisher } from '../../v2/shared/events';
-import { IChatEventPublisher } from '../shared/chat-event-publisher';
+import { MessageRepository } from './repository.js';
+import { MessageListParams, SendMessageInput } from './types.js';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { IChatEventPublisher } from '../shared/chat-event-publisher.js';
 
 export class MessageService {
   private accessResolver: AccessContextResolver;

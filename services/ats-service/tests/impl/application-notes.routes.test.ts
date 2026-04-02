@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Fastify from 'fastify';
-import { registerApplicationNoteRoutes } from '../../src/v2/application-notes/routes';
+import { registerApplicationNoteRoutes } from '../../src/v2/application-notes/routes.js';
 
 describe('Application notes routes (integration)', () => {
     let service: any;

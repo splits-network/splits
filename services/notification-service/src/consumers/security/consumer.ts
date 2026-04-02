@@ -1,6 +1,6 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { SecurityEmailService } from '../../services/security/service';
+import { SecurityEmailService } from '../../services/security/service.js';
 
 export class SecurityEventConsumer {
     constructor(

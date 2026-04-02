@@ -1,13 +1,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { SupportRepository } from './repository';
-import { SupportEventPublisher } from './events';
+import { SupportRepository } from './repository.js';
+import { SupportEventPublisher } from './events.js';
 import {
     CreateConversationInput,
     SupportConversation,
     SupportConversationStatus,
     SupportMessage,
-} from './types';
+} from './types.js';
 
 export class SupportServiceV2 {
     constructor(

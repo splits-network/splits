@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ReputationRepository } from './repository';
-import { ReputationListParams, ReputationUpdate } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ReputationRepository } from './repository.js';
+import { ReputationListParams, ReputationUpdate } from './types.js';
 
 export class ReputationService {
   private accessResolver: AccessContextResolver;

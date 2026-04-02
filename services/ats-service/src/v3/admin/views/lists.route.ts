@@ -5,13 +5,13 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminListsRepository } from './lists.repository';
+import { AdminListsRepository } from './lists.repository.js';
 import {
     adminListQuerySchema,
     adminApplicationsQuerySchema,
     adminPlacementsQuerySchema,
     AdminListParams,
-} from '../types';
+} from '../types.js';
 
 export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseClient) {
     const repository = new AdminListsRepository(supabase);

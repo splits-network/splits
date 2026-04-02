@@ -4,15 +4,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PayoutRepository } from './repository';
-import { PayoutService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PayoutRepository } from './repository.js';
+import { PayoutService } from './service.js';
 import {
   TransactionListParams,
   transactionListQuerySchema,
   idParamSchema,
   placementIdParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerPayoutRoutes(
   app: FastifyInstance,

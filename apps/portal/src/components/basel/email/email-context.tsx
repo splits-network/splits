@@ -48,6 +48,12 @@ interface EmailContextValue {
     closeCompose: () => void;
     composeOpts: ComposeOpts;
 
+    /* actions */
+    trashMessage: (messageId: string) => Promise<void>;
+    archiveMessage: (messageId: string) => Promise<void>;
+    markAsRead: (messageId: string) => Promise<void>;
+    markAsUnread: (messageId: string) => Promise<void>;
+
     /* stats */
     unreadCount: number;
 }
@@ -195,6 +201,70 @@ export function EmailProvider({ children }: { children: ReactNode }) {
         }
     }, [selectedThreadId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    /* ── Message actions ── */
+    const performAction = useCallback(
+        async (messageId: string, action: string) => {
+            if (!selectedConnection) return;
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                await client.post(
+                    `/integrations/email/${selectedConnection.id}/messages/${messageId}/${action}`,
+                );
+            } catch {
+                setError(`Failed to ${action} message`);
+            }
+        },
+        [selectedConnection], // eslint-disable-line react-hooks/exhaustive-deps
+    );
+
+    const trashMessage = useCallback(
+        async (messageId: string) => {
+            await performAction(messageId, "trash");
+            setMessages((prev) => prev.filter((m) => m.id !== messageId));
+            if (selectedThreadId) {
+                closeThread();
+            }
+        },
+        [performAction, selectedThreadId], // eslint-disable-line react-hooks/exhaustive-deps
+    );
+
+    const archiveMessage = useCallback(
+        async (messageId: string) => {
+            await performAction(messageId, "archive");
+            setMessages((prev) => prev.filter((m) => m.id !== messageId));
+            if (selectedThreadId) {
+                closeThread();
+            }
+        },
+        [performAction, selectedThreadId], // eslint-disable-line react-hooks/exhaustive-deps
+    );
+
+    const markAsRead = useCallback(
+        async (messageId: string) => {
+            await performAction(messageId, "read");
+            setMessages((prev) =>
+                prev.map((m) =>
+                    m.id === messageId ? { ...m, isRead: true } : m,
+                ),
+            );
+        },
+        [performAction],
+    );
+
+    const markAsUnread = useCallback(
+        async (messageId: string) => {
+            await performAction(messageId, "unread");
+            setMessages((prev) =>
+                prev.map((m) =>
+                    m.id === messageId ? { ...m, isRead: false } : m,
+                ),
+            );
+        },
+        [performAction],
+    );
+
     /* ── Handlers ── */
     const selectConnection = useCallback(
         (conn: OAuthConnectionPublic) => {
@@ -266,6 +336,10 @@ export function EmailProvider({ children }: { children: ReactNode }) {
                 openCompose,
                 closeCompose,
                 composeOpts,
+                trashMessage,
+                archiveMessage,
+                markAsRead,
+                markAsUnread,
                 unreadCount,
             }}
         >

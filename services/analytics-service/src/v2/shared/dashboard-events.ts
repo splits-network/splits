@@ -5,7 +5,7 @@
  * can fan them out to connected dashboard WebSocket clients.
  */
 
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 export interface DashboardEvent {
     type: 'stats.updated' | 'chart.invalidated';

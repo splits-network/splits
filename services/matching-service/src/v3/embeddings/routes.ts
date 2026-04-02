@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EmbeddingRepository } from './repository';
-import { EmbeddingService } from './service';
-import { EmbeddingListParams, idParamSchema, listQuerySchema } from './types';
+import { EmbeddingRepository } from './repository.js';
+import { EmbeddingService } from './service.js';
+import { EmbeddingListParams, idParamSchema, listQuerySchema } from './types.js';
 
 export function registerEmbeddingRoutes(
   app: FastifyInstance,

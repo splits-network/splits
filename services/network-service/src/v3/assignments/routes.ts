@@ -4,15 +4,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { AssignmentRepository } from './repository';
-import { AssignmentService } from './service';
-import { registerAssignmentListView } from './views/list.route';
-import { registerAssignmentDetailView } from './views/detail.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { AssignmentRepository } from './repository.js';
+import { AssignmentService } from './service.js';
+import { registerAssignmentListView } from './views/list.route.js';
+import { registerAssignmentDetailView } from './views/detail.route.js';
 import {
   AssignmentListParams, AssignmentUpdate, CreateAssignmentInput,
   listQuerySchema, createSchema, updateSchema, idParamSchema,
-} from './types';
+} from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

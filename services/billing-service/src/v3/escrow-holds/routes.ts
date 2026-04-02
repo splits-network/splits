@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { EscrowHoldRepository } from './repository';
-import { EscrowHoldService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { EscrowHoldRepository } from './repository.js';
+import { EscrowHoldService } from './service.js';
 import {
   CreateEscrowHoldInput,
   UpdateEscrowHoldInput,
@@ -18,7 +18,7 @@ import {
   updateSchema,
   idParamSchema,
   placementIdParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerEscrowHoldRoutes(
   app: FastifyInstance,

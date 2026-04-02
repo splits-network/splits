@@ -6,9 +6,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError, ForbiddenError } from "@splits-network/shared-fastify";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ConnectionRepository } from "./repository";
-import { ConnectionListParams } from "./types";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ConnectionRepository } from "./repository.js";
+import { ConnectionListParams } from "./types.js";
 
 export class ConnectionService {
     private accessResolver: AccessContextResolver;

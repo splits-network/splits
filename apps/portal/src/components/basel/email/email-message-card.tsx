@@ -15,12 +15,20 @@ interface EmailMessageCardProps {
     message: EmailMessage;
     isLast: boolean;
     onReply: (messageId: string) => void;
+    onTrash?: (messageId: string) => void;
+    onArchive?: (messageId: string) => void;
+    onMarkRead?: (messageId: string) => void;
+    onMarkUnread?: (messageId: string) => void;
 }
 
 export default function EmailMessageCard({
     message,
     isLast,
     onReply,
+    onTrash,
+    onArchive,
+    onMarkRead,
+    onMarkUnread,
 }: EmailMessageCardProps) {
     const [expanded, setExpanded] = useState(isLast);
     const initial = (
@@ -134,8 +142,8 @@ export default function EmailMessageCard({
                         </div>
                     )}
 
-                    {/* Reply action */}
-                    <div className="mt-4 pl-13">
+                    {/* Actions */}
+                    <div className="mt-4 pl-13 flex items-center gap-1">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -146,6 +154,54 @@ export default function EmailMessageCard({
                             <i className="fa-duotone fa-regular fa-reply" />
                             Reply
                         </button>
+                        {onArchive && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onArchive(message.id);
+                                }}
+                                className="btn btn-ghost btn-sm rounded-none"
+                            >
+                                <i className="fa-duotone fa-regular fa-box-archive" />
+                                Archive
+                            </button>
+                        )}
+                        {onTrash && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onTrash(message.id);
+                                }}
+                                className="btn btn-ghost btn-sm rounded-none text-error"
+                            >
+                                <i className="fa-duotone fa-regular fa-trash" />
+                                Trash
+                            </button>
+                        )}
+                        {message.isRead && onMarkUnread && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onMarkUnread(message.id);
+                                }}
+                                className="btn btn-ghost btn-sm rounded-none"
+                            >
+                                <i className="fa-duotone fa-regular fa-envelope" />
+                                Mark unread
+                            </button>
+                        )}
+                        {!message.isRead && onMarkRead && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onMarkRead(message.id);
+                                }}
+                                className="btn btn-ghost btn-sm rounded-none"
+                            >
+                                <i className="fa-duotone fa-regular fa-envelope-open" />
+                                Mark read
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

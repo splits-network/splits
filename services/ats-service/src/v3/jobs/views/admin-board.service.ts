@@ -6,8 +6,8 @@
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminBoardRepository } from './admin-board.repository';
-import { JobListParams } from '../types';
+import { AdminBoardRepository } from './admin-board.repository.js';
+import { JobListParams } from '../types.js';
 
 export class AdminBoardService {
   private accessResolver: AccessContextResolver;

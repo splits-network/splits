@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Fastify from 'fastify';
-import { registerCompanyRoutes } from '../../src/v2/companies/routes';
+import { registerCompanyRoutes } from '../../src/v2/companies/routes.js';
 
 describe('Company routes (integration)', () => {
     let service: any;

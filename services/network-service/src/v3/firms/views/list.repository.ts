@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { FirmListParams } from '../types';
+import { FirmListParams } from '../types.js';
 
 interface ScopeFilters {
   firm_ids?: string[];

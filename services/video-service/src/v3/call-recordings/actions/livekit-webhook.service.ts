@@ -11,7 +11,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { WebhookReceiver, EgressStatus } from 'livekit-server-sdk';
-import { IEventPublisher } from '../../../v2/shared/events';
+import { IEventPublisher } from '../../../v2/shared/events.js';
 
 export interface WebhookResult {
   received: boolean;

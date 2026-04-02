@@ -3,14 +3,14 @@
  * Handles ALL placement updates with smart validation
  */
 
-import { PlacementRepository } from './repository';
-import { PlacementFilters, PlacementUpdate } from './types';
-import { IEventPublisher } from '../shared/events';
-import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { PlacementRepository } from './repository.js';
+import { PlacementFilters, PlacementUpdate } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
+import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanySourcerRepository } from '../company-sourcers/repository';
-import { CandidateSourcerRepository } from '../candidate-sourcers/repository';
+import { CompanySourcerRepository } from '../company-sourcers/repository.js';
+import { CandidateSourcerRepository } from '../candidate-sourcers/repository.js';
 
 export class PlacementServiceV2 {
     private accessResolver: AccessContextResolver;

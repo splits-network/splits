@@ -10,8 +10,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { UserRoleDetailViewRepository } from './detail.repository';
-import { UserRoleListParams } from '../types';
+import { UserRoleDetailViewRepository } from './detail.repository.js';
+import { UserRoleListParams } from '../types.js';
 
 export class UserRoleDetailViewService {
   private accessResolver: AccessContextResolver;

@@ -3,8 +3,8 @@
  * Professional branded templates for firm invitation notifications
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider, badge } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider, badge } from '../components.js';
 
 export interface FirmInvitationData {
     organizationName: string;

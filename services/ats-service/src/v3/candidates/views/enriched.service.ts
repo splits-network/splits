@@ -7,10 +7,10 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { CandidateEnrichedRepository } from './enriched.repository';
-import { CandidateRepository } from '../repository';
-import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository';
-import { CandidateListParams } from '../types';
+import { CandidateEnrichedRepository } from './enriched.repository.js';
+import { CandidateRepository } from '../repository.js';
+import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository.js';
+import { CandidateListParams } from '../types.js';
 
 export class CandidateEnrichedService {
   private accessResolver: AccessContextResolver;

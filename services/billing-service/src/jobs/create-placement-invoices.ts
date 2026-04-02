@@ -6,11 +6,11 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { PlacementInvoiceRepository } from '../v2/placement-invoices/repository';
-import { PlacementSnapshotRepository } from '../v2/placement-snapshot/repository';
-import { CompanyBillingProfileRepository } from '../v2/company-billing/repository';
-import { CompanyBillingProfileService } from '../v2/company-billing/service';
-import { PlacementInvoiceService } from '../v2/placement-invoices/service';
+import { PlacementInvoiceRepository } from '../v2/placement-invoices/repository.js';
+import { PlacementSnapshotRepository } from '../v2/placement-snapshot/repository.js';
+import { CompanyBillingProfileRepository } from '../v2/company-billing/repository.js';
+import { CompanyBillingProfileService } from '../v2/company-billing/service.js';
+import { PlacementInvoiceService } from '../v2/placement-invoices/service.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;

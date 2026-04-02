@@ -9,9 +9,9 @@ import * as amqp from 'amqplib';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ExecutionRunner } from './execution-runner';
-import { FraudRunner } from './fraud-runner';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ExecutionRunner } from './execution-runner.js';
+import { FraudRunner } from './fraud-runner.js';
 
 interface DomainConsumerConfig {
   rabbitMqUrl: string;

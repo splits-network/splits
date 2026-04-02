@@ -5,10 +5,10 @@
  * detection and event publishing.
  */
 
-import { CompanyReputationRepository } from './company-repository';
-import { calculateCompanyReputationScore } from './company-calculator';
-import { getCompanyTierFromScore, CompanyTierChangeEvent, CompanyReputation } from './company-types';
-import { IEventPublisher } from '../shared/events';
+import { CompanyReputationRepository } from './company-repository.js';
+import { calculateCompanyReputationScore } from './company-calculator.js';
+import { getCompanyTierFromScore, CompanyTierChangeEvent, CompanyReputation } from './company-types.js';
+import { IEventPublisher } from '../shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
 
 export class CompanyReputationService {

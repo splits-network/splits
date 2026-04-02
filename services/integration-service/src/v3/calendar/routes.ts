@@ -7,12 +7,12 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ConnectionAdapter } from '../connections/connection-adapter';
-import { TokenRefreshService } from './token-refresh-service';
-import { CalendarService } from '../../v2/calendar/service';
-import { CalendarWebhookService } from '../../v2/calendar/webhook-service';
-import { registerCalendarMutationRoutes } from './mutation-routes';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ConnectionAdapter } from '../connections/connection-adapter.js';
+import { TokenRefreshService } from './token-refresh-service.js';
+import { CalendarService } from '../../v2/calendar/service.js';
+import { CalendarWebhookService } from '../../v2/calendar/webhook-service.js';
+import { registerCalendarMutationRoutes } from './mutation-routes.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

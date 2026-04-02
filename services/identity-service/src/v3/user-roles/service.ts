@@ -7,9 +7,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { UserRoleRepository } from './repository';
-import { CreateUserRoleInput, UpdateUserRoleInput, UserRoleListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { UserRoleRepository } from './repository.js';
+import { CreateUserRoleInput, UpdateUserRoleInput, UserRoleListParams } from './types.js';
 
 const SYSTEM_ROLES = ['platform_admin'];
 

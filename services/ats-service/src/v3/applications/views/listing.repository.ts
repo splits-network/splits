@@ -8,8 +8,8 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ApplicationListParams } from '../types';
-import { ApplicationScopeFilters } from '../repository';
+import { ApplicationListParams } from '../types.js';
+import { ApplicationScopeFilters } from '../repository.js';
 
 const LIST_SELECT = `*,
   candidate:candidates(id, full_name, email, phone, location, user_id,

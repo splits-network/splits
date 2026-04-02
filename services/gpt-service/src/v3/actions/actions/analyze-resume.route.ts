@@ -8,9 +8,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { AnalyzeResumeService } from './analyze-resume.service';
-import { resumeAnalysisSchema } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { AnalyzeResumeService } from './analyze-resume.service.js';
+import { resumeAnalysisSchema } from '../types.js';
 
 export function registerAnalyzeResumeAction(
   app: FastifyInstance,

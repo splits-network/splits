@@ -3,8 +3,8 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { ApplicationFilters, ApplicationUpdate } from './types';
-import { resolveAccessContext, AccessContext } from '../shared/access';
+import { ApplicationFilters, ApplicationUpdate } from './types.js';
+import { resolveAccessContext, AccessContext } from '../shared/access.js';
 import { create } from 'domain';
 import { parseFilters, StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 

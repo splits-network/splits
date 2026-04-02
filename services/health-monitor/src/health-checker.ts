@@ -1,5 +1,5 @@
 import { Logger } from "@splits-network/shared-logging";
-import { ServiceDefinition, ServiceCheckResult, ServiceStatus } from "./types";
+import { ServiceDefinition, ServiceCheckResult, ServiceStatus } from "./types.js";
 
 export class HealthChecker {
     constructor(

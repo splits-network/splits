@@ -12,7 +12,7 @@ import { createClient } from '@supabase/supabase-js';
 import { loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { register, Counter, Histogram, Gauge } from 'prom-client';
-import { EventPublisher } from '../v2/shared/events';
+import { EventPublisher } from '../v2/shared/events.js';
 
 // Same timeout stages as application-timeout.ts
 const TIMEOUT_STAGES: Record<string, number> = {

@@ -9,7 +9,7 @@ import {
 import { StorageClient } from "./storage.js";
 import { registerV2Routes } from "./v2/routes.js";
 import { registerV3Routes } from "./v3/routes.js";
-import { EventPublisher, OutboxPublisher } from "./v2/shared/events.js";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
 
 async function start() {
     let eventPublisher: EventPublisher | null = null;
@@ -81,18 +81,21 @@ async function start() {
         // Set up transactional outbox for durable event delivery
         const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
 
+        // Resilient publisher: tries direct RabbitMQ first, falls back to outbox
+        const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
+
         // Register V2 routes
         await registerV2Routes(fastify, {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey,
             storage,
-            eventPublisher: outboxPublisher,
+            eventPublisher: resilientPublisher,
         });
 
         // Register V3 routes (coexist with V2)
         registerV3Routes(fastify, {
             supabase: supabaseClient,
-            eventPublisher: outboxPublisher,
+            eventPublisher: resilientPublisher,
         });
 
         // Register standardized health check

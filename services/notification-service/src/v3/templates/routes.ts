@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { TemplateRepository } from './repository';
-import { TemplateService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { TemplateRepository } from './repository.js';
+import { TemplateService } from './service.js';
 import {
   CreateTemplateInput,
   UpdateTemplateInput,
@@ -15,7 +15,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerTemplateRoutes(
   app: FastifyInstance,

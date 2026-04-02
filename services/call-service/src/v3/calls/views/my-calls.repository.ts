@@ -8,7 +8,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CallListParams } from '../types';
+import { CallListParams } from '../types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'scheduled_at', 'status'];
 

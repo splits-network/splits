@@ -9,8 +9,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { ChartServiceV2 } from '../../v2/charts/service';
-import { ChartType, ChartFilters } from './types';
+import { ChartServiceV2 } from '../../v2/charts/service.js';
+import { ChartType, ChartFilters } from './types.js';
 
 export class ChartV3Service {
   private accessResolver: AccessContextResolver;

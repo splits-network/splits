@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { IChatEventPublisher } from '../shared/chat-event-publisher';
-import { MessageRepository } from './repository';
-import { MessageService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { IChatEventPublisher } from '../shared/chat-event-publisher.js';
+import { MessageRepository } from './repository.js';
+import { MessageService } from './service.js';
 import {
   MessageListParams,
   SendMessageInput,
@@ -15,10 +15,10 @@ import {
   sendMessageSchema,
   conversationIdParamSchema,
   messageIdParamSchema,
-} from './types';
+} from './types.js';
 
 // --- Action registrations ---
-import { registerRedactAction } from './actions/redact.route';
+import { registerRedactAction } from './actions/redact.route.js';
 
 export function registerMessageRoutes(
   app: FastifyInstance,

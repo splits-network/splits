@@ -6,10 +6,10 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { registerV3Routes, V3RouteConfig } from './proxy';
-import { requireAuth, optionalAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
+import { ServiceRegistry } from '../../clients.js';
+import { registerV3Routes, V3RouteConfig } from './proxy.js';
+import { requireAuth, optionalAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
 
 const networkV3Routes: V3RouteConfig[] = [
   // ── Recruiters Views (registered before :id to avoid param collision) ──

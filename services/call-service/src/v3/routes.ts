@@ -7,15 +7,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerStatsRoutes } from './stats/routes';
-import { registerArtifactRoutes } from './artifacts/routes';
-import { registerParticipantRoutes } from './participants/routes';
-import { registerCallRoutes } from './calls/routes';
-import { registerTokenRoute } from './calls/actions/token.route';
-import { registerExchangeTokenRoute } from './calls/actions/exchange-token.route';
-import { registerNotesRoutes } from './calls/actions/notes.route';
-import { registerCalendarPreferencesRoutes } from './calls/actions/calendar-preferences.route';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerStatsRoutes } from './stats/routes.js';
+import { registerArtifactRoutes } from './artifacts/routes.js';
+import { registerParticipantRoutes } from './participants/routes.js';
+import { registerCallRoutes } from './calls/routes.js';
+import { registerTokenRoute } from './calls/actions/token.route.js';
+import { registerExchangeTokenRoute } from './calls/actions/exchange-token.route.js';
+import { registerNotesRoutes } from './calls/actions/notes.route.js';
+import { registerCalendarPreferencesRoutes } from './calls/actions/calendar-preferences.route.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

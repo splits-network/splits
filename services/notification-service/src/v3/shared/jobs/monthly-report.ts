@@ -7,9 +7,9 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { EngagementEmailService } from '../../../services/engagement/service';
-import { PORTAL_URL } from '../../../helpers/urls';
-import { JobResult } from '../scheduler';
+import { EngagementEmailService } from '../../../services/engagement/service.js';
+import { PORTAL_URL } from '../../../helpers/urls.js';
+import { JobResult } from '../scheduler.js';
 
 const MONTH_NAMES = [
     'January', 'February', 'March', 'April', 'May', 'June',

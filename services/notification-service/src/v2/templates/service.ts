@@ -1,8 +1,8 @@
-import { buildPaginationResponse } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { NotificationTemplateRepository } from './repository';
-import { EmailTemplate, TemplateCreateInput, TemplateFilters, TemplateUpdate } from './types';
-import type { AccessContext } from '../shared/access';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { NotificationTemplateRepository } from './repository.js';
+import { EmailTemplate, TemplateCreateInput, TemplateFilters, TemplateUpdate } from './types.js';
+import type { AccessContext } from '../shared/access.js';
 
 export class TemplateServiceV2 {
     constructor(

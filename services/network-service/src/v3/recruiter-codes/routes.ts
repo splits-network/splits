@@ -4,15 +4,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecruiterCodeRepository } from './repository';
-import { RecruiterCodeService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecruiterCodeRepository } from './repository.js';
+import { RecruiterCodeService } from './service.js';
 import {
   RecruiterCodeListParams, CreateRecruiterCodeInput, RecruiterCodeUpdate, LogCodeUsageInput,
   listQuerySchema, createSchema, updateSchema, lookupQuerySchema, logUsageSchema, logListQuerySchema, idParamSchema,
-} from './types';
-import { registerRecruiterCodeDetailView } from './views/detail.route';
-import { registerRecruiterCodeListView } from './views/list.route';
+} from './types.js';
+import { registerRecruiterCodeDetailView } from './views/detail.route.js';
+import { registerRecruiterCodeListView } from './views/list.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

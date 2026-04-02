@@ -4,8 +4,8 @@
  */
 
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { ProviderRepository } from './repository';
-import { ProviderListParams } from './types';
+import { ProviderRepository } from './repository.js';
+import { ProviderListParams } from './types.js';
 
 export class ProviderService {
   constructor(private repository: ProviderRepository) {}

@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { STARTER_ENTITLEMENTS } from '@splits-network/shared-types';
-import type { ResolvedEntitlements, PlanTier } from './types';
+import type { ResolvedEntitlements, PlanTier } from './types.js';
 
 interface SubscriptionPlanRow {
     status: string;

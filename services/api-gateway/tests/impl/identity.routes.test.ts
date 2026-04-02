@@ -7,7 +7,7 @@ vi.mock('../../src/middleware/auth', () => ({
     },
 }));
 
-import { registerIdentityRoutes } from '../../src/routes/v2/identity';
+import { registerIdentityRoutes } from '../../src/routes/v2/identity.js';
 
 describe('Identity routes (integration)', () => {
     const identityClient = {

@@ -6,9 +6,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { BadRequestError, NotFoundError } from "@splits-network/shared-fastify";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ParticipantRepository } from "./repository";
-import { AddParticipantInput, ParticipantListParams } from "./types";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ParticipantRepository } from "./repository.js";
+import { AddParticipantInput, ParticipantListParams } from "./types.js";
 
 export class ParticipantService {
     private accessResolver: AccessContextResolver;

@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterCompanyListRepository } from './list.repository';
-import { RecruiterCompanyListService } from './list.service';
-import { listQuerySchema, RecruiterCompanyListParams } from '../types';
+import { RecruiterCompanyListRepository } from './list.repository.js';
+import { RecruiterCompanyListService } from './list.service.js';
+import { listQuerySchema, RecruiterCompanyListParams } from '../types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

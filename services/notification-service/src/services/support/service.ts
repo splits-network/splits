@@ -1,8 +1,8 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import { baseEmailTemplate, type EmailSource } from '../../templates/base';
-import { heading, paragraph, infoCard, divider } from '../../templates/components';
+import { NotificationRepository } from '../../repository.js';
+import { baseEmailTemplate, type EmailSource } from '../../templates/base.js';
+import { heading, paragraph, infoCard, divider } from '../../templates/components.js';
 
 export interface StatusContactEmailData {
     recipient: string;

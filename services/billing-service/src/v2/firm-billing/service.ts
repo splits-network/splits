@@ -1,15 +1,15 @@
 import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
-import type { AccessContext } from '../shared/access';
-import { FirmBillingProfileRepository } from './repository';
+import type { AccessContext } from '../shared/access.js';
+import { FirmBillingProfileRepository } from './repository.js';
 import {
     FirmBillingProfile,
     FirmBillingProfileCreate,
     FirmBillingProfileUpdate,
     PaymentMethodDetails,
     FirmBillingReadiness,
-} from './types';
-import { IEventPublisher } from '../shared/events';
+} from './types.js';
+import { IEventPublisher } from '../shared/events.js';
 
 async function requireFirmAdmin(
     access: AccessContext,

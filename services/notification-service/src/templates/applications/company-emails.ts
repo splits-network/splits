@@ -3,8 +3,8 @@
  * Professional branded templates for company-facing expiration notifications
  */
 
-import { baseEmailTemplate } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider } from '../components';
+import { baseEmailTemplate } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider } from '../components.js';
 
 // ============================================================================
 // Application Expired — Company Admin

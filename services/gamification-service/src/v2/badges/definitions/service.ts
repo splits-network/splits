@@ -1,6 +1,6 @@
-import { BadgeDefinitionRepository } from './repository';
-import { BadgeDefinitionCreate, BadgeDefinitionFilters, BadgeDefinitionUpdate } from './types';
-import { buildPaginationResponse } from '../../shared/pagination';
+import { BadgeDefinitionRepository } from './repository.js';
+import { BadgeDefinitionCreate, BadgeDefinitionFilters, BadgeDefinitionUpdate } from './types.js';
+import { buildPaginationResponse } from '../../shared/pagination.js';
 
 export class BadgeDefinitionService {
     constructor(private repository: BadgeDefinitionRepository) {}

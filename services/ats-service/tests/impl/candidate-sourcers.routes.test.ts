@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Fastify from 'fastify';
-import { candidateSourcerRoutes } from '../../src/v2/candidate-sourcers/routes';
+import { candidateSourcerRoutes } from '../../src/v2/candidate-sourcers/routes.js';
 
 describe('Candidate sourcer routes (integration)', () => {
     let service: any;

@@ -1,17 +1,19 @@
 import Fastify, { FastifyInstance } from "fastify";
 import { createLogger } from "@splits-network/shared-logging";
-import { createSupabaseClient } from "@splits-network/shared-config";
+import { createSupabaseClient, loadRedisConfig } from "@splits-network/shared-config";
+import { Redis } from "ioredis";
+import { AiClient } from "@splits-network/shared-ai-client";
 import * as amqp from "amqplib";
 
 // V2 Architecture imports
-import { DocumentRepositoryV2 } from "./v2/documents/repository";
-import { DocumentServiceV2 } from "./v2/documents/service";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
+import { DocumentRepositoryV2 } from "./v2/documents/repository.js";
+import { DocumentServiceV2 } from "./v2/documents/service.js";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
 import { EventPublisher } from "@splits-network/shared-job-queue";
 
 // Processing imports (to be updated to use V2)
-import { DomainConsumer } from "./domain-consumer";
+import { DomainConsumer } from "./domain-consumer.js";
 
 const logger = createLogger("document-processing-service");
 
@@ -69,6 +71,31 @@ async function main() {
             key: process.env.SUPABASE_SERVICE_ROLE_KEY!,
         });
         const repository = new DocumentRepositoryV2(supabase);
+
+        // Initialize Redis + AI client for provider-agnostic AI calls
+        const redisConfig = loadRedisConfig();
+        const redis = new Redis({
+            host: redisConfig.host,
+            port: redisConfig.port,
+            password: redisConfig.password || undefined,
+            db: redisConfig.db || 0,
+            maxRetriesPerRequest: 3,
+            lazyConnect: true,
+        });
+        try {
+            await redis.connect();
+        } catch (err) {
+            logger.warn({ err }, 'Redis connection failed — AI config will use DB/env fallback');
+        }
+
+        const aiClient = new AiClient({
+            supabase,
+            redis,
+            serviceName: 'document-processing-service',
+            logger,
+            openaiApiKey: process.env.OPENAI_API_KEY || '',
+            anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
+        });
 
         // Start HTTP server
         const server = await buildServer();
@@ -130,7 +157,7 @@ async function main() {
                 "document.uploaded",
             );
 
-            consumer = new DomainConsumer(channel, eventPublisher);
+            consumer = new DomainConsumer(channel, eventPublisher, aiClient);
             await consumer.initialize();
         }
 

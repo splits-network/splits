@@ -1,10 +1,10 @@
-import { fileTypeFromBuffer } from "file-type";
+import { fileTypeFromBuffer } from "file-type/core";
 import { randomUUID } from "crypto";
-import { StorageClient } from "../../storage";
-import { DocumentFilters, DocumentUpdate, DocumentCreateInput } from "./types";
-import { buildPaginationResponse } from "../shared/helpers";
-import { DocumentRepositoryV2 } from "./repository";
-import { EventPublisher, IEventPublisher } from "../shared/events";
+import { StorageClient } from "../../storage.js";
+import { DocumentFilters, DocumentUpdate, DocumentCreateInput } from "./types.js";
+import { buildPaginationResponse } from "../shared/helpers.js";
+import { DocumentRepositoryV2 } from "./repository.js";
+import { EventPublisher, IEventPublisher } from "../shared/events.js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -14,6 +14,8 @@ const ALLOWED_MIME_TYPES = [
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain",
+    "text/markdown",
+    "text/x-markdown",
     "application/rtf",
 ];
 
@@ -67,12 +69,16 @@ export class DocumentServiceV2 {
                 case "txt":
                     contentType = "text/plain";
                     break;
+                case "md":
+                case "markdown":
+                    contentType = "text/markdown";
+                    break;
                 case "rtf":
                     contentType = "application/rtf";
                     break;
                 default:
                     throw new Error(
-                        "Unsupported file type. Allowed: PDF, DOC, DOCX, TXT, RTF",
+                        "Unsupported file type. Allowed: PDF, DOC, DOCX, TXT, MD, RTF",
                     );
             }
         }

@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PreScreenRepository } from './repository';
-import { PreScreenService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PreScreenRepository } from './repository.js';
+import { PreScreenService } from './service.js';
 import {
   CreatePreScreenInput,
   UpdatePreScreenInput,
@@ -16,7 +16,7 @@ import {
   updateSchema,
   jobIdParamSchema,
   applicationIdParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerPreScreenRoutes(
   app: FastifyInstance,

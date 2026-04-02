@@ -2,19 +2,19 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { IEventPublisher } from '../shared/events';
-import { PayoutScheduleRepository } from './repository';
-import { PayoutAuditRepository } from '../audit/repository';
-import { InvoiceEligibilityRepository } from './invoice-eligibility-repository';
-import { PlacementInvoice } from '../placement-invoices/types';
-import { PayoutServiceV2 } from '../payouts/service';
+import { IEventPublisher } from '../shared/events.js';
+import { PayoutScheduleRepository } from './repository.js';
+import { PayoutAuditRepository } from '../audit/repository.js';
+import { InvoiceEligibilityRepository } from './invoice-eligibility-repository.js';
+import { PlacementInvoice } from '../placement-invoices/types.js';
+import { PayoutServiceV2 } from '../payouts/service.js';
 import {
     PayoutSchedule,
     PayoutScheduleCreate,
     PayoutScheduleUpdate,
     PayoutScheduleFilters,
     PayoutScheduleWithAmount,
-} from './types';
+} from './types.js';
 
 const MAX_RETRY_ATTEMPTS = 3;
 

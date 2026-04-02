@@ -6,8 +6,8 @@ import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FirmBillingRepository } from './repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FirmBillingRepository } from './repository.js';
 
 export class FirmBillingService {
   private stripe: Stripe;

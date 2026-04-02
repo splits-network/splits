@@ -7,10 +7,10 @@
 
 import { z, ZodTypeAny } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { GptActionRepository } from '../../actions/repository';
-import { formatStageLabel } from '../../actions/helpers';
-import { McpAuthContext, toolError, safeTool } from '../types';
-import { requireMcpScope } from '../auth';
+import { GptActionRepository } from '../../actions/repository.js';
+import { formatStageLabel } from '../../actions/helpers.js';
+import { McpAuthContext, toolError, safeTool } from '../types.js';
+import { requireMcpScope } from '../auth.js';
 
 // Extracted to avoid TS2589 deep type inference in registerTool generics
 const getApplicationsSchema: Record<string, ZodTypeAny> = {

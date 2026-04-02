@@ -6,9 +6,9 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { requireUserContext } from '../shared/access';
-import { ChartServiceV2 } from './service';
-import { ChartType, ChartFilters } from './types';
+import { requireUserContext } from '../shared/access.js';
+import { ChartServiceV2 } from './service.js';
+import { ChartType, ChartFilters } from './types.js';
 
 interface ChartServices {
     chartService: ChartServiceV2;

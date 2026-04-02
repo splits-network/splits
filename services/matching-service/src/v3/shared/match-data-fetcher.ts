@@ -7,8 +7,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { EmbeddingService } from '../../v2/embeddings/service';
-import { EmbeddingRepository } from '../../v2/embeddings/repository';
+import { EmbeddingService } from '../../v2/embeddings/service.js';
+import { EmbeddingRepository } from '../../v2/embeddings/repository.js';
 
 export class MatchDataFetcher {
   constructor(

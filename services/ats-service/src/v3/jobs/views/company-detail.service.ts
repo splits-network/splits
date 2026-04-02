@@ -5,7 +5,7 @@
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyDetailRepository } from './company-detail.repository';
+import { CompanyDetailRepository } from './company-detail.repository.js';
 
 export class CompanyDetailService {
   private accessResolver: AccessContextResolver;

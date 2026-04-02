@@ -6,8 +6,8 @@
  * No HTTP concepts. Typed errors only.
  */
 
-import { StatsV3Repository } from './repository';
-import { StatsQueryParams } from './types';
+import { StatsV3Repository } from './repository.js';
+import { StatsQueryParams } from './types.js';
 
 export class StatsV3Service {
   constructor(private repository: StatsV3Repository) {}

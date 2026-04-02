@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchIdentityUserId } from '../../src/index';
+import { fetchIdentityUserId } from '../../src/index.js';
 
 describe('fetchIdentityUserId (unit)', () => {
     beforeEach(() => {

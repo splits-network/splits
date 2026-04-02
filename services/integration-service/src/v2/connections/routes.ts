@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
 import { EntitlementChecker } from '@splits-network/shared-access-context';
-import { ConnectionRepository } from './repository';
-import { ConnectionService } from './service';
-import { ProviderRepository } from '../providers/repository';
-import { IEventPublisher } from '../shared/events';
-import { requireUserContext } from '../shared/helpers';
+import { ConnectionRepository } from './repository.js';
+import { ConnectionService } from './service.js';
+import { ProviderRepository } from '../providers/repository.js';
+import { IEventPublisher } from '../shared/events.js';
+import { requireUserContext } from '../shared/helpers.js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
 

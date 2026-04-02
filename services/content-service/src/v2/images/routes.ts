@@ -6,9 +6,9 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { ImageServiceV2 } from './service';
-import { requireUserContext } from '../shared/helpers';
-import { ImageFilters, ImageUpdate } from './types';
+import { ImageServiceV2 } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { ImageFilters, ImageUpdate } from './types.js';
 
 interface RegisterConfig {
     imageService: ImageServiceV2;

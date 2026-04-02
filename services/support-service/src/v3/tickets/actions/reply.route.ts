@@ -9,8 +9,8 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { idParamSchema, replySchema } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { idParamSchema, replySchema } from '../types.js';
 
 export function registerTicketReplyAction(
   app: FastifyInstance,

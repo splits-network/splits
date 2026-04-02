@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { BadgeListParams } from './types';
+import { BadgeListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['awarded_at', 'created_at'];
 

@@ -1,6 +1,6 @@
-import { CallRepository } from './repository';
-import { CallLifecycleService } from './call-lifecycle-service';
-import { IEventPublisher } from './shared/events';
+import { CallRepository } from './repository.js';
+import { CallLifecycleService } from './call-lifecycle-service.js';
+import { IEventPublisher } from './shared/events.js';
 import {
     Call,
     CallDetail,
@@ -14,7 +14,7 @@ import {
     CreateCallInput,
     UpdateCallInput,
     CallListFilters,
-} from './types';
+} from './types.js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class CallService {

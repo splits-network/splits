@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ListForUserRepository, ParticipantDetails } from './list-for-user.repository';
+import { ListForUserRepository, ParticipantDetails } from './list-for-user.repository.js';
 
 export class DetailViewRepository {
   private participantRepo: ListForUserRepository;

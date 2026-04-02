@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ConsentServiceV2 } from './service';
-import { requireUserContext } from '../shared/helpers';
-import { SaveConsentRequest } from './types';
+import { ConsentServiceV2 } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { SaveConsentRequest } from './types.js';
 
 interface RegisterConsentRoutesConfig {
     consentService: ConsentServiceV2;

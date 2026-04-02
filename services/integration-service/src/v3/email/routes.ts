@@ -7,10 +7,10 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ConnectionAdapter } from '../connections/connection-adapter';
-import { TokenRefreshService } from '../calendar/token-refresh-service';
-import { EmailService, SendEmailParams } from '../../v2/email/service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ConnectionAdapter } from '../connections/connection-adapter.js';
+import { TokenRefreshService } from '../calendar/token-refresh-service.js';
+import { EmailService, SendEmailParams } from './service.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 
@@ -37,7 +37,7 @@ export function registerEmailRoutes(app: FastifyInstance, config: EmailRouteConf
   const tokenRefresh = new TokenRefreshService(
     config.supabase, config.eventPublisher, config.logger, config.crypto,
   );
-  const service = new EmailService(adapter as any, tokenRefresh as any, config.logger);
+  const service = new EmailService(adapter, tokenRefresh, config.logger);
 
   // GET /api/v3/integrations/email/:connectionId/messages
   app.get('/api/v3/integrations/email/:connectionId/messages', async (request, reply) => {
@@ -89,6 +89,97 @@ export function registerEmailRoutes(app: FastifyInstance, config: EmailRouteConf
       return reply.send({ data: thread });
     } catch (err: any) {
       config.logger.error({ err, connectionId, threadId }, 'Failed to get thread');
+      return reply.status(mapErrorStatus(err)).send({ error: err.message });
+    }
+  });
+
+  // POST /api/v3/integrations/email/:connectionId/messages/:messageId/trash
+  app.post('/api/v3/integrations/email/:connectionId/messages/:messageId/trash', async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { connectionId, messageId } = request.params as { connectionId: string; messageId: string };
+
+    try {
+      await service.trashMessage(connectionId, clerkUserId, messageId);
+      return reply.send({ data: { success: true } });
+    } catch (err: any) {
+      config.logger.error({ err, connectionId, messageId }, 'Failed to trash message');
+      return reply.status(mapErrorStatus(err)).send({ error: err.message });
+    }
+  });
+
+  // POST /api/v3/integrations/email/:connectionId/messages/:messageId/archive
+  app.post('/api/v3/integrations/email/:connectionId/messages/:messageId/archive', async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { connectionId, messageId } = request.params as { connectionId: string; messageId: string };
+
+    try {
+      await service.archiveMessage(connectionId, clerkUserId, messageId);
+      return reply.send({ data: { success: true } });
+    } catch (err: any) {
+      config.logger.error({ err, connectionId, messageId }, 'Failed to archive message');
+      return reply.status(mapErrorStatus(err)).send({ error: err.message });
+    }
+  });
+
+  // POST /api/v3/integrations/email/:connectionId/messages/:messageId/read
+  app.post('/api/v3/integrations/email/:connectionId/messages/:messageId/read', async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { connectionId, messageId } = request.params as { connectionId: string; messageId: string };
+
+    try {
+      await service.markAsRead(connectionId, clerkUserId, messageId);
+      return reply.send({ data: { success: true } });
+    } catch (err: any) {
+      config.logger.error({ err, connectionId, messageId }, 'Failed to mark as read');
+      return reply.status(mapErrorStatus(err)).send({ error: err.message });
+    }
+  });
+
+  // POST /api/v3/integrations/email/:connectionId/messages/:messageId/unread
+  app.post('/api/v3/integrations/email/:connectionId/messages/:messageId/unread', async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { connectionId, messageId } = request.params as { connectionId: string; messageId: string };
+
+    try {
+      await service.markAsUnread(connectionId, clerkUserId, messageId);
+      return reply.send({ data: { success: true } });
+    } catch (err: any) {
+      config.logger.error({ err, connectionId, messageId }, 'Failed to mark as unread');
+      return reply.status(mapErrorStatus(err)).send({ error: err.message });
+    }
+  });
+
+  // POST /api/v3/integrations/email/:connectionId/messages/:messageId/labels
+  app.post('/api/v3/integrations/email/:connectionId/messages/:messageId/labels', async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { connectionId, messageId } = request.params as { connectionId: string; messageId: string };
+    const { add, remove } = request.body as { add?: string[]; remove?: string[] };
+
+    try {
+      await service.modifyLabels(connectionId, clerkUserId, messageId, add ?? [], remove ?? []);
+      return reply.send({ data: { success: true } });
+    } catch (err: any) {
+      config.logger.error({ err, connectionId, messageId }, 'Failed to modify labels');
+      return reply.status(mapErrorStatus(err)).send({ error: err.message });
+    }
+  });
+
+  // GET /api/v3/integrations/email/:connectionId/labels
+  app.get('/api/v3/integrations/email/:connectionId/labels', async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { connectionId } = request.params as { connectionId: string };
+
+    try {
+      const labels = await service.listLabels(connectionId, clerkUserId);
+      return reply.send({ data: labels });
+    } catch (err: any) {
+      config.logger.error({ err, connectionId }, 'Failed to list labels');
       return reply.status(mapErrorStatus(err)).send({ error: err.message });
     }
   });

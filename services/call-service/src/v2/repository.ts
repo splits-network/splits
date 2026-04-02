@@ -10,11 +10,11 @@ import {
     CreateCallInput,
     UpdateCallInput,
     CallListFilters,
-} from './types';
-import { ParticipantRepository } from './participant-repository';
-import { ArtifactRepository } from './artifact-repository';
-import { StatsRepository } from './stats-repository';
-import { resolveCallIdFilters } from './list-helpers';
+} from './types.js';
+import { ParticipantRepository } from './participant-repository.js';
+import { ArtifactRepository } from './artifact-repository.js';
+import { StatsRepository } from './stats-repository.js';
+import { resolveCallIdFilters } from './list-helpers.js';
 
 export class CallRepository {
     private supabase: SupabaseClient;

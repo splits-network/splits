@@ -147,6 +147,72 @@ export class MicrosoftMailClient {
         }
     }
 
+    /**
+     * Delete a message (moves to Deleted Items).
+     */
+    async deleteMessage(accessToken: string, messageId: string): Promise<void> {
+        const res = await fetch(`${BASE_URL}/me/messages/${messageId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Microsoft delete failed (${res.status}): ${text}`);
+        }
+    }
+
+    /**
+     * Move a message to a folder (e.g. 'archive', 'deleteditems', 'inbox').
+     */
+    async moveMessage(
+        accessToken: string,
+        messageId: string,
+        destinationFolderId: string,
+    ): Promise<void> {
+        const res = await fetch(`${BASE_URL}/me/messages/${messageId}/move`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ destinationId: destinationFolderId }),
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Microsoft move failed (${res.status}): ${text}`);
+        }
+    }
+
+    /**
+     * Update message properties (isRead, etc.).
+     */
+    async updateMessage(
+        accessToken: string,
+        messageId: string,
+        updates: { isRead?: boolean },
+    ): Promise<void> {
+        const res = await fetch(`${BASE_URL}/me/messages/${messageId}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updates),
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Microsoft update failed (${res.status}): ${text}`);
+        }
+    }
+
+    /**
+     * List mail folders (Inbox, Archive, Deleted Items, etc.).
+     */
+    async listFolders(accessToken: string): Promise<Array<{ id: string; displayName: string }>> {
+        const res = await this.request(accessToken, '/me/mailFolders?$top=50');
+        return res.value ?? [];
+    }
+
     /* ── Private ─────────────────────────────────────────────────────── */
 
     private async request(accessToken: string, path: string): Promise<any> {

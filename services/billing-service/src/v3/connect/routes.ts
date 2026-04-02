@@ -7,10 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ConnectRepository } from './repository';
-import { ConnectService } from './service';
-import { onboardingLinkSchema, payoutsQuerySchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ConnectRepository } from './repository.js';
+import { ConnectService } from './service.js';
+import { onboardingLinkSchema, payoutsQuerySchema } from './types.js';
 
 export function registerConnectRoutes(
   app: FastifyInstance,

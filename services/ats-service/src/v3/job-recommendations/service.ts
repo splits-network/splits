@@ -6,13 +6,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { JobRecommendationRepository } from './repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { JobRecommendationRepository } from './repository.js';
 import {
   CreateJobRecommendationInput,
   UpdateJobRecommendationInput,
   JobRecommendationListParams,
-} from './types';
+} from './types.js';
 
 export class JobRecommendationService {
   private accessResolver: AccessContextResolver;

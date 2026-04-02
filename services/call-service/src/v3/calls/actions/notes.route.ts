@@ -7,7 +7,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { idParamSchema } from '../types';
+import { idParamSchema } from '../types.js';
 
 const createNoteSchema = {
   type: 'object',

@@ -3,7 +3,7 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { TerminationService } from './termination.service';
+import { TerminationService } from './termination.service.js';
 
 export function registerTerminationRoutes(app: FastifyInstance, service: TerminationService) {
   // GET /api/v3/applications/affected-by-termination

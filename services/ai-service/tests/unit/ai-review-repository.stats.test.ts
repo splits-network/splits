@@ -12,7 +12,7 @@ vi.mock('@supabase/supabase-js', () => {
     };
 });
 
-import { AIReviewRepository } from '../../src/v2/reviews/repository';
+import { AIReviewRepository } from '../../src/v2/reviews/repository.js';
 
 describe('AIReviewRepository stats (unit)', () => {
     beforeEach(() => {

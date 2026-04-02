@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { registerStatsRoutes } from '../../src/v2/stats/routes';
+import { registerStatsRoutes } from '../../src/v2/stats/routes.js';
 
 describe('Stats routes (integration)', () => {
     const statsService = {

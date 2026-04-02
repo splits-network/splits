@@ -4,20 +4,20 @@
  * reschedule, recording ready, and instant call notifications.
  */
 
-export { callConfirmationEmail } from './confirmation';
-export type { CallConfirmationData } from './confirmation';
+export { callConfirmationEmail } from './confirmation.js';
+export type { CallConfirmationData } from './confirmation.js';
 
-export { callReminderEmail } from './reminder';
-export type { CallReminderData } from './reminder';
+export { callReminderEmail } from './reminder.js';
+export type { CallReminderData } from './reminder.js';
 
-export { callCancellationEmail } from './cancellation';
-export type { CallCancellationData } from './cancellation';
+export { callCancellationEmail } from './cancellation.js';
+export type { CallCancellationData } from './cancellation.js';
 
-export { callRescheduleEmail } from './reschedule';
-export type { CallRescheduleData } from './reschedule';
+export { callRescheduleEmail } from './reschedule.js';
+export type { CallRescheduleData } from './reschedule.js';
 
-export { callRecordingReadyEmail } from './recording-ready';
-export type { CallRecordingReadyData } from './recording-ready';
+export { callRecordingReadyEmail } from './recording-ready.js';
+export type { CallRecordingReadyData } from './recording-ready.js';
 
-export { instantCallEmail } from './instant-call';
-export type { InstantCallData } from './instant-call';
+export { instantCallEmail } from './instant-call.js';
+export type { InstantCallData } from './instant-call.js';

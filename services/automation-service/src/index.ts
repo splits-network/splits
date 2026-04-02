@@ -8,11 +8,11 @@ import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, registerHealthCheck, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
-import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
-import { DomainEventConsumer } from "./v2/shared/domain-consumer";
-import { ReputationRepository, ReputationService, ReputationEventConsumer, CompanyReputationRepository, CompanyReputationService } from "./v2/reputation";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
+import { DomainEventConsumer } from "./v2/shared/domain-consumer.js";
+import { ReputationRepository, ReputationService, ReputationEventConsumer, CompanyReputationRepository, CompanyReputationService } from "./v2/reputation/index.js";
 
 async function main() {
     const baseConfig = loadBaseConfig("automation-service");
@@ -81,7 +81,7 @@ async function main() {
         const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
         // Import access context resolver for domain consumer
-        const { resolveAccessContext } = await import('./v2/shared/access');
+        const { resolveAccessContext } = await import('./v2/shared/access.js');
         const accessResolver = (clerkUserId: string) =>
             resolveAccessContext(supabaseClient, clerkUserId);
 
@@ -102,6 +102,9 @@ async function main() {
         // Set up transactional outbox for durable event delivery
         outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
 
+        // Resilient publisher: tries RabbitMQ first, falls back to outbox
+        const resilientPublisher = new ResilientPublisher(v2EventPublisher!, outboxPublisher, logger);
+
         // Initialize reputation event consumer for reputation recalculation
         const reputationRepository = new ReputationRepository(
             dbConfig.supabaseUrl,
@@ -109,7 +112,7 @@ async function main() {
         );
         const reputationService = new ReputationService(
             reputationRepository,
-            outboxPublisher,
+            resilientPublisher,
             logger,
         );
         const companyReputationRepository = new CompanyReputationRepository(
@@ -118,7 +121,7 @@ async function main() {
         );
         const companyReputationService = new CompanyReputationService(
             companyReputationRepository,
-            outboxPublisher,
+            resilientPublisher,
             logger,
         );
         reputationConsumer = new ReputationEventConsumer(
@@ -136,12 +139,12 @@ async function main() {
         await registerV2Routes(app, {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey,
-            eventPublisher: outboxPublisher,
+            eventPublisher: resilientPublisher,
         });
 
         registerV3Routes(app, {
             supabase: supabaseClient,
-            eventPublisher: outboxPublisher || undefined,
+            eventPublisher: resilientPublisher,
         });
 
         // Register standardized health check

@@ -11,6 +11,8 @@ interface EmailListItemProps {
     message: EmailListItemType;
     isSelected: boolean;
     onSelect: (threadId: string) => void;
+    onArchive?: (messageId: string) => void;
+    onTrash?: (messageId: string) => void;
 }
 
 function formatDate(dateStr?: string) {
@@ -35,6 +37,8 @@ export default function EmailListItem({
     message,
     isSelected,
     onSelect,
+    onArchive,
+    onTrash,
 }: EmailListItemProps) {
     const isUnread = message.isRead === false;
 
@@ -49,7 +53,7 @@ export default function EmailListItem({
                     onSelect(message.threadId);
                 }
             }}
-            className={`relative w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 cursor-pointer ${
+            className={`group relative w-full text-left p-4 border-b border-base-300 transition-all hover:bg-base-300/50 cursor-pointer ${
                 isSelected
                     ? "bg-base-100 border-l-4 border-l-primary"
                     : "border-l-4 border-l-transparent"
@@ -80,9 +84,40 @@ export default function EmailListItem({
                                 message.from?.email ||
                                 "Unknown"}
                         </span>
-                        <span className="text-sm text-base-content/40 flex-shrink-0 ml-2">
-                            {formatDate(message.date)}
-                        </span>
+                        <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                            {/* Quick actions — visible on group hover */}
+                            {(onArchive || onTrash) && (
+                                <div className="hidden group-hover:flex items-center gap-0.5">
+                                    {onArchive && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onArchive(message.id);
+                                            }}
+                                            className="btn btn-ghost btn-xs btn-square rounded-none"
+                                            title="Archive"
+                                        >
+                                            <i className="fa-duotone fa-regular fa-box-archive text-xs" />
+                                        </button>
+                                    )}
+                                    {onTrash && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onTrash(message.id);
+                                            }}
+                                            className="btn btn-ghost btn-xs btn-square rounded-none text-error"
+                                            title="Trash"
+                                        >
+                                            <i className="fa-duotone fa-regular fa-trash text-xs" />
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            <span className="text-sm text-base-content/40">
+                                {formatDate(message.date)}
+                            </span>
+                        </div>
                     </div>
 
                     <p

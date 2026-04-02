@@ -18,6 +18,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/chat-gateway ./services/chat-gateway
 EXPOSE 3020
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-logging build
 CMD ["pnpm", "--filter", "@splits-network/chat-gateway", "dev"]
 
 # Build stage
@@ -47,6 +48,7 @@ COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-lo
 COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
 
 # Copy built service
+COPY --from=build /app/services/chat-gateway/package.json ./services/chat-gateway/
 COPY --from=build /app/services/chat-gateway/dist ./services/chat-gateway/dist
 
 EXPOSE 3020

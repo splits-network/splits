@@ -3,8 +3,8 @@
  * Templates for user registration, recruiter onboarding, and company welcome flows
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, divider } from '../components.js';
 
 // ─── Welcome Email ──────────────────────────────────────────────────────────
 

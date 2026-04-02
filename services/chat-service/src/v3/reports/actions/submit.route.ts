@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SubmitActionRepository } from './submit.repository';
-import { SubmitActionService, SubmitReportInput } from './submit.service';
-import { IEventPublisher } from '../../../v2/shared/events';
+import { SubmitActionRepository } from './submit.repository.js';
+import { SubmitActionService, SubmitReportInput } from './submit.service.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
 
 const bodySchema = {
   type: 'object',

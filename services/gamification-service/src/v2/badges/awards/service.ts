@@ -1,8 +1,8 @@
-import { BadgeAwardRepository } from './repository';
-import { BadgeAwardFilters } from './types';
-import { BadgeEntityType } from '../definitions/types';
-import { IEventPublisher } from '../../shared/events';
-import { buildPaginationResponse } from '../../shared/pagination';
+import { BadgeAwardRepository } from './repository.js';
+import { BadgeAwardFilters } from './types.js';
+import { BadgeEntityType } from '../definitions/types.js';
+import { IEventPublisher } from '../../shared/events.js';
+import { buildPaginationResponse } from '../../shared/pagination.js';
 
 export class BadgeAwardService {
     constructor(

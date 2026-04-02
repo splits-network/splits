@@ -4,11 +4,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobRequirementRepository } from './repository';
-import { JobRequirementService } from './service';
+import { JobRequirementRepository } from './repository.js';
+import { JobRequirementService } from './service.js';
 import { CreateJobRequirementInput, UpdateJobRequirementInput, JobRequirementListParams,
-  idParamSchema, listQuerySchema, createSchema, updateSchema } from './types';
-import { registerBulkReplaceAction } from './actions/bulk-replace.route';
+  idParamSchema, listQuerySchema, createSchema, updateSchema } from './types.js';
+import { registerBulkReplaceAction } from './actions/bulk-replace.route.js';
 
 export function registerJobRequirementRoutes(
   app: FastifyInstance,

@@ -4,19 +4,19 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecruiterCandidateRepository } from './repository';
-import { RecruiterCandidateService } from './service';
-import { RecruiterActivityRepository } from '../recruiter-activity/repository';
-import { RecruiterActivityService } from '../recruiter-activity/service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecruiterCandidateRepository } from './repository.js';
+import { RecruiterCandidateService } from './service.js';
+import { RecruiterActivityRepository } from '../recruiter-activity/repository.js';
+import { RecruiterActivityService } from '../recruiter-activity/service.js';
 import {
   RecruiterCandidateListParams, CreateRecruiterCandidateInput, RecruiterCandidateUpdate,
   TerminateInput, listQuerySchema, createSchema, updateSchema, terminateSchema,
   idParamSchema, tokenParamSchema,
-} from './types';
-import { registerRecruiterCandidateDetailView } from './views/detail.route';
-import { registerListForCandidateView } from './views/list-for-candidate.route';
-import { registerRecruiterCandidateListView } from './views/list.route';
+} from './types.js';
+import { registerRecruiterCandidateDetailView } from './views/detail.route.js';
+import { registerListForCandidateView } from './views/list-for-candidate.route.js';
+import { registerRecruiterCandidateListView } from './views/list.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

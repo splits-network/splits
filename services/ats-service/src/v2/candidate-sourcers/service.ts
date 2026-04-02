@@ -1,8 +1,8 @@
-import { CandidateSourcerRepository } from './repository';
-import { IEventPublisher } from '../shared/events';
+import { CandidateSourcerRepository } from './repository.js';
+import { IEventPublisher } from '../shared/events.js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateSourcer, CandidateSourcerFilters, CandidateSourcerUpdate } from './types';
+import { CandidateSourcer, CandidateSourcerFilters, CandidateSourcerUpdate } from './types.js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 /**

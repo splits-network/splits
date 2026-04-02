@@ -4,7 +4,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
-import { RecruiterCandidateListParams } from './types';
+import { RecruiterCandidateListParams } from './types.js';
 
 export class RecruiterCandidateRepository {
   constructor(private supabase: SupabaseClient) {}

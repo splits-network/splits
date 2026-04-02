@@ -8,8 +8,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { ActivityRepository } from './repository';
-import { HeartbeatInput } from './types';
+import { ActivityRepository } from './repository.js';
+import { HeartbeatInput } from './types.js';
 
 export class ActivityV3Service {
   private accessResolver: AccessContextResolver;

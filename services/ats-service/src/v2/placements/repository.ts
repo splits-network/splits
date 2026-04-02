@@ -3,8 +3,8 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { PlacementFilters, PlacementUpdate } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { PlacementFilters, PlacementUpdate } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 export interface RepositoryListResponse<T> {
     data: T[];

@@ -1,13 +1,13 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { requireAuth } from '../../rbac';
+import { ServiceRegistry } from '../../clients.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { requireAuth } from '../../rbac.js';
 import {
     ResourceDefinition,
     registerResourceRoutes,
     getCorrelationId,
     buildQueryString,
-} from './common';
+} from './common.js';
 
 const ATS_RESOURCES: ResourceDefinition[] = [
     {

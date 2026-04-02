@@ -7,11 +7,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateEnrichedRepository } from './enriched.repository';
-import { CandidateEnrichedService } from './enriched.service';
-import { CandidateRepository } from '../repository';
-import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository';
-import { CandidateListParams, listQuerySchema } from '../types';
+import { CandidateEnrichedRepository } from './enriched.repository.js';
+import { CandidateEnrichedService } from './enriched.service.js';
+import { CandidateRepository } from '../repository.js';
+import { RecruiterSavedCandidateRepository } from '../../recruiter-saved-candidates/repository.js';
+import { CandidateListParams, listQuerySchema } from '../types.js';
 
 export function registerCandidateEnrichedView(app: FastifyInstance, supabase: SupabaseClient) {
   const enrichedRepo = new CandidateEnrichedRepository(supabase);

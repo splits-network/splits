@@ -1,6 +1,6 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Logger } from "@splits-network/shared-logging";
-import { AggregatedServiceStatus } from "./types";
+import { AggregatedServiceStatus } from "./types.js";
 
 export interface StatusTransition {
     service: string;

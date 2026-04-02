@@ -7,7 +7,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { PageFilters, PageCreate, PageUpdate } from './types';
+import { PageFilters, PageCreate, PageUpdate } from './types.js';
 
 export interface RepositoryListResponse<T> {
     data: T[];

@@ -3,10 +3,10 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { AIReviewRepository } from './reviews/repository';
-import { AIReviewServiceV2 } from './reviews/service';
-import { IEventPublisher } from './shared/events';
-import { registerAIReviewRoutes } from './reviews/routes';
+import { AIReviewRepository } from './reviews/repository.js';
+import { AIReviewServiceV2 } from './reviews/service.js';
+import { IEventPublisher } from './shared/events.js';
+import { registerAIReviewRoutes } from './reviews/routes.js';
 import { Logger } from '@splits-network/shared-logging';
 
 interface RegisterConfig {

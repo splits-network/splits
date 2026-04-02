@@ -9,9 +9,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ApplicationListingRepository } from './listing.repository';
-import { ApplicationListingService } from './listing.service';
-import { ApplicationListParams, listQuerySchema } from '../types';
+import { ApplicationListingRepository } from './listing.repository.js';
+import { ApplicationListingService } from './listing.service.js';
+import { ApplicationListParams, listQuerySchema } from '../types.js';
 
 export function registerApplicationListingView(
   app: FastifyInstance,

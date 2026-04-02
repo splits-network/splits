@@ -4,25 +4,25 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerPlanRoutes } from './plans/routes';
-import { registerSubscriptionRoutes } from './subscriptions/routes';
-import { registerPayoutRoutes } from './payouts/routes';
-import { registerPayoutScheduleRoutes } from './payout-schedules/routes';
-import { registerSplitsRateRoutes } from './splits-rates/routes';
-import { registerPlacementInvoiceRoutes } from './placement-invoices/routes';
-import { registerPlacementSnapshotRoutes } from './placement-snapshot/routes';
-import { registerEscrowHoldRoutes } from './escrow-holds/routes';
-import { registerEntitlementRoutes } from './entitlements/routes';
-import { registerDiscountRoutes } from './discounts/routes';
-import { registerConnectRoutes } from './connect/routes';
-import { registerFirmConnectRoutes } from './firm-connect/routes';
-import { registerFirmBillingRoutes } from './firm-billing/routes';
-import { registerCompanyBillingRoutes } from './company-billing/routes';
-import { registerWebhookEventRoutes } from './webhook-events/routes';
-import { registerWebhookRoutes } from './webhooks/routes';
-import { registerAuditRoutes } from './audit/routes';
-import { registerAdminBillingRoutes } from './admin/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerPlanRoutes } from './plans/routes.js';
+import { registerSubscriptionRoutes } from './subscriptions/routes.js';
+import { registerPayoutRoutes } from './payouts/routes.js';
+import { registerPayoutScheduleRoutes } from './payout-schedules/routes.js';
+import { registerSplitsRateRoutes } from './splits-rates/routes.js';
+import { registerPlacementInvoiceRoutes } from './placement-invoices/routes.js';
+import { registerPlacementSnapshotRoutes } from './placement-snapshot/routes.js';
+import { registerEscrowHoldRoutes } from './escrow-holds/routes.js';
+import { registerEntitlementRoutes } from './entitlements/routes.js';
+import { registerDiscountRoutes } from './discounts/routes.js';
+import { registerConnectRoutes } from './connect/routes.js';
+import { registerFirmConnectRoutes } from './firm-connect/routes.js';
+import { registerFirmBillingRoutes } from './firm-billing/routes.js';
+import { registerCompanyBillingRoutes } from './company-billing/routes.js';
+import { registerWebhookEventRoutes } from './webhook-events/routes.js';
+import { registerWebhookRoutes } from './webhooks/routes.js';
+import { registerAuditRoutes } from './audit/routes.js';
+import { registerAdminBillingRoutes } from './admin/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import Redis from "ioredis";
+import { Redis } from 'ioredis';
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const AGGREGATED_KEY = "health-monitor:aggregated";

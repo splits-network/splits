@@ -3,10 +3,11 @@
  * Listens for company invitation events and sends emails
  */
 
-import { NotificationService } from '../../service';
+import { NotificationService } from '../../service.js';
 import { Logger } from '@splits-network/shared-logging';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
+import { PORTAL_URL } from '../../helpers/urls.js';
 
 export class CompanyInvitationsConsumer {
     constructor(
@@ -60,7 +61,7 @@ export class CompanyInvitationsConsumer {
                 }
             }
 
-            const { PORTAL_URL: portalUrl } = require('../../helpers/urls');
+            const portalUrl = PORTAL_URL;
             const invitationLink = `${portalUrl}/join/${invite_link_token}`;
             const expiresDate = new Date(expires_at).toLocaleDateString('en-US', {
                 weekday: 'long',

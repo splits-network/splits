@@ -1,14 +1,14 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import multipart from "@fastify/multipart";
-import { DocumentServiceV2 } from "./service";
+import { DocumentServiceV2 } from "./service.js";
 import {
     requireUserContext,
     validatePaginationParams,
-} from "../shared/helpers";
-import { DocumentRepositoryV2 } from "./repository";
-import { DocumentUpdate } from "./types";
-import { StorageClient } from "../../storage";
-import { EventPublisher, IEventPublisher } from "../shared/events";
+} from "../shared/helpers.js";
+import { DocumentRepositoryV2 } from "./repository.js";
+import { DocumentUpdate } from "./types.js";
+import { StorageClient } from "../../storage.js";
+import { EventPublisher, IEventPublisher } from "../shared/events.js";
 
 interface RegisterDocumentRoutesConfig {
     supabaseUrl: string;

@@ -3,8 +3,8 @@
  * Templates for referral code usage notifications
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, infoCard, divider } from '../components.js';
 
 export interface ReferralCodeRedeemedData {
     recruiterName: string;

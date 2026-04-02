@@ -5,8 +5,8 @@ vi.mock('@supabase/supabase-js', () => ({
     createClient: () => ({}),
 }));
 
-import { MarketplaceMetricsServiceV2 } from '../../src/v2/metrics/service';
-import { registerMetricRoutes } from '../../src/v2/metrics/routes';
+import { MarketplaceMetricsServiceV2 } from '../../src/v2/metrics/service.js';
+import { registerMetricRoutes } from '../../src/v2/metrics/routes.js';
 
 describe('Marketplace metrics routes (integration)', () => {
     const config = {

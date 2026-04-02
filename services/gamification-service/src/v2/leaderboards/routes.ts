@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { LeaderboardService } from './service';
-import { validatePaginationParams } from '../shared/pagination';
-import { BadgeEntityType } from '../badges/definitions/types';
-import { LeaderboardPeriod } from './types';
+import { LeaderboardService } from './service.js';
+import { validatePaginationParams } from '../shared/pagination.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
+import { LeaderboardPeriod } from './types.js';
 
 export function registerLeaderboardRoutes(
     app: FastifyInstance,

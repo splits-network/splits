@@ -6,11 +6,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { AcceptActionRepository } from './accept.repository';
-import { AcceptActionService } from './accept.service';
-import { idParamSchema } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { AcceptActionRepository } from './accept.repository.js';
+import { AcceptActionService } from './accept.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerAcceptAction(
   app: FastifyInstance,

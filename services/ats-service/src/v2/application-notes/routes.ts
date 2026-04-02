@@ -4,9 +4,9 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { ApplicationNoteServiceV2 } from './service';
-import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate } from './types';
-import { requireUserContext } from '../helpers';
+import { ApplicationNoteServiceV2 } from './service.js';
+import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate } from './types.js';
+import { requireUserContext } from '../helpers.js';
 
 export async function registerApplicationNoteRoutes(
     app: FastifyInstance,

@@ -7,10 +7,10 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { AdminRepository } from './repository';
-import { getIdentityAdminStats, AdminStatsResult } from '../../v2/admin/stats-repository';
-import { getIdentityAdminChartData, AdminChartDataResult } from '../../v2/admin/chart-repository';
-import { AdminListParams } from './types';
+import { AdminRepository } from './repository.js';
+import { getIdentityAdminStats, AdminStatsResult } from '../../v2/admin/stats-repository.js';
+import { getIdentityAdminChartData, AdminChartDataResult } from '../../v2/admin/chart-repository.js';
+import { AdminListParams } from './types.js';
 
 export class AdminService {
   constructor(

@@ -4,7 +4,7 @@
  * Filter and update types for the jobs domain.
  */
 
-import { PaginationParams, SortParams } from '../shared/pagination';
+import { PaginationParams, SortParams } from '../shared/pagination.js';
 
 export interface JobFilters extends PaginationParams, SortParams {
     search?: string;

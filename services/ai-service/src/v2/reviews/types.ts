@@ -19,10 +19,14 @@ export interface AIReviewInput {
     resume_text?: string;
     resume_data?: {
         summary?: string;
+        headline?: string;
         experience?: any[];
         education?: any[];
         skills?: string[];
         certifications?: string[];
+        projects?: any[];
+        tasks?: any[];
+        publications?: string[];
         total_years_experience?: number;
         highest_degree?: string;
     };

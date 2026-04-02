@@ -4,8 +4,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { BulkReplaceSkillsRepository } from './bulk-replace.repository';
-import { BulkReplaceSkillsService } from './bulk-replace.service';
+import { BulkReplaceSkillsRepository } from './bulk-replace.repository.js';
+import { BulkReplaceSkillsService } from './bulk-replace.service.js';
 
 const bodySchema = {
   type: 'object',

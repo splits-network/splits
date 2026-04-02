@@ -2,8 +2,8 @@
  * Termination Service — Handle recruiter-candidate relationship termination
  */
 
-import { IEventPublisher } from '../../../v2/shared/events';
-import { ApplicationRepository } from '../repository';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { ApplicationRepository } from '../repository.js';
 
 export class TerminationService {
   constructor(

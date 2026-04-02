@@ -1,7 +1,7 @@
-import { LeaderboardService } from './service';
+import { LeaderboardService } from './service.js';
 import { Logger } from '@splits-network/shared-logging';
-import { BadgeEntityType } from '../badges/definitions/types';
-import { LeaderboardPeriod } from './types';
+import { BadgeEntityType } from '../badges/definitions/types.js';
+import { LeaderboardPeriod } from './types.js';
 
 interface LeaderboardJob {
     entityType: BadgeEntityType;

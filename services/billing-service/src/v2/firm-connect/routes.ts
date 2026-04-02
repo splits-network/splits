@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
-import { requireUserContext } from '../shared/helpers';
-import { FirmStripeConnectService } from './service';
+import { requireUserContext } from '../shared/helpers.js';
+import { FirmStripeConnectService } from './service.js';
 import {
     FirmConnectLinkRequest,
     UpdateFirmAccountDetailsRequest,
     AddFirmBankAccountRequest,
-} from './types';
+} from './types.js';
 
 export function firmStripeConnectRoutes(app: FastifyInstance, service: FirmStripeConnectService) {
     const basePath = '/api/v2/firm-stripe-connect';

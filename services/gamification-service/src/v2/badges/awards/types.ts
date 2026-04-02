@@ -1,4 +1,4 @@
-import { BadgeEntityType } from '../definitions/types';
+import { BadgeEntityType } from '../definitions/types.js';
 
 export interface BadgeAwarded {
     id: string;

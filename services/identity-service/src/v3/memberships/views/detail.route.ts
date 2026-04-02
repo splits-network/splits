@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { idParamSchema, listQuerySchema, MembershipListParams } from '../types';
-import { MembershipDetailViewRepository } from './detail.repository';
-import { MembershipDetailViewService } from './detail.service';
+import { idParamSchema, listQuerySchema, MembershipListParams } from '../types.js';
+import { MembershipDetailViewRepository } from './detail.repository.js';
+import { MembershipDetailViewService } from './detail.service.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

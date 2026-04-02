@@ -6,8 +6,8 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { idParamSchema } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { idParamSchema } from '../types.js';
 
 export function registerDismissAction(
   app: FastifyInstance,

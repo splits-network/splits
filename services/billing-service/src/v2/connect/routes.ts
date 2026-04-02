@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
-import { requireUserContext } from '../shared/helpers';
-import { StripeConnectService } from './service';
+import { requireUserContext } from '../shared/helpers.js';
+import { StripeConnectService } from './service.js';
 import {
     StripeConnectLinkRequest,
     UpdateAccountDetailsRequest,
     AddBankAccountRequest,
-} from './types';
+} from './types.js';
 
 export function stripeConnectRoutes(app: FastifyInstance, service: StripeConnectService) {
     const basePath = '/api/v2/stripe/connect';

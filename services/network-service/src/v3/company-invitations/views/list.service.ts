@@ -7,8 +7,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { CompanyInvitationListParams } from '../types';
-import { CompanyInvitationListViewRepository } from './list.repository';
+import { CompanyInvitationListParams } from '../types.js';
+import { CompanyInvitationListViewRepository } from './list.repository.js';
 
 export class CompanyInvitationListViewService {
   private accessResolver: AccessContextResolver;

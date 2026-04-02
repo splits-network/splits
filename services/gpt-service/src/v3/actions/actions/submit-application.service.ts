@@ -13,14 +13,14 @@ import {
   BadRequestError,
   ConflictError,
 } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { GptActionsRepository } from '../repository';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { GptActionsRepository } from '../repository.js';
 import {
   generateConfirmationToken,
   getConfirmationToken,
   deleteConfirmationToken,
-} from '../../../v2/actions/helpers';
-import { SubmitApplicationInput } from '../types';
+} from '../../../v2/actions/helpers.js';
+import { SubmitApplicationInput } from '../types.js';
 
 export class SubmitApplicationService {
   private repository: GptActionsRepository;

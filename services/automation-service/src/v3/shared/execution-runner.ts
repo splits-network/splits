@@ -8,10 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RuleRepository } from '../rules/repository';
-import { ExecutionRepository } from '../executions/repository';
-import { evaluateConditions, executeAction, TriggerConditions } from '../executions/rule-engine';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RuleRepository } from '../rules/repository.js';
+import { ExecutionRepository } from '../executions/repository.js';
+import { evaluateConditions, executeAction, TriggerConditions } from '../executions/rule-engine.js';
 
 export class ExecutionRunner {
   private ruleRepository: RuleRepository;

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { CandidateSkillService } from './service';
-import { requireUserContext } from '../shared/helpers';
+import { CandidateSkillService } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterCandidateSkillRoutesConfig {
     service: CandidateSkillService;

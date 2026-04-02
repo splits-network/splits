@@ -1,8 +1,8 @@
-import { buildPaginationResponse } from '../shared/helpers';
-import { RuleFilters, RuleUpdate } from './types';
-import { AutomationRuleRepository, CreateRuleInput } from './repository';
-import { IEventPublisher } from '../shared/events';
-import type { AccessContext } from '../shared/access';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { RuleFilters, RuleUpdate } from './types.js';
+import { AutomationRuleRepository, CreateRuleInput } from './repository.js';
+import { IEventPublisher } from '../shared/events.js';
+import type { AccessContext } from '../shared/access.js';
 
 export class AutomationRuleServiceV2 {
     constructor(

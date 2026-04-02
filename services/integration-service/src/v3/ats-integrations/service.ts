@@ -5,9 +5,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { BadRequestError, NotFoundError } from "@splits-network/shared-fastify";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ATSIntegrationRepository } from "./repository";
-import { CreateATSInput, UpdateATSInput, ATSListParams } from "./types";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ATSIntegrationRepository } from "./repository.js";
+import { CreateATSInput, UpdateATSInput, ATSListParams } from "./types.js";
 
 export class ATSIntegrationService {
     private accessResolver: AccessContextResolver;

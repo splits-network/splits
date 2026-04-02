@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { FraudSignalServiceV2 } from './service';
-import { FraudSignalRepository, CreateFraudSignalInput } from './repository';
-import { FraudSignalFilters, FraudSignalUpdate } from './types';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { resolveAccessContext } from '../shared/access';
+import { FraudSignalServiceV2 } from './service.js';
+import { FraudSignalRepository, CreateFraudSignalInput } from './repository.js';
+import { FraudSignalFilters, FraudSignalUpdate } from './types.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 interface RegisterFraudRoutesConfig {
     supabaseUrl: string;
