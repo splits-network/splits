@@ -294,7 +294,9 @@ export default function ApplicationWizardModal({
             await authClient.patch(`/applications/${appId}`, { stage: "ai_review" });
 
             // Step 3: Poll for AI review completion
-            await pollForAiReview(appId);
+            if (appId) {
+                await pollForAiReview(appId);
+            }
         } catch (err: any) {
             console.error("AI review process failed:", err);
             setError(err.message || "Failed to process AI review");
