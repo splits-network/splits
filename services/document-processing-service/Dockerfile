@@ -61,6 +61,7 @@ RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-access-context build
+RUN pnpm --filter @splits-network/shared-job-queue build
 
 # Then build the service
 RUN pnpm --filter @splits-network/document-processing-service build
