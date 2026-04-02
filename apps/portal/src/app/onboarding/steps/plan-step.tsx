@@ -194,28 +194,30 @@ export function PlanStep({ state, actions }: PlanStepProps) {
                 )}
 
                 {/* Billing toggle */}
-                <div className="flex items-center justify-center gap-3">
-                    <span
-                        className={`text-sm font-semibold ${!isAnnual ? "text-base-content" : "text-base-content/40"}`}
-                    >
-                        Monthly
-                    </span>
-                    <input
-                        type="checkbox"
-                        className="toggle toggle-primary toggle-sm"
-                        checked={isAnnual}
-                        onChange={(e) => setIsAnnual(e.target.checked)}
-                    />
-                    <span
-                        className={`text-sm font-semibold ${isAnnual ? "text-base-content" : "text-base-content/40"}`}
-                    >
-                        Annual
-                    </span>
-                    {isAnnual && (
-                        <span className="badge badge-success badge-sm text-sm">
-                            Save ~16%
+                <div className="flex items-center justify-center gap-3 pb-6">
+                    <div className="flex items-center gap-3 relative">
+                        <span
+                            className={`text-sm font-semibold ${!isAnnual ? "text-base-content" : "text-base-content/40"}`}
+                        >
+                            Monthly
                         </span>
-                    )}
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-primary toggle-sm"
+                            checked={isAnnual}
+                            onChange={(e) => setIsAnnual(e.target.checked)}
+                        />
+                        <span
+                            className={`text-sm font-semibold ${isAnnual ? "text-base-content" : "text-base-content/40"}`}
+                        >
+                            Annual
+                        </span>
+                        {isAnnual && (
+                            <span className="badge badge-success badge-sm text-sm absolute -right-30">
+                                Save ~16%
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 <BaselPricingCardGrid
