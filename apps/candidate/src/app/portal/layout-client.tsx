@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { PageTitleProvider } from "@/contexts/page-title-context";
-import { useUserProfile } from "@/contexts";
+import { useUserProfile, DrawerProvider } from "@/contexts";
 import { PortalToolbar } from "@/components/portal-toolbar";
 import { usePresenceHeartbeat } from "@/hooks/use-presence-heartbeat";
 
@@ -47,14 +47,16 @@ export function PortalLayoutClient({
 
     return (
         <PageTitleProvider>
-            <OnboardingRedirectGuard>
-                <PortalToolbar />
-                <div className="bg-base-200 flex">
-                    <div className="flex-1 min-w-0 transition-all duration-300">
-                        {children}
+            <DrawerProvider>
+                <OnboardingRedirectGuard>
+                    <PortalToolbar />
+                    <div className="bg-base-200 flex">
+                        <div className="flex-1 min-w-0 transition-all duration-300">
+                            {children}
+                        </div>
                     </div>
-                </div>
-            </OnboardingRedirectGuard>
+                </OnboardingRedirectGuard>
+            </DrawerProvider>
         </PageTitleProvider>
     );
 }

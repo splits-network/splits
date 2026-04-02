@@ -48,6 +48,15 @@ export class ApplicationRepository {
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
+        // DEBUG: Log access context to understand the authorization issue
+        console.log('=== DEBUG ACCESS CONTEXT ===');
+        console.log('clerkUserId:', clerkUserId);
+        console.log('accessContext:', JSON.stringify(accessContext, null, 2));
+        console.log('isPlatformAdmin:', accessContext.isPlatformAdmin);
+        console.log('organizationIds:', accessContext.organizationIds);
+        console.log('roles:', accessContext.roles);
+        console.log('===========================');
+
         // Build select clause with optional includes
         const selectClause = this.buildSelectClause(params.include);
 

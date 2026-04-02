@@ -496,18 +496,11 @@ export default function AIReviewPanel({
                                 <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Matched Skills
                                 </span>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {aiReview.matched_skills.map(
-                                        (skill, index) => (
-                                            <BaselStatusPill
-                                                key={index}
-                                                color="success"
-                                            >
-                                                {skill}
-                                            </BaselStatusPill>
-                                        ),
-                                    )}
-                                </div>
+                                <BaselCheckList
+                                    items={aiReview.matched_skills}
+                                    color="success"
+                                    icon="fa-duotone fa-regular fa-circle-check"
+                                />
                             </div>
                         )}
 
@@ -517,18 +510,11 @@ export default function AIReviewPanel({
                                 <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Missing Skills
                                 </span>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {aiReview.missing_skills.map(
-                                        (skill, index) => (
-                                            <BaselStatusPill
-                                                key={index}
-                                                color="warning"
-                                            >
-                                                {skill}
-                                            </BaselStatusPill>
-                                        ),
-                                    )}
-                                </div>
+                                <BaselCheckList
+                                    items={aiReview.missing_skills}
+                                    color="warning"
+                                    icon="fa-duotone fa-regular fa-triangle-exclamation"
+                                />
                             </div>
                         )}
                 </div>
@@ -547,13 +533,11 @@ export default function AIReviewPanel({
                             <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                 Met Requirements
                             </span>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {aiReview.matched_requirements.map((req, index) => (
-                                    <BaselStatusPill key={index} color="success">
-                                        {req}
-                                    </BaselStatusPill>
-                                ))}
-                            </div>
+                            <BaselCheckList
+                                items={aiReview.matched_requirements}
+                                color="success"
+                                icon="fa-duotone fa-regular fa-circle-check"
+                            />
                         </div>
                     )}
 
@@ -562,13 +546,11 @@ export default function AIReviewPanel({
                             <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                 Unmet Requirements
                             </span>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {aiReview.missing_requirements.map((req, index) => (
-                                    <BaselStatusPill key={index} color="error">
-                                        {req}
-                                    </BaselStatusPill>
-                                ))}
-                            </div>
+                            <BaselCheckList
+                                items={aiReview.missing_requirements}
+                                color="error"
+                                icon="fa-duotone fa-regular fa-circle-xmark"
+                            />
                         </div>
                     )}
                 </div>

@@ -273,9 +273,10 @@ export class ApplicationRepository {
     }
 
     if (scope.company_ids && scope.company_ids.length > 0) {
-      if (scope.viewable_job_ids && scope.viewable_job_ids.length > 0) {
-        query = query.in('job_id', scope.viewable_job_ids);
+      if (!scope.viewable_job_ids || scope.viewable_job_ids.length === 0) {
+        return query.eq('id', '00000000-0000-0000-0000-000000000000');
       }
+      query = query.in('job_id', scope.viewable_job_ids);
       if (scope.visible_stages) {
         query = query.in('stage', scope.visible_stages);
       }

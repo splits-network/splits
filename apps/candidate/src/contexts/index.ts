@@ -2,3 +2,4 @@ export { UserProfileProvider, useUserProfile } from "./user-profile-context";
 export type { UserProfile } from "./user-profile-context";
 export { PageTitleProvider, usePageTitle } from "./page-title-context";
 export { PresenceProvider, usePresenceStatus, useRegisterPresence } from "./presence-context";
+export { DrawerProvider, useDrawer } from "./drawer-context";
