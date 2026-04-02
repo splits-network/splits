@@ -47,11 +47,11 @@ export default function StepReview({
     const selectedDocs = documents.filter((d) =>
         selectedDocuments.includes(d.id),
     );
-    const selectedResume = selectedDocs.find(
-        (d) => d.document_type === "resume",
-    );
     const coverLetterDocs = selectedDocs.filter(
         (d) => d.document_type === "cover_letter",
+    );
+    const supportingDocs = selectedDocs.filter(
+        (d) => d.document_type !== "resume" && d.document_type !== "cover_letter",
     );
 
     const getQuestionText = (index: number) => {
@@ -92,7 +92,7 @@ export default function StepReview({
                 description="Review everything you're about to submit. Use the Back button to fix anything that doesn't look right."
                 icon="fa-duotone fa-regular fa-clipboard-check"
                 tips={[
-                    "Double-check your resume is the right version for this role",
+                    "Your Smart Resume will be automatically tailored to this role",
                     "Save as draft if you want to come back and polish it later",
                     "After submission, your application goes through AI review before reaching the hiring team",
                     "You can track your application status from your dashboard",
@@ -141,47 +141,43 @@ export default function StepReview({
 
                 <div className="border-t border-base-300" />
 
-                {/* Resume */}
+                {/* Smart Resume */}
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2">
                         Resume
                     </p>
-                    {selectedResume ? (
-                        <div className="flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-file-pdf text-primary" />
-                            <span className="text-sm font-semibold">
-                                {selectedResume.file_name}
-                            </span>
-                        </div>
-                    ) : (
-                        <p className="text-sm text-base-content/40 italic">
-                            No resume selected
-                        </p>
-                    )}
-                    {selectedDocs.filter(
-                        (d) =>
-                            d.document_type !== "resume" &&
-                            d.document_type !== "cover_letter",
-                    ).length > 0 && (
-                        <div className="mt-2 space-y-1">
-                            {selectedDocs
-                                .filter(
-                                    (d) =>
-                                        d.document_type !== "resume" &&
-                                        d.document_type !== "cover_letter",
-                                )
-                                .map((doc) => (
+                    <div className="flex items-center gap-2">
+                        <i className="fa-duotone fa-regular fa-file-user text-primary" />
+                        <span className="text-sm font-semibold">
+                            Smart Resume (auto-tailored)
+                        </span>
+                    </div>
+                </div>
+
+                {/* Supporting Documents */}
+                {supportingDocs.length > 0 && (
+                    <>
+                        <div className="border-t border-base-300" />
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-2">
+                                Supporting Documents
+                            </p>
+                            <div className="space-y-1">
+                                {supportingDocs.map((doc) => (
                                     <div
                                         key={doc.id}
-                                        className="flex items-center gap-2 text-xs text-base-content/50"
+                                        className="flex items-center gap-2 text-sm"
                                     >
-                                        <i className="fa-duotone fa-regular fa-file" />
-                                        <span>{doc.file_name}</span>
+                                        <i className="fa-duotone fa-regular fa-file text-secondary" />
+                                        <span className="font-semibold">
+                                            {doc.file_name}
+                                        </span>
                                     </div>
                                 ))}
+                            </div>
                         </div>
-                    )}
-                </div>
+                    </>
+                )}
 
                 <div className="border-t border-base-300" />
 

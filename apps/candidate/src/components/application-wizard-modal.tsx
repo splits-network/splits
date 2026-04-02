@@ -32,7 +32,7 @@ interface WizardStep {
 
 function buildWizardSteps(hasQuestions: boolean, hasRecruiterChoice: boolean): WizardStep[] {
     const steps: WizardStep[] = [
-        { label: "Documents", description: "Select your resume and any supporting documents." },
+        { label: "Documents", description: "Attach any supporting documents like portfolios or certifications." },
         { label: "Cover Letter", description: "Add an optional cover letter to strengthen your application." },
     ];
     if (hasQuestions) {
@@ -170,20 +170,9 @@ export default function ApplicationWizardModal({
     /* ─── Step Validation & Navigation ─────────────────────────────────── */
 
     const validateDocuments = useCallback((): string | null => {
-        const currentDocs = localDocuments.length > 0 ? localDocuments : documents;
-        const selected = formData.documents.selected;
-
-        if (selected.length === 0) return "Select at least one document to continue.";
-
-        const selectedResumes = selected.filter((id: string) => {
-            const doc = currentDocs.find((d: any) => d.id === id);
-            return doc && doc.document_type === "resume";
-        });
-
-        if (selectedResumes.length === 0) return "A resume is required. Please select one to continue.";
-        if (selectedResumes.length > 1) return "Only one resume can be attached per application.";
+        // Supporting documents are optional — no validation needed
         return null;
-    }, [localDocuments, documents, formData.documents.selected]);
+    }, []);
 
     const validateQuestions = useCallback((): string | null => {
         const missingRequired = questions
