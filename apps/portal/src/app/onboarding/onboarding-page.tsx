@@ -181,13 +181,12 @@ export function OnboardingPage() {
                                     actions={actions}
                                 />
                             )}
-                        {state.currentStep === 3 &&
-                            !state.selectedRole && (
-                                <RoleStep
-                                    selectedRole={state.selectedRole}
-                                    actions={actions}
-                                />
-                            )}
+                        {state.currentStep === 3 && !state.selectedRole && (
+                            <RoleStep
+                                selectedRole={state.selectedRole}
+                                actions={actions}
+                            />
+                        )}
                         {state.currentStep === 4 && (
                             <ReviewStep state={state} actions={actions} />
                         )}
@@ -212,7 +211,7 @@ export function OnboardingPage() {
             </div>
 
             {/* ── Branding Panel (Right on desktop) ── */}
-            <div className="hidden lg:flex lg:w-2/5 bg-base-300 text-base-content flex-col justify-between p-12 relative">
+            <div className="hidden lg:flex lg:w-1/4 bg-base-300 text-base-content flex-col justify-between p-12 relative">
                 {/* Diagonal accent */}
                 <div
                     className="absolute top-0 left-0 w-full h-full bg-primary/5"
