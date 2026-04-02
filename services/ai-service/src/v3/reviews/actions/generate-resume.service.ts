@@ -327,12 +327,14 @@ Generate a tailored resume as JSON with this exact structure:
 }
 
 Rules:
-- Order experience, projects, and skills by RELEVANCE to this specific job, most relevant first
-- Only include experiences, projects, and skills that are relevant — omit irrelevant entries
-- Rewrite descriptions and achievements to highlight aspects relevant to the target role
-- Do not fabricate experience or skills the candidate does not have
-- Keep the summary concise but compelling, connecting the candidate's background to this role
-- For skills, prioritize those matching the job's required and preferred skills`;
+- Include ALL work experiences — do not omit any roles. Order by RELEVANCE to this job, most relevant first.
+- Include ALL achievements and bullet points from each role. Do not summarize, truncate, or merge them. If a role has 10 bullets, return 10 achievements.
+- Rewrite descriptions and achievements to emphasize aspects relevant to the target role, but preserve the full scope of each entry.
+- Include ALL projects. Order by relevance, most relevant first.
+- Include ALL skills. Order by relevance, with required/preferred job skills first.
+- Do not fabricate experience or skills the candidate does not have.
+- Keep the summary concise but compelling (2-4 sentences), connecting the candidate's background to this role.
+- The resume should be COMPREHENSIVE — a full career profile, not a trimmed-down highlight reel.`;
   }
 
   private async callOpenAI(prompt: string): Promise<TailoredResume> {
