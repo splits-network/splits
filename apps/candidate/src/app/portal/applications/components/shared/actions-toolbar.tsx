@@ -79,15 +79,19 @@ export default function ActionsToolbar({
 
     // Derived state
     const recruiterUserId = item.recruiter?.user?.id;
-    const canEdit = stage === "draft" || stage === "ai_failed";
+    const canEdit =
+        stage === "draft" ||
+        stage === "ai_failed" ||
+        stage === "recruiter_request" ||
+        stage === "recruiter_review" ||
+        stage === "ai_review" ||
+        stage === "ai_reviewed";
     const canBackToDraft = BACK_TO_DRAFT_STAGES.includes(stage);
     const canSubmit = SUBMITTABLE_STAGES.includes(stage);
     const canWithdraw = WITHDRAWABLE_STAGES.includes(stage);
     const isProposal = stage === "recruiter_proposed";
-    const isOffer =
-        stage === "offer" && !item.accepted_by_candidate;
-    const hasAcceptedOffer =
-        stage === "offer" && !!item.accepted_by_candidate;
+    const isOffer = stage === "offer" && !item.accepted_by_candidate;
+    const hasAcceptedOffer = stage === "offer" && !!item.accepted_by_candidate;
     const isJobClosed = ["closed", "filled", "cancelled"].includes(
         item.job?.status || "",
     );
@@ -149,7 +153,9 @@ export default function ActionsToolbar({
             router.push(`/portal/messages?conversationId=${conversationId}`);
         } catch (err: any) {
             console.error("Failed to start chat:", err);
-            toast.error(err?.message || "Couldn't start conversation. Try again.");
+            toast.error(
+                err?.message || "Couldn't start conversation. Try again.",
+            );
         } finally {
             setStartingChat(false);
         }
@@ -359,9 +365,13 @@ export default function ActionsToolbar({
 
                     {/* Already accepted indicator */}
                     {hasAcceptedOffer && (
-                        <span className={`btn btn-success btn-outline ${getSizeClass()} gap-2 no-animation pointer-events-none`}>
+                        <span
+                            className={`btn btn-success btn-outline ${getSizeClass()} gap-2 no-animation pointer-events-none`}
+                        >
                             <i className="fa-duotone fa-regular fa-check-double" />
-                            <span className="hidden md:inline">Offer Accepted</span>
+                            <span className="hidden md:inline">
+                                Offer Accepted
+                            </span>
                         </span>
                     )}
 
@@ -515,8 +525,7 @@ export default function ActionsToolbar({
             icon: "fa-duotone fa-regular fa-file-signature",
             label: "Review Offer",
             variant: "btn-success",
-            onClick: () =>
-                router.push(`/portal/applications/${item.id}/offer`),
+            onClick: () => router.push(`/portal/applications/${item.id}/offer`),
         });
     }
 

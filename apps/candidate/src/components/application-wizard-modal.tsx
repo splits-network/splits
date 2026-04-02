@@ -141,6 +141,7 @@ export default function ApplicationWizardModal({
     const tailoredResumeStarted = useRef(false);
     const [tailoredResumeReady, setTailoredResumeReady] = useState(false);
     const [tailoredResumeData, setTailoredResumeData] = useState<any>(null);
+    const [isRerunning, setIsRerunning] = useState(false);
 
     const hasQuestions = questions.length > 0;
     const hasRecruiterChoice = activeRecruiters.length > 1;
@@ -161,6 +162,18 @@ export default function ApplicationWizardModal({
                 if (!token) throw new Error("Authentication required");
 
                 const authClient = createAuthenticatedClient(token);
+
+                // Move existing application to draft so it can transition to ai_review later
+                if (existingApplication?.id && existingApplication.stage !== "draft") {
+                    try {
+                        await authClient.patch(`/applications/${existingApplication.id}`, {
+                            stage: "draft",
+                        });
+                    } catch (err) {
+                        console.warn("Failed to move application to draft:", err);
+                    }
+                }
+
                 const [jobResponse, documentsResponse, recruitersResponse] =
                     await Promise.all([
                         authClient.get<{ data: any }>(
@@ -314,6 +327,7 @@ export default function ApplicationWizardModal({
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
+                        ...(tailoredResumeData ? { resume_data: tailoredResumeData } : {}),
                     },
                 );
                 appId = existingApplication.id;
@@ -324,6 +338,9 @@ export default function ApplicationWizardModal({
                     cover_letter: formData.cover_letter,
                     pre_screen_answers: preScreenAnswers,
                 };
+                if (tailoredResumeData) {
+                    payload.resume_data = tailoredResumeData;
+                }
                 if (formData.candidate_recruiter_id) {
                     payload.candidate_recruiter_id =
                         formData.candidate_recruiter_id;
@@ -523,6 +540,7 @@ export default function ApplicationWizardModal({
                 stage: "submitted",
             });
 
+            onSuccess?.(applicationId);
             onClose();
             router.push(`/portal/applications?applicationId=${applicationId}`);
         } catch (err: any) {
@@ -531,6 +549,53 @@ export default function ApplicationWizardModal({
             setSubmitting(false);
         }
     }, [applicationId, getToken, onClose, router]);
+
+    /* ─── Re-run AI Review (from AI Results step after resume changes) ─── */
+
+    const handleRerunAnalysis = useCallback(async () => {
+        if (!applicationId) return;
+
+        setIsRerunning(true);
+        setError(null);
+
+        try {
+            const token = await getToken();
+            if (!token) throw new Error("Authentication required");
+
+            const authClient = createAuthenticatedClient(token);
+
+            // 1. Regenerate tailored resume with updated Smart Resume data
+            const candidateResponse = await authClient.get("/candidates", {
+                params: { limit: 1 },
+            });
+            const candidateId = candidateResponse.data?.[0]?.id;
+            if (candidateId) {
+                try {
+                    const resumeResponse = await authClient.post(
+                        "/ai-reviews/actions/generate-resume",
+                        { candidate_id: candidateId, job_id: jobId },
+                    );
+                    setTailoredResumeData(resumeResponse.data || resumeResponse);
+                } catch (err) {
+                    console.warn("Tailored resume regeneration failed:", err);
+                }
+            }
+
+            // 2. Save updated tailored resume + re-trigger AI review
+            await authClient.patch(`/applications/${applicationId}`, {
+                stage: "ai_review",
+                ...(tailoredResumeData ? { resume_data: tailoredResumeData } : {}),
+            });
+
+            // 3. Poll for new review
+            await pollForAiReview(applicationId);
+        } catch (err: any) {
+            console.error("Re-run analysis failed:", err);
+            setError(err.message || "Failed to re-run analysis");
+        } finally {
+            setIsRerunning(false);
+        }
+    }, [applicationId, jobId, getToken, pollForAiReview]);
 
     const handleSaveAsDraft = useCallback(async () => {
         setSubmitting(true);
@@ -595,6 +660,7 @@ export default function ApplicationWizardModal({
                 }
             }
 
+            if (appId) onSuccess?.(appId);
             onClose();
             router.push(`/portal/applications?draft=true&application=${appId}`);
         } catch (err: any) {
@@ -733,7 +799,12 @@ export default function ApplicationWizardModal({
                 );
             case "AI Results":
                 return aiReview ? (
-                    <StepAiResults review={aiReview} jobTitle={jobTitle} />
+                    <StepAiResults
+                        review={aiReview}
+                        jobTitle={jobTitle}
+                        onRerunRequested={handleRerunAnalysis}
+                        isRerunning={isRerunning}
+                    />
                 ) : null;
             default:
                 return null;
@@ -802,6 +873,13 @@ export default function ApplicationWizardModal({
 
     /* ─── Custom footer for AI Results step ──────────────────────────── */
 
+    const handleSaveAsDraftFromResults = useCallback(() => {
+        // Application already exists from the Review step — just close and redirect
+        if (applicationId) onSuccess?.(applicationId);
+        onClose();
+        router.push(`/portal/applications?draft=true&application=${applicationId}`);
+    }, [applicationId, onClose, onSuccess, router]);
+
     const aiResultsFooter = isAiResultsStep ? (
         <>
             <div>
@@ -814,7 +892,15 @@ export default function ApplicationWizardModal({
                     Go Back & Improve
                 </button>
             </div>
-            <div>
+            <div className="flex gap-3">
+                <button
+                    onClick={handleSaveAsDraftFromResults}
+                    className="btn btn-ghost"
+                    disabled={submitting}
+                >
+                    <i className="fa-duotone fa-regular fa-floppy-disk" />
+                    Save Draft
+                </button>
                 <button
                     onClick={handleFinalSubmit}
                     className="btn btn-primary"

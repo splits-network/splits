@@ -23,6 +23,8 @@ interface AIReviewData {
 interface StepAiResultsProps {
     review: AIReviewData;
     jobTitle: string;
+    onRerunRequested?: () => void;
+    isRerunning?: boolean;
 }
 
 const RECOMMENDATION_CONFIG = {
@@ -63,8 +65,11 @@ const RECOMMENDATION_CONFIG = {
 export default function StepAiResults({
     review,
     jobTitle,
+    onRerunRequested,
+    isRerunning,
 }: StepAiResultsProps) {
     const config = RECOMMENDATION_CONFIG[review.recommendation];
+    const hasGaps = review.missing_skills.length > 0 || review.concerns.length > 0;
 
     return (
         <div className="space-y-6">
@@ -103,16 +108,65 @@ export default function StepAiResults({
                 </div>
             </div>
 
-            {/* Summary */}
+            {/* Improve your score — edit Smart Resume + re-run */}
+            {hasGaps && onRerunRequested && (
+                <div className="bg-secondary/5 border-l-4 border-secondary p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-file-user text-secondary text-lg mt-0.5" />
+                        <div className="flex-1">
+                            <p className="font-bold text-sm">
+                                Want to improve your score?
+                            </p>
+                            <p className="text-xs text-base-content/50 mt-1 leading-relaxed">
+                                Update your Smart Resume with any missing skills or
+                                experience, then re-run the analysis to see your
+                                updated fit.
+                            </p>
+                            <div className="flex items-center gap-3 mt-3">
+                                <a
+                                    href="/portal/smart-resume"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs" />
+                                    Edit Smart Resume
+                                </a>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={onRerunRequested}
+                                    disabled={isRerunning}
+                                >
+                                    {isRerunning ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-xs" />
+                                            Analyzing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-duotone fa-regular fa-brain-circuit" />
+                                            Re-run Analysis
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Analysis details */}
             <WizardHelpZone
                 title="AI Analysis"
                 description="This analysis compares your Smart Resume against the job requirements, skills, and experience expectations."
                 icon="fa-duotone fa-regular fa-brain-circuit"
                 tips={[
                     "This score is visible only to you — employers see a separate review",
-                    "You can improve your score by updating your Smart Resume",
+                    "Edit your Smart Resume in a new tab, then re-run the analysis",
                     "Even a fair fit can land an interview if your cover letter is strong",
-                    "Go back and adjust your application if you want to improve your chances",
+                    "Only add skills and experience you genuinely have",
                 ]}
             >
                 <div className="space-y-5">
@@ -190,16 +244,14 @@ export default function StepAiResults({
                                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
                                     Matched Skills
                                 </p>
-                                <div className="flex flex-wrap gap-1">
+                                <ul className="space-y-1">
                                     {review.matched_skills.map((skill) => (
-                                        <span
-                                            key={skill}
-                                            className="badge badge-sm bg-success/10 text-success border-success/20 font-semibold"
-                                        >
+                                        <li key={skill} className="flex items-start gap-2 text-sm text-base-content/70">
+                                            <i className="fa-solid fa-check text-success text-xs mt-1 shrink-0" />
                                             {skill}
-                                        </span>
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
                             </div>
                         )}
                         {review.missing_skills.length > 0 && (
@@ -207,16 +259,14 @@ export default function StepAiResults({
                                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
                                     Missing Skills
                                 </p>
-                                <div className="flex flex-wrap gap-1">
+                                <ul className="space-y-1">
                                     {review.missing_skills.map((skill) => (
-                                        <span
-                                            key={skill}
-                                            className="badge badge-sm bg-error/10 text-error border-error/20 font-semibold"
-                                        >
+                                        <li key={skill} className="flex items-start gap-2 text-sm text-base-content/70">
+                                            <i className="fa-solid fa-xmark text-error text-xs mt-1 shrink-0" />
                                             {skill}
-                                        </span>
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
                             </div>
                         )}
                     </div>
@@ -254,8 +304,7 @@ export default function StepAiResults({
                         </p>
                         <p>
                             Click <strong>Submit to Job</strong> to send your application to
-                            the hiring team, or go back to make improvements first. Your
-                            application will be saved as a draft either way.
+                            the hiring team, or save as a draft to come back later.
                         </p>
                     </div>
                 </div>
