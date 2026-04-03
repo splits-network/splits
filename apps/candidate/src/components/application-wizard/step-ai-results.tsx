@@ -2,6 +2,24 @@
 
 import { WizardHelpZone } from "@splits-network/basel-ui";
 
+/** Parse a skill/requirement that may be a string, JSON string, or object */
+function parseTaggedItem(item: any): { name: string; is_required?: boolean } {
+    if (typeof item === "object" && item !== null) {
+        return { name: item.name || item.text || "", is_required: item.is_required };
+    }
+    if (typeof item === "string") {
+        // Try to parse as JSON (AI may return stringified objects)
+        if (item.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(item);
+                return { name: parsed.name || parsed.text || item, is_required: parsed.is_required };
+            } catch { /* not JSON, use as-is */ }
+        }
+        return { name: item };
+    }
+    return { name: String(item) };
+}
+
 interface AIReviewData {
     fit_score: number;
     recommendation: "strong_fit" | "good_fit" | "fair_fit" | "poor_fit";
@@ -9,11 +27,11 @@ interface AIReviewData {
     confidence_level: number;
     strengths: string[];
     concerns: string[];
-    matched_skills: string[];
-    missing_skills: string[];
+    matched_skills: (string | { name: string; is_required: boolean })[];
+    missing_skills: (string | { name: string; is_required: boolean })[];
     skills_match_percentage: number;
-    matched_requirements: string[];
-    missing_requirements: string[];
+    matched_requirements: (string | { text: string; is_required: boolean })[];
+    missing_requirements: (string | { text: string; is_required: boolean })[];
     required_years?: number;
     candidate_years?: number;
     meets_experience_requirement?: boolean;
@@ -245,12 +263,22 @@ export default function StepAiResults({
                                     Matched Skills
                                 </p>
                                 <ul className="space-y-1">
-                                    {review.matched_skills.map((skill) => (
-                                        <li key={skill} className="flex items-start gap-2 text-sm text-base-content/70">
-                                            <i className="fa-solid fa-check text-success text-xs mt-1 shrink-0" />
-                                            {skill}
-                                        </li>
-                                    ))}
+                                    {review.matched_skills.map((skill, i) => {
+                                        const parsed = parseTaggedItem(skill);
+                                        return (
+                                            <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                <i className="fa-solid fa-check text-success text-xs mt-1 shrink-0" />
+                                                <span>
+                                                    {parsed.name}
+                                                    {parsed.is_required != null && (
+                                                        <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                            {parsed.is_required ? "(required)" : "(preferred)"}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             </div>
                         )}
@@ -260,16 +288,82 @@ export default function StepAiResults({
                                     Missing Skills
                                 </p>
                                 <ul className="space-y-1">
-                                    {review.missing_skills.map((skill) => (
-                                        <li key={skill} className="flex items-start gap-2 text-sm text-base-content/70">
-                                            <i className="fa-solid fa-xmark text-error text-xs mt-1 shrink-0" />
-                                            {skill}
-                                        </li>
-                                    ))}
+                                    {review.missing_skills.map((skill, i) => {
+                                        const parsed = parseTaggedItem(skill);
+                                        return (
+                                            <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                <i className="fa-solid fa-xmark text-error text-xs mt-1 shrink-0" />
+                                                <span>
+                                                    {parsed.name}
+                                                    {parsed.is_required != null && (
+                                                        <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                            {parsed.is_required ? "(required)" : "(preferred)"}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             </div>
                         )}
                     </div>
+
+                    {/* Matched vs Missing Requirements */}
+                    {(review.matched_requirements.length > 0 || review.missing_requirements.length > 0) && (
+                        <div className="grid grid-cols-2 gap-4">
+                            {review.matched_requirements.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                        Met Requirements
+                                    </p>
+                                    <ul className="space-y-1">
+                                        {review.matched_requirements.map((req, i) => {
+                                            const parsed = parseTaggedItem(req);
+                                            return (
+                                                <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                    <i className="fa-solid fa-check text-success text-xs mt-1 shrink-0" />
+                                                    <span>
+                                                        {parsed.name}
+                                                        {parsed.is_required != null && (
+                                                            <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                                {parsed.is_required ? "(required)" : "(preferred)"}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            )}
+                            {review.missing_requirements.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                        Unmet Requirements
+                                    </p>
+                                    <ul className="space-y-1">
+                                        {review.missing_requirements.map((req, i) => {
+                                            const parsed = parseTaggedItem(req);
+                                            return (
+                                                <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                    <i className="fa-solid fa-xmark text-error text-xs mt-1 shrink-0" />
+                                                    <span>
+                                                        {parsed.name}
+                                                        {parsed.is_required != null && (
+                                                            <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                                {parsed.is_required ? "(required)" : "(preferred)"}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Experience */}
                     {review.required_years != null && (

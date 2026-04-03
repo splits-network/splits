@@ -99,6 +99,34 @@ const getLocationLabel = (compatibility: string | null) => {
     }
 };
 
+/* ─── Normalizer for tagged items (handles string, JSON string, object) ──── */
+
+function normalizeTaggedItems(items: any[]): string[] {
+    return items.map((item) => {
+        if (typeof item === "string") {
+            if (item.startsWith("{")) {
+                try {
+                    const parsed = JSON.parse(item);
+                    const name = parsed.name || parsed.text || item;
+                    const tag = parsed.is_required != null
+                        ? (parsed.is_required ? " (required)" : " (preferred)")
+                        : "";
+                    return name + tag;
+                } catch { return item; }
+            }
+            return item;
+        }
+        if (typeof item === "object" && item !== null) {
+            const name = item.name || item.text || "";
+            const tag = item.is_required != null
+                ? (item.is_required ? " (required)" : " (preferred)")
+                : "";
+            return name + tag;
+        }
+        return String(item);
+    });
+}
+
 /* ─── Section Header ─────────────────────────────────────────────────────── */
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
@@ -497,7 +525,7 @@ export default function AIReviewPanel({
                                     Matched Skills
                                 </span>
                                 <BaselCheckList
-                                    items={aiReview.matched_skills}
+                                    items={normalizeTaggedItems(aiReview.matched_skills)}
                                     color="success"
                                     icon="fa-duotone fa-regular fa-circle-check"
                                 />
@@ -511,7 +539,7 @@ export default function AIReviewPanel({
                                     Missing Skills
                                 </span>
                                 <BaselCheckList
-                                    items={aiReview.missing_skills}
+                                    items={normalizeTaggedItems(aiReview.missing_skills)}
                                     color="warning"
                                     icon="fa-duotone fa-regular fa-triangle-exclamation"
                                 />
@@ -534,7 +562,7 @@ export default function AIReviewPanel({
                                 Met Requirements
                             </span>
                             <BaselCheckList
-                                items={aiReview.matched_requirements}
+                                items={normalizeTaggedItems(aiReview.matched_requirements)}
                                 color="success"
                                 icon="fa-duotone fa-regular fa-circle-check"
                             />
@@ -547,7 +575,7 @@ export default function AIReviewPanel({
                                 Unmet Requirements
                             </span>
                             <BaselCheckList
-                                items={aiReview.missing_requirements}
+                                items={normalizeTaggedItems(aiReview.missing_requirements)}
                                 color="error"
                                 icon="fa-duotone fa-regular fa-circle-xmark"
                             />

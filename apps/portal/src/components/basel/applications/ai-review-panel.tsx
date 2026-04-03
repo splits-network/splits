@@ -102,6 +102,34 @@ const getLocationLabel = (compatibility: string | null) => {
     }
 };
 
+/* ─── Normalizer for tagged items (handles string, JSON string, object) ──── */
+
+function normalizeTaggedItems(items: any[]): string[] {
+    return items.map((item) => {
+        if (typeof item === "string") {
+            if (item.startsWith("{")) {
+                try {
+                    const parsed = JSON.parse(item);
+                    const name = parsed.name || parsed.text || item;
+                    const tag = parsed.is_required != null
+                        ? (parsed.is_required ? " (required)" : " (preferred)")
+                        : "";
+                    return name + tag;
+                } catch { return item; }
+            }
+            return item;
+        }
+        if (typeof item === "object" && item !== null) {
+            const name = item.name || item.text || "";
+            const tag = item.is_required != null
+                ? (item.is_required ? " (required)" : " (preferred)")
+                : "";
+            return name + tag;
+        }
+        return String(item);
+    });
+}
+
 /* ─── Section Header ─────────────────────────────────────────────────────── */
 
 function SectionHeader({
@@ -472,7 +500,8 @@ export default function AIReviewPanel({
 
     const fitColor = getScoreColor(aiReview.fit_score);
     const confColor = getScoreColor(aiReview.confidence_level);
-    const skillsColor = getScoreColor(aiReview.skills_match?.match_percentage);
+    const skillsMatchPct = aiReview.skills_match?.match_percentage ?? aiReview.skills_match_percentage ?? null;
+    const skillsColor = getScoreColor(skillsMatchPct);
 
     return (
         <div className="space-y-6">
@@ -551,11 +580,10 @@ export default function AIReviewPanel({
                     <div
                         className={`text-3xl font-black ${semanticText[skillsColor]}`}
                     >
-                        {aiReview.skills_match?.match_percentage || "N/A"}%
+                        {skillsMatchPct != null ? `${Math.round(skillsMatchPct)}%` : "N/A"}
                     </div>
                     <div className="text-sm uppercase tracking-wider text-base-content/40 mt-1">
                         Skills Match
-                        {aiReview.skills_match?.match_percentage}
                     </div>
                 </div>
             </div>
@@ -606,41 +634,44 @@ export default function AIReviewPanel({
             )}
 
             {/* Skills Analysis */}
-            {aiReview.skills_match?.match_percentage !== null && (
-                <div className="bg-base-100 border-l-4 border-primary p-5 shadow-sm">
-                    <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-4">
-                        Skills Analysis
-                    </h4>
+            {(() => {
+                const matchedSkills = aiReview.skills_match?.matched_skills || aiReview.matched_skills || [];
+                const missingSkills = aiReview.skills_match?.missing_skills || aiReview.missing_skills || [];
+                if (!matchedSkills.length && !missingSkills.length) return null;
+                return (
+                    <div className="bg-base-100 border-l-4 border-primary p-5 shadow-sm">
+                        <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-base-content/50 mb-4">
+                            Skills Analysis
+                        </h4>
 
-                    {aiReview.skills_match?.matched_skills &&
-                        aiReview.skills_match.matched_skills.length > 0 && (
+                        {matchedSkills.length > 0 && (
                             <div className="mb-4">
                                 <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Matched Skills
                                 </span>
                                 <BaselCheckList
-                                    items={aiReview.skills_match.matched_skills}
+                                    items={normalizeTaggedItems(matchedSkills)}
                                     color="success"
                                     icon="fa-duotone fa-regular fa-circle-check"
                                 />
                             </div>
                         )}
 
-                    {aiReview.skills_match?.missing_skills &&
-                        aiReview.skills_match.missing_skills.length > 0 && (
+                        {missingSkills.length > 0 && (
                             <div>
                                 <span className="text-sm font-bold uppercase tracking-wider text-base-content/40">
                                     Missing Skills
                                 </span>
                                 <BaselCheckList
-                                    items={aiReview.skills_match.missing_skills}
+                                    items={normalizeTaggedItems(missingSkills)}
                                     color="warning"
                                     icon="fa-duotone fa-regular fa-triangle-exclamation"
                                 />
                             </div>
                         )}
-                </div>
-            )}
+                    </div>
+                );
+            })()}
 
             {/* Requirements Analysis */}
             {((aiReview.matched_requirements && aiReview.matched_requirements.length > 0) ||
@@ -656,7 +687,7 @@ export default function AIReviewPanel({
                                 Met Requirements
                             </span>
                             <BaselCheckList
-                                items={aiReview.matched_requirements}
+                                items={normalizeTaggedItems(aiReview.matched_requirements)}
                                 color="success"
                                 icon="fa-duotone fa-regular fa-circle-check"
                             />
@@ -669,7 +700,7 @@ export default function AIReviewPanel({
                                 Unmet Requirements
                             </span>
                             <BaselCheckList
-                                items={aiReview.missing_requirements}
+                                items={normalizeTaggedItems(aiReview.missing_requirements)}
                                 color="error"
                                 icon="fa-duotone fa-regular fa-circle-xmark"
                             />
@@ -680,34 +711,29 @@ export default function AIReviewPanel({
 
             {/* Experience & Location */}
             <div className="grid grid-cols-2 gap-4">
-                {aiReview.experience_analysis?.candidate_years != null &&
-                    aiReview.experience_analysis?.required_years != null && (
+                {(() => {
+                    const candYears = aiReview.experience_analysis?.candidate_years ?? aiReview.candidate_years;
+                    const reqYears = aiReview.experience_analysis?.required_years ?? aiReview.required_years;
+                    const meetsExp = aiReview.experience_analysis?.meets_requirement ?? aiReview.meets_experience_requirement;
+                    if (candYears == null || reqYears == null) return null;
+                    return (
                         <div className="bg-base-100 border-t-4 border-warning p-5 shadow-sm text-center">
                             <h4 className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-3">
                                 Experience
                             </h4>
                             <div className="flex items-center justify-center gap-2">
-                                {aiReview.experience_analysis
-                                    ?.meets_requirement ? (
+                                {meetsExp ? (
                                     <i className="fa-duotone fa-regular fa-circle-check text-success text-xl" />
                                 ) : (
                                     <i className="fa-duotone fa-regular fa-circle-xmark text-warning text-xl" />
                                 )}
                                 <span className="text-sm font-bold text-base-content">
-                                    {
-                                        aiReview.experience_analysis
-                                            .candidate_years
-                                    }{" "}
-                                    yrs (Req:{" "}
-                                    {
-                                        aiReview.experience_analysis
-                                            .required_years
-                                    }
-                                    )
+                                    {candYears} yrs (Req: {reqYears})
                                 </span>
                             </div>
                         </div>
-                    )}
+                    );
+                })()}
 
                 <div className="bg-base-100 border-t-4 border-accent p-5 shadow-sm text-center">
                     <h4 className="text-sm font-bold uppercase tracking-wider text-base-content/40 mb-3">

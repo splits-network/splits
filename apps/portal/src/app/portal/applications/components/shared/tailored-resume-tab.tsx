@@ -272,6 +272,31 @@ function checkPage(ctx: PdfContext, needed: number) {
     }
 }
 
+/** Parse a tagged item (string, JSON string, or object) for PDF rendering */
+function parseItem(s: any): { name: string; tag: string } {
+    if (typeof s === "string") {
+        if (s.startsWith("{")) {
+            try {
+                const obj = JSON.parse(s);
+                const name = obj.name || obj.text || s;
+                const tag = obj.is_required != null
+                    ? (obj.is_required ? " [Required]" : " [Preferred]")
+                    : "";
+                return { name, tag };
+            } catch { return { name: s, tag: "" }; }
+        }
+        return { name: s, tag: "" };
+    }
+    if (typeof s === "object" && s !== null) {
+        const name = s.name || s.text || String(s);
+        const tag = s.is_required != null
+            ? (s.is_required ? " [Required]" : " [Preferred]")
+            : "";
+        return { name, tag };
+    }
+    return { name: String(s), tag: "" };
+}
+
 function pdfHeading(ctx: PdfContext, text: string) {
     checkPage(ctx, 10);
     ctx.doc.setFont("helvetica", "bold");
@@ -674,6 +699,11 @@ async function buildFullPdf(resumeData: any, candidate: any, aiReview: any, jobT
             const skillColW = (ctx.contentWidth - 4) / 2;
             const skillStartY = ctx.y;
 
+            const skillLabel = (s: any): string => {
+                const { name, tag } = parseItem(s);
+                return name + tag;
+            };
+
             // Matched (left)
             let mY = skillStartY;
             if (matchedSkills.length) {
@@ -682,10 +712,12 @@ async function buildFullPdf(resumeData: any, candidate: any, aiReview: any, jobT
                 doc.setTextColor(...C.muted);
                 doc.text("MATCHED SKILLS", ctx.margin, mY);
                 mY += 4;
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(9);
                 for (const s of matchedSkills) {
-                    const sLines = doc.splitTextToSize(s, skillColW - 8);
+                    const label = skillLabel(s);
+                    const isReq = typeof s === "object" && s.is_required;
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    const sLines = doc.splitTextToSize(label, skillColW - 8);
                     doc.setTextColor(...C.success);
                     doc.text("\u2713", ctx.margin, mY);
                     doc.setTextColor(60);
@@ -705,10 +737,11 @@ async function buildFullPdf(resumeData: any, candidate: any, aiReview: any, jobT
                 doc.setTextColor(...C.muted);
                 doc.text("MISSING SKILLS", msX, msY);
                 msY += 4;
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(9);
                 for (const s of missingSkills) {
-                    const sLines = doc.splitTextToSize(s, skillColW - 8);
+                    const label = skillLabel(s);
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(9);
+                    const sLines = doc.splitTextToSize(label, skillColW - 8);
                     doc.setTextColor(...C.warning);
                     doc.text("\u2013", msX, msY);
                     doc.setTextColor(60);
@@ -735,6 +768,11 @@ async function buildFullPdf(resumeData: any, candidate: any, aiReview: any, jobT
             doc.text("REQUIREMENTS ANALYSIS", ctx.margin + 4, ctx.y + 1);
             ctx.y += 6;
 
+            const reqLabel = (r: any): string => {
+                const { name, tag } = parseItem(r);
+                return name + tag;
+            };
+
             if (matchedReqs.length) {
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(7);
@@ -745,7 +783,7 @@ async function buildFullPdf(resumeData: any, candidate: any, aiReview: any, jobT
                 doc.setFontSize(9);
                 for (const r of matchedReqs) {
                     checkPage(ctx, 5);
-                    const rLines = doc.splitTextToSize(r, ctx.contentWidth - 8);
+                    const rLines = doc.splitTextToSize(reqLabel(r), ctx.contentWidth - 8);
                     doc.setTextColor(...C.success);
                     doc.text("\u2713", ctx.margin, ctx.y);
                     doc.setTextColor(60);
@@ -767,7 +805,7 @@ async function buildFullPdf(resumeData: any, candidate: any, aiReview: any, jobT
                 doc.setFontSize(9);
                 for (const r of missingReqs) {
                     checkPage(ctx, 5);
-                    const rLines = doc.splitTextToSize(r, ctx.contentWidth - 8);
+                    const rLines = doc.splitTextToSize(reqLabel(r), ctx.contentWidth - 8);
                     doc.setTextColor(...C.error);
                     doc.text("\u2717", ctx.margin, ctx.y);
                     doc.setTextColor(60);
