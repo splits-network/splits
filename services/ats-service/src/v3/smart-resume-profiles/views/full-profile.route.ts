@@ -30,7 +30,11 @@ export function registerFullProfileView(app: FastifyInstance, supabase: Supabase
     }
 
     const context = await accessResolver.resolve(clerkUserId);
-    if (!context.isPlatformAdmin && !context.recruiterId && !context.candidateId) {
+    const hasAccess = context.isPlatformAdmin
+      || context.recruiterId
+      || context.candidateId
+      || context.roles.some(r => ['company_admin', 'hiring_manager'].includes(r));
+    if (!hasAccess) {
       throw new ForbiddenError('Insufficient permissions');
     }
 

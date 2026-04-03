@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import ActionsToolbar from "./actions-toolbar";
-import { BaselBadge, getStageDisplay } from "@splits-network/basel-ui";
+import {
+    BaselBadge,
+    BaselModal,
+    BaselModalBody,
+    getStageDisplay,
+} from "@splits-network/basel-ui";
+import { ModalPortal } from "@splits-network/shared-ui";
+import { DetailLoader as CandidateDetailLoader } from "@/app/portal/candidates/components/shared/candidate-detail";
+import { DetailLoader as JobDetailLoader } from "@/app/portal/roles/components/shared/job-detail";
 import { formatApplicationDate } from "../../types";
 import type { Application } from "../../types";
 
@@ -26,6 +34,8 @@ export function ApplicationDetailHeader({
     onClose,
     onRefresh,
 }: ApplicationDetailHeaderProps) {
+    const [showFullProfile, setShowFullProfile] = useState(false);
+    const [showFullBrief, setShowFullBrief] = useState(false);
     const candidate = application.candidate;
     const job = application.job;
     const stageOpts = {
@@ -199,6 +209,30 @@ export function ApplicationDetailHeader({
                         onRefresh={onRefresh}
                     />
                 </div>
+                <div className="my-6">
+                    <div className="flex gap-2">
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-soft btn-primary"
+                            onClick={() => setShowFullProfile(true)}
+                            disabled={!candidate?.id}
+                        >
+                            <i className="fa-duotone fa-regular fa-user" />
+                            View Candidate Profile
+                        </button>
+                        {job && (
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-soft btn-primary"
+                                onClick={() => setShowFullBrief(true)}
+                                disabled={!job.id}
+                            >
+                                <i className="fa-duotone fa-regular fa-briefcase" />
+                                View Role Details
+                            </button>
+                        )}
+                    </div>
+                </div>
 
                 {/* Stats strip */}
                 <div
@@ -229,6 +263,42 @@ export function ApplicationDetailHeader({
                     ))}
                 </div>
             </div>
+
+            {showFullProfile && candidate?.id && (
+                <ModalPortal>
+                    <BaselModal
+                        isOpen
+                        onClose={() => setShowFullProfile(false)}
+                        maxWidth="max-w-5xl"
+                        className="h-[90vh]"
+                    >
+                        <BaselModalBody padding="p-0" scrollable>
+                            <CandidateDetailLoader
+                                candidateId={candidate.id}
+                                onClose={() => setShowFullProfile(false)}
+                            />
+                        </BaselModalBody>
+                    </BaselModal>
+                </ModalPortal>
+            )}
+
+            {showFullBrief && job?.id && (
+                <ModalPortal>
+                    <BaselModal
+                        isOpen
+                        onClose={() => setShowFullBrief(false)}
+                        maxWidth="max-w-5xl"
+                        className="h-[90vh]"
+                    >
+                        <BaselModalBody padding="p-0" scrollable>
+                            <JobDetailLoader
+                                jobId={job.id}
+                                onClose={() => setShowFullBrief(false)}
+                            />
+                        </BaselModalBody>
+                    </BaselModal>
+                </ModalPortal>
+            )}
         </header>
     );
 }

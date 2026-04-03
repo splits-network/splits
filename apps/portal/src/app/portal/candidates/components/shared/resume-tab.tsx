@@ -1,6 +1,9 @@
 "use client";
 
-import type { Candidate, ResumeMetadata } from "../../types";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import type { Candidate } from "../../types";
 
 /* ─── Helpers ──────────────────────────────────────────────────────────── */
 
@@ -28,16 +31,6 @@ function proficiencyWidth(p?: string): string {
     }
 }
 
-function degreeLabel(d?: string): string {
-    switch (d) {
-        case "doctorate": return "Doctorate";
-        case "masters": return "Master's";
-        case "bachelors": return "Bachelor's";
-        case "associates": return "Associate's";
-        default: return d || "";
-    }
-}
-
 /* ─── Section Label ────────────────────────────────────────────────────── */
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -48,87 +41,94 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     );
 }
 
-/* ─── Empty State ──────────────────────────────────────────────────────── */
-
-function EmptyResume() {
-    return (
-        <div className="h-full flex items-center justify-center p-12">
-            <div className="text-center">
-                <i className="fa-duotone fa-regular fa-file-user text-3xl text-base-content/20 mb-4 block" />
-                <h3 className="text-lg font-black tracking-tight mb-2">
-                    No Resume on File
-                </h3>
-                <p className="text-sm text-base-content/40">
-                    No resume data has been extracted for this candidate yet.
-                </p>
-            </div>
-        </div>
-    );
-}
-
 /* ─── Resume Tab ───────────────────────────────────────────────────────── */
 
 export function ResumeTab({ candidate }: { candidate: Candidate }) {
-    const r = candidate.resume_metadata as ResumeMetadata | undefined;
+    const { getToken } = useAuth();
+    const [profile, setProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
-    if (!r) return <EmptyResume />;
+    useEffect(() => {
+        loadSmartResume();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [candidate.id]);
 
-    const hasExperience = r.experience && r.experience.length > 0;
-    const hasEducation = r.education && r.education.length > 0;
-    const hasSkills = r.skills && r.skills.length > 0;
-    const hasCerts = r.certifications && r.certifications.length > 0;
+    const loadSmartResume = async () => {
+        try {
+            setLoading(true);
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            const result = await client.get(
+                "/smart-resume-profiles/views/matching-data",
+                { params: { candidate_id: candidate.id } },
+            );
+            setProfile(result.data);
+        } catch (err) {
+            console.error("Failed to load smart resume:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center p-12">
+                <span className="loading loading-spinner loading-lg" />
+            </div>
+        );
+    }
+
+    if (!profile) {
+        return (
+            <div className="h-full flex items-center justify-center p-12">
+                <div className="text-center">
+                    <i className="fa-duotone fa-regular fa-file-user text-3xl text-base-content/20 mb-4 block" />
+                    <h3 className="text-lg font-black tracking-tight mb-2">
+                        No Smart Resume
+                    </h3>
+                    <p className="text-sm text-base-content/40">
+                        This candidate hasn't created a Smart Resume yet.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    const experiences = profile.experiences || [];
+    const education = profile.education || [];
+    const skills = profile.skills || [];
+    const certifications = profile.certifications || [];
+    const projects = profile.projects || [];
+    const publications = profile.publications || [];
 
     // Group skills by category
-    const skillsByCategory = hasSkills
-        ? r.skills.reduce<Record<string, typeof r.skills>>((acc, s) => {
-              const cat = s.category || "Other";
+    const skillsByCategory = skills.length > 0
+        ? skills.reduce((acc: Record<string, any[]>, s: any) => {
+              const cat = s.category || "other";
               (acc[cat] ??= []).push(s);
               return acc;
-          }, {})
+          }, {} as Record<string, any[]>)
         : {};
 
     return (
         <div className="space-y-8 p-6">
-            {/* Summary stats row */}
-            {(r.total_years_experience || r.highest_degree || r.skills_count) && (
-                <div className="grid grid-cols-3 gap-[2px] bg-base-300">
-                    {r.total_years_experience != null && (
-                        <div className="bg-base-100 p-4 text-center">
-                            <p className="text-2xl font-black tracking-tight">{r.total_years_experience}</p>
-                            <p className="text-sm uppercase tracking-[0.15em] text-base-content/40">Years Exp.</p>
-                        </div>
-                    )}
-                    {r.highest_degree && (
-                        <div className="bg-base-100 p-4 text-center">
-                            <p className="text-2xl font-black tracking-tight">{degreeLabel(r.highest_degree)}</p>
-                            <p className="text-sm uppercase tracking-[0.15em] text-base-content/40">Highest Degree</p>
-                        </div>
-                    )}
-                    {r.skills_count != null && (
-                        <div className="bg-base-100 p-4 text-center">
-                            <p className="text-2xl font-black tracking-tight">{r.skills_count}</p>
-                            <p className="text-sm uppercase tracking-[0.15em] text-base-content/40">Skills</p>
-                        </div>
-                    )}
-                </div>
-            )}
-
             {/* Professional Summary */}
-            {r.professional_summary && (
+            {profile.professional_summary && (
                 <div className="border-l-4 border-l-primary pl-6">
                     <SectionLabel>Professional Summary</SectionLabel>
                     <p className="text-sm text-base-content/70 leading-relaxed whitespace-pre-line">
-                        {r.professional_summary}
+                        {profile.professional_summary}
                     </p>
                 </div>
             )}
 
             {/* Experience */}
-            {hasExperience && (
+            {experiences.length > 0 && (
                 <div>
                     <SectionLabel>Experience</SectionLabel>
                     <div className="space-y-[2px] bg-base-300">
-                        {r.experience.map((exp, i) => (
+                        {experiences.map((exp: any, i: number) => (
                             <div key={i} className="bg-base-100 p-4">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
@@ -147,11 +147,11 @@ export function ResumeTab({ candidate }: { candidate: Candidate }) {
                                         {exp.description}
                                     </p>
                                 )}
-                                {exp.highlights && exp.highlights.length > 0 && (
+                                {exp.achievements && exp.achievements.length > 0 && (
                                     <ul className="mt-2 space-y-1">
-                                        {exp.highlights.map((h, j) => (
+                                        {exp.achievements.map((a: string, j: number) => (
                                             <li key={j} className="text-sm text-base-content/60 pl-4 relative before:content-['·'] before:absolute before:left-0 before:text-base-content/30 before:font-bold">
-                                                {h}
+                                                {a}
                                             </li>
                                         ))}
                                     </ul>
@@ -162,12 +162,38 @@ export function ResumeTab({ candidate }: { candidate: Candidate }) {
                 </div>
             )}
 
+            {/* Projects */}
+            {projects.length > 0 && (
+                <div>
+                    <SectionLabel>Projects</SectionLabel>
+                    <div className="space-y-[2px] bg-base-300">
+                        {projects.map((proj: any, i: number) => (
+                            <div key={i} className="bg-base-100 p-4">
+                                <h4 className="font-bold text-sm tracking-tight">{proj.name}</h4>
+                                {proj.description && (
+                                    <p className="text-sm text-base-content/60 mt-1">{proj.description}</p>
+                                )}
+                                {proj.skills_used && proj.skills_used.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {proj.skills_used.map((s: string, j: number) => (
+                                            <span key={j} className="text-xs px-2 py-0.5 bg-secondary/10 text-secondary">
+                                                {s}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Education */}
-            {hasEducation && (
+            {education.length > 0 && (
                 <div>
                     <SectionLabel>Education</SectionLabel>
                     <div className="space-y-[2px] bg-base-300">
-                        {r.education.map((edu, i) => (
+                        {education.map((edu: any, i: number) => (
                             <div key={i} className="bg-base-100 p-4">
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
@@ -190,29 +216,20 @@ export function ResumeTab({ candidate }: { candidate: Candidate }) {
             )}
 
             {/* Skills by Category */}
-            {hasSkills && (
+            {skills.length > 0 && (
                 <div>
                     <SectionLabel>Skills</SectionLabel>
                     <div className="space-y-4">
-                        {Object.entries(skillsByCategory).map(([category, skills]) => (
+                        {Object.entries(skillsByCategory).map(([category, catSkills]) => (
                             <div key={category}>
-                                <p className="text-sm font-bold text-base-content/50 capitalize mb-2">
+                                <p className="text-sm font-bold text-base-content/50 mb-2">
                                     {category.replace(/_/g, " ")}
                                 </p>
-                                <div className="space-y-1.5">
-                                    {skills.map((skill, i) => (
-                                        <div key={i} className="flex items-center gap-3">
-                                            <span className="text-sm font-semibold w-32 shrink-0 truncate">{skill.name}</span>
-                                            <div className="flex-1 bg-base-300 h-1.5">
-                                                <div className={`h-full bg-primary ${proficiencyWidth(skill.proficiency)}`} />
-                                            </div>
-                                            {skill.proficiency && (
-                                                <span className="text-sm text-base-content/40 capitalize w-24 shrink-0">{skill.proficiency}</span>
-                                            )}
-                                            {skill.years_used != null && (
-                                                <span className="text-sm text-base-content/40 shrink-0">{skill.years_used}y</span>
-                                            )}
-                                        </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {(catSkills as any[]).map((skill: any, i: number) => (
+                                        <span key={i} className="badge badge-sm badge-soft badge-primary normal-case">
+                                            {skill.name}
+                                        </span>
                                     ))}
                                 </div>
                             </div>
@@ -222,11 +239,11 @@ export function ResumeTab({ candidate }: { candidate: Candidate }) {
             )}
 
             {/* Certifications */}
-            {hasCerts && (
+            {certifications.length > 0 && (
                 <div>
                     <SectionLabel>Certifications</SectionLabel>
                     <div className="space-y-[2px] bg-base-300">
-                        {r.certifications.map((cert, i) => (
+                        {certifications.map((cert: any, i: number) => (
                             <div key={i} className="bg-base-100 p-4 flex items-center justify-between gap-3">
                                 <div>
                                     <h4 className="font-bold text-sm tracking-tight">{cert.name}</h4>
@@ -236,7 +253,6 @@ export function ResumeTab({ candidate }: { candidate: Candidate }) {
                                 </div>
                                 <span className="text-sm text-base-content/40 whitespace-nowrap shrink-0">
                                     {cert.date_obtained && formatDateRange(cert.date_obtained)}
-                                    {cert.expiry_date && ` — Exp. ${formatDateRange(cert.expiry_date)}`}
                                 </span>
                             </div>
                         ))}
@@ -244,15 +260,22 @@ export function ResumeTab({ candidate }: { candidate: Candidate }) {
                 </div>
             )}
 
-            {/* Extraction metadata footer */}
-            <div className="border-t border-base-300 pt-4">
-                <p className="text-sm text-base-content/30">
-                    Extracted {new Date(r.extracted_at).toLocaleDateString()}
-                    {r.extraction_confidence != null && (
-                        <span> · {Math.round(r.extraction_confidence * 100)}% confidence</span>
-                    )}
-                </p>
-            </div>
+            {/* Publications */}
+            {publications.length > 0 && (
+                <div>
+                    <SectionLabel>Publications</SectionLabel>
+                    <div className="space-y-[2px] bg-base-300">
+                        {publications.map((pub: any, i: number) => (
+                            <div key={i} className="bg-base-100 p-4">
+                                <h4 className="font-bold text-sm tracking-tight">{pub.title}</h4>
+                                {pub.description && (
+                                    <p className="text-sm text-base-content/60 mt-0.5">{pub.description}</p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

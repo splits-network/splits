@@ -4,8 +4,6 @@ import { useState } from "react";
 import { BaselTabBar } from "@splits-network/basel-ui";
 import { ApplicationDetailHeader } from "./application-detail-header";
 import { ApplicationOverviewTab } from "./application-overview-tab";
-import { ApplicationCandidateDetail } from "./application-candidate-detail";
-import { ApplicationRoleDetail } from "./application-role-detail";
 import { TailoredResumeTab } from "./tailored-resume-tab";
 import { ApplicationDocumentsTab } from "./application-documents-tab";
 import AIReviewPanel from "@/components/basel/applications/ai-review-panel";
@@ -17,8 +15,6 @@ import type { Application } from "../../types";
 
 type TabKey =
     | "overview"
-    | "candidate"
-    | "job"
     | "resume"
     | "documents"
     | "ai_review"
@@ -28,11 +24,11 @@ type TabKey =
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
     { key: "overview", label: "Overview", icon: "fa-clipboard" },
-    { key: "candidate", label: "Candidate", icon: "fa-user" },
-    { key: "job", label: "Role", icon: "fa-briefcase" },
-    { key: "resume", label: "Smart Resume", icon: "fa-file-user" },
-    { key: "documents", label: "Documents", icon: "fa-file" },
     { key: "ai_review", label: "AI Analysis", icon: "fa-brain" },
+    { key: "resume", label: "Smart Resume", icon: "fa-file-user" },
+    // { key: "candidate", label: "Candidate", icon: "fa-user" },
+    // { key: "job", label: "Role", icon: "fa-briefcase" },
+    { key: "documents", label: "Documents", icon: "fa-file" },
     { key: "calls", label: "Calls", icon: "fa-phone" },
     { key: "notes", label: "Notes", icon: "fa-comments" },
     { key: "timeline", label: "Timeline", icon: "fa-timeline" },
@@ -90,30 +86,15 @@ export function ApplicationDetailPanel({
                 {activeTab === "overview" && (
                     <ApplicationOverviewTab application={application} />
                 )}
-                {activeTab === "candidate" &&
-                    (application.candidate ? (
-                        <ApplicationCandidateDetail
-                            candidate={application.candidate as any}
-                        />
-                    ) : (
-                        <EmptyState
-                            icon="fa-user"
-                            message="No candidate data on file for this application."
-                        />
-                    ))}
-                {activeTab === "job" &&
-                    (application.job ? (
-                        <ApplicationRoleDetail job={application.job as any} />
-                    ) : (
-                        <EmptyState
-                            icon="fa-briefcase"
-                            message="No role data on file for this application."
-                        />
-                    ))}
                 {activeTab === "resume" && (
                     <TailoredResumeTab
-                        candidateId={(application as any).candidate_id || application.candidate?.id}
-                        jobId={(application as any).job_id || application.job?.id}
+                        candidateId={
+                            (application as any).candidate_id ||
+                            application.candidate?.id
+                        }
+                        jobId={
+                            (application as any).job_id || application.job?.id
+                        }
                         applicationId={application.id}
                         resumeData={(application as any).resume_data}
                         candidate={application.candidate}
@@ -142,15 +123,6 @@ export function ApplicationDetailPanel({
                     />
                 )}
             </div>
-        </div>
-    );
-}
-
-function EmptyState({ icon, message }: { icon: string; message: string }) {
-    return (
-        <div className="text-center p-8 text-base-content/50">
-            <i className={`fa-duotone ${icon} text-4xl mb-2 block`} />
-            <p>{message}</p>
         </div>
     );
 }
