@@ -3,12 +3,11 @@
 /**
  * Full-Page Onboarding Wizard (Basel Edition — Candidate)
  *
- * Split-screen layout matching the SSO callback design language:
+ * Streamlined 3-step flow: Welcome → Import Smart Resume → All Set.
+ *
+ * Split-screen layout:
  * - Left panel (light): step content, navigation
  * - Right panel (dark): branding, vertical step progress, testimonial
- *
- * Covers the root Header/Footer via fixed positioning.
- * GSAP entrance animation on mount.
  */
 
 import { useRef } from "react";
@@ -19,25 +18,15 @@ import { SplashLoading } from "@splits-network/shared-ui";
 
 // Steps
 import { WelcomeStep } from "./steps/welcome-step";
-import { ContactStep } from "./steps/contact-step";
 import { ResumeStep } from "./steps/resume-step";
-import { PreferencesStep } from "./steps/preferences-step";
-import { ReviewStep } from "./steps/review-step";
 import { SuccessStep } from "./steps/success-step";
 
 /* ─── Step Definitions ──────────────────────────────────────────────────── */
 
 const CANDIDATE_STEPS = [
     { id: 1, label: "Welcome", icon: "fa-duotone fa-regular fa-hand-wave" },
-    { id: 2, label: "Your Profile", icon: "fa-duotone fa-regular fa-user" },
-    { id: 3, label: "Resume", icon: "fa-duotone fa-regular fa-file-lines" },
-    { id: 4, label: "Preferences", icon: "fa-duotone fa-regular fa-sliders" },
-    {
-        id: 5,
-        label: "Review",
-        icon: "fa-duotone fa-regular fa-clipboard-check",
-    },
-    { id: 6, label: "All Set", icon: "fa-duotone fa-regular fa-rocket" },
+    { id: 2, label: "Smart Resume", icon: "fa-duotone fa-regular fa-file-user" },
+    { id: 3, label: "All Set", icon: "fa-duotone fa-regular fa-rocket" },
 ];
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
@@ -57,12 +46,10 @@ export function OnboardingPage() {
         handleSignOut,
     } = useOnboarding({ redirectUrl: redirectUrl || undefined });
 
-    // Map currentStep to index in the step list
     const activeStepIndex = CANDIDATE_STEPS.findIndex(
         (s) => s.id === state.currentStep,
     );
 
-    // ── Entrance animation via scroll-reveal ──
     useScrollReveal(mainRef);
 
     // ── Loading state ──
@@ -153,38 +140,16 @@ export function OnboardingPage() {
                             </div>
                         )}
 
-                        {/* Skip button (steps 1-4 only) */}
-                        {state.currentStep <= 4 && (
-                            <div className="flex justify-end mb-4">
-                                <button
-                                    className="btn btn-ghost btn-sm text-base-content/40"
-                                    onClick={() => actions.skipOnboarding()}
-                                    disabled={state.submitting}
-                                >
-                                    Skip for now
-                                    <i className="fa-solid fa-forward text-xs" />
-                                </button>
-                            </div>
-                        )}
-
                         {state.currentStep === 1 && (
                             <WelcomeStep state={state} actions={actions} />
                         )}
                         {state.currentStep === 2 && (
-                            <ContactStep state={state} actions={actions} />
-                        )}
-                        {state.currentStep === 3 && (
                             <ResumeStep state={state} actions={actions} />
                         )}
-                        {state.currentStep === 4 && (
-                            <PreferencesStep state={state} actions={actions} />
-                        )}
-                        {state.currentStep === 5 && (
-                            <ReviewStep state={state} actions={actions} />
-                        )}
-                        {state.currentStep === 6 && (
+                        {state.currentStep === 3 && (
                             <SuccessStep
                                 redirectUrl={redirectUrl || undefined}
+                                hasSmartResume={state.profileData.resumeUploaded}
                             />
                         )}
                     </div>

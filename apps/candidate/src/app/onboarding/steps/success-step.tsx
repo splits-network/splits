@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Step 6: Success (Basel Edition)
- * Celebration screen with stats and quick actions.
+ * Step 3: All Set
+ * Celebration screen with quick actions focused on Smart Resume.
  * Auto-redirects to dashboard after 15 seconds.
  */
 
@@ -26,7 +26,7 @@ const STATS = [
     },
 ];
 
-function getQuickActions(redirectUrl?: string) {
+function getQuickActions(redirectUrl?: string, hasSmartResume?: boolean) {
     const actions = [];
 
     if (redirectUrl) {
@@ -45,33 +45,40 @@ function getQuickActions(redirectUrl?: string) {
         });
     }
 
-    actions.push(
-        {
-            label: "Complete Your Profile",
-            icon: "fa-duotone fa-regular fa-user-pen",
-            href: "/portal/profile",
+    if (hasSmartResume) {
+        actions.push({
+            label: "Review Your Smart Resume",
+            icon: "fa-duotone fa-regular fa-file-user",
+            href: "/portal/smart-resume",
             color: "btn-secondary",
-        },
-        {
-            label: "View Your Dashboard",
-            icon: "fa-duotone fa-regular fa-gauge-high",
-            href: "/portal/dashboard",
-            color: "btn-accent",
-        },
-    );
+        });
+    } else {
+        actions.push({
+            label: "Build Your Smart Resume",
+            icon: "fa-duotone fa-regular fa-file-user",
+            href: "/portal/smart-resume",
+            color: "btn-secondary",
+        });
+    }
+
+    actions.push({
+        label: "View Your Dashboard",
+        icon: "fa-duotone fa-regular fa-gauge-high",
+        href: "/portal/dashboard",
+        color: "btn-accent",
+    });
 
     return actions;
 }
 
 interface SuccessStepProps {
     redirectUrl?: string;
+    hasSmartResume?: boolean;
 }
 
-export function SuccessStep({ redirectUrl }: SuccessStepProps) {
+export function SuccessStep({ redirectUrl, hasSmartResume }: SuccessStepProps) {
     const destination = redirectUrl || "/portal/dashboard";
 
-    // Auto-redirect after 15 seconds
-    // Hard navigation forces fresh profile fetch
     useEffect(() => {
         const timer = setTimeout(() => {
             window.location.href = destination;
@@ -113,7 +120,7 @@ export function SuccessStep({ redirectUrl }: SuccessStepProps) {
 
             {/* Quick Actions */}
             <div className="flex flex-col gap-3 max-w-xs mx-auto">
-                {getQuickActions(redirectUrl).map((action) => (
+                {getQuickActions(redirectUrl, hasSmartResume).map((action) => (
                     <button
                         key={action.label}
                         onClick={() => {

@@ -3,19 +3,15 @@
 /**
  * Full-Page Onboarding State Hook (Candidate)
  *
- * Adapted from portal's use-onboarding.ts — same persistence pattern,
- * but simplified for candidates (no role selection, no Stripe).
- *
- * State is persisted to onboarding_metadata JSONB on every step navigation,
- * so users can close the browser and resume exactly where they left off.
+ * Streamlined for the 3-step flow: Welcome → Import Smart Resume → All Set.
+ * State is persisted to onboarding_metadata JSONB on every step navigation.
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser, useAuth, useClerk } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
-import type { CandidateData, UserData } from "@/lib/user-registration";
-import { buildCandidatePayload } from "@/lib/onboarding-actions";
+import type { UserData } from "@/lib/user-registration";
 import type {
     CandidateOnboardingState,
     CandidateOnboardingActions,
@@ -61,7 +57,6 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
     const [initMessage, setInitMessage] = useState("Loading your profile...");
     const [persisting, setPersisting] = useState(false);
 
-    // Ref to hold latest state for persistence (avoids stale closures)
     const stateRef = useRef(state);
     stateRef.current = state;
 
@@ -69,9 +64,6 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
     useEffect(() => {
         if (!user || profileLoading) return;
 
-        // Active flag prevents Strict Mode double-execution race condition.
-        // When React unmounts+remounts in dev, the first init's cleanup sets active=false
-        // so its state updates are discarded, and only the second init runs to completion.
         let active = true;
 
         const init = async () => {
@@ -82,14 +74,13 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
 
                 const client = createAuthenticatedClient(token);
 
-                // Single call to init endpoint — handles user + candidate creation/claiming
                 setInitStatus("creating_account");
                 setInitMessage("Setting up your account...");
 
                 const initResponse = await client.post<{
                     data: {
                         user: UserData;
-                        candidate: CandidateData | null;
+                        candidate: { id: string } | null;
                     };
                 }>("/onboarding/init", {
                     email: user.primaryEmailAddress?.emailAddress || "",
@@ -111,20 +102,18 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
 
                 if (!active) return;
 
-                // Admin or already completed → go to redirect or dashboard
-                // Hard navigation to avoid stale UserProfile context redirect loop
+                // Already completed or admin → go to dashboard
                 if (isAdmin || userData?.onboarding_status === "completed") {
                     window.location.href = redirectUrl || "/portal/dashboard";
                     return;
                 }
 
-                // Skipped → also go to redirect or dashboard (user must explicitly come back via banner)
                 if (userData?.onboarding_status === "skipped") {
                     window.location.href = redirectUrl || "/portal/dashboard";
                     return;
                 }
 
-                // Restore state from onboarding_metadata (JSONB field not on the typed interface)
+                // Restore state from onboarding_metadata
                 let restoredStep: CandidateOnboardingStep = 1;
                 let restoredProfileData: CandidateProfileData = {};
 
@@ -138,92 +127,24 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
                     restoredProfileData = rawMetadata.profile_data || {};
                 }
 
-                // Pre-fill from existing candidate data (merge with restored)
-                const profileData: CandidateProfileData = {
-                    full_name:
-                        restoredProfileData.full_name ||
-                        candidateData.full_name ||
-                        "",
-                    phone:
-                        restoredProfileData.phone ||
-                        candidateData.phone ||
-                        "",
-                    location:
-                        restoredProfileData.location ||
-                        candidateData.location ||
-                        "",
-                    current_title:
-                        restoredProfileData.current_title ||
-                        candidateData.current_title ||
-                        "",
-                    current_company:
-                        restoredProfileData.current_company ||
-                        candidateData.current_company ||
-                        "",
-                    bio:
-                        restoredProfileData.bio || candidateData.bio || "",
-                    linkedin_url:
-                        restoredProfileData.linkedin_url ||
-                        candidateData.linkedin_url ||
-                        "",
-                    github_url:
-                        restoredProfileData.github_url ||
-                        candidateData.github_url ||
-                        "",
-                    portfolio_url:
-                        restoredProfileData.portfolio_url ||
-                        candidateData.portfolio_url ||
-                        "",
-                    desired_job_type:
-                        restoredProfileData.desired_job_type ||
-                        candidateData.desired_job_type ||
-                        "",
-                    availability:
-                        restoredProfileData.availability ||
-                        candidateData.availability ||
-                        "",
-                    open_to_remote:
-                        restoredProfileData.open_to_remote ??
-                        candidateData.open_to_remote ??
-                        false,
-                    open_to_relocation:
-                        restoredProfileData.open_to_relocation ??
-                        candidateData.open_to_relocation ??
-                        false,
-                    desired_salary_min:
-                        restoredProfileData.desired_salary_min ??
-                        candidateData.desired_salary_min ??
-                        undefined,
-                    desired_salary_max:
-                        restoredProfileData.desired_salary_max ??
-                        candidateData.desired_salary_max ??
-                        undefined,
-                    // Resume state is not pre-filled from candidate (File objects don't persist)
-                    resumeUploaded:
-                        restoredProfileData.resumeUploaded ?? false,
-                    resumeDocumentId:
-                        restoredProfileData.resumeDocumentId ?? undefined,
-                };
-
                 if (!active) return;
 
                 setState((prev) => ({
                     ...prev,
                     currentStep: restoredStep,
-                    status:
-                        restoredStep > 1 ? "in_progress" : "pending",
-                    profileData,
-                    candidateId: candidateData!.id,
+                    status: restoredStep > 1 ? "in_progress" : "pending",
+                    profileData: {
+                        resumeUploaded: restoredProfileData.resumeUploaded ?? false,
+                        resumeDocumentId: restoredProfileData.resumeDocumentId ?? undefined,
+                    },
+                    candidateId: candidateData.id,
                     loading: false,
                 }));
 
                 setInitStatus("ready");
             } catch (error) {
                 if (!active) return;
-                console.error(
-                    "[useOnboarding] Failed to initialize:",
-                    error,
-                );
+                console.error("[useOnboarding] Failed to initialize:", error);
                 setInitStatus("error");
                 setInitMessage(
                     error instanceof Error
@@ -260,10 +181,6 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
                 profile_data: s.profileData,
                 started_at: new Date().toISOString(),
                 last_updated_at: new Date().toISOString(),
-                device_info: {
-                    user_agent: navigator.userAgent,
-                    platform: navigator.platform,
-                },
             };
 
             await apiClient.patch("/users/me", {
@@ -290,7 +207,6 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
                         ? "in_progress"
                         : prev.status,
             }));
-            // Persist after a tick so stateRef picks up the new state
             setTimeout(() => persistState(), 0);
         },
 
@@ -302,15 +218,6 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
         },
 
         submitOnboarding: async () => {
-            const s = stateRef.current;
-            if (!s.candidateId) {
-                setState((prev) => ({
-                    ...prev,
-                    error: "No candidate profile found",
-                }));
-                return;
-            }
-
             setState((prev) => ({ ...prev, submitting: true, error: null }));
 
             try {
@@ -318,28 +225,23 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
                 if (!token) throw new Error("No authentication token");
 
                 const apiClient = createAuthenticatedClient(token);
-                const candidatePayload = buildCandidatePayload(
-                    s.profileData,
-                );
 
-                // Single call — backend handles candidate update + onboarding completion
-                await apiClient.post("/onboarding/candidate", {
-                    candidate_id: s.candidateId,
-                    profile: candidatePayload,
+                // Mark onboarding as completed
+                await apiClient.patch("/users/me", {
+                    onboarding_status: "completed",
                 });
 
                 // Move to success step
                 setState((prev) => ({
                     ...prev,
-                    currentStep: 6,
+                    currentStep: 3,
                     status: "completed",
                     submitting: false,
                 }));
             } catch (error: any) {
                 setState((prev) => ({
                     ...prev,
-                    error:
-                        error.message || "Failed to complete onboarding",
+                    error: error.message || "Failed to complete onboarding",
                     submitting: false,
                 }));
             }
@@ -357,13 +259,11 @@ export function useOnboarding(options?: UseOnboardingOptions): UseOnboardingRetu
                     onboarding_status: "skipped",
                 });
 
-                // Hard navigation to redirect or dashboard
                 window.location.href = redirectUrl || "/portal/dashboard";
             } catch (error: any) {
                 setState((prev) => ({
                     ...prev,
-                    error:
-                        error.message || "Failed to skip onboarding",
+                    error: error.message || "Failed to skip onboarding",
                     submitting: false,
                 }));
             }
