@@ -231,7 +231,7 @@ export function registerAtsV3Routes(app: FastifyInstance, services: ServiceRegis
       const query = { ...(request.query as Record<string, any>), application_id: id };
       const qs = new URLSearchParams();
       Object.entries(query).forEach(([k, v]) => { if (v != null) qs.append(k, String(v)); });
-      const path = `/api/v3/application-notes?${qs.toString()}`;
+      const path = `/api/v3/application-notes/views/with-author?${qs.toString()}`;
       const data = await atsClient.get(path, undefined, (request as any).correlationId, buildAuthHeaders(request));
       return reply.send(data);
     } catch (error: any) {
