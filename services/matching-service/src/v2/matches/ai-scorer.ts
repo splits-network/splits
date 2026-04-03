@@ -8,6 +8,13 @@
 import { Logger } from '@splits-network/shared-logging';
 import type { IAiClient } from '@splits-network/shared-ai-client';
 
+export interface AiScoringSmartResume {
+    professional_summary?: string;
+    experiences?: Array<{ title: string; company: string; achievements?: string[] }>;
+    projects?: Array<{ name: string; outcomes?: string; skills_used?: string[] }>;
+    skills?: Array<{ name: string; proficiency?: string; years_used?: number }>;
+}
+
 export interface AiScoringInput {
     candidate: {
         full_name?: string;
@@ -27,6 +34,7 @@ export interface AiScoringInput {
     };
     requirements: Array<{ description: string; requirement_type: string }>;
     cosine_similarity: number;
+    smart_resume?: AiScoringSmartResume;
 }
 
 export interface AiScoringResult {
@@ -96,10 +104,15 @@ async function callGptAnalysis(
 }
 
 function buildAnalysisPrompt(input: AiScoringInput): string {
-    const { candidate, job, requirements } = input;
+    const { candidate, job, requirements, smart_resume } = input;
+    const reqText = requirements.map(r => `[${r.requirement_type}] ${r.description}`).join('\n');
+
+    if (smart_resume) {
+        return buildSmartResumePrompt(candidate, job, reqText, smart_resume);
+    }
+
     const skills = candidate.resume_metadata?.skills?.map((s: any) => s.name).join(', ') || 'Unknown';
     const experience = candidate.resume_metadata?.total_years_experience || 'Unknown';
-    const reqText = requirements.map(r => `[${r.requirement_type}] ${r.description}`).join('\n');
 
     return `Evaluate this candidate-job match:
 
@@ -116,4 +129,60 @@ REQUIREMENTS:
 ${reqText || 'None specified'}
 
 Respond with JSON: { "fit_score": <0-100>, "summary": "<1-2 sentence assessment>" }`;
+}
+
+function buildSmartResumePrompt(
+    candidate: AiScoringInput['candidate'],
+    job: AiScoringInput['job'],
+    reqText: string,
+    sr: AiScoringSmartResume,
+): string {
+    const skillsText = sr.skills?.length
+        ? sr.skills.map(s => {
+            const parts = [s.name];
+            if (s.proficiency) parts.push(`(${s.proficiency})`);
+            if (s.years_used) parts.push(`${s.years_used}yr`);
+            return parts.join(' ');
+        }).join(', ')
+        : 'Unknown';
+
+    const achievementsText = sr.experiences?.length
+        ? sr.experiences
+            .filter(e => e.achievements?.length)
+            .flatMap(e => e.achievements!.map(a => `- ${e.title} at ${e.company}: ${a}`))
+            .slice(0, 8)
+            .join('\n')
+        : '';
+
+    const projectsText = sr.projects?.length
+        ? sr.projects.slice(0, 5).map(p => {
+            const parts = [p.name];
+            if (p.outcomes) parts.push(`(${p.outcomes})`);
+            if (p.skills_used?.length) parts.push(`[${p.skills_used.join(', ')}]`);
+            return `- ${parts.join(' ')}`;
+        }).join('\n')
+        : '';
+
+    let prompt = `Evaluate this candidate-job match:
+
+CANDIDATE: ${candidate.current_title || 'Unknown'} at ${candidate.current_company || 'Unknown'}
+Location: ${candidate.location || 'Unknown'}
+${sr.professional_summary ? `Summary: ${sr.professional_summary.substring(0, 400)}` : ''}
+Skills: ${skillsText}`;
+
+    if (achievementsText) prompt += `\n\nKEY ACHIEVEMENTS:\n${achievementsText}`;
+    if (projectsText) prompt += `\n\nPROJECTS:\n${projectsText}`;
+
+    prompt += `
+
+JOB: ${job.title} (${job.employment_type || 'Unknown'}, ${job.job_level || 'Unknown'})
+Location: ${job.location || 'Unknown'}
+Description: ${(job.recruiter_description || job.candidate_description || '').substring(0, 500)}
+
+REQUIREMENTS:
+${reqText || 'None specified'}
+
+Respond with JSON: { "fit_score": <0-100>, "summary": "<1-2 sentence assessment>" }`;
+
+    return prompt;
 }

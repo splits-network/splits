@@ -17,6 +17,8 @@ import { computeAiScore } from '../../v2/matches/ai-scorer.js';
 import { EmbeddingService } from '../../v2/embeddings/service.js';
 import { EmbeddingRepository } from '../../v2/embeddings/repository.js';
 import { MatchDataFetcher } from './match-data-fetcher.js';
+import type { SmartResumeMatchingData } from './smart-resume-types.js';
+import type { AiScoringSmartResume } from '../../v2/matches/ai-scorer.js';
 
 export interface MatchingOrchestratorConfig {
   repository: MatchRepository;
@@ -47,6 +49,8 @@ export class MatchingOrchestrator {
   }
 
   async scoreCandidate(candidateId: string): Promise<void> {
+    this.fetcher.clearSmartResumeCache();
+
     const candidate = await this.fetcher.fetchCandidate(candidateId);
     if (!candidate || candidate.marketplace_visibility !== 'public') return;
 
@@ -89,6 +93,11 @@ export class MatchingOrchestrator {
     await this.scoreCandidate(candidateId);
   }
 
+  async rescoreWithSmartResume(candidateId: string): Promise<void> {
+    this.logger.info({ candidateId }, 'Rescoring candidate with smart resume data');
+    await this.scoreCandidate(candidateId);
+  }
+
   async runBatchCatchup(limit: number = 200): Promise<number> {
     const jobIds = await this.fetcher.fetchActiveJobIds(limit);
     let count = 0;
@@ -104,22 +113,23 @@ export class MatchingOrchestrator {
   }
 
   private async generateMatchForPair(candidateId: string, jobId: string): Promise<void> {
-    const [candidate, job, requirements, jobSkills, candidateSkills] =
+    const [candidate, job, requirements, jobSkills, candidateSkills, smartResumeData] =
       await Promise.all([
         this.fetcher.fetchCandidate(candidateId),
         this.fetcher.fetchJob(jobId),
         this.fetcher.fetchJobRequirements(jobId),
         this.fetcher.fetchJobSkills(jobId),
         this.fetcher.fetchCandidateSkills(candidateId),
+        this.fetcher.fetchSmartResumeData(candidateId),
       ]);
 
     if (!candidate || !job) return;
     if (candidate.marketplace_visibility !== 'public' || job.status !== 'active') return;
 
-    const ruleResult = this.computeRuleScore(candidate, job);
-    const skillsResult = this.computeSkillsScore(candidate, requirements, jobSkills, candidateSkills);
+    const ruleResult = this.computeRuleScore(candidate, job, smartResumeData);
+    const skillsResult = this.computeSkillsScore(candidate, requirements, jobSkills, candidateSkills, smartResumeData);
     const { aiScore, aiSummary, cosineSimilarity } = await this.computeAiLayer(
-      candidate, job, requirements, candidateId, jobId,
+      candidate, job, requirements, candidateId, jobId, smartResumeData,
     );
 
     const matchTier = aiScore != null ? 'true' as const : 'standard' as const;
@@ -133,6 +143,7 @@ export class MatchingOrchestrator {
       skills_missing: [...skillsResult.missing_mandatory, ...skillsResult.missing_preferred],
       skills_match_pct: skillsResult.match_pct,
       skills_source: skillsResult.skills_source,
+      data_source: smartResumeData ? 'smart_resume' : 'resume_metadata',
       ...(aiSummary && { ai_summary: aiSummary }),
       ...(cosineSimilarity !== undefined && { cosine_similarity: cosineSimilarity }),
     };
@@ -152,7 +163,10 @@ export class MatchingOrchestrator {
     await this.publishMatchGenerated(match, candidateId, jobId, matchTier, ruleResult, skillsResult);
   }
 
-  private computeRuleScore(candidate: any, job: any) {
+  private computeRuleScore(
+    candidate: any, job: any,
+    smartResume: SmartResumeMatchingData | null,
+  ) {
     const ruleInput: RuleScoringInput = {
       candidate: {
         desired_salary_min: candidate.desired_salary_min,
@@ -172,7 +186,9 @@ export class MatchingOrchestrator {
         location: job.location,
         open_to_relocation: job.open_to_relocation,
       },
-      candidate_years_experience: candidate.resume_metadata?.total_years_experience,
+      candidate_years_experience:
+        smartResume?.profile?.total_years_experience
+        ?? candidate.resume_metadata?.total_years_experience,
     };
     return computeRuleScore(ruleInput);
   }
@@ -180,9 +196,20 @@ export class MatchingOrchestrator {
   private computeSkillsScore(
     candidate: any, requirements: any[],
     jobSkills: any[], candidateSkills: any[],
+    smartResume: SmartResumeMatchingData | null,
   ) {
+    const smartSkills = smartResume?.skills;
+    const candidateSkillsInput = smartSkills?.length
+      ? smartSkills.map(s => ({
+          name: s.name,
+          category: s.category,
+          proficiency: s.proficiency,
+          years_used: s.years_used,
+        }))
+      : (candidate.resume_metadata?.skills || []);
+
     return computeSkillsScore({
-      candidate_skills: candidate.resume_metadata?.skills || [],
+      candidate_skills: candidateSkillsInput,
       job_requirements: requirements,
       structured_candidate_skills: candidateSkills,
       structured_job_skills: jobSkills,
@@ -192,6 +219,7 @@ export class MatchingOrchestrator {
   private async computeAiLayer(
     candidate: any, job: any, requirements: any[],
     candidateId: string, jobId: string,
+    smartResume: SmartResumeMatchingData | null,
   ) {
     let aiScore: number | null = null;
     let aiSummary: string | undefined;
@@ -204,8 +232,9 @@ export class MatchingOrchestrator {
     cosineSimilarity = similarity ?? undefined;
 
     if (similarity !== null) {
+      const aiSmartResume = smartResume ? buildAiSmartResume(smartResume) : undefined;
       const aiResult = await computeAiScore(
-        { candidate, job, requirements, cosine_similarity: similarity },
+        { candidate, job, requirements, cosine_similarity: similarity, smart_resume: aiSmartResume },
         this.logger,
         this.aiClient,
       );
@@ -232,4 +261,25 @@ export class MatchingOrchestrator {
       skills_score: skillsResult.score,
     });
   }
+}
+
+function buildAiSmartResume(sr: SmartResumeMatchingData): AiScoringSmartResume {
+  return {
+    professional_summary: sr.profile.professional_summary,
+    experiences: sr.experiences.map(e => ({
+      title: e.title || '',
+      company: e.company || '',
+      achievements: e.achievements,
+    })),
+    projects: sr.projects.map(p => ({
+      name: p.name || '',
+      outcomes: p.outcomes,
+      skills_used: p.skills_used,
+    })),
+    skills: sr.skills.map(s => ({
+      name: s.name,
+      proficiency: s.proficiency,
+      years_used: s.years_used,
+    })),
+  };
 }

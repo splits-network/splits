@@ -29,6 +29,7 @@ const SUBSCRIBED_EVENTS = [
   'job.updated',
   'job.status_changed',
   'resume.metadata.extracted',
+  'smart_resume.updated',
 ] as const;
 
 export class DomainEventConsumer {
@@ -121,6 +122,12 @@ export class DomainEventConsumer {
         if (payload.entity_type === 'candidate' && payload.structured_data_available) {
           await this.orchestrator.rescoreWithResumeData(payload.entity_id);
         }
+        break;
+
+      case 'smart_resume.updated':
+        await this.orchestrator.rescoreWithSmartResume(
+          payload.candidateId || payload.candidate_id,
+        );
         break;
 
       default:
