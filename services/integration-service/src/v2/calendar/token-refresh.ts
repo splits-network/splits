@@ -1,8 +1,8 @@
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { ConnectionRepository } from '../connections/repository';
-import { IEventPublisher } from '../shared/events';
-import { getOAuthClientId, getOAuthClientSecret } from '../shared/helpers';
+import { ConnectionRepository } from '../connections/repository.js';
+import { IEventPublisher } from '../shared/events.js';
+import { getOAuthClientId, getOAuthClientSecret } from '../shared/helpers.js';
 
 interface TokenResponse {
     access_token: string;

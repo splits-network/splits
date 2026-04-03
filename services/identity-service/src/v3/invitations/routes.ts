@@ -6,11 +6,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { InvitationRepository } from './repository';
-import { MembershipRepository } from '../memberships/repository';
-import { UserRepository } from '../users/repository';
-import { InvitationService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { InvitationRepository } from './repository.js';
+import { MembershipRepository } from '../memberships/repository.js';
+import { UserRepository } from '../users/repository.js';
+import { InvitationService } from './service.js';
 import {
   CreateInvitationInput,
   UpdateInvitationInput,
@@ -21,8 +21,8 @@ import {
   updateSchema,
   acceptSchema,
   idParamSchema,
-} from './types';
-import { registerInvitationDetailView } from './views/detail.route';
+} from './types.js';
+import { registerInvitationDetailView } from './views/detail.route.js';
 
 export function registerInvitationRoutes(
   app: FastifyInstance,

@@ -5,11 +5,11 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { MembershipUpdate } from './types';
-import { MembershipRepository } from './repository';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { MembershipUpdate } from './types.js';
+import { MembershipRepository } from './repository.js';
 import { v4 as uuidv4 } from 'uuid';
-import type { AccessContext } from '../shared/access';
+import type { AccessContext } from '../shared/access.js';
 
 export class MembershipServiceV2 {
     constructor(

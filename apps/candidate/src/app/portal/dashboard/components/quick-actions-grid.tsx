@@ -46,11 +46,17 @@ const ACTIONS: ActionItem[] = [
         iconColor: "text-primary",
     },
     {
+        href: "/portal/smart-resume",
+        icon: "fa-file-user",
+        label: "Smart Resume",
+        iconColor: "text-warning",
+    },
+    {
         href: "/portal/documents",
         icon: "fa-file-lines",
         label: "Documents",
         badgeKey: "resume",
-        iconColor: "text-warning",
+        iconColor: "text-base-content/50",
     },
     {
         href: "/portal/notifications",

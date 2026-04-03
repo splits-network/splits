@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { AdminNotificationRepository } from './repository';
-import { AdminNotificationService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { AdminNotificationRepository } from './repository.js';
+import { AdminNotificationService } from './service.js';
 import {
   AdminListParams,
   CreateSiteNotificationInput,
@@ -19,7 +19,7 @@ import {
   createSiteNotificationSchema,
   updateSiteNotificationSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerAdminNotificationRoutes(
   app: FastifyInstance,

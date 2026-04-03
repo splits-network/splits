@@ -6,8 +6,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminJobsRepository } from './jobs.repository';
-import { adminJobsQuerySchema, idParamSchema, AdminListParams } from '../types';
+import { AdminJobsRepository } from './jobs.repository.js';
+import { adminJobsQuerySchema, idParamSchema, AdminListParams } from '../types.js';
 
 function buildPagination(total: number, page: number, limit: number) {
     return { total, page, limit, total_pages: Math.ceil(total / limit) };

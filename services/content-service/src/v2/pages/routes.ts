@@ -5,9 +5,9 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { PageServiceV2 } from './service';
-import { getUserContext, requireUserContext } from '../shared/helpers';
-import { PageFilters, PageCreate, PageUpdate } from './types';
+import { PageServiceV2 } from './service.js';
+import { getUserContext, requireUserContext } from '../shared/helpers.js';
+import { PageFilters, PageCreate, PageUpdate } from './types.js';
 
 interface RegisterConfig {
     pageService: PageServiceV2;

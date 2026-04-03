@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { registerMarketplaceMetricsRoutes } from '../../src/v2/marketplace-metrics/routes';
+import { registerMarketplaceMetricsRoutes } from '../../src/v2/marketplace-metrics/routes.js';
 
 describe('Marketplace metrics routes (integration)', () => {
     const marketplaceMetricsService = {

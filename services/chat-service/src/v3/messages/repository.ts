@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MessageListParams } from './types';
+import { MessageListParams } from './types.js';
 
 export class MessageRepository {
     constructor(private supabase: SupabaseClient) { }

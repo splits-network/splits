@@ -6,8 +6,8 @@
  */
 
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { BatchStatusRepository } from './batch-status.repository';
-import { PresenceEntry } from '../types';
+import { BatchStatusRepository } from './batch-status.repository.js';
+import { PresenceEntry } from '../types.js';
 
 const MAX_USER_IDS = 100;
 

@@ -5,7 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { JobStatsRepository } from './job-stats.repository';
+import { JobStatsRepository } from './job-stats.repository.js';
 
 export class JobStatsService {
   private accessResolver: AccessContextResolver;

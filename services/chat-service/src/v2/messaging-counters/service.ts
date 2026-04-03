@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { EntitlementChecker } from '@splits-network/shared-access-context';
-import { MessagingCounterRepository } from './repository';
+import { MessagingCounterRepository } from './repository.js';
 
 export class MessagingCounterService {
     private repository: MessagingCounterRepository;

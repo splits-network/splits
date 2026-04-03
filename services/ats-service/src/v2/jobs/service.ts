@@ -3,10 +3,10 @@
  * Handles ALL job updates with smart validation
  */
 
-import { JobRepository } from './repository';
-import { IEventPublisher } from '../shared/events';
-import { JobFilters, JobUpdate } from './types';
-import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { JobRepository } from './repository.js';
+import { IEventPublisher } from '../shared/events.js';
+import { JobFilters, JobUpdate } from './types.js';
+import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 

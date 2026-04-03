@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { OAuthSessionRepository } from './repository';
-import { OAuthSessionService } from './service';
-import { OAuthSessionListParams, sessionListQuerySchema } from './types';
+import { OAuthSessionRepository } from './repository.js';
+import { OAuthSessionService } from './service.js';
+import { OAuthSessionListParams, sessionListQuerySchema } from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

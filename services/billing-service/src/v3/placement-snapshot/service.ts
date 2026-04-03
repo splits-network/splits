@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PlacementSnapshotRepository } from './repository';
-import { PlacementSnapshotCreate, PlacementSnapshotListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PlacementSnapshotRepository } from './repository.js';
+import { PlacementSnapshotCreate, PlacementSnapshotListParams } from './types.js';
 
 export class PlacementSnapshotService {
   private accessResolver: AccessContextResolver;

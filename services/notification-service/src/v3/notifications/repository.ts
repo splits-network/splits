@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { NotificationListParams, NotificationUpdateInput } from './types';
+import { NotificationListParams, NotificationUpdateInput } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'sent_at', 'priority', 'status'];
 
@@ -102,18 +102,40 @@ export class NotificationRepository {
   async countUnreadByCategory(recipientUserId: string): Promise<Record<string, number>> {
     const { data, error } = await this.supabase
       .from('notification_log')
-      .select('category')
+      .select('category, action_url')
       .eq('recipient_user_id', recipientUserId)
       .eq('read', false)
       .eq('dismissed', false);
 
     if (error) throw error;
 
-    const counts: Record<string, number> = {};
+    // Count distinct resources per category using action_url as the resource identifier.
+    // This prevents 10 notifications for the same application showing as "10 applications".
+    const counts: Record<string, Set<string>> = {};
     for (const row of data || []) {
       const cat = row.category || 'uncategorized';
-      counts[cat] = (counts[cat] || 0) + 1;
+      if (!counts[cat]) counts[cat] = new Set();
+      // Use action_url as distinct key; fall back to a unique counter if missing
+      counts[cat].add(row.action_url || `no-url-${counts[cat].size}`);
     }
-    return counts;
+
+    const result: Record<string, number> = {};
+    for (const [cat, urls] of Object.entries(counts)) {
+      result[cat] = urls.size;
+    }
+    return result;
+  }
+
+  async markAsReadByCategory(recipientUserId: string, category: string): Promise<number> {
+    const { data, error } = await this.supabase
+      .from('notification_log')
+      .update({ read: true, read_at: new Date().toISOString() })
+      .eq('recipient_user_id', recipientUserId)
+      .eq('category', category)
+      .eq('read', false)
+      .select('id');
+
+    if (error) throw error;
+    return data?.length || 0;
   }
 }

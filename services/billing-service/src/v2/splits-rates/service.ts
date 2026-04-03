@@ -1,8 +1,8 @@
-import { IEventPublisher } from '../shared/events';
-import { requireBillingAdmin } from '../shared/helpers';
-import type { AccessContext } from '../shared/access';
-import { SplitsRateRepository } from './repository';
-import { SplitsRateWithPlan, SplitsRateUpdateInput } from './types';
+import { IEventPublisher } from '../shared/events.js';
+import { requireBillingAdmin } from '../shared/helpers.js';
+import type { AccessContext } from '../shared/access.js';
+import { SplitsRateRepository } from './repository.js';
+import { SplitsRateWithPlan, SplitsRateUpdateInput } from './types.js';
 
 /**
  * Tier name mapping: snapshot tiers → plan tiers.

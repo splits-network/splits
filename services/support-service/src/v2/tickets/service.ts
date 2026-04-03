@@ -1,14 +1,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { IEventPublisher } from '../shared/events';
-import { SupportEventPublisher } from '../support/events';
-import { TicketRepository } from './repository';
+import { IEventPublisher } from '../shared/events.js';
+import { SupportEventPublisher } from '../support/events.js';
+import { TicketRepository } from './repository.js';
 import {
     CreateTicketInput,
     SupportTicket,
     SupportTicketReply,
     SupportTicketStatus,
-} from './types';
+} from './types.js';
 
 export class TicketService {
     constructor(

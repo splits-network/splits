@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { getCorrelationId, buildQueryString } from './common';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { requireAuth } from '../../middleware/auth';
+import { ServiceRegistry } from '../../clients.js';
+import { getCorrelationId, buildQueryString } from './common.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { requireAuth } from '../../middleware/auth.js';
 
 /**
  * Register search service V2 routes

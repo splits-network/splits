@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ChatServiceV2 } from '../../src/v2/chat/service';
+import { ChatServiceV2 } from '../../src/v2/chat/service.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { ChatRepository } from '../../src/v2/chat/repository';
-import { ChatConversation, ChatMessage, ChatParticipantState } from '../../src/v2/chat/types';
+import { ChatRepository } from '../../src/v2/chat/repository.js';
+import { ChatConversation, ChatMessage, ChatParticipantState } from '../../src/v2/chat/types.js';
 
 function createSupabaseMock(
     otherParticipant: ChatParticipantState | null,

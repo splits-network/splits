@@ -6,9 +6,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { SavedJobRepository } from './repository';
-import { CreateSavedJobInput, SavedJobListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SavedJobRepository } from './repository.js';
+import { CreateSavedJobInput, SavedJobListParams } from './types.js';
 
 export class SavedJobService {
   private accessResolver: AccessContextResolver;

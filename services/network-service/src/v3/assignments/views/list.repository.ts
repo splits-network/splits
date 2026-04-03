@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AssignmentListParams } from '../types';
+import { AssignmentListParams } from '../types.js';
 
 interface ScopeFilters {
   recruiter_id?: string;

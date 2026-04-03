@@ -9,17 +9,17 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError } from '@splits-network/shared-fastify';
 import { EntitlementChecker } from '@splits-network/shared-access-context';
-import { PreferenceRepository } from './repository';
+import { PreferenceRepository } from './repository.js';
 import {
   PreferenceUpdateInput,
   BulkPreferenceUpdateInput,
   EffectivePreference,
-} from './types';
+} from './types.js';
 import {
   PREFERENCE_CATEGORIES,
   ALL_PREFERENCE_CATEGORIES,
   type PreferenceCategory,
-} from '../../helpers/preference-categories';
+} from '../../helpers/preference-categories.js';
 
 export class PreferenceService {
   private accessResolver: AccessContextResolver;

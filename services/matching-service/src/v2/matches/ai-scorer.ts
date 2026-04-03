@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
+import type { IAiClient } from '@splits-network/shared-ai-client';
 
 export interface AiScoringInput {
     candidate: {
@@ -37,6 +38,7 @@ export interface AiScoringResult {
 export async function computeAiScore(
     input: AiScoringInput,
     logger: Logger,
+    aiClient?: IAiClient,
 ): Promise<AiScoringResult> {
     const { cosine_similarity } = input;
 
@@ -44,7 +46,7 @@ export async function computeAiScore(
     const embeddingScore = cosine_similarity * 70;
 
     // Try GPT nuanced analysis (30% weight)
-    const gptResult = await callGptAnalysis(input, logger);
+    const gptResult = await callGptAnalysis(input, logger, aiClient);
 
     if (gptResult) {
         const score = Math.round((embeddingScore + gptResult.score * 0.3) * 100) / 100;
@@ -67,46 +69,28 @@ export async function computeAiScore(
 async function callGptAnalysis(
     input: AiScoringInput,
     logger: Logger,
+    aiClient?: IAiClient,
 ): Promise<{ score: number; summary: string } | null> {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) return null;
+    if (!aiClient) return null;
 
     try {
         const prompt = buildAnalysisPrompt(input);
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-                messages: [
-                    { role: 'system', content: 'You are a recruiting match analyst. Evaluate candidate-job fit. Respond with JSON only.' },
-                    { role: 'user', content: prompt },
-                ],
-                response_format: { type: 'json_object' },
-                temperature: 0.3,
-                max_tokens: 500,
-            }),
+        const messages = [
+            { role: 'system' as const, content: 'You are a recruiting match analyst. Evaluate candidate-job fit. Respond with JSON only.' },
+            { role: 'user' as const, content: prompt },
+        ];
+
+        const result = await aiClient.chatCompletion('matching_scoring', messages, {
+            jsonMode: true,
         });
 
-        if (!response.ok) {
-            logger.warn({ status: response.status }, 'GPT analysis call failed');
-            return null;
-        }
-
-        const data = await response.json() as any;
-        const content = data.choices?.[0]?.message?.content;
-        if (!content) return null;
-
-        const parsed = JSON.parse(content);
+        const parsed = JSON.parse(result.content);
         return {
             score: Math.min(100, Math.max(0, parsed.fit_score || 50)),
             summary: parsed.summary || 'AI analysis completed',
         };
     } catch (error) {
-        logger.warn({ error }, 'GPT analysis failed, using embedding-only score');
+        logger.warn({ error }, 'AI analysis failed, using embedding-only score');
         return null;
     }
 }

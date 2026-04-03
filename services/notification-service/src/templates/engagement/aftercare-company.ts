@@ -3,9 +3,9 @@
  * Sent at milestone intervals after a candidate is hired to encourage check-ins with new hires.
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, infoCard, divider } from '../components';
-import { AftercareMilestone } from './aftercare-recruiter';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, infoCard, divider } from '../components.js';
+import { AftercareMilestone } from './aftercare-recruiter.js';
 
 export interface CompanyAftercareData {
     adminName: string;

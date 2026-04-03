@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { registerAssignmentRoutes } from '../../src/v2/assignments/routes';
+import { registerAssignmentRoutes } from '../../src/v2/assignments/routes.js';
 
 describe('Assignment routes (integration)', () => {
     const assignmentService = {

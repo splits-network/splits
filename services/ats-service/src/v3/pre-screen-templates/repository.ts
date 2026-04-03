@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TemplateListParams } from './types';
+import { TemplateListParams } from './types.js';
 
 const TABLE = 'pre_screen_question_templates';
 

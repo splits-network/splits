@@ -3,10 +3,10 @@
  * Handles ALL candidate updates with smart validation
  */
 
-import { CandidateRepository } from './repository';
-import { CandidateFilters, CandidateUpdate, CandidateDashboardStats, RecentCandidateApplication } from './types';
-import { IEventPublisher } from '../shared/events';
-import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { CandidateRepository } from './repository.js';
+import { CandidateFilters, CandidateUpdate, CandidateDashboardStats, RecentCandidateApplication } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
+import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 

@@ -8,7 +8,7 @@ import {
     TopPerformer,
     RecruiterStatsMetrics,
     StatsRange,
-} from './types';
+} from './types.js';
 
 const DEFAULT_CANDIDATE_STATS: CandidateStatsMetrics = {
     total_applications: 0,

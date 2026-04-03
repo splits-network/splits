@@ -5,8 +5,8 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { JobFilters, JobUpdate } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { JobFilters, JobUpdate } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 export interface RepositoryListResponse<T> {
     data: T[];

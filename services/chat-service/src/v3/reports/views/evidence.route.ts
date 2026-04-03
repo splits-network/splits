@@ -7,8 +7,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EvidenceViewRepository } from './evidence.repository';
-import { EvidenceViewService } from './evidence.service';
+import { EvidenceViewRepository } from './evidence.repository.js';
+import { EvidenceViewService } from './evidence.service.js';
 
 const paramsSchema = {
   type: 'object',

@@ -6,8 +6,8 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { resolveAccessContext } from '../shared/access';
-import { ChartRepository } from './repository';
+import { resolveAccessContext } from '../shared/access.js';
+import { ChartRepository } from './repository.js';
 import {
     ChartType,
     ChartFilters,
@@ -15,7 +15,7 @@ import {
     ChartDataset,
     ChartResponse,
     CHART_METRIC_MAPPING,
-} from './types';
+} from './types.js';
 
 export class ChartServiceV2 {
     constructor(

@@ -1,5 +1,5 @@
-import { SchedulerRepository, CallWithParticipantsForReminder } from './scheduler-repository';
-import { IEventPublisher } from './shared/events';
+import { SchedulerRepository, CallWithParticipantsForReminder } from './scheduler-repository.js';
+import { IEventPublisher } from './shared/events.js';
 
 interface Logger {
     info(msg: string, ...args: unknown[]): void;

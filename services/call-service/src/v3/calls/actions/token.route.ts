@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessToken } from 'livekit-server-sdk';
-import { idParamSchema } from '../types';
+import { idParamSchema } from '../types.js';
 
 interface LiveKitConfig {
   apiKey: string;

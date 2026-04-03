@@ -27,6 +27,11 @@ export class TextExtractor {
         case 'application/docx':
           return await this.extractFromDocx(fileBuffer);
         
+        case 'text/markdown':
+        case 'text/x-markdown':
+        case 'text/plain':
+          return this.extractFromText(fileBuffer);
+
         default:
           throw new Error(`Unsupported file type: ${mimeType}`);
       }
@@ -92,6 +97,23 @@ export class TextExtractor {
       wordCount,
       extractionMethod: 'mammoth',
       confidence
+    };
+  }
+
+  /**
+   * Extract text from plain text or markdown files
+   */
+  private extractFromText(fileBuffer: Buffer): ExtractionResult {
+    const text = fileBuffer.toString('utf-8').trim();
+    const wordCount = this.countWords(text);
+
+    logger.info(`Text/Markdown extraction completed: ${text.length} chars, ${wordCount} words`);
+
+    return {
+      text,
+      wordCount,
+      extractionMethod: 'plain-text',
+      confidence: wordCount > 50 ? 0.95 : 0.7,
     };
   }
 

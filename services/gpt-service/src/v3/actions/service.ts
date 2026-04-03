@@ -5,8 +5,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError, ForbiddenError } from "@splits-network/shared-fastify";
-import { GptActionsRepository } from "./repository";
-import { JobSearchParams, ApplicationListParams } from "./types";
+import { GptActionsRepository } from "./repository.js";
+import { JobSearchParams, ApplicationListParams } from "./types.js";
 
 export class GptActionsService {
     private accessResolver: AccessContextResolver;

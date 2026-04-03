@@ -7,14 +7,15 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../shared/events';
-import { MatchRepository } from './repository';
-import { MatchUpsert, MatchFactors } from './types';
-import { computeRuleScore, RuleScoringInput } from './rule-scorer';
-import { computeSkillsScore } from './skills-scorer';
-import { computeAiScore } from './ai-scorer';
-import { EmbeddingService } from '../embeddings/service';
-import { EmbeddingRepository } from '../embeddings/repository';
+import type { IAiClient } from '@splits-network/shared-ai-client';
+import { IEventPublisher } from '../shared/events.js';
+import { MatchRepository } from './repository.js';
+import { MatchUpsert, MatchFactors } from './types.js';
+import { computeRuleScore, RuleScoringInput } from './rule-scorer.js';
+import { computeSkillsScore } from './skills-scorer.js';
+import { computeAiScore } from './ai-scorer.js';
+import { EmbeddingService } from '../embeddings/service.js';
+import { EmbeddingRepository } from '../embeddings/repository.js';
 
 export class MatchingOrchestrator {
     constructor(
@@ -24,6 +25,7 @@ export class MatchingOrchestrator {
         private supabase: SupabaseClient,
         private eventPublisher?: IEventPublisher,
         private logger?: Logger,
+        private aiClient?: IAiClient,
     ) {}
 
     async triggerForCandidate(candidateId: string): Promise<void> {
@@ -153,6 +155,7 @@ export class MatchingOrchestrator {
                 const aiResult = await computeAiScore(
                     { candidate, job, requirements, cosine_similarity: similarity },
                     this.logger!,
+                    this.aiClient,
                 );
                 aiScore = aiResult.score;
                 aiSummary = aiResult.summary;

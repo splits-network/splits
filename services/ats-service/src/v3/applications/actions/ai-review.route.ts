@@ -3,8 +3,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { AIReviewService } from './ai-review.service';
-import { idParamSchema } from '../types';
+import { AIReviewService } from './ai-review.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerAIReviewRoutes(app: FastifyInstance, service: AIReviewService) {
   // POST /api/v3/applications/:id/trigger-ai-review

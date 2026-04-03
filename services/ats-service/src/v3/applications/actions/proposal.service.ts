@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { ApplicationRepository } from '../repository';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { ApplicationRepository } from '../repository.js';
 
 export class ProposalService {
   private accessResolver: AccessContextResolver;

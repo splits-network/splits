@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ProviderListParams } from './types';
+import { ProviderListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['name', 'created_at'];
 

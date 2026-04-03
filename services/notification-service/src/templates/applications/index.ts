@@ -3,8 +3,8 @@
  * Professional branded templates for application-related notifications
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider } from '../components.js';
 
 export interface ApplicationCreatedData {
     candidateName: string;

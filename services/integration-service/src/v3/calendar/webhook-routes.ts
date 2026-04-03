@@ -8,10 +8,10 @@ import { FastifyInstance } from 'fastify';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { IEventPublisher } from '../../v2/shared/events';
-import { TokenRefreshService } from './token-refresh-service';
-import { CalendarWebhookService } from './webhook-service';
-import { GoogleWebhookHeaders, MicrosoftWebhookNotification } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { TokenRefreshService } from './token-refresh-service.js';
+import { CalendarWebhookService } from './webhook-service.js';
+import { GoogleWebhookHeaders, MicrosoftWebhookNotification } from './types.js';
 
 interface WebhookRouteConfig {
   supabase: SupabaseClient;

@@ -9,7 +9,7 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { idParamSchema } from '../types';
+import { idParamSchema } from '../types.js';
 
 export function registerAdminDetailView(
   app: FastifyInstance,

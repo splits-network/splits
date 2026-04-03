@@ -18,6 +18,7 @@ export interface CreateApplicationInput {
     answer: any;
   }>;
   application_source?: string;
+  resume_data?: Record<string, any>;
 }
 
 export interface UpdateApplicationInput {
@@ -40,6 +41,7 @@ export interface UpdateApplicationInput {
     disclaimer?: string;
     answer: any;
   }>;
+  resume_data?: Record<string, any>;
 }
 
 export interface ApplicationListParams {
@@ -86,6 +88,7 @@ export const createSchema = {
     document_ids: { type: 'array', items: { type: 'string', format: 'uuid' } },
     pre_screen_answers: { type: 'array' },
     application_source: { type: 'string' },
+    resume_data: { type: 'object' },
   },
   additionalProperties: false,
 };
@@ -105,6 +108,7 @@ export const updateSchema = {
     decline_details: { type: 'string', maxLength: 5000 },
     document_ids: { type: 'array', items: { type: 'string', format: 'uuid' } },
     pre_screen_answers: { type: 'array' },
+    resume_data: { type: 'object' },
   },
   additionalProperties: false,
 };

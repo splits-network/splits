@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { InvitationServiceV2 } from './service';
+import { InvitationServiceV2 } from './service.js';
 import {
     requireUserContext,
     validatePaginationParams,
     buildPaginationResponse,
-} from '../shared/helpers';
+} from '../shared/helpers.js';
 
 interface RegisterInvitationRoutesConfig {
     invitationService: InvitationServiceV2;

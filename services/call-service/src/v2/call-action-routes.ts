@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { CallService } from './service';
-import { TokenService } from './token-service';
-import { requireUserContext } from './shared/helpers';
+import { CallService } from './service.js';
+import { TokenService } from './token-service.js';
+import { requireUserContext } from './shared/helpers.js';
 
 /**
  * Registers per-call action routes (start, end, cancel, reschedule,

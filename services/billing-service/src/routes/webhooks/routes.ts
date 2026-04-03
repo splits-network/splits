@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { WebhookServiceV2 } from '../../v2/webhooks/service';
+import { WebhookServiceV2 } from '../../v2/webhooks/service.js';
 import { UnauthorizedError } from '@splits-network/shared-fastify';
-import { WebhookEventRepository } from '../../v2/webhook-events/repository';
+import { WebhookEventRepository } from '../../v2/webhook-events/repository.js';
 import Stripe from 'stripe';
 
 /**

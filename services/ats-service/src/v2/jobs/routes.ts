@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { JobServiceV2 } from './service';
-import { JobUpdate } from './types';
-import { getUserContext, requireUserContext } from '../shared/helpers';
+import { JobServiceV2 } from './service.js';
+import { JobUpdate } from './types.js';
+import { getUserContext, requireUserContext } from '../shared/helpers.js';
 
 interface RegisterJobRoutesConfig {
     jobService: JobServiceV2;

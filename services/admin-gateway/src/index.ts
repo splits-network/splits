@@ -12,10 +12,10 @@ import {
     setupProcessErrorHandlers,
 } from "@splits-network/shared-fastify";
 import rateLimit from "@fastify/rate-limit";
-import Redis from "ioredis";
-import { AdminAuthMiddleware } from "./auth";
-import { registerAdminRoutes } from "./routes";
-import { setupRealtimeServer } from "./realtime";
+import { Redis } from 'ioredis';
+import { AdminAuthMiddleware } from "./auth.js";
+import { registerAdminRoutes } from "./routes.js";
+import { setupRealtimeServer } from "./realtime.js";
 
 async function main() {
     // Set PORT default before loadBaseConfig reads it (admin-gateway uses 3030, not the 3000 default)

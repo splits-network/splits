@@ -5,15 +5,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyInvitationRepository } from './repository';
-import { CompanyInvitationServiceV2 } from './service';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { requireUserContext } from '../helpers';
+import { CompanyInvitationRepository } from './repository.js';
+import { CompanyInvitationServiceV2 } from './service.js';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { requireUserContext } from '../helpers.js';
 import { StandardListParams } from '@splits-network/shared-types';
 import {
     CompanyInvitationFilters,
     CreateCompanyInvitationRequest
-} from './types';
+} from './types.js';
 
 const listSchema = {
     querystring: {

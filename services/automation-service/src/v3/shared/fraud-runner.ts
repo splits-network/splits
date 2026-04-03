@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FraudSignalRepository } from '../fraud-signals/repository';
-import { runFraudAnalysis } from '../fraud-signals/analyzers';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FraudSignalRepository } from '../fraud-signals/repository.js';
+import { runFraudAnalysis } from '../fraud-signals/analyzers/index.js';
 
 export class FraudRunner {
   private fraudRepository: FraudSignalRepository;

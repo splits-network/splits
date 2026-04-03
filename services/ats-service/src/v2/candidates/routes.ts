@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { CandidateServiceV2 } from './service';
-import { CandidateUpdate } from './types';
-import { requireUserContext } from '../shared/helpers';
+import { CandidateServiceV2 } from './service.js';
+import { CandidateUpdate } from './types.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterCandidateRoutesConfig {
     candidateService: CandidateServiceV2;

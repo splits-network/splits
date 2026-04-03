@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/video-service ./services/video-service
 EXPOSE 3019
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/video-service", "dev"]
 
 # Build stage
@@ -63,6 +64,7 @@ COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 # Copy built service
+COPY --from=build /app/services/video-service/package.json ./services/video-service/
 COPY --from=build /app/services/video-service/dist ./services/video-service/dist
 
 EXPOSE 3019

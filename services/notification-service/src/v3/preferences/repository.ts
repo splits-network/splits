@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PreferenceUpdateInput } from './types';
+import { PreferenceUpdateInput } from './types.js';
 
 export class PreferenceRepository {
   constructor(private supabase: SupabaseClient) {}

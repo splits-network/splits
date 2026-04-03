@@ -8,10 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { BlockRepository } from './repository';
-import { BlockListParams, CreateBlockInput } from './types';
-import { IEventPublisher } from '../../v2/shared/events';
-import { IChatEventPublisher } from '../shared/chat-event-publisher';
+import { BlockRepository } from './repository.js';
+import { BlockListParams, CreateBlockInput } from './types.js';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { IChatEventPublisher } from '../shared/chat-event-publisher.js';
 
 export class BlockService {
   private accessResolver: AccessContextResolver;

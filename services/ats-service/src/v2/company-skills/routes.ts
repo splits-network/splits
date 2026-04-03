@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { CompanySkillService } from './service';
-import { requireUserContext } from '../shared/helpers';
+import { CompanySkillService } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterCompanySkillRoutesConfig {
     service: CompanySkillService;

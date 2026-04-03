@@ -7,7 +7,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BadRequestError, ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
-import { PlaybackRepository } from './playback.repository';
+import { PlaybackRepository } from './playback.repository.js';
 
 const BUCKET = 'call-recordings';
 const SIGNED_URL_EXPIRY_SECONDS = 3600;

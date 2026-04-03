@@ -4,8 +4,8 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterCodeRepository } from './repository';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
+import { RecruiterCodeRepository } from './repository.js';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
 import { AccessContextResolver, EntitlementChecker } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 import {
@@ -16,7 +16,7 @@ import {
     RecruiterCodeLookupResult,
     LogCodeUsageRequest,
     CreateRecruiterCodeRequest,
-} from './types';
+} from './types.js';
 
 export class RecruiterCodeServiceV2 {
     private accessResolver: AccessContextResolver;

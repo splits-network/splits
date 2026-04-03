@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ConsentRepository } from './repository';
-import { ConsentService } from './service';
-import { SaveConsentInput, saveConsentSchema } from './types';
+import { ConsentRepository } from './repository.js';
+import { ConsentService } from './service.js';
+import { SaveConsentInput, saveConsentSchema } from './types.js';
 
 export function registerConsentRoutes(
   app: FastifyInstance,

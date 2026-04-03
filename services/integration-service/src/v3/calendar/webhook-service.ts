@@ -7,13 +7,13 @@
 import { randomUUID } from 'crypto';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TokenRefreshService } from './token-refresh-service';
+import { TokenRefreshService } from './token-refresh-service.js';
 import {
   WebhookSubscription,
   WebhookChangeEvent,
   GoogleWebhookHeaders,
   MicrosoftWebhookNotification,
-} from './types';
+} from './types.js';
 
 /* ── Constants ────────────────────────────────────────────────────────── */
 

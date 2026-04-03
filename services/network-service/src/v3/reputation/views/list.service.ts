@@ -8,8 +8,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { ReputationListParams } from '../types';
-import { ReputationListViewRepository } from './list.repository';
+import { ReputationListParams } from '../types.js';
+import { ReputationListViewRepository } from './list.repository.js';
 
 export class ReputationListViewService {
   private accessResolver: AccessContextResolver;

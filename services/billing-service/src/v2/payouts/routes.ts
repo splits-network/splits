@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { PayoutServiceV2 } from './service';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
+import { PayoutServiceV2 } from './service.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
 
 interface RegisterPayoutRoutesConfig {
     payoutService: PayoutServiceV2;

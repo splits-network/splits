@@ -10,13 +10,13 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError } from "@splits-network/shared-fastify";
-import { IEventPublisher } from "../../v2/shared/events";
-import { CallRecordingRepository } from "./repository";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { CallRecordingRepository } from "./repository.js";
 import {
     CallRecordingListParams,
     CreateCallRecordingInput,
     UpdateCallRecordingInput,
-} from "./types";
+} from "./types.js";
 
 export class CallRecordingService {
     private accessResolver: AccessContextResolver;

@@ -5,12 +5,12 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { SavedJobRepository } from './repository';
-import { SavedJobService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SavedJobRepository } from './repository.js';
+import { SavedJobService } from './service.js';
 import { CreateSavedJobInput, SavedJobListParams,
-  idParamSchema, listQuerySchema, createSchema } from './types';
-import { registerEnrichedView } from './views/enriched.route';
+  idParamSchema, listQuerySchema, createSchema } from './types.js';
+import { registerEnrichedView } from './views/enriched.route.js';
 
 export function registerSavedJobRoutes(
   app: FastifyInstance,

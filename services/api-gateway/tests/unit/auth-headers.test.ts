@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildAuthHeaders } from '../../src/helpers/auth-headers';
+import { buildAuthHeaders } from '../../src/helpers/auth-headers.js';
 
 describe('buildAuthHeaders (unit)', () => {
     it('returns internal service key header when present', () => {

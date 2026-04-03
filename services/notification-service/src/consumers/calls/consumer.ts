@@ -9,11 +9,11 @@
 
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { CallsEmailService } from '../../services/calls/service';
-import { CallInAppNotificationService } from '../../services/calls/in-app-service';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { EmailSource } from '../../templates/base';
+import { CallsEmailService } from '../../services/calls/service.js';
+import { CallInAppNotificationService } from '../../services/calls/in-app-service.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { EmailSource } from '../../templates/base.js';
 
 /** Normalized call event payload (camelCase, after normalizePayload) */
 interface CallEventPayload {

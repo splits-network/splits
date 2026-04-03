@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { MarketplaceMetricsServiceV2 } from './service';
-import { MarketplaceMetricsRepository, CreateMetricInput } from './repository';
-import { MetricFilters, MetricUpdate } from './types';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { resolveAccessContext } from '../shared/access';
+import { MarketplaceMetricsServiceV2 } from './service.js';
+import { MarketplaceMetricsRepository, CreateMetricInput } from './repository.js';
+import { MetricFilters, MetricUpdate } from './types.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 interface RegisterMetricRoutesConfig {
     supabaseUrl: string;

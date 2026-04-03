@@ -4,8 +4,8 @@
  * Uses urgency styling to prompt immediate action.
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, alert } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, alert } from '../components.js';
 
 export interface InstantCallData {
     callerName: string;

@@ -13,10 +13,10 @@
 
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { NotificationRepository } from '../../repository';
-import { ContactLookupHelper, Contact } from '../../helpers/contact-lookup';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { NotificationChannel } from '../../helpers/email-entitlement-gate';
+import { NotificationRepository } from '../../repository.js';
+import { ContactLookupHelper, Contact } from '../../helpers/contact-lookup.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { NotificationChannel } from '../../helpers/email-entitlement-gate.js';
 
 /** Channel resolution result */
 interface ChannelDecision {

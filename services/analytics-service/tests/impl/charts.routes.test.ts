@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { registerChartRoutes } from '../../src/v2/charts/routes';
+import { registerChartRoutes } from '../../src/v2/charts/routes.js';
 
 describe('Chart routes (integration)', () => {
     const chartService = {

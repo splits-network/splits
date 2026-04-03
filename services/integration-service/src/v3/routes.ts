@@ -6,16 +6,16 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerProviderRoutes } from './providers/routes';
-import { registerConnectionRoutes } from './connections/routes';
-import { registerATSIntegrationRoutes } from './ats-integrations/routes';
-import { registerATSActionRoutes } from './ats-integrations/actions/sync.route';
-import { registerCalendarWebhookRoutes } from './calendar/webhook-routes';
-import { registerCalendarRoutes } from './calendar/routes';
-import { registerCallCalendarRoutes } from './calendar/call-calendar-routes';
-import { registerEmailRoutes } from './email/routes';
-import { registerLinkedInRoutes } from './linkedin/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerProviderRoutes } from './providers/routes.js';
+import { registerConnectionRoutes } from './connections/routes.js';
+import { registerATSIntegrationRoutes } from './ats-integrations/routes.js';
+import { registerATSActionRoutes } from './ats-integrations/actions/sync.route.js';
+import { registerCalendarWebhookRoutes } from './calendar/webhook-routes.js';
+import { registerCalendarRoutes } from './calendar/routes.js';
+import { registerCallCalendarRoutes } from './calendar/call-calendar-routes.js';
+import { registerEmailRoutes } from './email/routes.js';
+import { registerLinkedInRoutes } from './linkedin/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

@@ -1,14 +1,14 @@
 import Stripe from 'stripe';
-import type { AccessContext } from '../shared/access';
-import { requireBillingAdmin, requireBillingReadAccess, isRecruiterOnly } from '../shared/helpers';
-import { PlacementSnapshotRepository } from '../placement-snapshot/repository';
-import { CompanyBillingProfileRepository } from '../company-billing/repository';
-import { CompanyBillingProfileService } from '../company-billing/service';
-import { FirmBillingProfileRepository } from '../firm-billing/repository';
-import { FirmBillingProfileService } from '../firm-billing/service';
-import { PlacementInvoiceRepository } from './repository';
-import { PlacementInvoice } from './types';
-import { buildPaginationResponse } from '../shared/helpers';
+import type { AccessContext } from '../shared/access.js';
+import { requireBillingAdmin, requireBillingReadAccess, isRecruiterOnly } from '../shared/helpers.js';
+import { PlacementSnapshotRepository } from '../placement-snapshot/repository.js';
+import { CompanyBillingProfileRepository } from '../company-billing/repository.js';
+import { CompanyBillingProfileService } from '../company-billing/service.js';
+import { FirmBillingProfileRepository } from '../firm-billing/repository.js';
+import { FirmBillingProfileService } from '../firm-billing/service.js';
+import { PlacementInvoiceRepository } from './repository.js';
+import { PlacementInvoice } from './types.js';
+import { buildPaginationResponse } from '../shared/helpers.js';
 
 const PROCESSING_FEE_RATE = 0.03;
 

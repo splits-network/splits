@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ApplicationNoteListParams } from '../types';
+import { ApplicationNoteListParams } from '../types.js';
 
 const NOTE_WITH_AUTHOR_SELECT = '*, created_by:users!created_by_user_id(id, name, email)';
 

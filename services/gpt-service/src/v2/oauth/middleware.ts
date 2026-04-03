@@ -4,7 +4,7 @@
  */
 
 import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
-import { OAuthService } from './oauth-service';
+import { OAuthService } from './oauth-service.js';
 
 // Extend FastifyRequest to include gptAuth
 declare module 'fastify' {

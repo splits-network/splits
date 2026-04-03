@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { BadgeEntityType } from '../badges/definitions/types';
-import { EntityLevel, LevelThreshold, XpHistoryFilters, XpLedgerEntry, XpRule, XpSourceType } from './types';
+import { BadgeEntityType } from '../badges/definitions/types.js';
+import { EntityLevel, LevelThreshold, XpHistoryFilters, XpLedgerEntry, XpRule, XpSourceType } from './types.js';
 
 export class XpRepository {
     private supabase: SupabaseClient;

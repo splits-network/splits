@@ -6,11 +6,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { DeclineActionRepository } from './decline.repository';
-import { DeclineActionService } from './decline.service';
-import { idParamSchema } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { DeclineActionRepository } from './decline.repository.js';
+import { DeclineActionService } from './decline.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerDeclineAction(
   app: FastifyInstance,

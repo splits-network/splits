@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { registerMatchRoutes } from './matches/routes';
-import { IEventPublisher } from './shared/events';
+import { registerMatchRoutes } from './matches/routes.js';
+import { IEventPublisher } from './shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
-import { MatchingOrchestrator } from './matches/matching-orchestrator';
+import { MatchingOrchestrator } from './matches/matching-orchestrator.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

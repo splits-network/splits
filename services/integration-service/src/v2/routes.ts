@@ -1,14 +1,14 @@
 import { FastifyInstance } from 'fastify';
-import { IEventPublisher } from './shared/events';
+import { IEventPublisher } from './shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { registerProviderRoutes } from './providers/routes';
-import { registerConnectionRoutes } from './connections/routes';
-import { registerCalendarRoutes } from './calendar/routes';
-import { registerCallCalendarRoutes } from './calendar/call-calendar-routes';
-import { registerEmailRoutes } from './email/routes';
-import { registerLinkedInRoutes } from './linkedin/routes';
-import { registerATSRoutes } from './ats/routes';
+import { registerProviderRoutes } from './providers/routes.js';
+import { registerConnectionRoutes } from './connections/routes.js';
+import { registerCalendarRoutes } from './calendar/routes.js';
+import { registerCallCalendarRoutes } from './calendar/call-calendar-routes.js';
+import { registerEmailRoutes } from './email/routes.js';
+import { registerLinkedInRoutes } from './linkedin/routes.js';
+import { registerATSRoutes } from './ats/routes.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

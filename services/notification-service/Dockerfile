@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/notification-service ./services/notification-service
 EXPOSE 3005
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/notification-service", "dev"]
 
 # Build stage
@@ -64,6 +65,7 @@ COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 # Copy built service
+COPY --from=build /app/services/notification-service/package.json ./services/notification-service/
 COPY --from=build /app/services/notification-service/dist ./services/notification-service/dist
 
 EXPOSE 3005

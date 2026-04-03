@@ -7,7 +7,7 @@ import {
     CallNoteWithUser,
     CallTag,
     CallTagLink,
-} from './types';
+} from './types.js';
 
 export class ArtifactRepository {
     constructor(private supabase: SupabaseClient) {}

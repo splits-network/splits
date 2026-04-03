@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementSnapshot, PlacementSnapshotCreate, PlacementSnapshotFilters } from './types';
+import { PlacementSnapshot, PlacementSnapshotCreate, PlacementSnapshotFilters } from './types.js';
 
 export class PlacementSnapshotRepository {
     constructor(private supabase: SupabaseClient) { }

@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { FirmMemberListParams } from '../types';
+import { FirmMemberListParams } from '../types.js';
 
 const MEMBER_SELECT = `
   *, recruiter:recruiters!inner(id, user_id, status, user:users!recruiters_user_id_fkey(id, name, email))

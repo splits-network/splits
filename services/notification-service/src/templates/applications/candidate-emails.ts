@@ -3,8 +3,8 @@
  * Professional branded templates for candidate-facing notifications
  */
 
-import { baseEmailTemplate, defaultTheme } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider } from '../components';
+import { baseEmailTemplate, defaultTheme } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider } from '../components.js';
 
 // When candidate submits application with recruiter
 export interface CandidateApplicationWithRecruiterData {

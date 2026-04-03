@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { IEventPublisher } from './shared/events';
-import { registerChatRoutes } from './chat/routes';
+import { IEventPublisher } from './shared/events.js';
+import { registerChatRoutes } from './chat/routes.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

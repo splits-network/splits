@@ -7,8 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { MetricsRepository } from './metrics.repository';
-import { ModerationMetrics } from '../types';
+import { MetricsRepository } from './metrics.repository.js';
+import { ModerationMetrics } from '../types.js';
 
 export class MetricsService {
   private accessResolver: AccessContextResolver;

@@ -1,4 +1,4 @@
-import { SupportCategory } from '../support/types';
+import { SupportCategory } from '../support/types.js';
 
 export type SupportTicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 

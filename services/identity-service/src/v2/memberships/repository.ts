@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { MembershipFilters } from './types';
+import { MembershipFilters } from './types.js';
 
 export class MembershipRepository {
     private supabase: SupabaseClient;

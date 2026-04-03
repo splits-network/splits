@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { AdminAtsService } from './service';
+import { AdminAtsService } from './service.js';
 
 interface AdminAtsRoutesConfig {
     adminService: AdminAtsService;

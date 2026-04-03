@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { Logger } from '@splits-network/shared-logging';
 
 export interface ChatEventPayload {

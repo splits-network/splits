@@ -9,11 +9,12 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { OutboxPublisher } from '../v2/shared/events';
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from '../v2/shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
 const STUCK_THRESHOLD_MINUTES = 10;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
@@ -57,8 +58,15 @@ async function main() {
         message: `Found ${stuckApps.length} applications stuck in AI review`
     }));
 
-    // Check if each stuck application already has a completed AI review
+    // Set up resilient publisher for durable event delivery
+    const eventPublisher = new EventPublisher(RABBITMQ_URL, logger, 'ats-service-recovery');
+    try {
+        await eventPublisher.connect();
+    } catch (err) {
+        logger.warn({ err }, 'Failed to connect RabbitMQ - ResilientPublisher will use outbox only');
+    }
     const outboxPublisher = new OutboxPublisher(supabase, 'ats-service-recovery', logger);
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
     let recovered = 0;
     let retriggered = 0;
     let failed = 0;
@@ -83,7 +91,7 @@ async function main() {
 
                 if (updateError) throw updateError;
 
-                await outboxPublisher.publish('application.stage_changed', {
+                await resilientPublisher.publish('application.stage_changed', {
                     application_id: app.id,
                     candidate_id: app.candidate_id,
                     job_id: app.job_id,
@@ -102,7 +110,7 @@ async function main() {
                 }));
             } else {
                 // No review exists — retrigger by publishing stage_changed to kick off AI review
-                await outboxPublisher.publish('application.stage_changed', {
+                await resilientPublisher.publish('application.stage_changed', {
                     application_id: app.id,
                     candidate_id: app.candidate_id,
                     job_id: app.job_id,

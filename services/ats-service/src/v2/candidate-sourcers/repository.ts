@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContext, resolveAccessContext } from '@splits-network/shared-access-context';
-import { CandidateSourcer, CandidateSourcerCreate, CandidateSourcerFilters, CandidateSourcerUpdate } from './types';
+import { CandidateSourcer, CandidateSourcerCreate, CandidateSourcerFilters, CandidateSourcerUpdate } from './types.js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class CandidateSourcerRepository {

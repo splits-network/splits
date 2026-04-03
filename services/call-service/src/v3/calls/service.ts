@@ -6,10 +6,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { BadRequestError, NotFoundError } from "@splits-network/shared-fastify";
-import { IEventPublisher } from "../../v2/shared/events";
-import { CallRepository } from "./repository";
-import { getCreatorTier } from "./subscription-helper";
-import { CreateCallInput, UpdateCallInput, CallListParams } from "./types";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { CallRepository } from "./repository.js";
+import { getCreatorTier } from "./subscription-helper.js";
+import { CreateCallInput, UpdateCallInput, CallListParams } from "./types.js";
 
 export class CallService {
     private accessResolver: AccessContextResolver;

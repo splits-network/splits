@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError, BadRequestError } from '@splits-network/shared-fastify';
-import { DocumentRepository } from './repository';
-import { DocumentListParams, UpdateDocumentInput } from './types';
-import { IEventPublisher } from '../../v2/shared/events';
+import { DocumentRepository } from './repository.js';
+import { DocumentListParams, UpdateDocumentInput } from './types.js';
+import { IEventPublisher } from '../../v2/shared/events.js';
 
 export class DocumentService {
   private accessResolver: AccessContextResolver;

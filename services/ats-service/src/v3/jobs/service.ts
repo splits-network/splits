@@ -8,12 +8,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver, EntitlementChecker } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { JobRepository } from './repository';
-import { JobAuthorizationHelper } from './authorization';
-import { JobActivityService } from './activity/service';
-import { ScopedJobListRepository, ScopedJobListParams } from './views/scoped-list.repository';
-import { CreateJobInput, UpdateJobInput, JobListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { JobRepository } from './repository.js';
+import { JobAuthorizationHelper } from './authorization.js';
+import { JobActivityService } from './activity/service.js';
+import { ScopedJobListRepository, ScopedJobListParams } from './views/scoped-list.repository.js';
+import { CreateJobInput, UpdateJobInput, JobListParams } from './types.js';
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   draft:   ['pending', 'active', 'closed'],

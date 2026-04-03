@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { OrganizationRepository } from './repository';
-import { OrganizationService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { OrganizationRepository } from './repository.js';
+import { OrganizationService } from './service.js';
 import {
   CreateOrganizationInput,
   UpdateOrganizationInput,
@@ -15,7 +15,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerOrganizationRoutes(
   app: FastifyInstance,

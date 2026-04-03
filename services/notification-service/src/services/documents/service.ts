@@ -1,8 +1,8 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
-import { resumeProcessedEmail, ResumeProcessedData } from '../../templates/documents';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
+import { resumeProcessedEmail, ResumeProcessedData } from '../../templates/documents/index.js';
 
 export class DocumentsEmailService {
     constructor(

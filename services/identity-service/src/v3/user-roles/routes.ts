@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { UserRoleRepository } from './repository';
-import { UserRoleService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { UserRoleRepository } from './repository.js';
+import { UserRoleService } from './service.js';
 import {
   CreateUserRoleInput,
   UpdateUserRoleInput,
@@ -15,8 +15,8 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
-import { registerUserRoleDetailView } from './views/detail.route';
+} from './types.js';
+import { registerUserRoleDetailView } from './views/detail.route.js';
 
 export function registerUserRoleRoutes(
   app: FastifyInstance,

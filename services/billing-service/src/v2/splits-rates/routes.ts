@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { SplitsRateService } from './service';
-import { requireUserContext } from '../shared/helpers';
+import { SplitsRateService } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
 
 interface RegisterSplitsRateRoutesConfig {
     splitsRateService: SplitsRateService;

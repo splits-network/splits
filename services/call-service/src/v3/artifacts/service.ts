@@ -6,9 +6,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError } from "@splits-network/shared-fastify";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ArtifactRepository } from "./repository";
-import { AddEntityLinkInput, ArtifactListParams } from "./types";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ArtifactRepository } from "./repository.js";
+import { AddEntityLinkInput, ArtifactListParams } from "./types.js";
 
 export class ArtifactService {
     private accessResolver: AccessContextResolver;

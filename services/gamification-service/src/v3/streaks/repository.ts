@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { StreakListParams } from './types';
+import { StreakListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['current_count', 'longest_count', 'updated_at'];
 

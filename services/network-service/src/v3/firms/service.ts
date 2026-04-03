@@ -5,13 +5,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver, EntitlementChecker } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FirmRepository } from './repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FirmRepository } from './repository.js';
 import {
   FirmListParams, FirmUpdate, CreateFirmInput, FirmMemberListParams,
   CreateFirmInvitationInput, TransferOwnershipInput,
   VALID_PLACEMENT_TYPES, VALID_TEAM_SIZE_RANGES,
-} from './types';
+} from './types.js';
 
 export class FirmService {
   private accessResolver: AccessContextResolver;

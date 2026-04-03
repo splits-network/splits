@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { DocumentRepository } from './repository';
-import { DocumentListParams, UpdateDocumentInput } from './types';
+import { DocumentRepository } from './repository.js';
+import { DocumentListParams, UpdateDocumentInput } from './types.js';
 
 export class DocumentService {
   private accessResolver: AccessContextResolver;

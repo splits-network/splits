@@ -1,11 +1,11 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { DocumentRepositoryV2 } from "./documents/repository";
-import { DocumentServiceV2 } from "./documents/service";
+import { DocumentRepositoryV2 } from "./documents/repository.js";
+import { DocumentServiceV2 } from "./documents/service.js";
 import {
     DocumentFilters,
     DocumentUpdate,
     PaginationParams,
-} from "./shared/types";
+} from "./shared/types.js";
 
 export async function registerV2Routes(
     app: FastifyInstance,

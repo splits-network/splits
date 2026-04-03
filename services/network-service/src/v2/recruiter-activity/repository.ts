@@ -4,7 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterActivity, CreateActivityInput } from './types';
+import { RecruiterActivity, CreateActivityInput } from './types.js';
 
 export class RecruiterActivityRepository {
     private supabase: SupabaseClient;

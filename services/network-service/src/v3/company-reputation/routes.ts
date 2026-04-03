@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyReputationRepository } from './repository';
-import { CompanyReputationService } from './service';
-import { registerCompanyReputationListView } from './views/list.route';
-import { CompanyReputationListParams, listQuerySchema, companyIdParamSchema } from './types';
+import { CompanyReputationRepository } from './repository.js';
+import { CompanyReputationService } from './service.js';
+import { registerCompanyReputationListView } from './views/list.route.js';
+import { CompanyReputationListParams, listQuerySchema, companyIdParamSchema } from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

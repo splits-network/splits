@@ -8,9 +8,9 @@ import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PlacementInvoiceRepository } from './repository';
-import { CreatePlacementInvoiceInput, PlacementInvoiceListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PlacementInvoiceRepository } from './repository.js';
+import { CreatePlacementInvoiceInput, PlacementInvoiceListParams } from './types.js';
 
 export class PlacementInvoiceService {
   private stripe: Stripe;

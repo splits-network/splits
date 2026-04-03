@@ -8,8 +8,8 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { WithDetailsPageTagRepository } from './with-details.repository';
-import { listQuerySchema } from '../types';
+import { WithDetailsPageTagRepository } from './with-details.repository.js';
+import { listQuerySchema } from '../types.js';
 
 export function registerWithDetailsView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new WithDetailsPageTagRepository(supabase);

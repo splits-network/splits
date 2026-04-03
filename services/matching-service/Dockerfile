@@ -13,6 +13,7 @@ COPY packages/shared-logging/package.json ./packages/shared-logging/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-access-context/package.json ./packages/shared-access-context/
 COPY packages/shared-job-queue/package.json ./packages/shared-job-queue/
+COPY packages/shared-ai-client/package.json ./packages/shared-ai-client/
 COPY services/matching-service/package.json ./services/matching-service/
 RUN pnpm install --frozen-lockfile
 
@@ -22,6 +23,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/matching-service ./services/matching-service
 EXPOSE 3017
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build && pnpm --filter @splits-network/shared-ai-client build
 CMD ["pnpm", "--filter", "@splits-network/matching-service", "dev"]
 
 # Build stage
@@ -37,6 +39,7 @@ RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-access-context build
 RUN pnpm --filter @splits-network/shared-job-queue build
+RUN pnpm --filter @splits-network/shared-ai-client build
 # Then build service
 RUN pnpm --filter @splits-network/matching-service build
 RUN pnpm install --prod --frozen-lockfile
@@ -60,7 +63,10 @@ COPY --from=build /app/packages/shared-access-context/package.json ./packages/sh
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-job-queue/
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
+COPY --from=build /app/packages/shared-ai-client/package.json ./packages/shared-ai-client/
+COPY --from=build /app/packages/shared-ai-client/dist ./packages/shared-ai-client/dist
 
+COPY --from=build /app/services/matching-service/package.json ./services/matching-service/
 COPY --from=build /app/services/matching-service/dist ./services/matching-service/dist
 
 EXPOSE 3017

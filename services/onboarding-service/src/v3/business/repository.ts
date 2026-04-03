@@ -11,7 +11,7 @@ import {
     OnboardingMembership,
     OnboardingCompany,
     OnboardingBillingProfile,
-} from './types';
+} from './types.js';
 
 export class BusinessOnboardingRepository {
     constructor(private supabase: SupabaseClient) {}

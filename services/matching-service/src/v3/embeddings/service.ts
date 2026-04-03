@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { EmbeddingRepository } from './repository';
-import { EmbeddingListParams } from './types';
+import { EmbeddingRepository } from './repository.js';
+import { EmbeddingListParams } from './types.js';
 
 export class EmbeddingService {
   private accessResolver: AccessContextResolver;

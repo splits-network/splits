@@ -5,8 +5,8 @@
  * `presence:user:{identityUserId}` keys and normalizes status values.
  */
 
-import Redis from 'ioredis';
-import { PresenceEntry, PresenceStatusValue } from '../types';
+import { Redis } from 'ioredis';
+import { PresenceEntry, PresenceStatusValue } from '../types.js';
 
 export class BatchStatusRepository {
   constructor(private redis: Redis) {}

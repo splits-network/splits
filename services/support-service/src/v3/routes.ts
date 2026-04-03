@@ -7,10 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { SupportEventPublisher } from './shared/support-event-publisher';
-import { registerSupportConversationRoutes } from './support-conversations/routes';
-import { registerTicketRoutes } from './tickets/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { SupportEventPublisher } from './shared/support-event-publisher.js';
+import { registerSupportConversationRoutes } from './support-conversations/routes.js';
+import { registerTicketRoutes } from './tickets/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

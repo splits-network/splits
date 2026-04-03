@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { ConnectionRepository } from '../connections/repository';
-import { TokenRefreshService } from '../calendar/token-refresh';
-import { LinkedInService } from './service';
-import { IEventPublisher } from '../shared/events';
-import { requireUserContext } from '../shared/helpers';
+import { ConnectionRepository } from '../connections/repository.js';
+import { TokenRefreshService } from '../calendar/token-refresh.js';
+import { LinkedInService } from './service.js';
+import { IEventPublisher } from '../shared/events.js';
+import { requireUserContext } from '../shared/helpers.js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
 

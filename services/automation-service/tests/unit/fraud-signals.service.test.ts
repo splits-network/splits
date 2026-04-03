@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { FraudSignalServiceV2 } from '../../src/v2/fraud-signals/service';
+import { FraudSignalServiceV2 } from '../../src/v2/fraud-signals/service.js';
 
 describe('FraudSignalServiceV2 (unit)', () => {
     const repository = {

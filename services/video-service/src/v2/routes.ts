@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { IEventPublisher } from './shared/events';
-import { CallRecordingRepository } from './calls/call-repository';
-import { CallRecordingService } from './calls/call-recording-service';
-import { registerCallRecordingRoutes } from './calls/call-recording-routes';
-import { registerCallRecordingWebhook } from './calls/call-recording-webhook';
+import { IEventPublisher } from './shared/events.js';
+import { CallRecordingRepository } from './calls/call-repository.js';
+import { CallRecordingService } from './calls/call-recording-service.js';
+import { registerCallRecordingRoutes } from './calls/call-recording-routes.js';
+import { registerCallRecordingWebhook } from './calls/call-recording-webhook.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

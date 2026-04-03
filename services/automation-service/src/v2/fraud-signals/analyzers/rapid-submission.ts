@@ -7,7 +7,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CreateFraudSignalInput } from '../repository';
+import { CreateFraudSignalInput } from '../repository.js';
 
 const MAX_SUBMISSIONS_IN_WINDOW = parseInt(process.env.FRAUD_RAPID_SUBMISSION_THRESHOLD || '10', 10);
 const WINDOW_MINUTES = parseInt(process.env.FRAUD_RAPID_SUBMISSION_WINDOW_MINUTES || '30', 10);

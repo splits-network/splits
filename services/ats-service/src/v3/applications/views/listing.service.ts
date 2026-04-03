@@ -7,9 +7,9 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { ApplicationListingRepository } from './listing.repository';
-import { ApplicationListParams } from '../types';
-import { ApplicationScopeFilters } from '../repository';
+import { ApplicationListingRepository } from './listing.repository.js';
+import { ApplicationListParams } from '../types.js';
+import { ApplicationScopeFilters } from '../repository.js';
 
 const COMPANY_VISIBLE_STAGES = [
   'submitted', 'company_review', 'company_feedback',

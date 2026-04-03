@@ -7,8 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { CompanyCultureTagRepository } from './repository';
-import { CreateCompanyCultureTagInput } from './types';
+import { CompanyCultureTagRepository } from './repository.js';
+import { CreateCompanyCultureTagInput } from './types.js';
 
 export class CompanyCultureTagService {
   private accessResolver: AccessContextResolver;

@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ConversationListParams, ChatConversation } from './types';
+import { ConversationListParams, ChatConversation } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'updated_at', 'last_message_at'];
 

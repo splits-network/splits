@@ -5,8 +5,8 @@
  * Delegates to ActivityService from V2 which handles Redis directly.
  */
 
-import { ActivityService } from '../../v2/activity/service';
-import { HeartbeatInput } from './types';
+import { ActivityService } from '../../v2/activity/service.js';
+import { HeartbeatInput } from './types.js';
 
 export class ActivityRepository {
   constructor(private activityService: ActivityService) {}

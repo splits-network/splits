@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ApplicationNoteRepository } from './repository';
-import { CreateApplicationNoteInput, UpdateApplicationNoteInput, ApplicationNoteListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ApplicationNoteRepository } from './repository.js';
+import { CreateApplicationNoteInput, UpdateApplicationNoteInput, ApplicationNoteListParams } from './types.js';
 
 const CANDIDATE_SIDE_TYPES = ['candidate', 'candidate_recruiter'] as const;
 const COMPANY_SIDE_TYPES = ['company_recruiter', 'hiring_manager', 'company_admin'] as const;

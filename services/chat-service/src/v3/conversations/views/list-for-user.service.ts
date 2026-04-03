@@ -8,7 +8,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { ListForUserRepository, ParticipantDetails } from './list-for-user.repository';
+import { ListForUserRepository, ParticipantDetails } from './list-for-user.repository.js';
 
 const FALLBACK_PARTICIPANT: Omit<ParticipantDetails, 'id'> = {
   name: null,

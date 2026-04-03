@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { CandidateSourcerRepository } from './repository';
-import { CandidateSourcerService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { CandidateSourcerRepository } from './repository.js';
+import { CandidateSourcerService } from './service.js';
 import {
   UpdateCandidateSourcerInput,
   CandidateSourcerListParams,
@@ -17,7 +17,7 @@ import {
   updateSchema,
   idParamSchema,
   candidateIdParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerCandidateSourcerRoutes(
   app: FastifyInstance,

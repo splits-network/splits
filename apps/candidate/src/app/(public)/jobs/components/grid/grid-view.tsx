@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { useDrawer } from "@/contexts";
 import type { Job } from "../../types";
 import { GridCard } from "./grid-card";
 import { JobDetailLoader } from "../shared/job-detail";
@@ -12,64 +14,41 @@ interface GridViewProps {
 
 export function GridView({ jobs, selectedId, onSelect }: GridViewProps) {
     const selectedJob = jobs.find((j) => j.id === selectedId) ?? null;
+    const { open, close, isOpen } = useDrawer();
+    const wasOpen = useRef(false);
 
-    return (
-        <div className="flex gap-6">
-            {/* Card grid -- hidden on mobile when detail is open */}
-            <div
-                className={`flex flex-col w-full ${selectedJob ? "hidden md:flex" : "flex"}`}
-            >
-                <div
-                    className={`grid gap-4 w-full ${
-                        selectedJob
-                            ? "grid-cols-1 lg:grid-cols-2"
-                            : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
-                    }`}
-                >
-                    {jobs.map((job) => (
-                        <GridCard
-                            key={job.id}
-                            job={job}
-                            isSelected={selectedId === job.id}
-                            onSelect={() => onSelect(job)}
-                        />
-                    ))}
-                </div>
-            </div>
+    useEffect(() => {
+        if (wasOpen.current && !isOpen && selectedJob) {
+            onSelect(selectedJob);
+        }
+        wasOpen.current = isOpen;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
-            {/* Detail sidebar */}
-            {selectedJob && selectedId && (
-                <DetailSidebar
-                    jobId={selectedId}
+    useEffect(() => {
+        if (selectedJob) {
+            open(
+                <JobDetailLoader
+                    jobId={selectedJob.id}
                     onClose={() => onSelect(selectedJob)}
-                />
-            )}
-        </div>
-    );
-}
+                />,
+            );
+        } else {
+            close();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedJob?.id]);
 
-function DetailSidebar({
-    jobId,
-    onClose,
-}: {
-    jobId: string;
-    onClose: () => void;
-}) {
     return (
-        <>
-            {/* Mobile: full-screen overlay */}
-            <div className="fixed inset-0 flex flex-col bg-base-100 md:hidden">
-                <div className="flex-1 overflow-y-auto">
-                    <JobDetailLoader jobId={jobId} onClose={onClose} />
-                </div>
-            </div>
-
-            {/* Desktop: inline sidebar */}
-            <div className="hidden md:flex md:flex-col md:w-1/2 md:border-2 md:border-base-300 md:flex-shrink-0 md:self-start bg-base-100">
-                <div className="flex-1 overflow-y-auto">
-                    <JobDetailLoader jobId={jobId} onClose={onClose} />
-                </div>
-            </div>
-        </>
+        <div className="grid gap-4 w-full grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {jobs.map((job) => (
+                <GridCard
+                    key={job.id}
+                    job={job}
+                    isSelected={selectedId === job.id}
+                    onSelect={() => onSelect(job)}
+                />
+            ))}
+        </div>
     );
 }

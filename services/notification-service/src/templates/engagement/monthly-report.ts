@@ -3,8 +3,8 @@
  * Sent to company admins on the 1st of each month with hiring pipeline metrics
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, divider } from '../components.js';
 
 export interface MonthlyReportData {
     companyName: string;

@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChatAttachment } from '../types';
+import { ChatAttachment } from '../types.js';
 
 export class CompleteUploadRepository {
   constructor(private supabase: SupabaseClient) {}

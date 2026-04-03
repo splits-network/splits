@@ -1,8 +1,8 @@
-import { LeaderboardRepository } from './repository';
-import { LeaderboardEntry, LeaderboardFilters, LeaderboardPeriod } from './types';
-import { BadgeEntityType } from '../badges/definitions/types';
+import { LeaderboardRepository } from './repository.js';
+import { LeaderboardEntry, LeaderboardFilters, LeaderboardPeriod } from './types.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { buildPaginationResponse } from '../shared/pagination';
+import { buildPaginationResponse } from '../shared/pagination.js';
 import { Logger } from '@splits-network/shared-logging';
 
 export class LeaderboardService {

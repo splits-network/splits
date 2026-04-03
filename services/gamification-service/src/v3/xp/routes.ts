@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { XpRepository } from "./repository";
-import { XpService } from "./service";
-import { XpListParams, idParamSchema, listQuerySchema } from "./types";
+import { XpRepository } from "./repository.js";
+import { XpService } from "./service.js";
+import { XpListParams, idParamSchema, listQuerySchema } from "./types.js";
 
 export function registerXpRoutes(
     app: FastifyInstance,

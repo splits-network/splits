@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PerkRepository } from './repository';
-import { PerkService } from './service';
-import { CreatePerkInput, PerkListParams, listQuerySchema, createSchema, idParamSchema } from './types';
+import { PerkRepository } from './repository.js';
+import { PerkService } from './service.js';
+import { CreatePerkInput, PerkListParams, listQuerySchema, createSchema, idParamSchema } from './types.js';
 
 export function registerPerkRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new PerkRepository(supabase);

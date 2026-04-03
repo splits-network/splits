@@ -8,10 +8,10 @@
 import amqplib, { Channel, ChannelModel } from 'amqplib';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { XpAwardService } from '../xp/award-service';
-import { BadgeAwardService } from '../badges/award-service';
-import { ActivityService } from '../streaks/activity-service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { XpAwardService } from '../xp/award-service.js';
+import { BadgeAwardService } from '../badges/award-service.js';
+import { ActivityService } from '../streaks/activity-service.js';
 
 type EntityType = 'recruiter' | 'candidate' | 'company' | 'firm';
 type XpSource = string;

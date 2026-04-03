@@ -6,8 +6,8 @@
  */
 
 import { IncomingMessage } from 'node:http';
-import { OAuthService } from '../oauth/oauth-service';
-import { McpAuthContext } from './types';
+import { OAuthService } from '../oauth/oauth-service.js';
+import { McpAuthContext } from './types.js';
 
 /**
  * Extract and validate auth from an incoming MCP HTTP request.

@@ -67,7 +67,7 @@ Each supported provider has a row in the `integration_providers` table (seeded v
 ### Scope Rationale
 
 - **Google Calendar**: `calendar.events.owned` (CRUD own events) + `calendar.events.freebusy` (check availability) + `calendar.calendarlist.readonly` (list calendars). Avoids the broad `calendar` scope.
-- **Gmail**: Single `gmail.modify` covers read + compose + send without granting full account access. Avoids the restricted `gmail.readonly` + `gmail.send` pair.
+- **Gmail**: Single `gmail.modify` covers read + compose + send + inbox management (archive, trash, label modification, mark read/unread) without granting full account access. Required because the platform provides in-app email management beyond just read and send.
 - **Microsoft**: `offline_access` is required for refresh tokens. `User.Read` is required to identify the account.
 - **LinkedIn**: "Sign In with OpenID Connect" product only — identity verification, not API access.
 

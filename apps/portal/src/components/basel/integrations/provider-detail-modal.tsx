@@ -23,6 +23,8 @@ const SCOPE_DESCRIPTIONS: Record<string, string> = {
     "https://www.googleapis.com/auth/calendar.events":
         "Create, edit, and delete calendar events",
     // Google Email
+    "https://www.googleapis.com/auth/gmail.modify":
+        "Read, send, archive, and organize your email",
     "https://www.googleapis.com/auth/gmail.readonly":
         "Read your email messages",
     "https://www.googleapis.com/auth/gmail.send": "Send email on your behalf",

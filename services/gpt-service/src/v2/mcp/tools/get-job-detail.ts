@@ -7,11 +7,11 @@
 
 import { z, ZodTypeAny } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { GptActionRepository } from '../../actions/repository';
-import { formatJobForGpt } from '../../actions/helpers';
-import { GptJobDetail } from '../../actions/types';
-import { McpAuthContext, toolError, safeTool } from '../types';
-import { requireMcpScope } from '../auth';
+import { GptActionRepository } from '../../actions/repository.js';
+import { formatJobForGpt } from '../../actions/helpers.js';
+import { GptJobDetail } from '../../actions/types.js';
+import { McpAuthContext, toolError, safeTool } from '../types.js';
+import { requireMcpScope } from '../auth.js';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

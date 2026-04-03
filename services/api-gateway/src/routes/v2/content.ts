@@ -6,8 +6,8 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { getCorrelationId, buildQueryString } from './common';
+import { ServiceRegistry } from '../../clients.js';
+import { getCorrelationId, buildQueryString } from './common.js';
 
 export function registerContentRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const contentService = () => services.get('content');

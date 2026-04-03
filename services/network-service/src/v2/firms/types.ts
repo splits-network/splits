@@ -2,7 +2,7 @@
  * Firm Domain Types
  */
 
-import { PaginationParams, SortParams } from '../shared/pagination';
+import { PaginationParams, SortParams } from '../shared/pagination.js';
 
 export interface FirmFilters extends PaginationParams, SortParams {
     search?: string;

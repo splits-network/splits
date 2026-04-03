@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PushSubscriptionRepository } from './repository';
-import { PushSubscriptionService } from './service';
-import { PushSubscriptionInput, subscribeSchema, unsubscribeSchema } from './types';
+import { PushSubscriptionRepository } from './repository.js';
+import { PushSubscriptionService } from './service.js';
+import { PushSubscriptionInput, subscribeSchema, unsubscribeSchema } from './types.js';
 
 export function registerPushRoutes(
   app: FastifyInstance,

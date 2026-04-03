@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DomainEventConsumer } from '../../src/domain-consumer';
-import { AIReviewServiceV2 } from '../../src/v2/reviews/service';
+import { DomainEventConsumer } from '../../src/domain-consumer.js';
+import { AIReviewServiceV2 } from '../../src/v2/reviews/service.js';
 import { Logger } from '@splits-network/shared-logging';
 
 function createLoggerMock(): Logger {

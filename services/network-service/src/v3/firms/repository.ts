@@ -4,7 +4,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
-import { FirmListParams, FirmUpdate, FirmMemberListParams, PUBLIC_FIRM_SELECT } from './types';
+import { FirmListParams, FirmUpdate, FirmMemberListParams, PUBLIC_FIRM_SELECT } from './types.js';
 
 interface ScopeFilters {
   firm_ids?: string[];

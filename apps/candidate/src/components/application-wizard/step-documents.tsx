@@ -37,31 +37,16 @@ export default function StepDocuments({
     // Inline upload state
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploadFile, setUploadFile] = useState<File | null>(null);
-    const [uploadDocType, setUploadDocType] = useState("resume");
+    const [uploadDocType, setUploadDocType] = useState("cover_letter");
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
     const handleToggleDocument = (docId: string) => {
-        const currentDocs =
-            localDocuments.length > 0 ? localDocuments : documents;
-        const doc = currentDocs.find((d) => d.id === docId);
-
         if (selected.includes(docId)) {
-            const newSelected = selected.filter((id) => id !== docId);
-            onChange({ selected: newSelected });
+            onChange({ selected: selected.filter((id) => id !== docId) });
         } else {
-            if (doc?.document_type === "resume") {
-                const newSelected = selected.filter((id) => {
-                    const existingDoc = currentDocs.find((d) => d.id === id);
-                    return existingDoc?.document_type !== "resume";
-                });
-                newSelected.push(docId);
-                onChange({ selected: newSelected });
-            } else {
-                const newSelected = [...selected, docId];
-                onChange({ selected: newSelected });
-            }
+            onChange({ selected: [...selected, docId] });
         }
         setError(null);
     };
@@ -174,7 +159,7 @@ export default function StepDocuments({
             await client.post("/documents", formData);
 
             setUploadFile(null);
-            setUploadDocType("resume");
+            setUploadDocType("cover_letter");
             if (fileInputRef.current) fileInputRef.current.value = "";
             success(`"${uploadFile.name}" uploaded successfully`);
             await reloadDocuments();
@@ -212,8 +197,7 @@ export default function StepDocuments({
             }
 
             if (selected.includes(docId)) {
-                const newSelected = selected.filter((id) => id !== docId);
-                onChange({ selected: newSelected });
+                onChange({ selected: selected.filter((id) => id !== docId) });
             }
 
             success(`"${fileName}" has been deleted`);
@@ -226,14 +210,10 @@ export default function StepDocuments({
     };
 
     const currentDocs = localDocuments.length > 0 ? localDocuments : documents;
-    const currentResumes = currentDocs.filter(
-        (doc) => doc.document_type === "resume",
-    );
-    const currentOtherDocs = currentDocs.filter(
+    // Filter out resumes — Smart Resume handles that now
+    const supportingDocs = currentDocs.filter(
         (doc) => doc.document_type !== "resume",
     );
-
-    /* ─── Empty State ─────────────────────────────────────────────────── */
 
     /* ─── Inline Upload Zone ───────────────────────────────────────────── */
 
@@ -330,8 +310,9 @@ export default function StepDocuments({
                                 onChange={(e) => setUploadDocType(e.target.value)}
                                 disabled={uploading}
                             >
-                                <option value="resume">Resume</option>
                                 <option value="cover_letter">Cover Letter</option>
+                                <option value="portfolio">Portfolio</option>
+                                <option value="certification">Certification</option>
                                 <option value="other">Other</option>
                             </select>
                         </fieldset>
@@ -360,61 +341,34 @@ export default function StepDocuments({
         </WizardHelpZone>
     );
 
-    /* ─── Empty State ─────────────────────────────────────────────────── */
-
-    if (currentDocs.length === 0) {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">
-                        Getting Started
-                    </p>
-                    <h3 className="text-xl font-black tracking-tight mb-2">
-                        Upload your resume
-                    </h3>
-                    <p className="text-sm text-base-content/60 leading-relaxed">
-                        We need at least one resume on file before you can
-                        apply. Upload yours now and you can reuse it for
-                        future applications too.
-                    </p>
-                </div>
-
-                {error && (
-                    <div className="bg-error/5 border-l-4 border-error p-4">
-                        <div className="flex items-start gap-3">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation text-error mt-0.5" />
-                            <span className="text-sm">{error}</span>
-                        </div>
-                    </div>
-                )}
-
-                {uploadZone}
-
-                <div className="text-center">
-                    <Link
-                        href="/portal/documents"
-                        className="text-sm text-primary hover:underline"
-                    >
-                        <i className="fa-duotone fa-regular fa-folder-open mr-1" />
-                        Or manage your documents library
-                    </Link>
-                </div>
-            </div>
-        );
-    }
-
-    /* ─── Document Selection ──────────────────────────────────────────── */
+    /* ─── Main Render ────────────────────────────────────────────────── */
 
     return (
         <>
             <div className="space-y-6">
+                {/* Smart Resume indicator */}
+                <div className="bg-primary/5 border-l-4 border-primary p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-file-user text-primary mt-0.5" />
+                        <div>
+                            <p className="font-bold text-sm">Your Smart Resume will be used</p>
+                            <p className="text-xs text-base-content/50 mt-0.5">
+                                A tailored version of your Smart Resume is automatically generated for this role.
+                                <Link href="/portal/smart-resume" className="text-primary font-semibold ml-1 hover:underline">
+                                    Review your Smart Resume
+                                </Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <h3 className="text-xl font-black tracking-tight mb-2">
-                        Choose your documents
+                        Supporting documents
                     </h3>
                     <p className="text-sm text-base-content/60 leading-relaxed">
-                        Select one resume (required) and any supporting
-                        files you'd like to include.
+                        Optionally attach portfolios, certifications, or other files
+                        to strengthen your application.
                     </p>
                 </div>
 
@@ -427,92 +381,11 @@ export default function StepDocuments({
                     </div>
                 )}
 
-                {/* Resumes */}
-                {currentResumes.length > 0 && (
+                {/* Supporting Documents */}
+                {supportingDocs.length > 0 && (
                     <WizardHelpZone
-                        title="Resume"
-                        description="Select the resume you want to submit with this application. Only one resume can be attached per application."
-                        icon="fa-duotone fa-regular fa-file-pdf"
-                        tips={[
-                            "Choose the resume most relevant to this specific role",
-                            "You can upload a new one using the Upload button if your current resume isn't up to date",
-                            "Your primary resume is marked with a star",
-                            "Only one resume per application — selecting a new one deselects the previous",
-                        ]}
-                    >
-                    <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
-                            Resumes
-                        </h4>
-                        <div className="space-y-2">
-                            {currentResumes.map((doc) => (
-                                <label
-                                    key={doc.id}
-                                    className={`flex items-center gap-4 p-4 border-l-4 cursor-pointer transition-colors ${
-                                        selected.includes(doc.id)
-                                            ? "border-primary bg-primary/5"
-                                            : "border-base-300 bg-base-200 hover:bg-base-200/80"
-                                    }`}
-                                >
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-primary"
-                                        checked={selected.includes(doc.id)}
-                                        onChange={() =>
-                                            handleToggleDocument(doc.id)
-                                        }
-                                        disabled={deletingDocId === doc.id}
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm truncate">
-                                                {doc.file_name}
-                                            </span>
-                                            {doc.metadata?.is_primary_for_candidate && (
-                                                <span className="bg-primary/10 text-primary px-2 py-0.5 text-xs font-bold shrink-0">
-                                                    <i className="fa-duotone fa-regular fa-star mr-1" />
-                                                    Primary
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="text-xs text-base-content/40">
-                                            {doc.file_size &&
-                                                `${(doc.file_size / 1024).toFixed(0)} KB`}
-                                            {doc.created_at &&
-                                                ` · Uploaded ${new Date(doc.created_at).toLocaleDateString()}`}
-                                        </div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="btn btn-sm btn-ghost btn-square text-error/60 hover:text-error"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setConfirmDelete({
-                                                id: doc.id,
-                                                name: doc.file_name,
-                                            });
-                                        }}
-                                        disabled={deletingDocId === doc.id}
-                                        title="Delete document"
-                                    >
-                                        {deletingDocId === doc.id ? (
-                                            <span className="loading loading-spinner loading-xs" />
-                                        ) : (
-                                            <i className="fa-duotone fa-regular fa-trash text-xs" />
-                                        )}
-                                    </button>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                    </WizardHelpZone>
-                )}
-
-                {/* Other Documents */}
-                {currentOtherDocs.length > 0 && (
-                    <WizardHelpZone
-                        title="Supporting Documents"
-                        description="Optionally attach additional documents like portfolios, certifications, or work samples."
+                        title="Your Documents"
+                        description="Select any supporting documents to include with your application."
                         icon="fa-duotone fa-regular fa-folder-open"
                         tips={[
                             "Only include documents relevant to this specific role",
@@ -522,10 +395,10 @@ export default function StepDocuments({
                     >
                     <div>
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-base-content/40 mb-3">
-                            Additional Files
+                            Available Documents
                         </h4>
                         <div className="space-y-2">
-                            {currentOtherDocs.map((doc) => (
+                            {supportingDocs.map((doc) => (
                                 <label
                                     key={doc.id}
                                     className={`flex items-center gap-4 p-4 border-l-4 cursor-pointer transition-colors ${

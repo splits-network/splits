@@ -1,6 +1,6 @@
-import { MarketplaceMetricsRepository } from './repository';
-import { MetricFilters, MetricUpdate, CreateMetricInput } from './types';
-import { IEventPublisher } from '../shared/events';
+import { MarketplaceMetricsRepository } from './repository.js';
+import { MetricFilters, MetricUpdate, CreateMetricInput } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 

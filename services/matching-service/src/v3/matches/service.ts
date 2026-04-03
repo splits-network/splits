@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { MatchRepository } from './repository';
-import { MatchListParams, UpdateMatchInput } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { MatchRepository } from './repository.js';
+import { MatchListParams, UpdateMatchInput } from './types.js';
 
 export class MatchService {
   private accessResolver: AccessContextResolver;

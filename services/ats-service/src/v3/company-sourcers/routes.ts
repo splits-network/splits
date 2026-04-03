@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { CompanySourcerRepository } from './repository';
-import { CompanySourcerService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { CompanySourcerRepository } from './repository.js';
+import { CompanySourcerService } from './service.js';
 import {
   UpdateCompanySourcerInput,
   CompanySourcerListParams,
@@ -17,7 +17,7 @@ import {
   updateSchema,
   idParamSchema,
   companyIdParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerCompanySourcerRoutes(
   app: FastifyInstance,

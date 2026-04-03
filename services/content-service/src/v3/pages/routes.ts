@@ -7,10 +7,10 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { PageRepository } from "./repository";
-import { PageService } from "./service";
-import { registerTypedListingView } from "./views/typed-listing.route";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { PageRepository } from "./repository.js";
+import { PageService } from "./service.js";
+import { registerTypedListingView } from "./views/typed-listing.route.js";
 import {
     CreatePageInput,
     UpdatePageInput,
@@ -20,7 +20,7 @@ import {
     updateSchema,
     idParamSchema,
     slugParamSchema,
-} from "./types";
+} from "./types.js";
 
 export function registerPageRoutes(
     app: FastifyInstance,
@@ -66,7 +66,7 @@ export function registerPageRoutes(
             },
         },
         async (request, reply) => {
-            const { TypedListingRepository } = await import("./views/typed-listing.repository");
+            const { TypedListingRepository } = await import("./views/typed-listing.repository.js");
             const listingRepo = new TypedListingRepository(supabase);
             const params = request.query as {
                 page_type: string;

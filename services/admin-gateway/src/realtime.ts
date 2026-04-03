@@ -1,6 +1,6 @@
 import http from 'http';
 import WebSocket, { WebSocketServer } from 'ws';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { verifyToken } from '@clerk/backend';
 import { createClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';

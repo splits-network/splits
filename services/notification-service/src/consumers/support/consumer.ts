@@ -1,6 +1,6 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { SupportEmailService } from '../../services/support/service';
+import { SupportEmailService } from '../../services/support/service.js';
 
 const DEFAULT_RECIPIENTS = [
     'help@applicant.network',

@@ -5,13 +5,13 @@
  */
 
 import { VALID_BLOCK_TYPES } from "@splits-network/shared-types";
-import { PageRepository } from "./repository";
-import { PageFilters, PageCreate, PageUpdate } from "./types";
+import { PageRepository } from "./repository.js";
+import { PageFilters, PageCreate, PageUpdate } from "./types.js";
 import {
     validatePaginationParams,
     buildPaginationResponse,
-} from "../shared/pagination";
-import { IEventPublisher } from "../shared/events";
+} from "../shared/pagination.js";
+import { IEventPublisher } from "../shared/events.js";
 
 export class PageServiceV2 {
     constructor(

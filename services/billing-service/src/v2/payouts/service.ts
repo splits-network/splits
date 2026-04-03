@@ -1,14 +1,14 @@
 import Stripe from 'stripe';
-import { IEventPublisher } from '../shared/events';
-import { buildPaginationResponse, requireBillingAdmin, requireBillingReadAccess, isRecruiterOnly } from '../shared/helpers';
-import type { AccessContext } from '../shared/access';
-import { PlacementSnapshotRepository } from '../placement-snapshot/repository';
-import { PlacementSnapshot } from '../placement-snapshot/types';
-import { PlacementSplitRepository } from './placement-split-repository';
-import { PlacementPayoutTransactionRepository, TransactionListFilters } from './placement-payout-transaction-repository';
-import type { PlacementSplit, PlacementPayoutTransaction, PlacementSplitInsert, PlacementPayoutTransactionInsert, PayoutRole } from './types';
-import { RecruiterConnectRepository } from './recruiter-connect-repository';
-import { FirmStripeConnectRepository } from '../firm-connect/repository';
+import { IEventPublisher } from '../shared/events.js';
+import { buildPaginationResponse, requireBillingAdmin, requireBillingReadAccess, isRecruiterOnly } from '../shared/helpers.js';
+import type { AccessContext } from '../shared/access.js';
+import { PlacementSnapshotRepository } from '../placement-snapshot/repository.js';
+import { PlacementSnapshot } from '../placement-snapshot/types.js';
+import { PlacementSplitRepository } from './placement-split-repository.js';
+import { PlacementPayoutTransactionRepository, TransactionListFilters } from './placement-payout-transaction-repository.js';
+import type { PlacementSplit, PlacementPayoutTransaction, PlacementSplitInsert, PlacementPayoutTransactionInsert, PayoutRole } from './types.js';
+import { RecruiterConnectRepository } from './recruiter-connect-repository.js';
+import { FirmStripeConnectRepository } from '../firm-connect/repository.js';
 
 export class PayoutServiceV2 {
     private stripe: Stripe;

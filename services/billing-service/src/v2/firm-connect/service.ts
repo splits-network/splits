@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
-import type { AccessContext } from '../shared/access';
-import { FirmStripeConnectRepository } from './repository';
+import type { AccessContext } from '../shared/access.js';
+import { FirmStripeConnectRepository } from './repository.js';
 import {
     FirmConnectAccountStatus,
     FirmConnectLinkRequest,
@@ -11,7 +11,7 @@ import {
     AcceptFirmTosResponse,
     FirmVerificationSessionResponse,
     FirmStripePayout,
-} from './types';
+} from './types.js';
 
 async function requireFirmAdmin(
     access: AccessContext,

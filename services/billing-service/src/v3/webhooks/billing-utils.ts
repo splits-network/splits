@@ -5,7 +5,7 @@
  * Publishes: jobs.billing_reverted_to_draft
  */
 
-import { WebhookHandlerDeps } from './types';
+import { WebhookHandlerDeps } from './types.js';
 
 export async function revertJobsToDraft(
   deps: WebhookHandlerDeps,

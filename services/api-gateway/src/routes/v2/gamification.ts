@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { requireAuth, optionalAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { getCorrelationId, buildQueryString } from './common';
+import { ServiceRegistry } from '../../clients.js';
+import { requireAuth, optionalAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { getCorrelationId, buildQueryString } from './common.js';
 
 export function registerGamificationRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const gamification = () => services.get('gamification');

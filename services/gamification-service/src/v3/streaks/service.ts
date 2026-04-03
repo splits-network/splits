@@ -5,8 +5,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError } from "@splits-network/shared-fastify";
-import { StreakRepository } from "./repository";
-import { StreakListParams } from "./types";
+import { StreakRepository } from "./repository.js";
+import { StreakListParams } from "./types.js";
 
 export class StreakService {
     private accessResolver: AccessContextResolver;

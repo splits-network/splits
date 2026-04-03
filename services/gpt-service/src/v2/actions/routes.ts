@@ -6,9 +6,9 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { GptActionRepository } from './repository';
-import { OAuthService } from '../oauth/oauth-service';
-import { extractGptAuth, requireScope } from '../oauth/middleware';
+import { GptActionRepository } from './repository.js';
+import { OAuthService } from '../oauth/oauth-service.js';
+import { extractGptAuth, requireScope } from '../oauth/middleware.js';
 import {
     gptError,
     formatJobForGpt,
@@ -16,15 +16,15 @@ import {
     generateConfirmationToken,
     getConfirmationToken,
     deleteConfirmationToken,
-} from './helpers';
+} from './helpers.js';
 import {
     GptJobDetail,
     GptSubmitApplicationRequest,
     GptConfirmationSummary,
     GptResumeAnalysisRequest,
     GptResumeAnalysisResponse,
-} from './types';
-import { IEventPublisher } from '../shared/events';
+} from './types.js';
+import { IEventPublisher } from '../shared/events.js';
 
 interface ActionRoutesConfig {
     repository: GptActionRepository;

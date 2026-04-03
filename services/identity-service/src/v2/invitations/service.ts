@@ -4,13 +4,13 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { InvitationUpdate } from './types';
-import { InvitationRepository } from './repository';
-import { UserRepository } from '../users/repository';
-import { MembershipRepository } from '../memberships/repository';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { InvitationUpdate } from './types.js';
+import { InvitationRepository } from './repository.js';
+import { UserRepository } from '../users/repository.js';
+import { MembershipRepository } from '../memberships/repository.js';
 import { v4 as uuidv4 } from 'uuid';
-import type { AccessContext } from '../shared/access';
+import type { AccessContext } from '../shared/access.js';
 
 export class InvitationServiceV2 {
     constructor(

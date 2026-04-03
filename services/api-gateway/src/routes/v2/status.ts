@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { EventPublisher } from '../../events/event-publisher';
+import { EventPublisher } from '../../events/event-publisher.js';
 
 interface StatusContactRequest {
     name?: string;

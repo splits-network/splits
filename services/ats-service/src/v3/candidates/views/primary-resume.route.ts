@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidatePrimaryResumeRepository } from './primary-resume.repository';
-import { CandidatePrimaryResumeService } from './primary-resume.service';
-import { idParamSchema } from '../types';
+import { CandidatePrimaryResumeRepository } from './primary-resume.repository.js';
+import { CandidatePrimaryResumeService } from './primary-resume.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerCandidatePrimaryResumeView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CandidatePrimaryResumeRepository(supabase);

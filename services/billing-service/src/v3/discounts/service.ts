@@ -9,10 +9,10 @@ import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { DiscountRepository } from './repository';
-import { PlanRepository } from '../plans/repository';
-import { DiscountValidationRequest } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { DiscountRepository } from './repository.js';
+import { PlanRepository } from '../plans/repository.js';
+import { DiscountValidationRequest } from './types.js';
 
 // 5-minute cache for promotion code lookups (keyed by code+plan+period)
 const promoCache = new Map<string, { data: any; expires: number }>();

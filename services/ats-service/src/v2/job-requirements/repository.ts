@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { JobRequirementBulkItem } from '../types';
+import { JobRequirementBulkItem } from '../types.js';
 
 export class JobRequirementRepository {
     private supabase: SupabaseClient;

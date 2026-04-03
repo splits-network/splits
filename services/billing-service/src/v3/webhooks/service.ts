@@ -8,15 +8,15 @@
 import Stripe from 'stripe';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { WebhookRepository } from './repository';
-import { WebhookHandlerDeps } from './types';
-import { ConnectWebhookHandler } from './connect-webhook-handler';
-import { SubscriptionWebhookHandler } from './subscription-webhook-handler';
-import { InvoiceWebhookHandler } from './invoice-webhook-handler';
-import { PaymentMethodWebhookHandler } from './payment-method-webhook-handler';
-import { TransferWebhookHandler } from './transfer-webhook-handler';
-import { BalanceWebhookHandler } from './balance-webhook-handler';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { WebhookRepository } from './repository.js';
+import { WebhookHandlerDeps } from './types.js';
+import { ConnectWebhookHandler } from './connect-webhook-handler.js';
+import { SubscriptionWebhookHandler } from './subscription-webhook-handler.js';
+import { InvoiceWebhookHandler } from './invoice-webhook-handler.js';
+import { PaymentMethodWebhookHandler } from './payment-method-webhook-handler.js';
+import { TransferWebhookHandler } from './transfer-webhook-handler.js';
+import { BalanceWebhookHandler } from './balance-webhook-handler.js';
 
 const CONNECT_EVENTS = ['account.updated'];
 const SUBSCRIPTION_EVENTS = [

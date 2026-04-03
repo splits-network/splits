@@ -5,8 +5,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminStatsRepository } from './stats.repository';
-import { periodQuerySchema } from '../types';
+import { AdminStatsRepository } from './stats.repository.js';
+import { periodQuerySchema } from '../types.js';
 
 export function registerAdminStatsViews(app: FastifyInstance, supabase: SupabaseClient) {
     const repository = new AdminStatsRepository(supabase);

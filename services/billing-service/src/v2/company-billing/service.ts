@@ -1,10 +1,10 @@
 import Stripe from 'stripe';
-import type { AccessContext } from '../shared/access';
-import { requireBillingAdmin } from '../shared/helpers';
-import { CompanyBillingProfileRepository } from './repository';
-import { CompanyBillingProfile, CompanyBillingProfileCreate, CompanyBillingProfileUpdate, PaymentMethodDetails, CompanyBillingReadiness } from './types';
-import { buildPaginationResponse } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
+import type { AccessContext } from '../shared/access.js';
+import { requireBillingAdmin } from '../shared/helpers.js';
+import { CompanyBillingProfileRepository } from './repository.js';
+import { CompanyBillingProfile, CompanyBillingProfileCreate, CompanyBillingProfileUpdate, PaymentMethodDetails, CompanyBillingReadiness } from './types.js';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
 
 export class CompanyBillingProfileService {
     private stripe: Stripe;

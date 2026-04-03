@@ -529,17 +529,11 @@ export class EventPublisher implements IEventPublisher {
 }
 
 /**
- * Durable event publisher that writes to the outbox_events table.
- * Use this instead of EventPublisher in repositories and services.
+ * Fallback event publisher that writes to the outbox_events table.
+ * Used by ResilientPublisher when RabbitMQ is unavailable.
+ * The outbox-service drains pending rows to RabbitMQ.
  *
- * Guarantees: if the DB write succeeds, the event will eventually be delivered
- * to RabbitMQ by OutboxWorker — even if RabbitMQ is temporarily down or
- * the process crashes before delivery.
- *
- * Integration:
- *   1. In service index.ts, create OutboxPublisher(supabaseClient, serviceName, logger)
- *   2. Create OutboxWorker(supabaseClient, eventPublisher, serviceName, logger) and call .start()
- *   3. Pass OutboxPublisher (typed as IEventPublisher) to repositories/services instead of EventPublisher
+ * Do NOT use this directly in services — use ResilientPublisher instead.
  */
 export class OutboxPublisher implements IEventPublisher {
     constructor(
@@ -567,6 +561,35 @@ export class OutboxPublisher implements IEventPublisher {
         }
 
         this.logger.debug({ event_type: eventType, source_service: this.sourceService }, 'Event queued in outbox');
+    }
+}
+
+/**
+ * RabbitMQ-first event publisher with outbox fallback.
+ *
+ * Default path: publishes directly to RabbitMQ via EventPublisher (fast, no DB write).
+ * Fallback path: if RabbitMQ is unavailable or publish fails, writes to outbox_events
+ * table via OutboxPublisher. The outbox-service drains fallback events to RabbitMQ.
+ *
+ * This is the publisher all services should use for domain events.
+ */
+export class ResilientPublisher implements IEventPublisher {
+    constructor(
+        private eventPublisher: EventPublisher,
+        private outboxPublisher: OutboxPublisher,
+        private logger: Logger,
+    ) {}
+
+    async publish(eventType: string, payload: Record<string, any>, sourceService?: string): Promise<void> {
+        if (this.eventPublisher.isConnected()) {
+            try {
+                await this.eventPublisher.publish(eventType, payload, sourceService);
+                return;
+            } catch (err) {
+                this.logger.warn({ err, event_type: eventType }, 'RabbitMQ publish failed, falling back to outbox');
+            }
+        }
+        await this.outboxPublisher.publish(eventType, payload);
     }
 }
 

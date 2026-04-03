@@ -19,10 +19,14 @@ export interface AIReviewInput {
     resume_text?: string;
     resume_data?: {
         summary?: string;
+        headline?: string;
         experience?: any[];
         education?: any[];
         skills?: string[];
         certifications?: string[];
+        projects?: any[];
+        tasks?: any[];
+        publications?: string[];
         total_years_experience?: number;
         highest_degree?: string;
     };
@@ -47,6 +51,9 @@ export interface AIReviewInput {
     }>;
 }
 
+export type SkillMatch = { name: string; is_required: boolean } | string;
+export type RequirementMatch = { text: string; is_required: boolean } | string;
+
 export interface AIReviewResult {
     fit_score: number; // 0-100
     recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
@@ -54,11 +61,11 @@ export interface AIReviewResult {
     confidence_level: number; // 0-100
     strengths: string[];
     concerns: string[];
-    matched_skills: string[];
-    missing_skills: string[];
+    matched_skills: SkillMatch[];
+    missing_skills: SkillMatch[];
     skills_match_percentage: number;
-    matched_requirements: string[];
-    missing_requirements: string[];
+    matched_requirements: RequirementMatch[];
+    missing_requirements: RequirementMatch[];
     required_years?: number;
     candidate_years?: number;
     meets_experience_requirement?: boolean;

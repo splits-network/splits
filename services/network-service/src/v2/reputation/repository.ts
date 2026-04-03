@@ -4,7 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { ReputationFilters, ReputationUpdate, RepositoryListResponse } from './types';
+import { ReputationFilters, ReputationUpdate, RepositoryListResponse } from './types.js';
 
 export class ReputationRepository {
     private supabase: SupabaseClient;

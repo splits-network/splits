@@ -7,8 +7,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { AssignmentListParams } from '../types';
-import { AssignmentListViewRepository } from './list.repository';
+import { AssignmentListParams } from '../types.js';
+import { AssignmentListViewRepository } from './list.repository.js';
 
 export class AssignmentListViewService {
   private accessResolver: AccessContextResolver;

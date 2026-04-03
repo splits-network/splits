@@ -1,4 +1,4 @@
-import { CultureTagRepository } from './repository';
+import { CultureTagRepository } from './repository.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 

@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { Logger } from '@splits-network/shared-logging';
 import { Webhook } from 'svix';
-import { OAuthService } from './oauth-service';
+import { OAuthService } from './oauth-service.js';
 
 export function registerWebhookRoutes(
     app: FastifyInstance,

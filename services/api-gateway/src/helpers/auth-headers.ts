@@ -13,7 +13,7 @@
  */
 
 import { FastifyRequest } from 'fastify';
-import { AuthContext } from '../auth';
+import { AuthContext } from '../auth.js';
 
 export interface AuthHeaders extends Record<string, string> {
     'x-clerk-user-id': string;

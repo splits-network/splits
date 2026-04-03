@@ -4,8 +4,8 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AccessContext } from '../shared/access';
-import { EnrichedCandidateRoleMatch } from './types';
+import { AccessContext } from '../shared/access.js';
+import { EnrichedCandidateRoleMatch } from './types.js';
 
 export interface CandidateRecruiter {
     recruiter_id: string;

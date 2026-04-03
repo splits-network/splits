@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { WebhookEventRepository } from './repository';
-import { WebhookEventService } from './service';
-import { listQuerySchema } from './types';
+import { WebhookEventRepository } from './repository.js';
+import { WebhookEventService } from './service.js';
+import { listQuerySchema } from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

@@ -2,7 +2,7 @@
  * Content Images — Filter and Update Types
  */
 
-import { PaginationParams, SortParams } from '../shared/pagination';
+import { PaginationParams, SortParams } from '../shared/pagination.js';
 
 export interface ImageFilters extends PaginationParams, SortParams {
     search?: string;

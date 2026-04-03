@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChatReport } from '../types';
+import { ChatReport } from '../types.js';
 
 export class SubmitActionRepository {
   constructor(private supabase: SupabaseClient) {}

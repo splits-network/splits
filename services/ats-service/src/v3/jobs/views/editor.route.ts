@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EditorRepository } from './editor.repository';
-import { EditorService } from './editor.service';
-import { idParamSchema } from '../types';
+import { EditorRepository } from './editor.repository.js';
+import { EditorService } from './editor.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerEditorView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new EditorRepository(supabase);

@@ -3,8 +3,8 @@
  * Templates for connection requests, relationship termination, and invitation cancellation.
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, infoCard, divider } from '../components.js';
 
 // ─── Connection Requested ────────────────────────────────────────────────────
 

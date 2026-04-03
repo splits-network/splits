@@ -4,12 +4,12 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FirmRepository } from './repository';
-import { FirmService } from './service';
-import { registerFirmDetailView } from './views/detail.route';
-import { registerFirmListView } from './views/list.route';
-import { registerFirmMembersView } from './views/members.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FirmRepository } from './repository.js';
+import { FirmService } from './service.js';
+import { registerFirmDetailView } from './views/detail.route.js';
+import { registerFirmListView } from './views/list.route.js';
+import { registerFirmMembersView } from './views/members.route.js';
 import {
   FirmListParams, FirmUpdate, CreateFirmInput, FirmMemberListParams,
   CreateFirmInvitationInput, TransferOwnershipInput, PublicFirmListParams,
@@ -17,7 +17,7 @@ import {
   transferOwnershipSchema, acceptInvitationSchema,
   idParamSchema, slugParamSchema, firmIdParamSchema, firmMemberParamsSchema,
   firmInvitationParamsSchema, tokenParamSchema,
-} from './types';
+} from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

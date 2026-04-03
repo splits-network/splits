@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobRequirementListParams } from './types';
+import { JobRequirementListParams } from './types.js';
 
 export class JobRequirementRepository {
   constructor(private supabase: SupabaseClient) {}

@@ -4,8 +4,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MarketplaceMetricRepository } from './repository';
-import { MarketplaceMetricService } from './service';
+import { MarketplaceMetricRepository } from './repository.js';
+import { MarketplaceMetricService } from './service.js';
 import {
   CreateMetricInput,
   UpdateMetricInput,
@@ -14,7 +14,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerMarketplaceMetricRoutes(
   app: FastifyInstance,

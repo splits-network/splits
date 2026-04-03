@@ -5,18 +5,18 @@
 
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
 import {
     tierPromotionEmail,
     tierDemotionEmail,
     TierChangeData,
-} from '../../templates/reputation';
+} from '../../templates/reputation/index.js';
 import {
     companyTierPromotionEmail,
     companyTierDemotionEmail,
     CompanyTierChangeData,
-} from '../../templates/reputation/company-emails';
+} from '../../templates/reputation/company-emails.js';
 
 export class ReputationEmailService {
     constructor(

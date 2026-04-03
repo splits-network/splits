@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { UserListParams } from './types';
+import { UserListParams } from './types.js';
 
 export class UserRepository {
   constructor(private supabase: SupabaseClient) {}

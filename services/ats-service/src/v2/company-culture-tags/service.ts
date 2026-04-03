@@ -1,4 +1,4 @@
-import { CompanyCultureTagRepository } from './repository';
+import { CompanyCultureTagRepository } from './repository.js';
 
 export class CompanyCultureTagService {
     constructor(private repository: CompanyCultureTagRepository) {}

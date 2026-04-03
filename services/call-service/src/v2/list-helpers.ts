@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CallListFilters } from './types';
+import { CallListFilters } from './types.js';
 
 /**
  * Pre-filter call IDs from related tables (entity links, tags, search).

@@ -9,9 +9,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PublicListingRepository } from './public-listing.repository';
-import { PublicListingService } from './public-listing.service';
-import { LeaderboardListParams, idParamSchema, listQuerySchema } from '../types';
+import { PublicListingRepository } from './public-listing.repository.js';
+import { PublicListingService } from './public-listing.service.js';
+import { LeaderboardListParams, idParamSchema, listQuerySchema } from '../types.js';
 
 export function registerPublicListingView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new PublicListingRepository(supabase);

@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { DocumentUpdate, DocumentFilters, DocumentRecord, PaginationParams, PaginationResponse } from '../shared/types';
+import { DocumentUpdate, DocumentFilters, DocumentRecord, PaginationParams, PaginationResponse } from '../shared/types.js';
 
 export class DocumentRepositoryV2 {
     constructor(private supabase: SupabaseClient) { }

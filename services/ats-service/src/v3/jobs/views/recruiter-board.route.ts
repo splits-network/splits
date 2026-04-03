@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterBoardRepository } from './recruiter-board.repository';
-import { RecruiterBoardService } from './recruiter-board.service';
-import { listQuerySchema, JobListParams } from '../types';
+import { RecruiterBoardRepository } from './recruiter-board.repository.js';
+import { RecruiterBoardService } from './recruiter-board.service.js';
+import { listQuerySchema, JobListParams } from '../types.js';
 
 export function registerRecruiterBoardView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new RecruiterBoardRepository(supabase);

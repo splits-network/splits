@@ -5,7 +5,7 @@ import {
     TemplateFilters,
     TemplateStatus,
     TemplateUpdate,
-} from './types';
+} from './types.js';
 
 export class NotificationTemplateRepository {
     private supabase: SupabaseClient;

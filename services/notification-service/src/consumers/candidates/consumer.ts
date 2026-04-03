@@ -1,9 +1,9 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { CandidatesEmailService } from '../../services/candidates/service';
-import { NotificationRepository } from '../../repository';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { CandidatesEmailService } from '../../services/candidates/service.js';
+import { NotificationRepository } from '../../repository.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
 
 export class CandidatesEventConsumer {
     constructor(

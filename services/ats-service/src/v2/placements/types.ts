@@ -2,7 +2,7 @@
  * Placement Domain Types
  */
 
-import { PaginationParams, SortParams } from '../shared/pagination';
+import { PaginationParams, SortParams } from '../shared/pagination.js';
 
 export interface PlacementFilters extends PaginationParams, SortParams {
     search?: string;

@@ -3,9 +3,9 @@
  * Branded templates for recruiter-to-company platform invitations
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert, divider, list, markdownToHtml } from '../components';
-const { PORTAL_URL } = require('../../helpers/urls');
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert, divider, list, markdownToHtml } from '../components.js';
+import { PORTAL_URL } from '../../helpers/urls.js';
 
 export interface CompanyPlatformInvitationData {
     recruiterName: string;

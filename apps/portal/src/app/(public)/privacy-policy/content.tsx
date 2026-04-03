@@ -1257,7 +1257,8 @@ export default function PrivacyPolicyContent() {
                                         <strong className="text-base-content">
                                             Gmail:
                                         </strong>{" "}
-                                        We read and send emails on behalf of the
+                                        We read, send, archive, trash, and
+                                        organize emails on behalf of the
                                         recruiter to manage recruiting
                                         communications within the platform. We
                                         request the{" "}
@@ -1265,8 +1266,9 @@ export default function PrivacyPolicyContent() {
                                             gmail.modify
                                         </code>{" "}
                                         scope, which covers reading, composing,
-                                        and sending without granting access to
-                                        account settings or other Google
+                                        sending, and inbox management (archive,
+                                        trash, labels) without granting access
+                                        to account settings or other Google
                                         services.
                                     </div>
                                 </li>

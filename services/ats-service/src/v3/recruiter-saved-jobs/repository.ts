@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterSavedJobListParams } from './types';
+import { RecruiterSavedJobListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at'];
 

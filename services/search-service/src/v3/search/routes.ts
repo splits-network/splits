@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { SearchRepository } from "./repository";
-import { SearchService } from "./service";
-import { SearchParams, searchQuerySchema } from "./types";
+import { SearchRepository } from "./repository.js";
+import { SearchService } from "./service.js";
+import { SearchParams, searchQuerySchema } from "./types.js";
 
 export function registerSearchRoutes(
     app: FastifyInstance,

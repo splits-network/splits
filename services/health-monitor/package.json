@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "@splits-network/shared-config": "workspace:*",
+        "@splits-network/shared-job-queue": "workspace:*",
         "@splits-network/shared-fastify": "workspace:*",
         "@splits-network/shared-logging": "workspace:*",
         "@splits-network/shared-types": "workspace:*",
@@ -27,5 +28,6 @@
         "tsx": "^4.19.2",
         "typescript": "^5.9.3",
         "vitest": "^2.1.9"
-    }
+    },
+    "type": "module"
 }

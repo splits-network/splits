@@ -9,8 +9,8 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { registerV2Routes } from './v2/routes';
-import { registerV3Routes } from './v3/routes';
+import { registerV2Routes } from './v2/routes.js';
+import { registerV3Routes } from './v3/routes.js';
 import * as Sentry from '@sentry/node';
 
 if (process.env.SENTRY_DSN) {
@@ -91,8 +91,8 @@ async function main() {
     });
 
     // Register V3 routes (coexist with V2)
-    const { SupportEventPublisher: V2SupportEventPublisher } = await import('./v2/support/events');
-    const { SupportEventPublisher: V3SupportEventPublisher } = await import('./v3/shared/support-event-publisher');
+    const { SupportEventPublisher: V2SupportEventPublisher } = await import('./v2/support/events.js');
+    const { SupportEventPublisher: V3SupportEventPublisher } = await import('./v3/shared/support-event-publisher.js');
     const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
     // V2 publisher used by V2 routes (unchanged)
     const supportEventPublisher = new V2SupportEventPublisher(redisConfig, app.log as any);

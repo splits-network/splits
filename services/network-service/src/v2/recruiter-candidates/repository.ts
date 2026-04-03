@@ -5,8 +5,8 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
-import { RecruiterCandidateFilters, RecruiterCandidateUpdate, RepositoryListResponse } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { RecruiterCandidateFilters, RecruiterCandidateUpdate, RepositoryListResponse } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class RecruiterCandidateRepository {

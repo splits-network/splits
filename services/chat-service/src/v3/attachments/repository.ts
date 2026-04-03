@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChatAttachment, AttachmentListParams } from './types';
+import { ChatAttachment, AttachmentListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'updated_at', 'file_name'];
 const ALLOWED_FIELDS = [

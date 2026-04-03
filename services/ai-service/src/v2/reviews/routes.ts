@@ -4,8 +4,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { AIReviewServiceV2 } from './service';
-import { requireUserContext, validateUUID, validateInternalService } from '../shared/helpers';
+import { AIReviewServiceV2 } from './service.js';
+import { requireUserContext, validateUUID, validateInternalService } from '../shared/helpers.js';
 
 interface RouteConfig {
     service: AIReviewServiceV2;

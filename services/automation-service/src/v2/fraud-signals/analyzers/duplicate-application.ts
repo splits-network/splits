@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CreateFraudSignalInput } from '../repository';
+import { CreateFraudSignalInput } from '../repository.js';
 
 const TERMINAL_STAGES = ['hired', 'rejected', 'withdrawn'];
 

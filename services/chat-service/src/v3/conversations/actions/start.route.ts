@@ -7,10 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { StartActionRepository } from './start.repository';
-import { StartActionService } from './start.service';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { StartActionRepository } from './start.repository.js';
+import { StartActionService } from './start.service.js';
 
 const bodySchema = {
   type: 'object',

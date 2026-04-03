@@ -84,7 +84,7 @@ vi.mock('ioredis', () => {
     return { default: RedisMock };
 });
 
-import { registerChatRoutes } from '../../src/v2/chat/routes';
+import { registerChatRoutes } from '../../src/v2/chat/routes.js';
 
 describe('Chat presence routes (integration)', () => {
     const config = {

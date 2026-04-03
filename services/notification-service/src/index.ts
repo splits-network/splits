@@ -7,13 +7,13 @@ import {
 } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, registerHealthCheck, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
-import { NotificationRepository } from './repository';
-import { NotificationService } from './service';
-import { DomainEventConsumer } from './domain-consumer';
-import { PORTAL_URL, CANDIDATE_URL } from './helpers/urls';
-import { registerV2Routes } from './v2/routes';
-import { registerV3Routes } from './v3/routes';
-import { EventPublisher as V2EventPublisher, OutboxPublisher } from './v2/shared/events';
+import { NotificationRepository } from './repository.js';
+import { NotificationService } from './service.js';
+import { DomainEventConsumer } from './domain-consumer.js';
+import { PORTAL_URL, CANDIDATE_URL } from './helpers/urls.js';
+import { registerV2Routes } from './v2/routes.js';
+import { registerV3Routes } from './v3/routes.js';
+import { EventPublisher as V2EventPublisher, OutboxPublisher, ResilientPublisher } from './v2/shared/events.js';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -137,17 +137,20 @@ async function main() {
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
 
+    // Wrap in resilient publisher for durable event delivery
+    const resilientPublisher = new ResilientPublisher(v2EventPublisher, outboxPublisher, logger);
+
     // Register V2 HTTP routes
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Register V3 HTTP routes (coexist with V2)
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Register standardized health check

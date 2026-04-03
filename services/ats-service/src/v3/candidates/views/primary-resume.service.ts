@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { CandidatePrimaryResumeRepository } from './primary-resume.repository';
+import { CandidatePrimaryResumeRepository } from './primary-resume.repository.js';
 
 export class CandidatePrimaryResumeService {
   private accessResolver: AccessContextResolver;

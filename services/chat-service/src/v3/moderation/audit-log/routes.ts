@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AuditLogRepository } from './repository';
-import { AuditLogService } from './service';
-import { AuditLogListParams, auditLogListQuerySchema, idParamSchema } from '../types';
+import { AuditLogRepository } from './repository.js';
+import { AuditLogService } from './service.js';
+import { AuditLogListParams, auditLogListQuerySchema, idParamSchema } from '../types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

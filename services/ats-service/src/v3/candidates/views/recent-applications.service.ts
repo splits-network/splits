@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { CandidateRecentApplicationsRepository } from './recent-applications.repository';
+import { CandidateRecentApplicationsRepository } from './recent-applications.repository.js';
 
 export class CandidateRecentApplicationsService {
   private accessResolver: AccessContextResolver;

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { requireUserContext } from '../shared/helpers';
-import { PlacementInvoiceService } from './service';
+import { requireUserContext } from '../shared/helpers.js';
+import { PlacementInvoiceService } from './service.js';
 
 export function placementInvoiceRoutes(app: FastifyInstance, service: PlacementInvoiceService) {
     const basePath = '/api/v2/placements';

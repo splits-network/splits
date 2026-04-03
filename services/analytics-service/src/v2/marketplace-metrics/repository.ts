@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MarketplaceMetric, MetricFilters, MetricUpdate, CreateMetricInput } from './types';
+import { MarketplaceMetric, MetricFilters, MetricUpdate, CreateMetricInput } from './types.js';
 import { StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
 
 /**

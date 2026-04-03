@@ -7,7 +7,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { CreateJobInput } from './types';
+import { CreateJobInput } from './types.js';
 
 export class JobAuthorizationHelper {
   constructor(private supabase: SupabaseClient) {}

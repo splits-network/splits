@@ -14,11 +14,11 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { NotificationService as EmailNotificationService } from '../../service';
-import { NotificationRepository } from '../../repository';
-import { EVENT_BINDINGS } from './event-bindings';
-import { routeEvent, DomainConsumers } from './event-router';
-import { createDomainConsumers } from './consumer-factory';
+import { NotificationService as EmailNotificationService } from '../../service.js';
+import { NotificationRepository } from '../../repository.js';
+import { EVENT_BINDINGS } from './event-bindings.js';
+import { routeEvent, DomainConsumers } from './event-router.js';
+import { createDomainConsumers } from './consumer-factory.js';
 
 export class V3DomainEventConsumer {
     public connection: Connection | null = null;

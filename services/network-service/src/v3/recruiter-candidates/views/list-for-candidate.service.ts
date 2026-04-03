@@ -8,7 +8,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { ListForCandidateViewRepository } from './list-for-candidate.repository';
+import { ListForCandidateViewRepository } from './list-for-candidate.repository.js';
 
 export class ListForCandidateViewService {
   private accessResolver: AccessContextResolver;

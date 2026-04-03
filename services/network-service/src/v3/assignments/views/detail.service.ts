@@ -6,7 +6,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { AssignmentDetailViewRepository } from './detail.repository';
+import { AssignmentDetailViewRepository } from './detail.repository.js';
 
 export class AssignmentDetailViewService {
   private accessResolver: AccessContextResolver;

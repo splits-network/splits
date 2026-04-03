@@ -6,7 +6,7 @@
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EditorRepository } from './editor.repository';
+import { EditorRepository } from './editor.repository.js';
 
 export class EditorService {
   private accessResolver: AccessContextResolver;

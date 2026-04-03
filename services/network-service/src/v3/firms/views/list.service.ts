@@ -7,8 +7,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { FirmListParams } from '../types';
-import { FirmListViewRepository } from './list.repository';
+import { FirmListParams } from '../types.js';
+import { FirmListViewRepository } from './list.repository.js';
 
 export class FirmListViewService {
   private accessResolver: AccessContextResolver;

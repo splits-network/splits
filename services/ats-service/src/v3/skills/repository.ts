@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SkillListParams } from './types';
+import { SkillListParams } from './types.js';
 
 export class SkillRepository {
   constructor(private supabase: SupabaseClient) {}

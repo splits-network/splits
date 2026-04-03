@@ -3,9 +3,9 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams } from '@splits-network/shared-types';
-import { EscrowHoldServiceV2 } from './service';
-import { EscrowHoldStatsRepository } from './stats-repository';
-import { EscrowHoldFilters, EscrowHoldUpdate } from './types';
+import { EscrowHoldServiceV2 } from './service.js';
+import { EscrowHoldStatsRepository } from './stats-repository.js';
+import { EscrowHoldFilters, EscrowHoldUpdate } from './types.js';
 
 export async function escrowHoldRoutes(
     app: FastifyInstance,

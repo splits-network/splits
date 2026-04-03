@@ -7,8 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { TagRepository } from './repository';
-import { CreateTagInput, TagListParams } from './types';
+import { TagRepository } from './repository.js';
+import { CreateTagInput, TagListParams } from './types.js';
 
 export class TagService {
   private accessResolver: AccessContextResolver;

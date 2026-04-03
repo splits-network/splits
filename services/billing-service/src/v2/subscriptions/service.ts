@@ -1,10 +1,10 @@
 import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../shared/events';
-import { buildPaginationResponse, isBillingAdmin } from '../shared/helpers';
-import type { AccessContext } from '../shared/access';
-import { PlanRepository } from '../plans/repository';
-import { SubscriptionRepository } from './repository';
+import { IEventPublisher } from '../shared/events.js';
+import { buildPaginationResponse, isBillingAdmin } from '../shared/helpers.js';
+import type { AccessContext } from '../shared/access.js';
+import { PlanRepository } from '../plans/repository.js';
+import { SubscriptionRepository } from './repository.js';
 import {
     SubscriptionCreateInput,
     SubscriptionListFilters,
@@ -18,7 +18,7 @@ import {
     UpdatePaymentMethodResponse,
     InvoicesResponse,
     Invoice,
-} from './types';
+} from './types.js';
 
 export class SubscriptionServiceV2 {
     private stripe: Stripe;

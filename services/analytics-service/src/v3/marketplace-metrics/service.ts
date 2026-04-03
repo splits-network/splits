@@ -8,12 +8,12 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { MarketplaceMetricRepository } from './repository';
+import { MarketplaceMetricRepository } from './repository.js';
 import {
   CreateMetricInput,
   UpdateMetricInput,
   MarketplaceMetricListParams,
-} from './types';
+} from './types.js';
 
 export class MarketplaceMetricService {
   private accessResolver: AccessContextResolver;

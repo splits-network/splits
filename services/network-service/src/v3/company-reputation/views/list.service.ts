@@ -7,8 +7,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { CompanyReputationListParams } from '../types';
-import { CompanyReputationListViewRepository } from './list.repository';
+import { CompanyReputationListParams } from '../types.js';
+import { CompanyReputationListViewRepository } from './list.repository.js';
 
 export class CompanyReputationListViewService {
   constructor(

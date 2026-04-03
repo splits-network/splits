@@ -8,7 +8,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { CompanyContactsRepository } from './contacts.repository';
+import { CompanyContactsRepository } from './contacts.repository.js';
 
 export class CompanyContactsService {
   private accessResolver: AccessContextResolver;

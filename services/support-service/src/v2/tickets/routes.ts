@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { EventPublisher, IEventPublisher } from '../shared/events';
-import { SupportEventPublisher } from '../support/events';
-import { TicketRepository } from './repository';
-import { TicketService } from './service';
-import { requireSupportIdentity, requireAdminContext } from '../shared/helpers';
+import { EventPublisher, IEventPublisher } from '../shared/events.js';
+import { SupportEventPublisher } from '../support/events.js';
+import { TicketRepository } from './repository.js';
+import { TicketService } from './service.js';
+import { requireSupportIdentity, requireAdminContext } from '../shared/helpers.js';
 
 interface RegisterTicketRoutesConfig {
     supabaseUrl: string;

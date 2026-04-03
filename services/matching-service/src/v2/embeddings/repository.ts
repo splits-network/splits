@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SimilarityResult } from './types';
+import { SimilarityResult } from './types.js';
 
 export class EmbeddingRepository {
     constructor(private supabase: SupabaseClient) {}

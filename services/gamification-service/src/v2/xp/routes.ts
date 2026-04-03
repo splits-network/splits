@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { XpService } from './service';
-import { getOptionalUserContext } from '../shared/helpers';
-import { validatePaginationParams } from '../shared/pagination';
-import { BadgeEntityType } from '../badges/definitions/types';
+import { XpService } from './service.js';
+import { getOptionalUserContext } from '../shared/helpers.js';
+import { validatePaginationParams } from '../shared/pagination.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
 
 export function registerXpRoutes(
     app: FastifyInstance,

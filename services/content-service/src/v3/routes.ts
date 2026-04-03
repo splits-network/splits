@@ -7,12 +7,12 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerPageRoutes } from './pages/routes';
-import { registerNavigationRoutes } from './navigation/routes';
-import { registerImageRoutes } from './images/routes';
-import { registerTagRoutes } from './tags/routes';
-import { registerPageTagRoutes } from './page-tags/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerPageRoutes } from './pages/routes.js';
+import { registerNavigationRoutes } from './navigation/routes.js';
+import { registerImageRoutes } from './images/routes.js';
+import { registerTagRoutes } from './tags/routes.js';
+import { registerPageTagRoutes } from './page-tags/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

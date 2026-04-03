@@ -2,8 +2,8 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { loadConfig, createSupabaseClient } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
 
 const logger = createLogger("SearchService");
 

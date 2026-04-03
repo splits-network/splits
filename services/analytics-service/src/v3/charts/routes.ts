@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChartServiceV2 } from '../../v2/charts/service';
-import { ChartV3Service } from './service';
-import { ChartType, ChartFilters, chartTypeParamSchema, chartQuerySchema } from './types';
+import { ChartServiceV2 } from '../../v2/charts/service.js';
+import { ChartV3Service } from './service.js';
+import { ChartType, ChartFilters, chartTypeParamSchema, chartQuerySchema } from './types.js';
 
 export function registerChartRoutes(
   app: FastifyInstance,

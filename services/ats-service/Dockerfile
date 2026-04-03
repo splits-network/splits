@@ -13,6 +13,7 @@ COPY packages/shared-logging/package.json ./packages/shared-logging/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-access-context/package.json ./packages/shared-access-context/
 COPY packages/shared-job-queue/package.json ./packages/shared-job-queue/
+COPY packages/shared-ai-client/package.json ./packages/shared-ai-client/
 COPY services/ats-service/package.json ./services/ats-service/
 RUN pnpm install --frozen-lockfile
 
@@ -22,6 +23,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/ats-service ./services/ats-service
 EXPOSE 3002
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build && pnpm --filter @splits-network/shared-ai-client build
 CMD ["pnpm", "--filter", "@splits-network/ats-service", "dev"]
 
 # Build stage
@@ -36,6 +38,7 @@ RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-access-context build
 RUN pnpm --filter @splits-network/shared-job-queue build
+RUN pnpm --filter @splits-network/shared-ai-client build
 # Then build service
 RUN pnpm --filter @splits-network/ats-service build
 # Prune to production dependencies (uses local store, no network)
@@ -62,8 +65,11 @@ COPY --from=build /app/packages/shared-access-context/package.json ./packages/sh
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-job-queue/
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
+COPY --from=build /app/packages/shared-ai-client/package.json ./packages/shared-ai-client/
+COPY --from=build /app/packages/shared-ai-client/dist ./packages/shared-ai-client/dist
 
 # Copy built service
+COPY --from=build /app/services/ats-service/package.json ./services/ats-service/
 COPY --from=build /app/services/ats-service/dist ./services/ats-service/dist
 
 EXPOSE 3002

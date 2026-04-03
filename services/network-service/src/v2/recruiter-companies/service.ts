@@ -4,11 +4,11 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterCompanyRepository } from './repository';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
+import { RecruiterCompanyRepository } from './repository.js';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { RecruiterActivityService } from '../recruiter-activity/service';
+import { RecruiterActivityService } from '../recruiter-activity/service.js';
 import {
     RecruiterCompany,
     RecruiterCompanyCreate,
@@ -20,7 +20,7 @@ import {
     AcceptInvitationRequest,
     TerminateRelationshipRequest,
     RequestConnectionRequest
-} from './types';
+} from './types.js';
 
 export class RecruiterCompanyServiceV2 {
     private accessResolver: AccessContextResolver;

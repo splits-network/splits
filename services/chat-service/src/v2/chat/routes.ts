@@ -1,13 +1,13 @@
 import { FastifyInstance } from "fastify";
 import { randomUUID } from "crypto";
-import { ChatRepository } from "./repository";
-import { ChatServiceV2 } from "./service";
-import { ChatStorageClient } from "./storage";
-import { requireUserContext } from "../shared/helpers";
+import { ChatRepository } from "./repository.js";
+import { ChatServiceV2 } from "./service.js";
+import { ChatStorageClient } from "./storage.js";
+import { requireUserContext } from "../shared/helpers.js";
 import { JobQueue } from "@splits-network/shared-job-queue";
-import { ChatEventPublisher } from "./events";
-import { EventPublisher, IEventPublisher } from "../shared/events";
-import Redis from "ioredis";
+import { ChatEventPublisher } from "./events.js";
+import { EventPublisher, IEventPublisher } from "../shared/events.js";
+import { Redis } from 'ioredis';
 
 interface RegisterChatRoutesConfig {
     supabaseUrl: string;

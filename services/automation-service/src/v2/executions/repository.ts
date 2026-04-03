@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { AutomationExecution, ExecutionFilters, CreateExecutionInput } from './types';
+import { AutomationExecution, ExecutionFilters, CreateExecutionInput } from './types.js';
 
 export class AutomationExecutionRepository {
     private supabase: SupabaseClient;

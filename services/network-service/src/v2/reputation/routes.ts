@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { ReputationServiceV2 } from './service';
-import { requireUserContext } from '../shared/helpers';
-import { validatePaginationParams } from '../shared/pagination';
+import { ReputationServiceV2 } from './service.js';
+import { requireUserContext } from '../shared/helpers.js';
+import { validatePaginationParams } from '../shared/pagination.js';
 
 interface RegisterReputationRoutesConfig {
     reputationService: ReputationServiceV2;

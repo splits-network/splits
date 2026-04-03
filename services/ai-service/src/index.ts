@@ -2,8 +2,11 @@ import {
     loadBaseConfig,
     loadDatabaseConfig,
     loadRabbitMQConfig,
+    loadRedisConfig,
     createSupabaseClient,
 } from "@splits-network/shared-config";
+import { Redis } from "ioredis";
+import { AiClient } from "@splits-network/shared-ai-client";
 import { createLogger } from "@splits-network/shared-logging";
 import {
     buildServer,
@@ -13,16 +16,16 @@ import {
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
-import { DomainEventConsumer } from "./v3/shared/domain-consumer";
-import { AIReviewRepository } from "./v2/reviews/repository";
-import { AIReviewServiceV2 } from "./v2/reviews/service";
-import { ResumeExtractionService } from "./v2/resume-extraction/service";
-import { ResumeExtractionRepository } from "./v2/resume-extraction/repository";
-import { CallPipelineRepository } from "./v2/call-pipeline/repository";
-import { CallPipelineService } from "./v2/call-pipeline/service";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
+import { DomainEventConsumer } from "./v3/shared/domain-consumer.js";
+import { AIReviewRepository } from "./v2/reviews/repository.js";
+import { AIReviewServiceV2 } from "./v2/reviews/service.js";
+import { ResumeExtractionService } from "./v2/resume-extraction/service.js";
+import { ResumeExtractionRepository } from "./v2/resume-extraction/repository.js";
+import { CallPipelineRepository } from "./v2/call-pipeline/repository.js";
+import { CallPipelineService } from "./v2/call-pipeline/service.js";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -120,17 +123,16 @@ async function main() {
         },
     });
 
-    // Initialize V2 event publisher
-    let eventPublisher: EventPublisher | null = null;
+    // Initialize V2 event publisher (non-fatal — ResilientPublisher falls back to outbox)
+    const eventPublisher = new EventPublisher(
+        rabbitConfig.url,
+        logger,
+        baseConfig.serviceName,
+    );
     try {
-        eventPublisher = new EventPublisher(
-            rabbitConfig.url,
-            logger,
-            baseConfig.serviceName,
-        );
         await eventPublisher.connect();
     } catch (error) {
-        logger.error({ err: error }, "Failed to connect event publisher");
+        logger.warn({ err: error }, "Failed to connect event publisher - ResilientPublisher will use outbox only");
     }
 
     // Initialize AI review repository
@@ -142,40 +144,71 @@ async function main() {
     // Create Supabase client (needed for outbox + health check)
     const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
+    // Initialize Redis + AI client for provider-agnostic AI calls
+    const redisConfig = loadRedisConfig();
+    const redis = new Redis({
+        host: redisConfig.host,
+        port: redisConfig.port,
+        password: redisConfig.password || undefined,
+        db: redisConfig.db || 0,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+    });
+    try {
+        await redis.connect();
+    } catch (err) {
+        logger.warn({ err }, 'Redis connection failed — AI config will use DB/env fallback');
+    }
+
+    const aiClient = new AiClient({
+        supabase: supabaseClient,
+        redis,
+        serviceName: 'ai-service',
+        logger,
+        openaiApiKey: process.env.OPENAI_API_KEY || '',
+        anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
+    });
+
     // Set up transactional outbox for durable event delivery
-    const outboxPublisher = eventPublisher ? new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger) : null;
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+
+    // Resilient publisher: tries RabbitMQ first, falls back to outbox
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
 
     // Initialize AI review service (needed for domain consumer)
     const aiReviewService = new AIReviewServiceV2(
         reviewRepository,
-        outboxPublisher || undefined,
+        resilientPublisher,
         logger,
+        aiClient,
     );
 
     // Register V2 routes (passing the same service instance)
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher || undefined,
+        eventPublisher: resilientPublisher,
         logger,
         aiReviewService, // Pass the service instance so routes use the same one
     });
 
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher || undefined,
+        eventPublisher: resilientPublisher,
+        aiClient,
     });
 
     // Initialize resume extraction service and repository
-    const resumeExtractionService = new ResumeExtractionService(logger);
+    const resumeExtractionService = new ResumeExtractionService(logger, aiClient);
     const resumeExtractionRepository = new ResumeExtractionRepository(supabaseClient, logger);
 
     // Initialize generalized call pipeline
     const callPipelineRepository = new CallPipelineRepository(supabaseClient, logger);
     const callPipelineService = new CallPipelineService(
         callPipelineRepository,
-        outboxPublisher || undefined,
+        resilientPublisher,
         logger,
+        aiClient,
     );
 
     // Initialize V3 domain event consumer (listens for application + document + call recording events)
@@ -188,7 +221,8 @@ async function main() {
             resumeExtractionService,
             resumeExtractionRepository,
             callPipelineService: callPipelineService,
-            eventPublisher: outboxPublisher || undefined,
+            eventPublisher: resilientPublisher,
+            aiClient,
             logger,
         });
         await domainConsumer.connect();
@@ -225,6 +259,7 @@ async function main() {
             if (eventPublisher) {
                 await eventPublisher.close();
             }
+            await redis.quit().catch(() => {});
         } finally {
             process.exit(0);
         }

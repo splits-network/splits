@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { BadgeDefinition, BadgeDefinitionCreate, BadgeDefinitionUpdate, BadgeDefinitionFilters } from './types';
+import { BadgeDefinition, BadgeDefinitionCreate, BadgeDefinitionUpdate, BadgeDefinitionFilters } from './types.js';
 
 export class BadgeDefinitionRepository {
     private supabase: SupabaseClient;

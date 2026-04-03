@@ -3,8 +3,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { PrescreenService } from './prescreen.service';
-import { idParamSchema } from '../types';
+import { PrescreenService } from './prescreen.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerPrescreenRoutes(app: FastifyInstance, service: PrescreenService) {
   // POST /api/v3/applications/:id/request-prescreen

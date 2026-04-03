@@ -8,7 +8,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { BadgeProgressRepository } from './repository';
+import { BadgeProgressRepository } from './repository.js';
 
 const querySchema = {
   type: 'object',

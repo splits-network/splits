@@ -4,30 +4,30 @@
  */
 
 import { Resend } from 'resend';
-import { NotificationRepository } from './repository';
+import { NotificationRepository } from './repository.js';
 import { Logger } from '@splits-network/shared-logging';
-import { ApplicationsEmailService } from './services/applications/service';
-import { PlacementsEmailService } from './services/placements/service';
-import { CandidatesEmailService } from './services/candidates/service';
-import { CollaborationEmailService } from './services/collaboration/service';
-import { InvitationsEmailService } from './services/invitations/service';
-import { CompanyInvitationsEmailService } from './services/company-invitations/service';
-import { RecruiterCompanyInvitationsEmailService } from './services/recruiter-company-invitations/service';
-import { RecruiterSubmissionEmailService } from './services/recruiter-submission/service';
-import { SupportEmailService } from './services/support/service';
-import { ChatEmailService } from './services/chat/service';
-import { BillingEmailService } from './services/billing/service';
-import { ReputationEmailService } from './services/reputation/service';
-import { HealthEmailService } from './services/health/service';
-import { OnboardingEmailService } from './services/onboarding/service';
-import { JobsEmailService } from './services/jobs/service';
-import { RelationshipsEmailService } from './services/relationships/service';
-import { SecurityEmailService } from './services/security/service';
-import { RecruiterCodesEmailService } from './services/recruiter-codes/service';
-import { DocumentsEmailService } from './services/documents/service';
-import { EngagementEmailService } from './services/engagement/service';
-import { MatchesEmailService } from './services/matches/service';
-import { CallsEmailService } from './services/calls/service';
+import { ApplicationsEmailService } from './services/applications/service.js';
+import { PlacementsEmailService } from './services/placements/service.js';
+import { CandidatesEmailService } from './services/candidates/service.js';
+import { CollaborationEmailService } from './services/collaboration/service.js';
+import { InvitationsEmailService } from './services/invitations/service.js';
+import { CompanyInvitationsEmailService } from './services/company-invitations/service.js';
+import { RecruiterCompanyInvitationsEmailService } from './services/recruiter-company-invitations/service.js';
+import { RecruiterSubmissionEmailService } from './services/recruiter-submission/service.js';
+import { SupportEmailService } from './services/support/service.js';
+import { ChatEmailService } from './services/chat/service.js';
+import { BillingEmailService } from './services/billing/service.js';
+import { ReputationEmailService } from './services/reputation/service.js';
+import { HealthEmailService } from './services/health/service.js';
+import { OnboardingEmailService } from './services/onboarding/service.js';
+import { JobsEmailService } from './services/jobs/service.js';
+import { RelationshipsEmailService } from './services/relationships/service.js';
+import { SecurityEmailService } from './services/security/service.js';
+import { RecruiterCodesEmailService } from './services/recruiter-codes/service.js';
+import { DocumentsEmailService } from './services/documents/service.js';
+import { EngagementEmailService } from './services/engagement/service.js';
+import { MatchesEmailService } from './services/matches/service.js';
+import { CallsEmailService } from './services/calls/service.js';
 
 export class NotificationService {
     public readonly applications: ApplicationsEmailService;

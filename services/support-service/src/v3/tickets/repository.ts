@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TicketListParams, TicketStatus } from './types';
+import { TicketListParams, TicketStatus } from './types.js';
 
 export class TicketRepository {
   constructor(private supabase: SupabaseClient) {}

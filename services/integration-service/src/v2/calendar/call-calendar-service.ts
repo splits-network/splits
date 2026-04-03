@@ -1,8 +1,8 @@
 import { Logger } from '@splits-network/shared-logging';
-import { ConnectionRepository } from '../connections/repository';
-import { TokenRefreshService } from './token-refresh';
-import { CalendarService, CreateCalendarEventParams, UpdateCalendarEventParams } from './service';
-import { CallCalendarRepository } from './call-calendar-repository';
+import { ConnectionRepository } from '../connections/repository.js';
+import { TokenRefreshService } from './token-refresh.js';
+import { CalendarService, CreateCalendarEventParams, UpdateCalendarEventParams } from './service.js';
+import { CallCalendarRepository } from './call-calendar-repository.js';
 
 /* ── Input types ───────────────────────────────────────────────────────── */
 

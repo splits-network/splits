@@ -4,8 +4,8 @@
  * Used for both 24h and 1h reminders (timeUntil param varies).
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, alert } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, alert } from '../components.js';
 
 export interface CallReminderData {
     title?: string;

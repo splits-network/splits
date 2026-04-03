@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { CompanyReputationRepository } from './repository';
-import { CompanyReputationListParams } from './types';
+import { CompanyReputationRepository } from './repository.js';
+import { CompanyReputationListParams } from './types.js';
 
 export class CompanyReputationService {
   private accessResolver: AccessContextResolver;

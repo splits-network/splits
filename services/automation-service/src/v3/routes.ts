@@ -4,12 +4,12 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerRuleRoutes } from './rules/routes';
-import { registerExecutionRoutes } from './executions/routes';
-import { registerFraudSignalRoutes } from './fraud-signals/routes';
-import { registerMetricRoutes } from './metrics/routes';
-import { registerReputationRoutes } from './reputation/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerRuleRoutes } from './rules/routes.js';
+import { registerExecutionRoutes } from './executions/routes.js';
+import { registerFraudSignalRoutes } from './fraud-signals/routes.js';
+import { registerMetricRoutes } from './metrics/routes.js';
+import { registerReputationRoutes } from './reputation/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

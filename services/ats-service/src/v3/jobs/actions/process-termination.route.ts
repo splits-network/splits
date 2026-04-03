@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { ProcessTerminationRepository } from './process-termination.repository';
-import { ProcessTerminationService } from './process-termination.service';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { ProcessTerminationRepository } from './process-termination.repository.js';
+import { ProcessTerminationService } from './process-termination.service.js';
 
 const bodySchema = {
   type: 'object',

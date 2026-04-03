@@ -12,8 +12,8 @@ import {
     setupProcessErrorHandlers,
 } from '@splits-network/shared-fastify';
 import { EventPublisher } from '@splits-network/shared-job-queue';
-import { CentralOutboxWorker } from './outbox-worker';
-import { OutboxCleanup } from './outbox-cleanup';
+import { CentralOutboxWorker } from './outbox-worker.js';
+import { OutboxCleanup } from './outbox-cleanup.js';
 
 async function main() {
     const baseConfig = loadBaseConfig('outbox-service');

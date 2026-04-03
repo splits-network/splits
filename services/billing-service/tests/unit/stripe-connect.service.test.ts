@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { StripeConnectService } from '../../src/v2/connect/service';
-import type { AccessContext } from '../../src/v2/shared/access';
+import { StripeConnectService } from '../../src/v2/connect/service.js';
+import type { AccessContext } from '../../src/v2/shared/access.js';
 
 const mockStripe = vi.hoisted(() => ({
     customers: {

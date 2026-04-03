@@ -5,7 +5,7 @@
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError, NotFoundError } from '@splits-network/shared-fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterDetailRepository } from './recruiter-detail.repository';
+import { RecruiterDetailRepository } from './recruiter-detail.repository.js';
 
 export class RecruiterDetailService {
   private accessResolver: AccessContextResolver;

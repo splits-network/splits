@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MembershipListParams } from './types';
+import { MembershipListParams } from './types.js';
 
 export class MembershipRepository {
   constructor(private supabase: SupabaseClient) {}

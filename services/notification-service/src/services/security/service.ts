@@ -1,8 +1,8 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
-import { fraudAlertEmail, FraudAlertData, securityReplayAlertEmail, SecurityReplayAlertData } from '../../templates/security';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
+import { fraudAlertEmail, FraudAlertData, securityReplayAlertEmail, SecurityReplayAlertData } from '../../templates/security/index.js';
 
 export class SecurityEmailService {
     constructor(

@@ -4,17 +4,17 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { DocumentRepository } from './repository';
-import { DocumentService } from './service';
-import { registerFriendlyListView } from './views/friendly-list.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { DocumentRepository } from './repository.js';
+import { DocumentService } from './service.js';
+import { registerFriendlyListView } from './views/friendly-list.route.js';
 import {
   DocumentListParams,
   UpdateDocumentInput,
   listQuerySchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerDocumentRoutes(
   app: FastifyInstance,

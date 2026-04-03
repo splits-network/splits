@@ -7,10 +7,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ApplicationRepository, ApplicationScopeFilters } from './repository';
-import { CreateApplicationInput, UpdateApplicationInput, ApplicationListParams } from './types';
-import { validateStageTransition, authorizeStageTransition } from './actions/stage-validation';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ApplicationRepository, ApplicationScopeFilters } from './repository.js';
+import { CreateApplicationInput, UpdateApplicationInput, ApplicationListParams } from './types.js';
+import { validateStageTransition, authorizeStageTransition } from './actions/stage-validation.js';
 
 const COMPANY_VISIBLE_STAGES = [
   'submitted', 'company_review', 'company_feedback',

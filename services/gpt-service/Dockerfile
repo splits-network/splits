@@ -12,6 +12,7 @@ COPY packages/shared-fastify/package.json ./packages/shared-fastify/
 COPY packages/shared-logging/package.json ./packages/shared-logging/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-access-context/package.json ./packages/shared-access-context/
+COPY packages/shared-job-queue/package.json ./packages/shared-job-queue/
 COPY services/gpt-service/package.json ./services/gpt-service/
 RUN pnpm install --frozen-lockfile
 
@@ -21,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/gpt-service ./services/gpt-service
 EXPOSE 3014
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/gpt-service", "dev"]
 
 # Build stage
@@ -34,6 +36,7 @@ RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-access-context build
+RUN pnpm --filter @splits-network/shared-job-queue build
 RUN pnpm --filter @splits-network/gpt-service build
 # Prune to production dependencies (uses local store, no network)
 RUN pnpm install --prod --frozen-lockfile
@@ -57,8 +60,11 @@ COPY --from=build /app/packages/shared-types/package.json ./packages/shared-type
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/packages/shared-access-context/package.json ./packages/shared-access-context/
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
+COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-job-queue/
+COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 # Copy built service
+COPY --from=build /app/services/gpt-service/package.json ./services/gpt-service/
 COPY --from=build /app/services/gpt-service/dist ./services/gpt-service/dist
 COPY --from=build /app/services/gpt-service/src/openapi.yaml ./services/gpt-service/dist/openapi.yaml
 COPY --from=build /app/services/gpt-service/src/v2/mcp/widgets/*.html ./services/gpt-service/dist/v2/mcp/widgets/

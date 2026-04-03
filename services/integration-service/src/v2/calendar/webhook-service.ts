@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { Logger } from '@splits-network/shared-logging';
-import { ConnectionRepository } from '../connections/repository';
-import { TokenRefreshService } from './token-refresh';
+import { ConnectionRepository } from '../connections/repository.js';
+import { TokenRefreshService } from './token-refresh.js';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 

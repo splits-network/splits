@@ -4,15 +4,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { CompanyInvitationRepository } from './repository';
-import { CompanyInvitationService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { CompanyInvitationRepository } from './repository.js';
+import { CompanyInvitationService } from './service.js';
 import {
   CompanyInvitationListParams, CreateCompanyInvitationInput, CompleteRelationshipInput,
   listQuerySchema, createSchema, completeRelationshipSchema, lookupQuerySchema, idParamSchema,
-} from './types';
-import { registerCompanyInvitationDetailView } from './views/detail.route';
-import { registerCompanyInvitationListView } from './views/list.route';
+} from './types.js';
+import { registerCompanyInvitationDetailView } from './views/detail.route.js';
+import { registerCompanyInvitationListView } from './views/list.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

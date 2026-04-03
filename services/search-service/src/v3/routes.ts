@@ -4,7 +4,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { registerSearchRoutes } from './search/routes';
+import { registerSearchRoutes } from './search/routes.js';
 
 interface RegisterV3Config {
   supabase: SupabaseClient;

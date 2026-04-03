@@ -7,8 +7,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ListForCandidateViewRepository } from './list-for-candidate.repository';
-import { ListForCandidateViewService } from './list-for-candidate.service';
+import { ListForCandidateViewRepository } from './list-for-candidate.repository.js';
+import { ListForCandidateViewService } from './list-for-candidate.service.js';
 
 export function registerListForCandidateView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new ListForCandidateViewRepository(supabase);

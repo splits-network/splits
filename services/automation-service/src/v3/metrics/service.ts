@@ -5,8 +5,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { MetricRepository } from './repository';
-import { MetricListParams } from './types';
+import { MetricRepository } from './repository.js';
+import { MetricListParams } from './types.js';
 
 export class MetricService {
   private accessResolver: AccessContextResolver;

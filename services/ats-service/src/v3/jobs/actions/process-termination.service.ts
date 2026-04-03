@@ -4,8 +4,8 @@
  */
 
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { ProcessTerminationRepository, TerminationDecision } from './process-termination.repository';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { ProcessTerminationRepository, TerminationDecision } from './process-termination.repository.js';
 
 export class ProcessTerminationService {
   constructor(

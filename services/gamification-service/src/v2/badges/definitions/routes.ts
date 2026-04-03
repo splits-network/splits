@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { BadgeDefinitionService } from './service';
-import { requireUserContext, getOptionalUserContext } from '../../shared/helpers';
-import { validatePaginationParams } from '../../shared/pagination';
+import { BadgeDefinitionService } from './service.js';
+import { requireUserContext, getOptionalUserContext } from '../../shared/helpers.js';
+import { validatePaginationParams } from '../../shared/pagination.js';
 
 export function registerBadgeDefinitionRoutes(
     app: FastifyInstance,

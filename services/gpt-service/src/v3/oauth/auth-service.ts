@@ -6,8 +6,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { TokenUtils } from './token-utils';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { TokenUtils } from './token-utils.js';
 import {
   GPT_SCOPES,
   AuthorizeParams,
@@ -16,7 +16,7 @@ import {
   TokenResponse,
   ValidatedToken,
   OAuthError,
-} from '../../v2/oauth/types';
+} from '../../v2/oauth/types.js';
 
 export class OAuthAuthService {
   private tokens: TokenUtils;

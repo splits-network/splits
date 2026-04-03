@@ -4,8 +4,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TerminationImpactRepository } from './termination-impact.repository';
-import { TerminationImpactService } from './termination-impact.service';
+import { TerminationImpactRepository } from './termination-impact.repository.js';
+import { TerminationImpactService } from './termination-impact.service.js';
 
 const querySchema = {
   type: 'object',

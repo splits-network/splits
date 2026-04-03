@@ -3,9 +3,9 @@
  * Business logic and event publishing
  */
 
-import { ApplicationNoteRepository } from './repository';
-import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate, ApplicationNote } from './types';
-import { IEventPublisher } from '../shared/events';
+import { ApplicationNoteRepository } from './repository.js';
+import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate, ApplicationNote } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListResponse } from '@splits-network/shared-types';

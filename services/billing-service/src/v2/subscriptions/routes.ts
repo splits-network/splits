@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { SubscriptionServiceV2 } from './service';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { SetupIntentRequest, ActivateSubscriptionRequest, UpdatePaymentMethodRequest } from './types';
+import { SubscriptionServiceV2 } from './service.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { SetupIntentRequest, ActivateSubscriptionRequest, UpdatePaymentMethodRequest } from './types.js';
 
 interface RegisterSubscriptionRoutesConfig {
     subscriptionService: SubscriptionServiceV2;

@@ -8,14 +8,14 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { SupportEventPublisher } from "../shared/support-event-publisher";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { SupportEventPublisher } from "../shared/support-event-publisher.js";
 import {
     requireSupportIdentity,
     getSupportContext,
-} from "../../v2/shared/helpers";
-import { SupportConversationRepository } from "./repository";
-import { SupportConversationService } from "./service";
+} from "../../v2/shared/helpers.js";
+import { SupportConversationRepository } from "./repository.js";
+import { SupportConversationService } from "./service.js";
 import {
     SupportConversationListParams,
     CreateSupportConversationInput,
@@ -26,10 +26,10 @@ import {
     updateSchema,
     idParamSchema,
     sendMessageSchema,
-} from "./types";
-import { registerLinkSessionAction } from "./actions/link-session.route";
-import { registerConversationClaimAction } from "./actions/claim.route";
-import { registerAdminDetailView } from "./views/admin-detail.route";
+} from "./types.js";
+import { registerLinkSessionAction } from "./actions/link-session.route.js";
+import { registerConversationClaimAction } from "./actions/claim.route.js";
+import { registerAdminDetailView } from "./views/admin-detail.route.js";
 
 export function registerSupportConversationRoutes(
     app: FastifyInstance,

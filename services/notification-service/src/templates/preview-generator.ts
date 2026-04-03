@@ -24,15 +24,15 @@ import {
     proposalAcceptedByApplicationEmail,
     proposalDeclinedByApplicationEmail,
     applicationNoteCreatedEmail,
-} from './applications';
+} from './applications/index.js';
 import {
     candidateOfferReceivedEmail,
     candidateHiredEmail,
-} from './applications/candidate-emails';
+} from './applications/candidate-emails.js';
 import {
     recruiterOfferExtendedEmail,
     recruiterCandidateHiredEmail,
-} from './applications/recruiter-emails';
+} from './applications/recruiter-emails.js';
 import {
     placementCreatedEmail,
     placementActivatedEmail,
@@ -40,7 +40,7 @@ import {
     placementFailedEmail,
     guaranteeExpiringEmail,
     firstPlacementEmail,
-} from './placements';
+} from './placements/index.js';
 import {
     candidateSourcedEmail,
     ownershipConflictEmail,
@@ -50,70 +50,70 @@ import {
     candidateInvitationEmail,
     consentGivenEmail,
     consentDeclinedEmail,
-} from './candidates';
+} from './candidates/index.js';
 import {
     companyPlatformInvitationEmail,
     companyInvitationAcceptedEmail,
-} from './company-invitations';
+} from './company-invitations/index.js';
 import {
     serviceUnhealthyEmail,
     serviceRecoveredEmail,
-} from './health';
+} from './health/index.js';
 import {
     firmInvitationEmail,
     invitationRevokedEmail,
-} from './invitations';
+} from './invitations/index.js';
 import {
     newOpportunityEmail,
     candidateApprovedEmail,
     candidateDeclinedEmail,
     opportunityExpiredEmail,
-} from './recruiter-submission';
+} from './recruiter-submission/index.js';
 import {
     tierPromotionEmail,
     tierDemotionEmail,
-} from './reputation';
+} from './reputation/index.js';
 import {
     companyTierPromotionEmail,
     companyTierDemotionEmail,
-} from './reputation/company-emails';
+} from './reputation/company-emails.js';
 import {
     stripeConnectOnboardedEmail,
     stripeConnectDisabledEmail,
     companyBillingSetupCompleteEmail,
     payoutConnectRequiredEmail,
-} from './billing';
+} from './billing/index.js';
 import {
     recruiterCompanyInvitationEmail,
     recruiterCompanyAcceptedEmail,
     recruiterCompanyDeclinedEmail,
-} from './recruiter-company-invitations';
+} from './recruiter-company-invitations/index.js';
 import {
     welcomeEmail,
     recruiterOnboardingEmail,
     companyWelcomeEmail,
-} from './onboarding';
+} from './onboarding/index.js';
 import {
     jobCreatedConfirmationEmail,
     jobStatusChangedEmail,
     jobExpiredEmail,
     firstJobPostedEmail,
-} from './jobs';
+} from './jobs/index.js';
 import {
     connectionRequestedEmail,
     relationshipTerminatedEmail,
     invitationCancelledEmail,
-} from './relationships';
-import { fraudAlertEmail, securityReplayAlertEmail } from './security';
-import { invitationAcceptedEmail } from './invitations';
-import { referralCodeRedeemedEmail } from './recruiter-codes';
-import { resumeProcessedEmail } from './documents';
+} from './relationships/index.js';
+import { fraudAlertEmail, securityReplayAlertEmail } from './security/index.js';
+import { invitationAcceptedEmail } from './invitations/index.js';
+import { referralCodeRedeemedEmail } from './recruiter-codes/index.js';
+import { resumeProcessedEmail } from './documents/index.js';
 import {
     weeklyActivityDigestEmail,
     monthlyHiringReportEmail,
     candidateProfileReminderEmail,
     recruiterInactivityReminderEmail,
-} from './engagement';
+} from './engagement/index.js';
 import {
     payoutProcessedEmail,
     payoutFailedEmail,
@@ -121,7 +121,7 @@ import {
     escrowAutoReleasedEmail,
     invoicePaidEmail,
     subscriptionCancelledEmail,
-} from './billing';
+} from './billing/index.js';
 
 const OUTPUT_DIR = path.join(__dirname, '../../email-previews');
 

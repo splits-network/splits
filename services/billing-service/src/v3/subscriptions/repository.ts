@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SubscriptionListParams } from './types';
+import { SubscriptionListParams } from './types.js';
 
 export interface SubscriptionScopeFilters {
   user_id?: string;

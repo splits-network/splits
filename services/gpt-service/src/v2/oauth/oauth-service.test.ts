@@ -4,11 +4,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { OAuthService } from './oauth-service';
-import { OAuthError } from './types';
+import { OAuthService } from './oauth-service.js';
+import { OAuthError } from './types.js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { GptConfig } from '@splits-network/shared-config';
-import type { EventPublisher } from '../shared/events';
+import type { EventPublisher } from '../shared/events.js';
 import type { Logger } from '@splits-network/shared-logging';
 
 // Mock logger

@@ -1,4 +1,4 @@
-import { ServiceDefinition } from "./types";
+import { ServiceDefinition } from "./types.js";
 
 export function loadServiceDefinitions(): ServiceDefinition[] {
     return [

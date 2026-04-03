@@ -5,20 +5,23 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { AIReviewRepository } from './repository';
-import { AIReviewService } from './service';
+import type { IAiClient } from '@splits-network/shared-ai-client';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { AIReviewRepository } from './repository.js';
+import { AIReviewService } from './service.js';
 import {
   CreateReviewInput, AIReviewListParams,
   idParamSchema, listQuerySchema, createReviewSchema,
-} from './types';
-import { registerJobStatsViewRoute } from './views/job-stats.route';
-import { registerAnalyzeActionRoute } from './actions/analyze.route';
+} from './types.js';
+import { registerJobStatsViewRoute } from './views/job-stats.route.js';
+import { registerAnalyzeActionRoute } from './actions/analyze.route.js';
+import { registerGenerateResumeActionRoute } from './actions/generate-resume.route.js';
 
 export function registerReviewRoutes(
   app: FastifyInstance,
   supabase: SupabaseClient,
   eventPublisher?: IEventPublisher,
+  aiClient?: IAiClient,
 ) {
   const repository = new AIReviewRepository(supabase);
   const service = new AIReviewService(repository, supabase, eventPublisher);
@@ -26,6 +29,7 @@ export function registerReviewRoutes(
   // Register views and actions BEFORE parameterized routes to avoid collisions
   registerJobStatsViewRoute(app, supabase);
   registerAnalyzeActionRoute(app, supabase, eventPublisher);
+  registerGenerateResumeActionRoute(app, supabase, aiClient);
 
   // GET /api/v3/ai-reviews
   app.get('/api/v3/ai-reviews', {

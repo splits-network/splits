@@ -3,11 +3,11 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
 import { EntitlementChecker } from '@splits-network/shared-access-context';
-import { FirmRepository } from './repository';
-import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmRequest, CreateFirmInvitationRequest, TransferOwnershipRequest, PublicFirmFilters, VALID_PLACEMENT_TYPES, VALID_TEAM_SIZE_RANGES } from './types';
+import { FirmRepository } from './repository.js';
+import { buildPaginationResponse, PaginationResponse } from '../shared/pagination.js';
+import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmRequest, CreateFirmInvitationRequest, TransferOwnershipRequest, PublicFirmFilters, VALID_PLACEMENT_TYPES, VALID_TEAM_SIZE_RANGES } from './types.js';
 
 export class FirmServiceV2 {
     private entitlementChecker: EntitlementChecker;

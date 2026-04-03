@@ -1,7 +1,7 @@
 import amqp, { Connection, Channel, ConsumeMessage } from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { MatchingOrchestrator } from './v2/matches/matching-orchestrator';
+import { MatchingOrchestrator } from './v2/matches/matching-orchestrator.js';
 
 /**
  * Domain Event Consumer for Matching Service
@@ -11,6 +11,7 @@ import { MatchingOrchestrator } from './v2/matches/matching-orchestrator';
  * - job.created / job.updated → score job against eligible candidates
  * - job.status_changed → remove matches for closed/paused jobs
  * - resume.metadata.extracted → re-score candidate with enriched data
+ * - smart_resume.updated → re-score candidate with smart resume data
  */
 export class DomainEventConsumer {
     private connection: Connection | null = null;
@@ -41,6 +42,7 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'job.updated');
             await this.channel.bindQueue(this.queue, this.exchange, 'job.status_changed');
             await this.channel.bindQueue(this.queue, this.exchange, 'resume.metadata.extracted');
+            await this.channel.bindQueue(this.queue, this.exchange, 'smart_resume.updated');
 
             this.logger.info({
                 exchange: this.exchange,
@@ -48,7 +50,7 @@ export class DomainEventConsumer {
                 bindings: [
                     'candidate.created', 'candidate.updated',
                     'job.created', 'job.updated', 'job.status_changed',
-                    'resume.metadata.extracted',
+                    'resume.metadata.extracted', 'smart_resume.updated',
                 ],
             }, 'Matching service connected to RabbitMQ');
 
@@ -120,6 +122,12 @@ export class DomainEventConsumer {
                 if (payload.entity_type === 'candidate' && payload.structured_data_available) {
                     await this.orchestrator.triggerForCandidate(payload.entity_id);
                 }
+                break;
+
+            case 'smart_resume.updated':
+                await this.orchestrator.triggerForCandidate(
+                    payload.candidateId || payload.candidate_id
+                );
                 break;
 
             default:

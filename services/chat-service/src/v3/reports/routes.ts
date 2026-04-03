@@ -8,21 +8,21 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ReportRepository } from './repository';
-import { ReportService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ReportRepository } from './repository.js';
+import { ReportService } from './service.js';
 import {
   ReportListParams,
   UpdateReportInput,
   listQuerySchema,
   updateReportSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 // --- View/Action registrations ---
-import { registerEvidenceView } from './views/evidence.route';
-import { registerSubmitAction } from './actions/submit.route';
-import { registerModerateAction } from './actions/moderate.route';
+import { registerEvidenceView } from './views/evidence.route.js';
+import { registerSubmitAction } from './actions/submit.route.js';
+import { registerModerateAction } from './actions/moderate.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

@@ -8,9 +8,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError, BadRequestError } from '@splits-network/shared-fastify';
-import { NotificationRepository } from './repository';
-import { NotificationListParams, NotificationUpdateInput } from './types';
-import { IEventPublisher } from '../../v2/shared/events';
+import { NotificationRepository } from './repository.js';
+import { NotificationListParams, NotificationUpdateInput } from './types.js';
+import { IEventPublisher } from '../../v2/shared/events.js';
 
 export class NotificationService {
     private accessResolver: AccessContextResolver;
@@ -87,5 +87,11 @@ export class NotificationService {
     async getCountsByCategory(clerkUserId: string) {
         const userId = await this.resolveUserId(clerkUserId);
         return this.repository.countUnreadByCategory(userId);
+    }
+
+    async markAsReadByCategory(clerkUserId: string, category: string) {
+        const userId = await this.resolveUserId(clerkUserId);
+        const count = await this.repository.markAsReadByCategory(userId, category);
+        return { marked: count };
     }
 }

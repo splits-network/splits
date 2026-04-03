@@ -3,8 +3,8 @@
  * Salary visibility enforcement, skill enrichment
  */
 
-import { CandidateListingRepository } from './candidate-listing.repository';
-import { JobListParams } from '../types';
+import { CandidateListingRepository } from './candidate-listing.repository.js';
+import { JobListParams } from '../types.js';
 
 export class CandidateListingService {
   constructor(private repository: CandidateListingRepository) {}

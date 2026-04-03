@@ -7,8 +7,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { PushSubscriptionRepository } from './repository';
-import { PushSubscriptionInput, PushSubscriptionRecord } from './types';
+import { PushSubscriptionRepository } from './repository.js';
+import { PushSubscriptionInput, PushSubscriptionRecord } from './types.js';
 
 export class PushSubscriptionService {
   private accessResolver: AccessContextResolver;

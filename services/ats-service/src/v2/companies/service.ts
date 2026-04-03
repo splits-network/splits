@@ -3,13 +3,13 @@
  * Handles ALL company updates with smart validation
  */
 
-import { CompanyRepository } from './repository';
-import { CompanyFilters, CompanyUpdate } from './types';
-import { IEventPublisher } from '../shared/events';
-import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { CompanyRepository } from './repository.js';
+import { CompanyFilters, CompanyUpdate } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
+import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination.js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { BillingProfileRepository } from './billing-profile-repository';
+import { BillingProfileRepository } from './billing-profile-repository.js';
 
 export class CompanyServiceV2 {
     private accessResolver: AccessContextResolver;

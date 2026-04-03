@@ -3,8 +3,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { ProposalService } from './proposal.service';
-import { idParamSchema } from '../types';
+import { ProposalService } from './proposal.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerProposalRoutes(app: FastifyInstance, service: ProposalService) {
   // POST /api/v3/applications/propose

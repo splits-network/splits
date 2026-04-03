@@ -8,10 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { StartActionRepository } from './start.repository';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { assertContextAccess } from '../lib/context-access';
+import { StartActionRepository } from './start.repository.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { assertContextAccess } from '../lib/context-access.js';
 
 interface StartInput {
   participantUserId: string;

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AssignmentServiceV2 } from '../../src/v2/assignments/service';
+import { AssignmentServiceV2 } from '../../src/v2/assignments/service.js';
 
 describe('AssignmentServiceV2 (unit)', () => {
     const repository = {

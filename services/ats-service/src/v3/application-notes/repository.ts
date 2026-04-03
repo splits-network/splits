@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ApplicationNoteListParams } from './types';
+import { ApplicationNoteListParams } from './types.js';
 
 export class ApplicationNoteRepository {
   constructor(private supabase: SupabaseClient) {}

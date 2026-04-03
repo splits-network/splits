@@ -1,4 +1,4 @@
-import { BadgeEntityType } from '../badges/definitions/types';
+import { BadgeEntityType } from '../badges/definitions/types.js';
 
 export type LeaderboardPeriod = 'weekly' | 'monthly' | 'quarterly' | 'all_time';
 

@@ -5,10 +5,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { JobRecommendationRepository } from './repository';
-import { JobRecommendationService } from './service';
-import { registerJobRecommendationDetailView } from './views/detail.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { JobRecommendationRepository } from './repository.js';
+import { JobRecommendationService } from './service.js';
+import { registerJobRecommendationDetailView } from './views/detail.route.js';
 import {
   CreateJobRecommendationInput,
   UpdateJobRecommendationInput,
@@ -17,7 +17,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerJobRecommendationRoutes(
   app: FastifyInstance,

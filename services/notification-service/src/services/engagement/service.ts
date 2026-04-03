@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
 import {
     weeklyActivityDigestEmail,
     WeeklyDigestData,
@@ -22,7 +22,7 @@ import {
     companyAftercareEmail,
     getCompanyAftercareSubject,
     CompanyAftercareData,
-} from '../../templates/engagement';
+} from '../../templates/engagement/index.js';
 
 export class EngagementEmailService {
     constructor(

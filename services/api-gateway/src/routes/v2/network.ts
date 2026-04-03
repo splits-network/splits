@@ -1,14 +1,14 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { requireAuth, optionalAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
+import { ServiceRegistry } from '../../clients.js';
+import { requireAuth, optionalAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
 import {
     ResourceDefinition,
     registerResourceRoutes,
     getCorrelationId,
-} from './common';
-import { registerPublicFirmGatewayRoutes } from './public-firms';
-import { registerPublicRecruiterGatewayRoutes } from './public-recruiters';
+} from './common.js';
+import { registerPublicFirmGatewayRoutes } from './public-firms.js';
+import { registerPublicRecruiterGatewayRoutes } from './public-recruiters.js';
 
 const NETWORK_RESOURCES: ResourceDefinition[] = [
     {

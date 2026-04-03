@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { DocumentListParams } from './types';
+import { DocumentListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'processing_status'];
 

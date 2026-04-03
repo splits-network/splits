@@ -8,8 +8,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, BadRequestError } from '@splits-network/shared-fastify';
-import { MessagingCounterRepository } from './repository';
-import { MessagingCounterListParams } from './types';
+import { MessagingCounterRepository } from './repository.js';
+import { MessagingCounterListParams } from './types.js';
 
 export class MessagingCounterService {
   private accessResolver: AccessContextResolver;

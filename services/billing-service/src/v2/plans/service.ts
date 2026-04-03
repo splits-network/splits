@@ -1,9 +1,9 @@
-import { IEventPublisher } from '../shared/events';
-import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers';
-import type { AccessContext } from '../shared/access';
-import { PlanRepository } from './repository';
-import { Plan, PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types';
-import type { SplitsRateService } from '../splits-rates/service';
+import { IEventPublisher } from '../shared/events.js';
+import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers.js';
+import type { AccessContext } from '../shared/access.js';
+import { PlanRepository } from './repository.js';
+import { Plan, PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types.js';
+import type { SplitsRateService } from '../splits-rates/service.js';
 
 export class PlanServiceV2 {
     private splitsRateService?: SplitsRateService;

@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/automation-service ./services/automation-service
 EXPOSE 3007
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-job-queue build && pnpm --filter @splits-network/shared-access-context build
 CMD ["pnpm", "--filter", "@splits-network/automation-service", "dev"]
 
 # Build stage
@@ -64,6 +65,7 @@ COPY --from=build /app/packages/shared-access-context/package.json ./packages/sh
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 
 # Copy built service
+COPY --from=build /app/services/automation-service/package.json ./services/automation-service/
 COPY --from=build /app/services/automation-service/dist ./services/automation-service/dist
 
 EXPOSE 3007

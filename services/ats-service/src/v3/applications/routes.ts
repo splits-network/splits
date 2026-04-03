@@ -4,31 +4,31 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ApplicationRepository } from './repository';
-import { ApplicationService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ApplicationRepository } from './repository.js';
+import { ApplicationService } from './service.js';
 import {
   ApplicationListParams, CreateApplicationInput, UpdateApplicationInput,
   listQuerySchema, createSchema, updateSchema, idParamSchema,
-} from './types';
+} from './types.js';
 
 // Action services
-import { ProposalService } from './actions/proposal.service';
-import { HireService } from './actions/hire.service';
-import { AIReviewService } from './actions/ai-review.service';
-import { PrescreenService } from './actions/prescreen.service';
-import { TerminationService } from './actions/termination.service';
+import { ProposalService } from './actions/proposal.service.js';
+import { HireService } from './actions/hire.service.js';
+import { AIReviewService } from './actions/ai-review.service.js';
+import { PrescreenService } from './actions/prescreen.service.js';
+import { TerminationService } from './actions/termination.service.js';
 
 // View routes
-import { registerApplicationListingView } from './views/listing.route';
-import { registerApplicationDetailView } from './views/detail.route';
+import { registerApplicationListingView } from './views/listing.route.js';
+import { registerApplicationDetailView } from './views/detail.route.js';
 
 // Action routes
-import { registerProposalRoutes } from './actions/proposal.route';
-import { registerHireRoutes } from './actions/hire.route';
-import { registerAIReviewRoutes } from './actions/ai-review.route';
-import { registerPrescreenRoutes } from './actions/prescreen.route';
-import { registerTerminationRoutes } from './actions/termination.route';
+import { registerProposalRoutes } from './actions/proposal.route.js';
+import { registerHireRoutes } from './actions/hire.route.js';
+import { registerAIReviewRoutes } from './actions/ai-review.route.js';
+import { registerPrescreenRoutes } from './actions/prescreen.route.js';
+import { registerTerminationRoutes } from './actions/termination.route.js';
 
 export function registerApplicationRoutes(
   app: FastifyInstance,

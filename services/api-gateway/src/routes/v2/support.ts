@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceRegistry } from '../../clients';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { buildQueryString, getCorrelationId } from './common';
+import { ServiceRegistry } from '../../clients.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
+import { buildQueryString, getCorrelationId } from './common.js';
 
 export function registerSupportRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const supportService = () => services.get('support');

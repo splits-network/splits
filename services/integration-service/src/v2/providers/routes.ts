@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { ProviderRepository } from './repository';
+import { ProviderRepository } from './repository.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

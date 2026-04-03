@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { UserRepository } from './repository';
-import { UserService, type SourceApp } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { UserRepository } from './repository.js';
+import { UserService, type SourceApp } from './service.js';
 import {
   CreateUserInput,
   UpdateUserInput,
@@ -22,7 +22,7 @@ import {
   profileImageSchema,
   activitySchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerUserRoutes(
   app: FastifyInstance,

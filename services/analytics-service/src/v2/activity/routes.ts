@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { requireUserContext } from '../shared/access';
-import { ActivityService } from './service';
-import { HeartbeatPayload } from './types';
+import { requireUserContext } from '../shared/access.js';
+import { ActivityService } from './service.js';
+import { HeartbeatPayload } from './types.js';
 
 interface RegisterActivityRoutesConfig {
     activityService: ActivityService;

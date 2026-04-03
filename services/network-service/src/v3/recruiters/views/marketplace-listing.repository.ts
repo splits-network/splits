@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterListParams } from '../types';
+import { RecruiterListParams } from '../types.js';
 
 const REPUTATION_SORT_COLUMNS = new Set([
   'reputation_score', 'total_submissions', 'total_hires',

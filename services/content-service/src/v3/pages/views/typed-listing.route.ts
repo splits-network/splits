@@ -7,7 +7,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TypedListingRepository } from './typed-listing.repository';
+import { TypedListingRepository } from './typed-listing.repository.js';
 
 const querySchema = {
   type: 'object',

@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { WebhookReceiver, EgressStatus } from 'livekit-server-sdk';
-import { CallRecordingService } from './call-recording-service';
-import { CallRecordingRepository } from './call-repository';
-import { IEventPublisher } from '../shared/events';
+import { CallRecordingService } from './call-recording-service.js';
+import { CallRecordingRepository } from './call-repository.js';
+import { IEventPublisher } from '../shared/events.js';
 
 interface CallRecordingWebhookConfig {
     callRecordingService: CallRecordingService;

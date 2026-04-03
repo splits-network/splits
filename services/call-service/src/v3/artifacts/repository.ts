@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ArtifactListParams } from './types';
+import { ArtifactListParams } from './types.js';
 
 export class ArtifactRepository {
   constructor(private supabase: SupabaseClient) {}

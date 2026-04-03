@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { OAuthSessionListParams } from './types';
+import { OAuthSessionListParams } from './types.js';
 
 export class OAuthSessionRepository {
   constructor(private supabase: SupabaseClient) {}

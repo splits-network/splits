@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import {
     useStandardList,
     PaginationControls,
@@ -9,6 +10,7 @@ import {
     EmptyState,
     ErrorState,
 } from "@/hooks/use-standard-list";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import { ApplicationsAnimator } from "./applications-animator";
 import type { BaselViewMode as ViewMode } from "@splits-network/basel-ui";
 import type { Application, ApplicationFilters } from "./types";
@@ -24,6 +26,21 @@ export default function ApplicationsBaselPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
+    const { getToken } = useAuth();
+
+    // Mark application notifications as read when visiting this page
+    useEffect(() => {
+        (async () => {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            try {
+                await client.post("/notifications/actions/mark-category-read", { category: "application" });
+            } catch {
+                // Non-critical — silently ignore
+            }
+        })();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
 

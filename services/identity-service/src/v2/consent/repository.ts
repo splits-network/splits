@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { ConsentRecord, SaveConsentRequest } from './types';
+import { ConsentRecord, SaveConsentRequest } from './types.js';
 
 export class ConsentRepository {
     private supabase: SupabaseClient;

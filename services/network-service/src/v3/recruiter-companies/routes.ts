@@ -4,19 +4,19 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { RecruiterCompanyRepository } from './repository';
-import { RecruiterCompanyService } from './service';
-import { RecruiterActivityRepository } from '../recruiter-activity/repository';
-import { RecruiterActivityService } from '../recruiter-activity/service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { RecruiterCompanyRepository } from './repository.js';
+import { RecruiterCompanyService } from './service.js';
+import { RecruiterActivityRepository } from '../recruiter-activity/repository.js';
+import { RecruiterActivityService } from '../recruiter-activity/service.js';
 import {
   RecruiterCompanyListParams, InviteRecruiterInput, RespondInput, TerminateInput,
   RecruiterCompanyUpdate, RequestConnectionInput,
   listQuerySchema, inviteSchema, respondSchema, terminateSchema, updateSchema,
   requestConnectionSchema, idParamSchema, companyIdParamSchema,
-} from './types';
-import { registerRecruiterCompanyDetailView } from './views/detail.route';
-import { registerRecruiterCompanyListView } from './views/list.route';
+} from './types.js';
+import { registerRecruiterCompanyDetailView } from './views/detail.route.js';
+import { registerRecruiterCompanyListView } from './views/list.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

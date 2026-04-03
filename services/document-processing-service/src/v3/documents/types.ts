@@ -2,7 +2,7 @@
  * Documents V3 Types & JSON Schemas
  */
 
-export type ProcessingStatus = 'pending' | 'processing' | 'processed' | 'failed';
+export type ProcessingStatus = 'pending' | 'processing' | 'enriching' | 'processed' | 'failed';
 export type ScanStatus = 'pending' | 'clean' | 'infected' | 'error';
 
 export interface DocumentListParams {

@@ -20,6 +20,8 @@ export default function EmailSplitView() {
         selectedThreadId,
         selectThread,
         nextPageToken,
+        archiveMessage,
+        trashMessage,
     } = useEmail();
 
     const noConnections = !loading && connections.length === 0;
@@ -78,6 +80,8 @@ export default function EmailSplitView() {
                                         selectedThreadId === msg.threadId
                                     }
                                     onSelect={selectThread}
+                                    onArchive={archiveMessage}
+                                    onTrash={trashMessage}
                                 />
                             ))}
 

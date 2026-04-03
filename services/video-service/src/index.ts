@@ -8,9 +8,9 @@ import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from './v3/routes';
-import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from './v3/routes.js';
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -112,6 +112,9 @@ async function main() {
 
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
 
+    // Wrap in resilient publisher for durable event delivery
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
+
     const livekitApiKey = process.env.LIVEKIT_API_KEY || '';
     const livekitApiSecret = process.env.LIVEKIT_API_SECRET || '';
     const livekitWsUrl = process.env.LIVEKIT_WS_URL || '';
@@ -131,8 +134,8 @@ async function main() {
     }
 
     // Create shared recording infrastructure used by both V2 and V3 routes
-    const { CallRecordingRepository: V2CallRecordingRepository } = await import('./v2/calls/call-repository');
-    const { CallRecordingService: V2CallRecordingService } = await import('./v2/calls/call-recording-service');
+    const { CallRecordingRepository: V2CallRecordingRepository } = await import('./v2/calls/call-repository.js');
+    const { CallRecordingService: V2CallRecordingService } = await import('./v2/calls/call-recording-service.js');
     const callRecordingRepository = new V2CallRecordingRepository(supabaseClient);
     const callRecordingService = new V2CallRecordingService(
         callRecordingRepository,
@@ -152,7 +155,7 @@ async function main() {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         rabbitMqUrl: rabbitConfig.url,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         livekitApiKey,
         livekitApiSecret,
         livekitWsUrl,
@@ -166,7 +169,7 @@ async function main() {
     // Register V3 routes — fully self-contained, no V2 dependencies
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         livekitApiKey,
         livekitApiSecret,
         livekitWsUrl,

@@ -6,9 +6,9 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { StopRecordingService } from './stop.service';
-import { CallRecordingRoutesConfig } from '../routes';
-import { idParamSchema } from '../types';
+import { StopRecordingService } from './stop.service.js';
+import { CallRecordingRoutesConfig } from '../routes.js';
+import { idParamSchema } from '../types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

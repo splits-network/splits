@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { BlockListParams, ChatUserBlock } from './types';
+import { BlockListParams, ChatUserBlock } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at'];
 

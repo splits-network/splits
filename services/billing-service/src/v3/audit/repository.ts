@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AuditListParams } from './types';
+import { AuditListParams } from './types.js';
 
 export class PayoutAuditRepository {
   constructor(private supabase: SupabaseClient) {}

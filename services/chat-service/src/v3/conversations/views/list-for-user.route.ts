@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { ListForUserRepository } from './list-for-user.repository';
-import { ListForUserService } from './list-for-user.service';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { ListForUserRepository } from './list-for-user.repository.js';
+import { ListForUserService } from './list-for-user.service.js';
 
 const querySchema = {
   type: 'object',

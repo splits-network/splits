@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { BadgeProgressService } from './service';
-import { BadgeEntityType } from '../definitions/types';
+import { BadgeProgressService } from './service.js';
+import { BadgeEntityType } from '../definitions/types.js';
 
 export function registerBadgeProgressRoutes(
     app: FastifyInstance,

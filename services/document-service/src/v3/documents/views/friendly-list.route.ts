@@ -15,7 +15,7 @@
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { NotFoundError } from '@splits-network/shared-fastify';
-import { DocumentListParams, listQuerySchema, idParamSchema } from '../types';
+import { DocumentListParams, listQuerySchema, idParamSchema } from '../types.js';
 
 function mapRow(row: any): any {
   return {

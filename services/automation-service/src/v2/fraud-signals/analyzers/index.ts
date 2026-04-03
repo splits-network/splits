@@ -5,9 +5,9 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CreateFraudSignalInput } from '../repository';
-import { analyzeRapidSubmission } from './rapid-submission';
-import { analyzeDuplicateApplication } from './duplicate-application';
+import { CreateFraudSignalInput } from '../repository.js';
+import { analyzeRapidSubmission } from './rapid-submission.js';
+import { analyzeDuplicateApplication } from './duplicate-application.js';
 
 export async function runFraudAnalysis(
     supabase: SupabaseClient,

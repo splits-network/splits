@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { RecruiterServiceV2 } from './service';
-import { requireUserContext, getOptionalUserContext } from '../shared/helpers';
-import { validatePaginationParams } from '../shared/pagination';
+import { RecruiterServiceV2 } from './service.js';
+import { requireUserContext, getOptionalUserContext } from '../shared/helpers.js';
+import { validatePaginationParams } from '../shared/pagination.js';
 
 interface RegisterRecruiterRoutesConfig {
     recruiterService: RecruiterServiceV2;

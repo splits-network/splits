@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { registerRecruiterRoutes } from '../../src/v2/recruiters/routes';
+import { registerRecruiterRoutes } from '../../src/v2/recruiters/routes.js';
 
 describe('Recruiter routes (integration)', () => {
     const recruiterService = {

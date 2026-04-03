@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementSplit, PlacementSplitInsert } from './types';
+import { PlacementSplit, PlacementSplitInsert } from './types.js';
 
 export class PlacementSplitRepository {
     constructor(private supabase: SupabaseClient) { }

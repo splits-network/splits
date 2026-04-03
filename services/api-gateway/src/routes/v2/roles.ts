@@ -1,4 +1,4 @@
-import { UserRole } from '../../auth';
+import { UserRole } from '../../auth.js';
 
 export const ATS_VIEW_ROLES: UserRole[] = [
     'candidate',

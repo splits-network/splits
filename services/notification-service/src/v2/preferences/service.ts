@@ -1,11 +1,11 @@
-import { PreferenceRepositoryV2 } from './repository';
-import { EffectivePreference, PreferenceUpdate, BulkPreferenceUpdate } from './types';
+import { PreferenceRepositoryV2 } from './repository.js';
+import { EffectivePreference, PreferenceUpdate, BulkPreferenceUpdate } from './types.js';
 import {
     PREFERENCE_CATEGORIES,
     ALL_PREFERENCE_CATEGORIES,
     type PreferenceCategory,
-} from '../../helpers/preference-categories';
-import type { AccessContext } from '../shared/access';
+} from '../../helpers/preference-categories.js';
+import type { AccessContext } from '../shared/access.js';
 import { EntitlementChecker } from '@splits-network/shared-access-context';
 import { createClient } from '@supabase/supabase-js';
 

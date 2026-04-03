@@ -7,15 +7,15 @@
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NotFoundError, BadRequestError } from "@splits-network/shared-fastify";
-import { SupportConversationRepository } from "./repository";
-import { SupportMessageRepository } from "./messages/repository";
+import { SupportConversationRepository } from "./repository.js";
+import { SupportMessageRepository } from "./messages/repository.js";
 import {
     SupportConversationListParams,
     CreateSupportConversationInput,
     UpdateSupportConversationInput,
-} from "./types";
-import { IEventPublisher } from "../../v2/shared/events";
-import { SupportEventPublisher } from "../shared/support-event-publisher";
+} from "./types.js";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { SupportEventPublisher } from "../shared/support-event-publisher.js";
 
 export class SupportConversationService {
     private messageRepository: SupportMessageRepository;
@@ -167,7 +167,7 @@ export class SupportConversationService {
     async linkSession(_sessionId: string, _clerkUserId: string) {
         // Moved to LinkSessionService action — this stub exists for
         // backward compatibility during V2→V3 transition
-        const { LinkSessionService } = await import('./actions/link-session.service');
+        const { LinkSessionService } = await import('./actions/link-session.service.js');
         const linkService = new LinkSessionService(this.supabase);
         await linkService.linkSession(_sessionId, _clerkUserId);
     }

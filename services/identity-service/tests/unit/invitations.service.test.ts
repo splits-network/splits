@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { InvitationServiceV2 } from '../../src/v2/invitations/service';
-import type { AccessContext } from '../../src/v2/shared/access';
+import { InvitationServiceV2 } from '../../src/v2/invitations/service.js';
+import type { AccessContext } from '../../src/v2/shared/access.js';
 
 vi.mock('uuid', () => ({ v4: () => 'uuid-1' }));
 

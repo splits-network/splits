@@ -6,19 +6,14 @@
 
 import { Logger } from '@splits-network/shared-logging';
 import type { ResumeMetadata, DegreeLevel } from '@splits-network/shared-types';
+import type { IAiClient } from '@splits-network/shared-ai-client';
 
 export class ResumeExtractionService {
-    private openaiApiKey: string;
-    private modelVersion: string;
+    constructor(
+        private logger: Logger,
+        private aiClient?: IAiClient,
+    ) {}
 
-    constructor(private logger: Logger) {
-        this.openaiApiKey = process.env.OPENAI_API_KEY || '';
-        this.modelVersion = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-
-        if (!this.openaiApiKey) {
-            this.logger.warn('OPENAI_API_KEY not set. Resume extraction will not function.');
-        }
-    }
 
     /**
      * Extract structured metadata from raw resume text.
@@ -29,46 +24,29 @@ export class ResumeExtractionService {
         extractedText: string,
         documentId: string
     ): Promise<ResumeMetadata> {
-        if (!this.openaiApiKey) {
-            throw new Error('OPENAI_API_KEY not configured');
+        if (!this.aiClient) {
+            throw new Error('AI client is not configured');
         }
 
         const startTime = Date.now();
         const prompt = this.buildExtractionPrompt(extractedText);
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.openaiApiKey}`,
+        const messages = [
+            {
+                role: 'system' as const,
+                content: 'You are an expert resume parser. Extract structured professional data from resume text. Return valid JSON only. Never include personal contact information (name, email, phone, address) in the output.',
             },
-            body: JSON.stringify({
-                model: this.modelVersion,
-                messages: [
-                    {
-                        role: 'system',
-                        content:
-                            'You are an expert resume parser. Extract structured professional data from resume text. Return valid JSON only. Never include personal contact information (name, email, phone, address) in the output.',
-                    },
-                    {
-                        role: 'user',
-                        content: prompt,
-                    },
-                ],
-                response_format: { type: 'json_object' },
-                temperature: 0.1,
-                max_tokens: 4000,
-            }),
+            {
+                role: 'user' as const,
+                content: prompt,
+            },
+        ];
+
+        const response = await this.aiClient.chatCompletion('resume_extraction', messages, {
+            jsonMode: true,
         });
 
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`OpenAI API error: ${response.status} ${error}`);
-        }
-
-        const data = (await response.json()) as any;
-        const content = data.choices[0].message.content;
-        const rawResult = JSON.parse(content);
+        const rawResult = JSON.parse(response.content);
 
         const result = this.normalizeAndValidate(rawResult, documentId);
 

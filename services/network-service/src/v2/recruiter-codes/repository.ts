@@ -11,7 +11,7 @@ import {
     RecruiterCodeFilters,
     RecruiterCodeUpdate,
     RecruiterCodeLogEntry,
-} from './types';
+} from './types.js';
 
 // Characters that won't be confused (no 0/O, 1/I/L)
 const CODE_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789';

@@ -1,7 +1,7 @@
 import { Database } from '@splits-network/shared-types';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SavedJobFilters } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { SavedJobFilters } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 export class SavedJobRepositoryV2 {
     constructor(private supabase: SupabaseClient<Database>) { }

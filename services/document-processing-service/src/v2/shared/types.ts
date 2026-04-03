@@ -15,7 +15,7 @@ export interface PaginationResponse {
     total_pages: number;
 }
 
-export type ProcessingStatus = 'pending' | 'processing' | 'processed' | 'failed';
+export type ProcessingStatus = 'pending' | 'processing' | 'enriching' | 'processed' | 'failed';
 export type ScanStatus = 'pending' | 'clean' | 'infected' | 'error';
 
 export interface DocumentFilters extends PaginationParams {

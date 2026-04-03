@@ -5,8 +5,8 @@
 
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
 import {
     recruiterInviteEmail,
     candidateRepresentedInviteEmail,
@@ -16,7 +16,7 @@ import {
     CandidateRepresentedInviteData,
     CandidateDirectInviteData,
     InviteDeniedData,
-} from '../../templates/matches';
+} from '../../templates/matches/index.js';
 
 export class MatchesEmailService {
     constructor(

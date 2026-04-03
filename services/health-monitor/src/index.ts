@@ -3,6 +3,7 @@ import {
     loadDatabaseConfig,
     loadRedisConfig,
     loadRabbitMQConfig,
+    createSupabaseClient,
 } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
 import {
@@ -11,15 +12,16 @@ import {
     registerHealthCheck,
     HealthCheckers,
 } from "@splits-network/shared-fastify";
-import Redis from "ioredis";
-import { loadServiceDefinitions } from "./config";
-import { HealthChecker } from "./health-checker";
-import { SlidingWindowManager } from "./sliding-window";
-import { IncidentManager } from "./incident-manager";
-import { NotificationManager } from "./notification-manager";
-import { EventPublisher } from "./event-publisher";
-import { MonitorLoop } from "./monitor-loop";
-import { registerHealthRoutes } from "./routes";
+import { Redis } from 'ioredis';
+import { loadServiceDefinitions } from "./config.js";
+import { HealthChecker } from "./health-checker.js";
+import { SlidingWindowManager } from "./sliding-window.js";
+import { IncidentManager } from "./incident-manager.js";
+import { NotificationManager } from "./notification-manager.js";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./event-publisher.js";
+import type { IEventPublisher } from "./event-publisher.js";
+import { MonitorLoop } from "./monitor-loop.js";
+import { registerHealthRoutes } from "./routes.js";
 
 async function main() {
     const baseConfig = loadBaseConfig("health-monitor");
@@ -74,23 +76,25 @@ async function main() {
         logger,
     );
 
-    // Initialize optional event publisher (also skip in dry-run)
-    let eventPublisher: EventPublisher | null = null;
+    // Initialize event publisher (skip entirely in dry-run)
+    let resilientPublisher: IEventPublisher | null = null;
+    let rawEventPublisher: EventPublisher | null = null;
     if (!dryRun) {
+        const eventPublisher = new EventPublisher(
+            rabbitConfig.url,
+            logger,
+            baseConfig.serviceName,
+        );
+        rawEventPublisher = eventPublisher;
         try {
-            eventPublisher = new EventPublisher(
-                rabbitConfig.url,
-                logger,
-                baseConfig.serviceName,
-            );
             await eventPublisher.connect();
         } catch (error) {
-            logger.warn(
-                { err: error },
-                "RabbitMQ unavailable - events will not be published",
-            );
-            eventPublisher = null;
+            logger.warn({ err: error }, "Failed to connect event publisher - ResilientPublisher will use outbox only");
         }
+
+        const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
+        const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+        resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
     }
 
     // In dry-run mode, skip DB-dependent managers (no reads or writes to staging)
@@ -109,7 +113,7 @@ async function main() {
             dbConfig.supabaseUrl,
             supabaseKey,
             logger,
-            eventPublisher,
+            resilientPublisher,
         );
         await notificationManager.initialize();
     }
@@ -120,7 +124,7 @@ async function main() {
         slidingWindow,
         incidentManager,
         notificationManager,
-        eventPublisher,
+        resilientPublisher,
         dbConfig.supabaseUrl,
         supabaseKey,
         logger,
@@ -133,7 +137,7 @@ async function main() {
         redis,
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Register health check for the health-monitor itself
@@ -142,9 +146,9 @@ async function main() {
         logger,
         checkers: {
             redis: HealthCheckers.redis(redis),
-            ...(eventPublisher && {
+            ...(rawEventPublisher && {
                 rabbitmq_publisher:
-                    HealthCheckers.rabbitMqPublisher(eventPublisher),
+                    HealthCheckers.rabbitMqPublisher(rawEventPublisher),
             }),
         },
     });
@@ -154,7 +158,7 @@ async function main() {
         logger.info("SIGTERM received, shutting down gracefully");
         monitorLoop.stop();
         await redis.quit();
-        if (eventPublisher) await eventPublisher.close();
+        if (rawEventPublisher) await rawEventPublisher.close();
         await app.close();
         process.exit(0);
     });
@@ -171,7 +175,7 @@ async function main() {
         logger.error(err);
         monitorLoop.stop();
         await redis.quit();
-        if (eventPublisher) await eventPublisher.close();
+        if (rawEventPublisher) await rawEventPublisher.close();
         process.exit(1);
     }
 }

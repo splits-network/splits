@@ -7,8 +7,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import Redis from 'ioredis';
-import { registerBatchStatusView } from './views/batch-status.route';
+import { Redis } from 'ioredis';
+import { registerBatchStatusView } from './views/batch-status.route.js';
 
 export function registerPresenceRoutes(app: FastifyInstance, redis: Redis) {
   // --- Views ---

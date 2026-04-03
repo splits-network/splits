@@ -5,8 +5,8 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { NavigationRepository } from './repository';
-import { requireUserContext } from '../shared/helpers';
+import { NavigationRepository } from './repository.js';
+import { requireUserContext } from '../shared/helpers.js';
 import type { HeaderNavConfig, FooterNavConfig } from '@splits-network/shared-types';
 
 interface RegisterConfig {

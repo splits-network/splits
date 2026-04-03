@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
-import type { AccessContext } from '../shared/access';
-import { StripeConnectRepository } from './repository';
+import type { AccessContext } from '../shared/access.js';
+import { StripeConnectRepository } from './repository.js';
 import {
     StripeConnectAccountStatus,
     StripeConnectLinkRequest,
@@ -10,7 +10,7 @@ import {
     AcceptTosResponse,
     VerificationSessionResponse,
     StripePayout,
-} from './types';
+} from './types.js';
 
 export class StripeConnectService {
     private stripe: Stripe;

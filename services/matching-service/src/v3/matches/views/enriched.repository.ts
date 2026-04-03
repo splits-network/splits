@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MatchListParams } from '../types';
+import { MatchListParams } from '../types.js';
 
 const ENRICHED_SELECT = `
   *,

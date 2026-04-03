@@ -22,6 +22,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/analytics-service ./services/analytics-service
 EXPOSE 3010
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-job-queue build && pnpm --filter @splits-network/shared-access-context build
 CMD ["pnpm", "--filter", "@splits-network/analytics-service", "dev"]
 
 # Build stage
@@ -64,6 +65,7 @@ COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
 
 # Copy built service
+COPY --from=build /app/services/analytics-service/package.json ./services/analytics-service/
 COPY --from=build /app/services/analytics-service/dist ./services/analytics-service/dist
 
 EXPOSE 3010

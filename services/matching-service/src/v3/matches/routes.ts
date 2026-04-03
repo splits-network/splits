@@ -5,17 +5,17 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { MatchRepository } from './repository';
-import { MatchService } from './service';
-import { registerEnrichedMatchView } from './views/enriched.route';
-import { registerInviteAction } from './actions/invite.route';
-import { registerDismissAction } from './actions/dismiss.route';
-import { registerDenyInviteAction } from './actions/deny-invite.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { MatchRepository } from './repository.js';
+import { MatchService } from './service.js';
+import { registerEnrichedMatchView } from './views/enriched.route.js';
+import { registerInviteAction } from './actions/invite.route.js';
+import { registerDismissAction } from './actions/dismiss.route.js';
+import { registerDenyInviteAction } from './actions/deny-invite.route.js';
 import {
   UpdateMatchInput, MatchListParams,
   idParamSchema, listQuerySchema, updateMatchSchema,
-} from './types';
+} from './types.js';
 
 export function registerMatchRoutes(
   app: FastifyInstance,

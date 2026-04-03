@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MatchListParams, MatchUpsert } from './types';
+import { MatchListParams, MatchUpsert } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'match_score'];
 

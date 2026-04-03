@@ -1,9 +1,9 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { UserServiceV2 } from './service';
+import { UserServiceV2 } from './service.js';
 import {
     requireUserContext,
     validatePaginationParams,
-} from '../shared/helpers';
+} from '../shared/helpers.js';
 import { StandardListParams } from '@splits-network/shared-types';
 
 interface RegisterUserRoutesConfig {

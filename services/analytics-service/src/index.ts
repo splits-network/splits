@@ -4,16 +4,16 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { loadConfig, loadRedisConfig, createSupabaseClient } from "@splits-network/shared-config";
 import { createLogger } from "@splits-network/shared-logging";
-import { CacheManager } from "./cache/cache-manager";
-import { CacheInvalidator } from "./cache/invalidation";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
-import { DomainEventConsumer } from "./consumers/domain-consumer";
-import { DashboardEventPublisher } from "./v2/shared/dashboard-events";
-import { startBackgroundJobs } from "./jobs";
-import { ActivityService } from "./v2/activity/service";
-import { ActivityPublisher } from "./v2/activity/publisher";
-import Redis from "ioredis";
+import { CacheManager } from "./cache/cache-manager.js";
+import { CacheInvalidator } from "./cache/invalidation.js";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
+import { DomainEventConsumer } from "./consumers/domain-consumer.js";
+import { DashboardEventPublisher } from "./v2/shared/dashboard-events.js";
+import { startBackgroundJobs } from "./jobs/index.js";
+import { ActivityService } from "./v2/activity/service.js";
+import { ActivityPublisher } from "./v2/activity/publisher.js";
+import { Redis } from 'ioredis';
 
 const logger = createLogger("AnalyticsService");
 
@@ -135,10 +135,10 @@ app.register(registerV2Routes, {
 
 // Register V3 routes (coexist with V2)
 // V3 reuses V2 service instances for charts/stats (complex logic already implemented)
-import { ChartRepository } from "./v2/charts/repository";
-import { ChartServiceV2 } from "./v2/charts/service";
-import { StatsRepository } from "./v2/stats/repository";
-import { StatsServiceV2 } from "./v2/stats/service";
+import { ChartRepository } from "./v2/charts/repository.js";
+import { ChartServiceV2 } from "./v2/charts/service.js";
+import { StatsRepository } from "./v2/stats/repository.js";
+import { StatsServiceV2 } from "./v2/stats/service.js";
 
 const v3ChartRepo = new ChartRepository(supabase);
 const v3ChartService = new ChartServiceV2(v3ChartRepo, supabase);

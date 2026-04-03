@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateListingRepository } from './candidate-listing.repository';
-import { CandidateListingService } from './candidate-listing.service';
-import { listQuerySchema, JobListParams } from '../types';
+import { CandidateListingRepository } from './candidate-listing.repository.js';
+import { CandidateListingService } from './candidate-listing.service.js';
+import { listQuerySchema, JobListParams } from '../types.js';
 
 export function registerCandidateListingView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CandidateListingRepository(supabase);

@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateSourcerListParams } from './types';
+import { CandidateSourcerListParams } from './types.js';
 
 export class CandidateSourcerRepository {
   constructor(private supabase: SupabaseClient) {}

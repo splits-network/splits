@@ -13,11 +13,11 @@ import { loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-c
 import { createLogger, Logger } from '@splits-network/shared-logging';
 import { register, Counter, Histogram, Gauge } from 'prom-client';
 import amqp, { Connection, Channel } from 'amqplib';
-import { ReputationRepository } from '../v2/reputation/repository';
-import { ReputationService } from '../v2/reputation/service';
-import { CompanyReputationRepository } from '../v2/reputation/company-repository';
-import { CompanyReputationService } from '../v2/reputation/company-service';
-import { EventPublisher } from '../v2/shared/events';
+import { ReputationRepository } from '../v2/reputation/repository.js';
+import { ReputationService } from '../v2/reputation/service.js';
+import { CompanyReputationRepository } from '../v2/reputation/company-repository.js';
+import { CompanyReputationService } from '../v2/reputation/company-service.js';
+import { EventPublisher } from '../v2/shared/events.js';
 
 // Prometheus metrics
 const recalculationRuns = new Counter({

@@ -5,7 +5,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ForbiddenError } from '@splits-network/shared-fastify';
-import { WebhookEventRepository } from './repository';
+import { WebhookEventRepository } from './repository.js';
 
 export class WebhookEventService {
   private accessResolver: AccessContextResolver;

@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SplitsRate, SplitsRateWithPlan, SplitsRateCreateInput } from './types';
+import { SplitsRate, SplitsRateWithPlan, SplitsRateCreateInput } from './types.js';
 
 export class SplitsRateRepository {
     constructor(private supabase: SupabaseClient) {}

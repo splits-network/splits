@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Fastify from 'fastify';
-import { registerPlacementRoutes } from '../../src/v2/placements/routes';
+import { registerPlacementRoutes } from '../../src/v2/placements/routes.js';
 
 describe('Placement routes (integration)', () => {
     let service: any;

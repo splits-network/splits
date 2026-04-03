@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildQueryString } from '../../src/routes/v2/common';
+import { buildQueryString } from '../../src/routes/v2/common.js';
 
 describe('buildQueryString (unit)', () => {
     it('returns empty string for empty query', () => {

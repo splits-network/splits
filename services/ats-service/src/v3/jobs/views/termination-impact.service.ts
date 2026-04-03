@@ -3,7 +3,7 @@
  */
 
 import { BadRequestError } from '@splits-network/shared-fastify';
-import { TerminationImpactRepository } from './termination-impact.repository';
+import { TerminationImpactRepository } from './termination-impact.repository.js';
 
 export class TerminationImpactService {
   constructor(private repository: TerminationImpactRepository) {}

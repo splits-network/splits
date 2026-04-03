@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyCultureTagRepository } from './repository';
-import { CompanyCultureTagService } from './service';
-import { registerWithDetailsView } from './views/with-details.route';
+import { CompanyCultureTagRepository } from './repository.js';
+import { CompanyCultureTagService } from './service.js';
+import { registerWithDetailsView } from './views/with-details.route.js';
 import {
   CreateCompanyCultureTagInput,
   BulkReplaceCompanyCultureTagsInput,
@@ -15,7 +15,7 @@ import {
   bulkReplaceSchema,
   companyIdParamSchema,
   deleteParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerCompanyCultureTagRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CompanyCultureTagRepository(supabase);

@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
-import { registerNotificationRoutes } from './notifications/routes';
-import { registerTemplateRoutes } from './templates/routes';
-import { registerPreferenceRoutes } from './preferences/routes';
-import { IEventPublisher } from './shared/events';
-import { AdminNotificationRepository } from './admin/repository';
-import { AdminNotificationService } from './admin/service';
-import { registerAdminNotificationRoutes } from './admin/routes';
+import { registerNotificationRoutes } from './notifications/routes.js';
+import { registerTemplateRoutes } from './templates/routes.js';
+import { registerPreferenceRoutes } from './preferences/routes.js';
+import { IEventPublisher } from './shared/events.js';
+import { AdminNotificationRepository } from './admin/repository.js';
+import { AdminNotificationService } from './admin/service.js';
+import { registerAdminNotificationRoutes } from './admin/routes.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

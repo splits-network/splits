@@ -1,8 +1,8 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { RecruiterCodesEmailService } from '../../services/recruiter-codes/service';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
-import { DataLookupHelper } from '../../helpers/data-lookup';
+import { RecruiterCodesEmailService } from '../../services/recruiter-codes/service.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
 
 export class RecruiterCodesEventConsumer {
     constructor(

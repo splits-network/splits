@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { StatsRepository } from "./repository";
-import { StatsService } from "./service";
-import { StatsQueryParams, statsQuerySchema } from "./types";
+import { StatsRepository } from "./repository.js";
+import { StatsService } from "./service.js";
+import { StatsQueryParams, statsQuerySchema } from "./types.js";
 
 export function registerStatsRoutes(
     app: FastifyInstance,

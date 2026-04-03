@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChatModerationAudit, AuditLogListParams } from '../types';
+import { ChatModerationAudit, AuditLogListParams } from '../types.js';
 
 const SORTABLE_FIELDS = ['created_at'];
 

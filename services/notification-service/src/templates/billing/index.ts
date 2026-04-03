@@ -4,8 +4,8 @@
  * invoices, and subscription notifications
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, infoCard, divider } from '../components.js';
 
 export interface StripeConnectOnboardedData {
     recruiterName: string;
@@ -196,9 +196,9 @@ ${paragraph('This is typically a quick process. Once you provide the required in
 }
 
 // Re-export Phase 4 templates
-export { payoutProcessedEmail, type PayoutProcessedData } from './payout-emails';
-export { payoutFailedEmail, type PayoutFailedData } from './payout-emails';
-export { escrowReleasedEmail, type EscrowReleasedData } from './escrow-emails';
-export { escrowAutoReleasedEmail, type EscrowAutoReleasedData } from './escrow-emails';
-export { invoicePaidEmail, type InvoicePaidData } from './invoice-emails';
-export { subscriptionCancelledEmail, type SubscriptionCancelledData } from './subscription-emails';
+export { payoutProcessedEmail, type PayoutProcessedData } from './payout-emails.js';
+export { payoutFailedEmail, type PayoutFailedData } from './payout-emails.js';
+export { escrowReleasedEmail, type EscrowReleasedData } from './escrow-emails.js';
+export { escrowAutoReleasedEmail, type EscrowAutoReleasedData } from './escrow-emails.js';
+export { invoicePaidEmail, type InvoicePaidData } from './invoice-emails.js';
+export { subscriptionCancelledEmail, type SubscriptionCancelledData } from './subscription-emails.js';

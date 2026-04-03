@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { SaveConsentInput } from './types';
+import { SaveConsentInput } from './types.js';
 
 export class ConsentRepository {
   constructor(private supabase: SupabaseClient) {}

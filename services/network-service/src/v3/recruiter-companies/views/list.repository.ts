@@ -7,7 +7,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterCompanyListParams } from '../types';
+import { RecruiterCompanyListParams } from '../types.js';
 
 const LIST_SELECT = `
   *,

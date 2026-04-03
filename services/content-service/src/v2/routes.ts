@@ -5,17 +5,17 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { IEventPublisher } from './shared/events';
-import { PageRepository } from './pages/repository';
-import { PageServiceV2 } from './pages/service';
-import { registerPageRoutes } from './pages/routes';
-import { NavigationRepository } from './navigation/repository';
-import { registerNavigationRoutes } from './navigation/routes';
-import { ImageRepository } from './images/repository';
-import { ContentImageStorage } from './images/storage';
-import { ImageServiceV2 } from './images/service';
-import { registerImageRoutes } from './images/routes';
-import { registerAdminContentRoutes } from './admin/routes';
+import { IEventPublisher } from './shared/events.js';
+import { PageRepository } from './pages/repository.js';
+import { PageServiceV2 } from './pages/service.js';
+import { registerPageRoutes } from './pages/routes.js';
+import { NavigationRepository } from './navigation/repository.js';
+import { registerNavigationRoutes } from './navigation/routes.js';
+import { ImageRepository } from './images/repository.js';
+import { ContentImageStorage } from './images/storage.js';
+import { ImageServiceV2 } from './images/service.js';
+import { registerImageRoutes } from './images/routes.js';
+import { registerAdminContentRoutes } from './admin/routes.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { IEventPublisher } from '../shared/events';
-import { ConnectionRepository } from './repository';
-import { ProviderRepository } from '../providers/repository';
-import { getOAuthClientId, getOAuthClientSecret } from '../shared/helpers';
+import { IEventPublisher } from '../shared/events.js';
+import { ConnectionRepository } from './repository.js';
+import { ProviderRepository } from '../providers/repository.js';
+import { getOAuthClientId, getOAuthClientSecret } from '../shared/helpers.js';
 import {
     OAuthConnectionPublic,
     InitiateOAuthResponse,

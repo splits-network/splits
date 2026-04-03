@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminBillingRepository } from './repository';
-import { AdminBillingService } from './service';
-import { AdminListParams, adminListQuerySchema, idParamSchema } from './types';
+import { AdminBillingRepository } from './repository.js';
+import { AdminBillingService } from './service.js';
+import { AdminListParams, adminListQuerySchema, idParamSchema } from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

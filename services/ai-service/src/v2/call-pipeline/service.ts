@@ -9,9 +9,10 @@ import { join } from 'path';
 import { writeFile, unlink, readFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import { Logger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../shared/events';
-import { CallPipelineRepository, CallContext } from './repository';
-import { getPromptForCallType, PROMPT_VERSIONS } from './prompt-templates';
+import type { IAiClient } from '@splits-network/shared-ai-client';
+import { IEventPublisher } from '../shared/events.js';
+import { CallPipelineRepository, CallContext } from './repository.js';
+import { getPromptForCallType, PROMPT_VERSIONS } from './prompt-templates.js';
 
 interface CallRecordingEvent {
     call_id: string;
@@ -30,15 +31,15 @@ const WHISPER_SIZE_LIMIT = 25 * 1024 * 1024; // 25 MB
 
 export class CallPipelineService {
     private openaiApiKey: string;
-    private model: string;
 
     constructor(
         private repository: CallPipelineRepository,
         private eventPublisher: IEventPublisher | undefined,
         private logger: Logger,
+        private aiClient?: IAiClient,
     ) {
+        // Whisper API still needs a direct API key (not abstracted)
         this.openaiApiKey = process.env.OPENAI_API_KEY || '';
-        this.model = process.env.OPENAI_SUMMARY_MODEL || 'gpt-4o-mini';
     }
 
     /**
@@ -153,20 +154,21 @@ export class CallPipelineService {
                     whisperResult.text,
                 );
 
-                const summaryText = await this.callOpenAI(systemPrompt, userPrompt);
+                const summaryResult = await this.callOpenAI(systemPrompt, userPrompt);
+                const modelLabel = `${summaryResult.provider}/${summaryResult.model}`;
 
                 // Step 6: Build and save structured summary
                 const summaryData = {
-                    tldr: this.extractTldr(summaryText),
-                    content: summaryText,
+                    tldr: this.extractTldr(summaryResult.content),
+                    content: summaryResult.content,
                     call_type: context.callType,
                     prompt_version: PROMPT_VERSIONS[context.callType] || 'unknown',
-                    model: this.model,
-                    action_items: this.extractActionItems(summaryText),
+                    model: modelLabel,
+                    action_items: this.extractActionItems(summaryResult.content),
                     entity_context: this.buildEntityContextSnapshot(context),
                 };
 
-                await this.repository.saveSummary(call_id, summaryData, this.model);
+                await this.repository.saveSummary(call_id, summaryData, modelLabel);
                 hasSummary = true;
 
                 this.logger.info(
@@ -388,73 +390,24 @@ export class CallPipelineService {
     }
 
     /**
-     * Call OpenAI chat completion for summarization.
+     * Call AI for summarization (provider-agnostic via shared AI client).
      */
-    private async callOpenAI(systemPrompt: string, userPrompt: string): Promise<string> {
-        if (!this.openaiApiKey) throw new Error('OPENAI_API_KEY not configured');
+    private async callOpenAI(systemPrompt: string, userPrompt: string) {
+        if (!this.aiClient) throw new Error('AI client is not configured');
 
-        const body = JSON.stringify({
-            model: this.model,
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: userPrompt },
-            ],
-            temperature: 0.3,
-            max_tokens: 1500,
-        });
+        const messages = [
+            { role: 'system' as const, content: systemPrompt },
+            { role: 'user' as const, content: userPrompt },
+        ];
 
-        const MAX_RETRIES = 2;
-        let lastError: Error | null = null;
+        const result = await this.aiClient.chatCompletion('call_summarization', messages);
 
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-            if (attempt > 0) {
-                const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
-                await new Promise((resolve) => setTimeout(resolve, delayMs));
-                this.logger.info({ attempt }, 'Retrying summary generation');
-            }
+        this.logger.info(
+            { model: result.model, tokens: result.inputTokens + result.outputTokens },
+            'Call summary generated',
+        );
 
-            const response = await fetch(
-                'https://api.openai.com/v1/chat/completions',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${this.openaiApiKey}`,
-                    },
-                    body,
-                    signal: AbortSignal.timeout(60_000),
-                },
-            );
-
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => '');
-                lastError = new Error(`OpenAI API error: ${response.status} ${errorText}`);
-                if (response.status === 429 || response.status >= 500) continue;
-                throw lastError;
-            }
-
-            let data: any;
-            try {
-                data = await response.json();
-            } catch {
-                lastError = new Error('OpenAI returned invalid JSON');
-                continue;
-            }
-
-            const content = data?.choices?.[0]?.message?.content;
-            if (!content) {
-                lastError = new Error('OpenAI response missing content');
-                continue;
-            }
-
-            this.logger.info(
-                { model: this.model, tokens: data.usage?.total_tokens },
-                'Call summary generated',
-            );
-            return content;
-        }
-
-        throw lastError || new Error('Summary generation failed after retries');
+        return result;
     }
 
     /**

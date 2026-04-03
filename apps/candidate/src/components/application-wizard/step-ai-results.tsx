@@ -1,0 +1,408 @@
+"use client";
+
+import { WizardHelpZone } from "@splits-network/basel-ui";
+
+/** Parse a skill/requirement that may be a string, JSON string, or object */
+function parseTaggedItem(item: any): { name: string; is_required?: boolean } {
+    if (typeof item === "object" && item !== null) {
+        return { name: item.name || item.text || "", is_required: item.is_required };
+    }
+    if (typeof item === "string") {
+        // Try to parse as JSON (AI may return stringified objects)
+        if (item.startsWith("{")) {
+            try {
+                const parsed = JSON.parse(item);
+                return { name: parsed.name || parsed.text || item, is_required: parsed.is_required };
+            } catch { /* not JSON, use as-is */ }
+        }
+        return { name: item };
+    }
+    return { name: String(item) };
+}
+
+interface AIReviewData {
+    fit_score: number;
+    recommendation: "strong_fit" | "good_fit" | "fair_fit" | "poor_fit";
+    overall_summary: string;
+    confidence_level: number;
+    strengths: string[];
+    concerns: string[];
+    matched_skills: (string | { name: string; is_required: boolean })[];
+    missing_skills: (string | { name: string; is_required: boolean })[];
+    skills_match_percentage: number;
+    matched_requirements: (string | { text: string; is_required: boolean })[];
+    missing_requirements: (string | { text: string; is_required: boolean })[];
+    required_years?: number;
+    candidate_years?: number;
+    meets_experience_requirement?: boolean;
+    location_compatibility?: "perfect" | "good" | "challenging" | "mismatch";
+}
+
+interface StepAiResultsProps {
+    review: AIReviewData;
+    jobTitle: string;
+    onRerunRequested?: () => void;
+    isRerunning?: boolean;
+}
+
+const RECOMMENDATION_CONFIG = {
+    strong_fit: {
+        label: "Strong Fit",
+        color: "text-success",
+        bg: "bg-success/10",
+        border: "border-success",
+        icon: "fa-duotone fa-regular fa-circle-check",
+        message: "You're a great match for this role.",
+    },
+    good_fit: {
+        label: "Good Fit",
+        color: "text-info",
+        bg: "bg-info/10",
+        border: "border-info",
+        icon: "fa-duotone fa-regular fa-thumbs-up",
+        message: "You're a solid match for this role.",
+    },
+    fair_fit: {
+        label: "Fair Fit",
+        color: "text-warning",
+        bg: "bg-warning/10",
+        border: "border-warning",
+        icon: "fa-duotone fa-regular fa-circle-minus",
+        message: "You meet some requirements but there are gaps.",
+    },
+    poor_fit: {
+        label: "Needs Work",
+        color: "text-error",
+        bg: "bg-error/10",
+        border: "border-error",
+        icon: "fa-duotone fa-regular fa-circle-xmark",
+        message: "This role may not be the best fit right now.",
+    },
+};
+
+export default function StepAiResults({
+    review,
+    jobTitle,
+    onRerunRequested,
+    isRerunning,
+}: StepAiResultsProps) {
+    const config = RECOMMENDATION_CONFIG[review.recommendation];
+    const hasGaps = review.missing_skills.length > 0 || review.concerns.length > 0;
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h3 className="text-xl font-black tracking-tight mb-2">
+                    Your AI fit analysis
+                </h3>
+                <p className="text-sm text-base-content/60 leading-relaxed">
+                    Here's how your profile matches <strong>{jobTitle}</strong>.
+                    Review the results and decide if you'd like to submit.
+                </p>
+            </div>
+
+            {/* Score + Recommendation hero */}
+            <div className={`${config.bg} border-l-4 ${config.border} p-5`}>
+                <div className="flex items-start gap-4">
+                    <div className="flex flex-col items-center gap-1">
+                        <div className={`text-3xl font-black ${config.color}`}>
+                            {review.fit_score}
+                        </div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-base-content/40">
+                            Fit Score
+                        </div>
+                    </div>
+                    <div className="flex-1 border-l border-base-300 pl-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <i className={`${config.icon} ${config.color}`} />
+                            <span className={`font-black text-sm ${config.color}`}>
+                                {config.label}
+                            </span>
+                        </div>
+                        <p className="text-sm text-base-content/60">
+                            {config.message}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Improve your score — edit Smart Resume + re-run */}
+            {hasGaps && onRerunRequested && (
+                <div className="bg-secondary/5 border-l-4 border-secondary p-4">
+                    <div className="flex items-start gap-3">
+                        <i className="fa-duotone fa-regular fa-file-user text-secondary text-lg mt-0.5" />
+                        <div className="flex-1">
+                            <p className="font-bold text-sm">
+                                Want to improve your score?
+                            </p>
+                            <p className="text-xs text-base-content/50 mt-1 leading-relaxed">
+                                Update your Smart Resume with any missing skills or
+                                experience, then re-run the analysis to see your
+                                updated fit.
+                            </p>
+                            <div className="flex items-center gap-3 mt-3">
+                                <a
+                                    href="/portal/smart-resume"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs" />
+                                    Edit Smart Resume
+                                </a>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={onRerunRequested}
+                                    disabled={isRerunning}
+                                >
+                                    {isRerunning ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-xs" />
+                                            Analyzing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-duotone fa-regular fa-brain-circuit" />
+                                            Re-run Analysis
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Analysis details */}
+            <WizardHelpZone
+                title="AI Analysis"
+                description="This analysis compares your Smart Resume against the job requirements, skills, and experience expectations."
+                icon="fa-duotone fa-regular fa-brain-circuit"
+                tips={[
+                    "This score is visible only to you — employers see a separate review",
+                    "Edit your Smart Resume in a new tab, then re-run the analysis",
+                    "Even a fair fit can land an interview if your cover letter is strong",
+                    "Only add skills and experience you genuinely have",
+                ]}
+            >
+                <div className="space-y-5">
+                    {/* Overall summary */}
+                    <div className="bg-base-200 p-4">
+                        <p className="text-sm text-base-content/70 leading-relaxed">
+                            {review.overall_summary}
+                        </p>
+                    </div>
+
+                    {/* Skills match */}
+                    <div>
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40">
+                                Skills Match
+                            </p>
+                            <span className="text-xs font-bold text-base-content/50">
+                                {review.skills_match_percentage}%
+                            </span>
+                        </div>
+                        <div className="w-full h-2 bg-base-300">
+                            <div
+                                className={`h-full transition-all ${
+                                    review.skills_match_percentage >= 75
+                                        ? "bg-success"
+                                        : review.skills_match_percentage >= 50
+                                          ? "bg-warning"
+                                          : "bg-error"
+                                }`}
+                                style={{ width: `${review.skills_match_percentage}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Strengths */}
+                    {review.strengths.length > 0 && (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-success mb-2">
+                                <i className="fa-duotone fa-regular fa-circle-check mr-1" />
+                                Strengths
+                            </p>
+                            <ul className="space-y-1.5">
+                                {review.strengths.map((s, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                        <i className="fa-solid fa-check text-success text-xs mt-1 shrink-0" />
+                                        {s}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Concerns */}
+                    {review.concerns.length > 0 && (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-warning mb-2">
+                                <i className="fa-duotone fa-regular fa-triangle-exclamation mr-1" />
+                                Areas to Improve
+                            </p>
+                            <ul className="space-y-1.5">
+                                {review.concerns.map((c, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                        <i className="fa-solid fa-minus text-warning text-xs mt-1 shrink-0" />
+                                        {c}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Matched vs Missing Skills */}
+                    <div className="grid grid-cols-2 gap-4">
+                        {review.matched_skills.length > 0 && (
+                            <div>
+                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                    Matched Skills
+                                </p>
+                                <ul className="space-y-1">
+                                    {review.matched_skills.map((skill, i) => {
+                                        const parsed = parseTaggedItem(skill);
+                                        return (
+                                            <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                <i className="fa-solid fa-check text-success text-xs mt-1 shrink-0" />
+                                                <span>
+                                                    {parsed.name}
+                                                    {parsed.is_required != null && (
+                                                        <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                            {parsed.is_required ? "(required)" : "(preferred)"}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        )}
+                        {review.missing_skills.length > 0 && (
+                            <div>
+                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                    Missing Skills
+                                </p>
+                                <ul className="space-y-1">
+                                    {review.missing_skills.map((skill, i) => {
+                                        const parsed = parseTaggedItem(skill);
+                                        return (
+                                            <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                <i className="fa-solid fa-xmark text-error text-xs mt-1 shrink-0" />
+                                                <span>
+                                                    {parsed.name}
+                                                    {parsed.is_required != null && (
+                                                        <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                            {parsed.is_required ? "(required)" : "(preferred)"}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Matched vs Missing Requirements */}
+                    {(review.matched_requirements.length > 0 || review.missing_requirements.length > 0) && (
+                        <div className="grid grid-cols-2 gap-4">
+                            {review.matched_requirements.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                        Met Requirements
+                                    </p>
+                                    <ul className="space-y-1">
+                                        {review.matched_requirements.map((req, i) => {
+                                            const parsed = parseTaggedItem(req);
+                                            return (
+                                                <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                    <i className="fa-solid fa-check text-success text-xs mt-1 shrink-0" />
+                                                    <span>
+                                                        {parsed.name}
+                                                        {parsed.is_required != null && (
+                                                            <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                                {parsed.is_required ? "(required)" : "(preferred)"}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            )}
+                            {review.missing_requirements.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-base-content/40 mb-2">
+                                        Unmet Requirements
+                                    </p>
+                                    <ul className="space-y-1">
+                                        {review.missing_requirements.map((req, i) => {
+                                            const parsed = parseTaggedItem(req);
+                                            return (
+                                                <li key={i} className="flex items-start gap-2 text-sm text-base-content/70">
+                                                    <i className="fa-solid fa-xmark text-error text-xs mt-1 shrink-0" />
+                                                    <span>
+                                                        {parsed.name}
+                                                        {parsed.is_required != null && (
+                                                            <span className={`text-xs ml-1 ${parsed.is_required ? "text-error/60" : "text-base-content/30"}`}>
+                                                                {parsed.is_required ? "(required)" : "(preferred)"}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Experience */}
+                    {review.required_years != null && (
+                        <div className="flex items-center gap-3 p-3 bg-base-200">
+                            <i className={`fa-duotone fa-regular fa-briefcase ${
+                                review.meets_experience_requirement ? "text-success" : "text-warning"
+                            }`} />
+                            <div className="text-sm">
+                                <span className="font-bold">Experience: </span>
+                                <span className="text-base-content/60">
+                                    {review.candidate_years ?? "?"} years
+                                    {" "}(requires {review.required_years}+)
+                                </span>
+                                {review.meets_experience_requirement ? (
+                                    <i className="fa-solid fa-check text-success text-xs ml-2" />
+                                ) : (
+                                    <i className="fa-solid fa-xmark text-warning text-xs ml-2" />
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </WizardHelpZone>
+
+            {/* Decision callout */}
+            <div className="bg-base-200 border-l-4 border-base-300 p-4">
+                <div className="flex items-start gap-3">
+                    <i className="fa-duotone fa-regular fa-circle-info text-base-content/40 mt-0.5" />
+                    <div className="text-sm text-base-content/50">
+                        <p className="font-bold text-base-content/70 mb-1">
+                            Ready to submit?
+                        </p>
+                        <p>
+                            Click <strong>Submit to Job</strong> to send your application to
+                            the hiring team, or save as a draft to come back later.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

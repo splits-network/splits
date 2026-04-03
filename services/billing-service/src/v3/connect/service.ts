@@ -9,8 +9,8 @@ import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ConnectRepository } from './repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ConnectRepository } from './repository.js';
 
 export class ConnectService {
   private stripe: Stripe;

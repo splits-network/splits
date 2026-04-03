@@ -5,9 +5,9 @@
 
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { RecruiterSubmissionEmailService } from '../../services/recruiter-submission/service';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { RecruiterSubmissionEmailService } from '../../services/recruiter-submission/service.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
 
 export class RecruiterSubmissionEventConsumer {
     constructor(

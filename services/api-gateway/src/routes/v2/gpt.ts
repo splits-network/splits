@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { request as httpRequest } from 'node:http';
 import { URL } from 'node:url';
-import { ServiceRegistry } from '../../clients';
-import { buildQueryString, getCorrelationId } from './common';
+import { ServiceRegistry } from '../../clients.js';
+import { buildQueryString, getCorrelationId } from './common.js';
 
 /**
  * GPT OAuth2, API, and MCP App routes

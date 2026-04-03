@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AIReviewListParams } from './types';
+import { AIReviewListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'fit_score'];
 

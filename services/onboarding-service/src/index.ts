@@ -12,8 +12,8 @@ import {
 } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { EventPublisher } from "./shared/events";
-import { registerV3Routes } from "./v3/routes";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./shared/events.js";
+import { registerV3Routes } from "./v3/routes.js";
 import * as Sentry from "@sentry/node";
 
 if (process.env.SENTRY_DSN) {
@@ -102,31 +102,27 @@ async function main() {
         },
     });
 
-    // Initialize event publisher
+    // Initialize event publisher (non-fatal — ResilientPublisher falls back to outbox)
     const eventPublisher = new EventPublisher(
         rabbitConfig.url,
         logger,
         baseConfig.serviceName,
     );
-
     try {
         await eventPublisher.connect();
-        logger.info("RabbitMQ EventPublisher connected successfully");
     } catch (error) {
-        logger.error(
-            { err: error },
-            "Failed to connect RabbitMQ EventPublisher on startup",
-        );
-        throw error;
+        logger.warn({ err: error }, "Failed to connect event publisher - ResilientPublisher will use outbox only");
     }
 
     // Create Supabase client
     const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
 
     // Register V3 routes
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Health check

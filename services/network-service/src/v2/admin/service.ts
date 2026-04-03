@@ -1,4 +1,4 @@
-import { AdminNetworkRepository, AdminListParams, AdminListResponse } from './repository';
+import { AdminNetworkRepository, AdminListParams, AdminListResponse } from './repository.js';
 
 export class AdminNetworkService {
     constructor(private repository: AdminNetworkRepository) {}

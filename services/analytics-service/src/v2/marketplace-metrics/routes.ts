@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { MarketplaceMetricsServiceV2 } from './service';
-import { MetricFilters, MetricUpdate, CreateMetricInput } from './types';
-import { requireUserContext } from '../shared/access';
+import { MarketplaceMetricsServiceV2 } from './service.js';
+import { MetricFilters, MetricUpdate, CreateMetricInput } from './types.js';
+import { requireUserContext } from '../shared/access.js';
 
 interface RegisterMarketplaceMetricsRoutesConfig {
     marketplaceMetricsService: MarketplaceMetricsServiceV2;

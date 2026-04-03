@@ -94,3 +94,6 @@ export * from './matching';
 
 // Subscription entitlements (feature gating)
 export * from './entitlements';
+
+// AI model management types (provider config, usage tracking, pricing)
+export * from './ai-management';

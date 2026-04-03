@@ -9,9 +9,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { SubmitApplicationService } from './submit-application.service';
-import { submitApplicationSchema, SubmitApplicationInput } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { SubmitApplicationService } from './submit-application.service.js';
+import { submitApplicationSchema, SubmitApplicationInput } from '../types.js';
 
 export function registerSubmitApplicationAction(
   app: FastifyInstance,

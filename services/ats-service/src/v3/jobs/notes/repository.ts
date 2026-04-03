@@ -7,7 +7,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
-import { JobNote, JobNoteCreate, JobNoteUpdate, JobNoteFilters } from './types';
+import { JobNote, JobNoteCreate, JobNoteUpdate, JobNoteFilters } from './types.js';
 
 const NOTE_SELECT = '*, created_by:users!created_by_user_id(id, name, email)';
 

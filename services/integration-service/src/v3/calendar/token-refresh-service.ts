@@ -7,8 +7,8 @@
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { getOAuthClientId, getOAuthClientSecret } from '../../v2/shared/helpers';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { getOAuthClientId, getOAuthClientSecret } from '../../v2/shared/helpers.js';
 
 interface TokenResponse {
   access_token: string;

@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyReputationListParams } from './types';
+import { CompanyReputationListParams } from './types.js';
 
 export class CompanyReputationRepository {
   constructor(private supabase: SupabaseClient) {}

@@ -5,8 +5,8 @@ import { DocumentService } from './services/document-service.js';
 import { ScannerService } from './services/scanner-service.js';
 
 // V2 Architecture imports
-import { DocumentRepositoryV2 } from './v2/documents/repository';
-import { DocumentServiceV2 } from './v2/documents/service';
+import { DocumentRepositoryV2 } from './v2/documents/repository.js';
+import { DocumentServiceV2 } from './v2/documents/service.js';
 
 import { createClient } from '@supabase/supabase-js';
 import { loadConfig } from '@splits-network/shared-config';
@@ -250,9 +250,14 @@ export class DomainConsumer {
                 throw new Error(`Poor extraction quality: confidence=${extractionResult.confidence}, words=${extractionResult.wordCount}`);
             }
 
-            // 5. Update document with extracted content
+            // 5. Check if this is a resume that needs smart resume extraction
+            const isResume = await this.isResumeDocument(event.document_id);
+            const needsSmartResume = isResume && event.entity_type === 'candidate';
+
+            // 5a. Update document with extracted content
+            // If smart resume extraction is needed, mark as 'enriching' so the frontend waits
             await this.documentServiceV2.updateBySystem(event.document_id, {
-                processing_status: 'processed',
+                processing_status: needsSmartResume ? 'enriching' : 'processed',
                 metadata: {
                     extracted_text: extractionResult.text,
                     extraction_method: extractionResult.extractionMethod,
@@ -261,6 +266,17 @@ export class DomainConsumer {
                     pages: extractionResult.pages
                 }
             });
+
+            // 5b. If this is a resume for a candidate, publish event for ai-service to handle
+            if (needsSmartResume) {
+                await this.publishDocumentEnriching({
+                    document_id: event.document_id,
+                    candidate_id: event.entity_id,
+                    extracted_text: extractionResult.text,
+                    mime_type: event.mime_type,
+                });
+                logger.info(`Published document.enriching event for candidate ${event.entity_id}`);
+            }
 
             const processingTime = Date.now() - startTime;
 
@@ -320,6 +336,23 @@ export class DomainConsumer {
     }
 
     /**
+     * Publish document.enriching event — triggers ai-service to extract structured resume data
+     */
+    private async publishDocumentEnriching(event: {
+        document_id: string;
+        candidate_id: string;
+        extracted_text: string;
+        mime_type: string;
+    }): Promise<void> {
+        try {
+            await this.eventPublisher.publish('document.enriching', event, 'document-processing-service');
+            logger.debug(`Published document.enriching event: ${event.document_id}`);
+        } catch (error) {
+            logger.error(`Failed to publish document.enriching event: ${event.document_id} - ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    /**
      * Publish document.processed event
      */
     private async publishDocumentProcessed(event: DocumentProcessedEvent): Promise<void> {
@@ -329,6 +362,18 @@ export class DomainConsumer {
         } catch (error) {
             logger.error(`Failed to publish document.processed event: ${event.document_id} - ${error instanceof Error ? error.message : String(error)}`);
         }
+    }
+
+    /**
+     * Check if a document is a resume type
+     */
+    private async isResumeDocument(documentId: string): Promise<boolean> {
+        const { data } = await this.supabase
+            .from('documents')
+            .select('document_type')
+            .eq('id', documentId)
+            .single() as any;
+        return data?.document_type === 'resume';
     }
 
     /**

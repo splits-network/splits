@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { ParticipantRepository } from "./repository";
-import { ParticipantService } from "./service";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { ParticipantRepository } from "./repository.js";
+import { ParticipantService } from "./service.js";
 import {
     AddParticipantInput,
     ParticipantListParams,
@@ -15,7 +15,7 @@ import {
     participantIdParamSchema,
     listQuerySchema,
     addParticipantSchema,
-} from "./types";
+} from "./types.js";
 
 export function registerParticipantRoutes(
     app: FastifyInstance,

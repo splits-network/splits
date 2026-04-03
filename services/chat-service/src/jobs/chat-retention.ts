@@ -1,8 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { loadBaseConfig, loadDatabaseConfig, loadRedisConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
-import { ChatEventPublisher } from '../v2/chat/events';
-import { ChatStorageClient } from '../v2/chat/storage';
+import { ChatEventPublisher } from '../v2/chat/events.js';
+import { ChatStorageClient } from '../v2/chat/storage.js';
 
 type RetentionConfig = {
     message_retention_days: number;

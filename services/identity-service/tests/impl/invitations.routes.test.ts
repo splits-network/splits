@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { registerInvitationRoutes } from '../../src/v2/invitations/routes';
+import { registerInvitationRoutes } from '../../src/v2/invitations/routes.js';
 
 describe('Invitation routes (integration)', () => {
     const invitationService = {

@@ -7,10 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { InitUploadRepository } from './init-upload.repository';
-import { InitUploadService } from './init-upload.service';
-import { AttachmentStorageClient } from '../storage';
-import { InitUploadInput, initUploadSchema } from '../types';
+import { InitUploadRepository } from './init-upload.repository.js';
+import { InitUploadService } from './init-upload.service.js';
+import { AttachmentStorageClient } from '../storage.js';
+import { InitUploadInput, initUploadSchema } from '../types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 const DISABLED_ERROR = { error: { code: 'FEATURE_DISABLED', message: 'Attachments are disabled' } };

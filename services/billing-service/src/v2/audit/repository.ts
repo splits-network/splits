@@ -2,8 +2,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { resolveAccessContext, isRecruiter, isCompanyUser, getAccessibleCompanyIds } from '../shared/access-helpers';
-import { PlacementPayoutAuditLog, PlacementPayoutAuditCreate, PlacementPayoutAuditFilters } from './types';
+import { resolveAccessContext, isRecruiter, isCompanyUser, getAccessibleCompanyIds } from '../shared/access-helpers.js';
+import { PlacementPayoutAuditLog, PlacementPayoutAuditCreate, PlacementPayoutAuditFilters } from './types.js';
 
 const TABLE = 'placement_payout_audit_log';
 

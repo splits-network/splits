@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { MatchService } from './service';
-import { MatchRepository } from './repository';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { MatchingOrchestrator } from './matching-orchestrator';
+import { MatchService } from './service.js';
+import { MatchRepository } from './repository.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { MatchingOrchestrator } from './matching-orchestrator.js';
 
 interface Config {
     supabaseUrl: string;

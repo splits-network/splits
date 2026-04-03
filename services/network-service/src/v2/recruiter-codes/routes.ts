@@ -5,17 +5,17 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { RecruiterCodeRepository } from './repository';
-import { RecruiterCodeServiceV2 } from './service';
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { requireUserContext } from '../helpers';
+import { RecruiterCodeRepository } from './repository.js';
+import { RecruiterCodeServiceV2 } from './service.js';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { requireUserContext } from '../helpers.js';
 import { StandardListParams } from '@splits-network/shared-types';
 import {
     RecruiterCodeFilters,
     CreateRecruiterCodeRequest,
     RecruiterCodeUpdate,
     LogCodeUsageRequest,
-} from './types';
+} from './types.js';
 
 const listSchema = {
     querystring: {

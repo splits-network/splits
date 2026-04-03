@@ -13,9 +13,9 @@ import {
   ForbiddenError,
   BadRequestError,
 } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { GptActionsRepository } from '../repository';
-import { ResumeAnalysisInput } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { GptActionsRepository } from '../repository.js';
+import { ResumeAnalysisInput } from '../types.js';
 
 export class AnalyzeResumeService {
   private repository: GptActionsRepository;

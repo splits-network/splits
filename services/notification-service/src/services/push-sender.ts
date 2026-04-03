@@ -7,8 +7,8 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { PushSubscriptionRepository } from '../v3/push/repository';
-import type { PushPayload, PushSubscriptionRecord } from '../v3/push/types';
+import { PushSubscriptionRepository } from '../v3/push/repository.js';
+import type { PushPayload, PushSubscriptionRecord } from '../v3/push/types.js';
 
 export class PushSender {
   private repository: PushSubscriptionRepository;

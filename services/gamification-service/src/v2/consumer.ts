@@ -1,14 +1,14 @@
 import amqplib, { Channel, ChannelModel } from 'amqplib';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
-import { BadgeDefinitionService } from './badges/definitions/service';
-import { BadgeAwardService } from './badges/awards/service';
-import { BadgeProgressService } from './badges/progress/service';
-import { evaluateBadgeCriteria } from './badges/evaluator';
-import { XpService } from './xp/service';
-import { StreakService } from './streaks/service';
-import { BadgeDefinition, BadgeEntityType } from './badges/definitions/types';
-import { XpSourceType } from './xp/types';
+import { BadgeDefinitionService } from './badges/definitions/service.js';
+import { BadgeAwardService } from './badges/awards/service.js';
+import { BadgeProgressService } from './badges/progress/service.js';
+import { evaluateBadgeCriteria } from './badges/evaluator.js';
+import { XpService } from './xp/service.js';
+import { StreakService } from './streaks/service.js';
+import { BadgeDefinition, BadgeEntityType } from './badges/definitions/types.js';
+import { XpSourceType } from './xp/types.js';
 
 /** Maps domain events to the entity type + XP source they affect */
 const EVENT_MAP: Record<string, { entityType: BadgeEntityType; entityIdField: string; xpSource: XpSourceType; streakType?: string }[]> = {

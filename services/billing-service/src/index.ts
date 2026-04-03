@@ -3,15 +3,15 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler, setupProcessErrorHandlers } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { registerWebhookRoutes } from './routes/webhooks/routes';
-import { registerV2Routes } from './v2/routes';
-import { registerV3Routes } from './v3/routes';
-import { EventPublisher as V2EventPublisher, OutboxPublisher } from './v2/shared/events';
-import { BillingEventConsumer } from './events/placement-consumer';
-import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
-import { PlacementSnapshotService } from './v2/placement-snapshot/service';
-import { WebhookServiceV2 } from './v2/webhooks/service';
-import { WebhookEventRepository } from './v2/webhook-events/repository';
+import { registerWebhookRoutes } from './routes/webhooks/routes.js';
+import { registerV2Routes } from './v2/routes.js';
+import { registerV3Routes } from './v3/routes.js';
+import { EventPublisher as V2EventPublisher, OutboxPublisher, ResilientPublisher } from './v2/shared/events.js';
+import { BillingEventConsumer } from './events/placement-consumer.js';
+import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository.js';
+import { PlacementSnapshotService } from './v2/placement-snapshot/service.js';
+import { WebhookServiceV2 } from './v2/webhooks/service.js';
+import { WebhookEventRepository } from './v2/webhook-events/repository.js';
 import * as Sentry from '@sentry/node';
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -146,11 +146,14 @@ async function main() {
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabase, baseConfig.serviceName, logger);
 
+    // Resilient publisher: tries RabbitMQ first, falls back to outbox
+    const resilientPublisher = new ResilientPublisher(v2EventPublisher, outboxPublisher, logger);
+
     // Register V2 routes (plans, subscriptions, payouts, splits-rates)
     const v2Services = await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Create snapshot service with DB-driven rates (must be after V2 routes init)
@@ -174,15 +177,15 @@ async function main() {
         logger.error({ err: error }, 'CRITICAL: Billing event consumer failed to connect - commission processing DISABLED');
     }
 
-    // Initialize V2 webhook service with outbox publisher for durable domain events
-    const webhookService = new WebhookServiceV2(supabase, logger, outboxPublisher, stripeConfig.secretKey);
+    // Initialize V2 webhook service with resilient publisher for durable domain events
+    const webhookService = new WebhookServiceV2(supabase, logger, resilientPublisher, stripeConfig.secretKey);
     const webhookEventRepository = new WebhookEventRepository(supabase);
     registerWebhookRoutes(app, webhookService, stripeConfig.webhookSecret, webhookEventRepository);
 
     // Register V3 routes
     registerV3Routes(app, {
         supabase,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         stripeWebhookSecret: stripeConfig.webhookSecret,
         stripeSecretKey: stripeConfig.secretKey,
     });

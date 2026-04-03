@@ -5,8 +5,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { BadRequestError } from "@splits-network/shared-fastify";
-import { StatsRepository } from "./repository";
-import { CallStats } from "./types";
+import { StatsRepository } from "./repository.js";
+import { CallStats } from "./types.js";
 
 export class StatsService {
     private accessResolver: AccessContextResolver;

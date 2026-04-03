@@ -1,8 +1,8 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
-import { referralCodeRedeemedEmail, ReferralCodeRedeemedData } from '../../templates/recruiter-codes';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
+import { referralCodeRedeemedEmail, ReferralCodeRedeemedData } from '../../templates/recruiter-codes/index.js';
 
 export class RecruiterCodesEmailService {
     constructor(

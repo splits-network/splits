@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { FraudSignalRepository } from './repository';
-import { FraudSignalService } from './service';
-import { CreateFraudSignalInput, UpdateFraudSignalInput, FraudSignalListParams, idParamSchema, listQuerySchema, createFraudSignalSchema, updateFraudSignalSchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { FraudSignalRepository } from './repository.js';
+import { FraudSignalService } from './service.js';
+import { CreateFraudSignalInput, UpdateFraudSignalInput, FraudSignalListParams, idParamSchema, listQuerySchema, createFraudSignalSchema, updateFraudSignalSchema } from './types.js';
 
 export function registerFraudSignalRoutes(app: FastifyInstance, supabase: SupabaseClient, eventPublisher?: IEventPublisher) {
   const repository = new FraudSignalRepository(supabase);

@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MetricsRepository } from './metrics.repository';
-import { MetricsService } from './metrics.service';
-import { metricsQuerySchema } from '../types';
+import { MetricsRepository } from './metrics.repository.js';
+import { MetricsService } from './metrics.service.js';
+import { metricsQuerySchema } from '../types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

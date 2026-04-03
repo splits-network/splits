@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { AccessToken } from 'livekit-server-sdk';
-import { CallRepository } from './repository';
-import { Call, CallDetail } from './types';
+import { CallRepository } from './repository.js';
+import { Call, CallDetail } from './types.js';
 
 export class TokenService {
     constructor(

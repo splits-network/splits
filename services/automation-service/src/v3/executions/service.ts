@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ExecutionRepository } from './repository';
-import { ExecutionListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ExecutionRepository } from './repository.js';
+import { ExecutionListParams } from './types.js';
 
 export class ExecutionService {
   private accessResolver: AccessContextResolver;

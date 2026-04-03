@@ -7,10 +7,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { registerAdminJobsView } from './views/jobs.route';
-import { registerAdminListViews } from './views/lists.route';
-import { registerAdminStatsViews } from './views/stats.route';
-import { registerAdminChartsView } from './views/charts.route';
+import { registerAdminJobsView } from './views/jobs.route.js';
+import { registerAdminListViews } from './views/lists.route.js';
+import { registerAdminStatsViews } from './views/stats.route.js';
+import { registerAdminChartsView } from './views/charts.route.js';
 
 export function registerAdminRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   registerAdminJobsView(app, supabase);

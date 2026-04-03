@@ -5,8 +5,8 @@
  * to record and retrieve recruiter activity.
  */
 
-import { RecruiterActivityRepository } from './repository';
-import { RecruiterActivity, CreateActivityInput } from './types';
+import { RecruiterActivityRepository } from './repository.js';
+import { RecruiterActivity, CreateActivityInput } from './types.js';
 
 export class RecruiterActivityService {
   constructor(private repository: RecruiterActivityRepository) {}

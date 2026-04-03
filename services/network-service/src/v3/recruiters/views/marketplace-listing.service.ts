@@ -5,8 +5,8 @@
  * Public — no auth required.
  */
 
-import { MarketplaceListingRepository } from './marketplace-listing.repository';
-import { RecruiterListParams } from '../types';
+import { MarketplaceListingRepository } from './marketplace-listing.repository.js';
+import { RecruiterListParams } from '../types.js';
 
 export class MarketplaceListingService {
   constructor(private repository: MarketplaceListingRepository) {}

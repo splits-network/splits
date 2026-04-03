@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PlanRepository } from './repository';
-import { PlanService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PlanRepository } from './repository.js';
+import { PlanService } from './service.js';
 import {
   CreatePlanInput,
   UpdatePlanInput,
@@ -15,7 +15,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerPlanRoutes(
   app: FastifyInstance,

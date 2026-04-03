@@ -3,7 +3,7 @@ import {
     Notification,
     NotificationFilters,
     NotificationUpdate,
-} from './types';
+} from './types.js';
 
 export class NotificationRepositoryV2 {
     private supabase: SupabaseClient;

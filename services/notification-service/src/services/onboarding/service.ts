@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
-import { NotificationRepository } from '../../repository';
-import type { EmailSource } from '../../templates/base';
+import { NotificationRepository } from '../../repository.js';
+import type { EmailSource } from '../../templates/base.js';
 import {
     welcomeEmail,
     WelcomeEmailData,
@@ -9,7 +9,7 @@ import {
     RecruiterOnboardingData,
     companyWelcomeEmail,
     CompanyWelcomeData,
-} from '../../templates/onboarding';
+} from '../../templates/onboarding/index.js';
 
 export class OnboardingEmailService {
     constructor(

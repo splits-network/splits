@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { TemplateServiceV2 } from './service';
-import { NotificationTemplateRepository } from './repository';
-import { TemplateCreateInput, TemplateUpdate } from './types';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { resolveAccessContext } from '../shared/access';
+import { TemplateServiceV2 } from './service.js';
+import { NotificationTemplateRepository } from './repository.js';
+import { TemplateCreateInput, TemplateUpdate } from './types.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 interface RegisterTemplateRoutesConfig {
     supabaseUrl: string;

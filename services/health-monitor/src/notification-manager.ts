@@ -1,7 +1,7 @@
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 import { Logger } from "@splits-network/shared-logging";
-import { AggregatedServiceStatus } from "./types";
-import { EventPublisher } from "./event-publisher";
+import { AggregatedServiceStatus } from "./types.js";
+import type { IEventPublisher } from "./event-publisher.js";
 
 export class NotificationManager {
     private supabase: SupabaseClient;
@@ -12,7 +12,7 @@ export class NotificationManager {
         supabaseUrl: string,
         supabaseKey: string,
         private logger: Logger,
-        private eventPublisher: EventPublisher | null = null,
+        private eventPublisher: IEventPublisher | null = null,
     ) {
         this.supabase = createClient(supabaseUrl, supabaseKey);
     }

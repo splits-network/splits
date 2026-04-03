@@ -8,8 +8,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AccessContextResolver } from "@splits-network/shared-access-context";
 import { NotFoundError, ForbiddenError } from "@splits-network/shared-fastify";
-import { NavigationRepository } from "./repository";
-import { NavigationListParams, UpsertNavigationInput } from "./types";
+import { NavigationRepository } from "./repository.js";
+import { NavigationListParams, UpsertNavigationInput } from "./types.js";
 
 export class NavigationService {
     private accessResolver: AccessContextResolver;

@@ -7,8 +7,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../v2/shared/events';
-import { registerCallRecordingRoutes } from './call-recordings/routes';
+import { IEventPublisher } from '../v2/shared/events.js';
+import { registerCallRecordingRoutes } from './call-recordings/routes.js';
 
 export interface RegisterV3Config {
   supabase: SupabaseClient;

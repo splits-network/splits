@@ -4,7 +4,7 @@ import {
     SubscriptionCreateInput,
     SubscriptionListFilters,
     SubscriptionUpdateInput,
-} from './types';
+} from './types.js';
 
 interface RepositoryListResult<T> {
     data: T[];

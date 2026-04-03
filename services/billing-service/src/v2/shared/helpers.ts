@@ -4,7 +4,7 @@
  */
 
 import { FastifyRequest } from 'fastify';
-import type { AccessContext } from './access';
+import type { AccessContext } from './access.js';
 
 // ============================================
 // USER CONTEXT

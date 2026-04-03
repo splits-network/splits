@@ -1,8 +1,11 @@
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { ApplicationsEmailService } from '../../services/applications/service';
-import { DataLookupHelper } from '../../helpers/data-lookup';
-import { ContactLookupHelper } from '../../helpers/contact-lookup';
+import { ApplicationsEmailService } from '../../services/applications/service.js';
+import { DataLookupHelper } from '../../helpers/data-lookup.js';
+import { ContactLookupHelper } from '../../helpers/contact-lookup.js';
+
+/** Stages where the application has been submitted to the company and company should receive notifications */
+const COMPANY_VISIBLE_STAGES = ['submitted', 'company_review', 'company_feedback', 'interview', 'offer', 'hired', 'rejected', 'withdrawn'];
 
 export class ApplicationsEventConsumer {
     constructor(
@@ -590,7 +593,8 @@ export class ApplicationsEventConsumer {
                         }
                     }
 
-                    {
+                    // Only notify company if the application was previously in a company-visible stage
+                    if (old_stage && COMPANY_VISIBLE_STAGES.includes(old_stage)) {
                         const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
                         for (const admin of companyAdmins) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
@@ -623,7 +627,7 @@ export class ApplicationsEventConsumer {
                         }
                     }
 
-                    if (old_stage === 'submitted' || old_stage === 'company_review' || old_stage === 'company_feedback' || old_stage === 'interview' || old_stage === 'offer') {
+                    if (old_stage && COMPANY_VISIBLE_STAGES.includes(old_stage)) {
                         const companyAdminsWithdrawn = await this.contactLookup.getCompanyAdminContacts(job.company_id);
                         for (const admin of companyAdminsWithdrawn) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
@@ -1424,8 +1428,9 @@ export class ApplicationsEventConsumer {
                 }
             }
 
-            // Add company admins (if visibility allows)
-            if (shouldNotifyCompanySide && job.company_id) {
+            // Add company admins (if visibility allows AND application has been submitted to company)
+            const isSubmittedToCompany = COMPANY_VISIBLE_STAGES.includes(application.stage);
+            if (shouldNotifyCompanySide && job.company_id && isSubmittedToCompany) {
                 const company = await this.dataLookup.getCompany(job.company_id);
                 if (company?.identity_organization_id) {
                     const companyAdmins = await this.contactLookup.getCompanyAdminContacts(company.identity_organization_id);
@@ -1441,6 +1446,11 @@ export class ApplicationsEventConsumer {
                         }
                     }
                 }
+            } else if (shouldNotifyCompanySide && !isSubmittedToCompany) {
+                this.logger.info(
+                    { application_id, stage: application.stage },
+                    'Skipping company notification — application not yet submitted to company'
+                );
             }
 
             // Send notifications to all recipients

@@ -9,10 +9,10 @@ import Stripe from 'stripe';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PayoutRepository, PayoutScopeFilters } from './repository';
-import { SplitCalculator } from './split-calculator';
-import { TransactionListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PayoutRepository, PayoutScopeFilters } from './repository.js';
+import { SplitCalculator } from './split-calculator.js';
+import { TransactionListParams } from './types.js';
 
 export class PayoutService {
   private stripe: Stripe;

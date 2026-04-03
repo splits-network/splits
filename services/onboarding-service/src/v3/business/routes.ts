@@ -5,10 +5,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../shared/events';
-import { BusinessOnboardingRepository } from './repository';
-import { BusinessOnboardingService } from './service';
-import { BusinessOnboardingInput, businessOnboardingSchema } from './types';
+import { IEventPublisher } from '../../shared/events.js';
+import { BusinessOnboardingRepository } from './repository.js';
+import { BusinessOnboardingService } from './service.js';
+import { BusinessOnboardingInput, businessOnboardingSchema } from './types.js';
 
 export function registerBusinessOnboardingRoutes(
     app: FastifyInstance,

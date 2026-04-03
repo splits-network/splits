@@ -6,10 +6,10 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Webhook } from 'svix';
 import { createLogger } from '@splits-network/shared-logging';
-import { IEventPublisher } from '../../v2/shared/events';
-import { WebhookRepository } from './repository';
-import { WebhookService } from './service';
-import { ClerkWebhookEvent, WebhookSourceApp, webhookHeadersSchema, webhookBodySchema } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { WebhookRepository } from './repository.js';
+import { WebhookService } from './service.js';
+import { ClerkWebhookEvent, WebhookSourceApp, webhookHeadersSchema, webhookBodySchema } from './types.js';
 
 const SPLITS_WEBHOOK_SECRET = process.env.SPLITS_CLERK_WEBHOOK_SECRET;
 const APP_WEBHOOK_SECRET = process.env.APP_CLERK_WEBHOOK_SECRET;

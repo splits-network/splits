@@ -4,8 +4,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { WithDetailsJobSkillRepository } from './with-details.repository';
-import { listQuerySchema, JobSkillListParams } from '../types';
+import { WithDetailsJobSkillRepository } from './with-details.repository.js';
+import { listQuerySchema, JobSkillListParams } from '../types.js';
 
 export function registerWithDetailsView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new WithDetailsJobSkillRepository(supabase);

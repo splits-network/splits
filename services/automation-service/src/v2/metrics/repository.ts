@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { MarketplaceMetric, MetricFilters, MetricUpdate } from './types';
+import { MarketplaceMetric, MetricFilters, MetricUpdate } from './types.js';
 
 export interface CreateMetricInput {
     metric_date: string;

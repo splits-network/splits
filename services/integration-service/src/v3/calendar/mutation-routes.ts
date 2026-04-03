@@ -4,8 +4,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { Logger } from '@splits-network/shared-logging';
-import { CalendarService, CreateCalendarEventParams, UpdateCalendarEventParams } from '../../v2/calendar/service';
-import { mapErrorStatus } from './routes';
+import { CalendarService, CreateCalendarEventParams, UpdateCalendarEventParams } from '../../v2/calendar/service.js';
+import { mapErrorStatus } from './routes.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

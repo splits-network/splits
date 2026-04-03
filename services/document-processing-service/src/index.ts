@@ -4,14 +4,14 @@ import { createSupabaseClient } from "@splits-network/shared-config";
 import * as amqp from "amqplib";
 
 // V2 Architecture imports
-import { DocumentRepositoryV2 } from "./v2/documents/repository";
-import { DocumentServiceV2 } from "./v2/documents/service";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
+import { DocumentRepositoryV2 } from "./v2/documents/repository.js";
+import { DocumentServiceV2 } from "./v2/documents/service.js";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
 import { EventPublisher } from "@splits-network/shared-job-queue";
 
 // Processing imports (to be updated to use V2)
-import { DomainConsumer } from "./domain-consumer";
+import { DomainConsumer } from "./domain-consumer.js";
 
 const logger = createLogger("document-processing-service");
 

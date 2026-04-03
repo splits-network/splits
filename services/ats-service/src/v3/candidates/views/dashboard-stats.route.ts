@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateDashboardStatsRepository } from './dashboard-stats.repository';
-import { CandidateDashboardStatsService } from './dashboard-stats.service';
-import { idParamSchema } from '../types';
+import { CandidateDashboardStatsRepository } from './dashboard-stats.repository.js';
+import { CandidateDashboardStatsService } from './dashboard-stats.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerCandidateDashboardStatsView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CandidateDashboardStatsRepository(supabase);

@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { MetricRepository } from './repository';
-import { MetricService } from './service';
-import { MetricListParams, idParamSchema, listQuerySchema } from './types';
+import { MetricRepository } from './repository.js';
+import { MetricService } from './service.js';
+import { MetricListParams, idParamSchema, listQuerySchema } from './types.js';
 
 export function registerMetricRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new MetricRepository(supabase);

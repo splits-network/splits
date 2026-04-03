@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AdminListParams } from './types';
+import { AdminListParams } from './types.js';
 
 function paginate(params: AdminListParams) {
   const page = Math.max(1, params.page ?? 1);

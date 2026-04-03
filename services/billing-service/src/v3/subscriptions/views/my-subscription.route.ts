@@ -6,7 +6,7 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError } from '@splits-network/shared-fastify';
-import { MySubscriptionRepository } from './my-subscription.repository';
+import { MySubscriptionRepository } from './my-subscription.repository.js';
 
 export function registerMySubscriptionView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new MySubscriptionRepository(supabase);

@@ -21,6 +21,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/outbox-service ./services/outbox-service
 EXPOSE 3013
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-job-queue build
 CMD ["pnpm", "--filter", "@splits-network/outbox-service", "dev"]
 
 # Build stage
@@ -60,6 +61,7 @@ COPY --from=build /app/packages/shared-types/package.json ./packages/shared-type
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 
 # Copy built service
+COPY --from=build /app/services/outbox-service/package.json ./services/outbox-service/
 COPY --from=build /app/services/outbox-service/dist ./services/outbox-service/dist
 
 EXPOSE 3013

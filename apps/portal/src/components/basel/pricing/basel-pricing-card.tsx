@@ -23,13 +23,13 @@ const tierColors = {
         bg: "bg-primary",
         text: "text-primary-content",
         checkColor: "text-primary",
-        cardBg: "bg-neutral",
-        cardText: "text-neutral-content",
-        cardTextMuted: "text-neutral-content/50",
-        cardTextSubtle: "text-neutral-content/70",
-        cardTextSoft: "text-neutral-content/80",
-        cardTextFaint: "text-neutral-content/50",
-        cardTextFaintest: "text-neutral-content/40",
+        cardBg: "bg-base-100",
+        cardText: "text-base-content",
+        cardTextMuted: "text-base-content/50",
+        cardTextSubtle: "text-base-content/70",
+        cardTextSoft: "text-base-content/80",
+        cardTextFaint: "text-base-content/40",
+        cardTextFaintest: "text-base-content/30",
     },
     partner: {
         border: "border-accent",
@@ -100,7 +100,7 @@ export function BaselPricingCard({
         >
             {/* Popular badge */}
             {isPopular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-black uppercase tracking-[0.2em] bg-warning text-warning-content">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-black uppercase tracking-[0.2em] bg-warning text-warning-content text-nowrap">
                     Most Popular
                 </div>
             )}

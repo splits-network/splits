@@ -1,5 +1,5 @@
 import { AccessContextResolver } from "@splits-network/shared-access-context";
-import { ChatRepository } from "./repository";
+import { ChatRepository } from "./repository.js";
 import {
     ChatAttachment,
     ChatConversation,
@@ -11,9 +11,9 @@ import {
     SendMessageInput,
     ChatConversationListItemWithParticipants,
     ResyncResponseWithParticipants,
-} from "./types";
-import { ChatEventPublisher } from "./events";
-import { EventPublisher, IEventPublisher } from "../shared/events";
+} from "./types.js";
+import { ChatEventPublisher } from "./events.js";
+import { EventPublisher, IEventPublisher } from "../shared/events.js";
 
 export class ChatServiceV2 {
     private accessResolver: AccessContextResolver;

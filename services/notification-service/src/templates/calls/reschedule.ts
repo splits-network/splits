@@ -3,8 +3,8 @@
  * Sent to all participants when a call is rescheduled.
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, divider } from '../components.js';
 
 export interface CallRescheduleData {
     title?: string;

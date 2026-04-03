@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyInvitationDetailRepository } from './detail.repository';
-import { CompanyInvitationDetailService } from './detail.service';
-import { idParamSchema } from '../types';
+import { CompanyInvitationDetailRepository } from './detail.repository.js';
+import { CompanyInvitationDetailService } from './detail.service.js';
+import { idParamSchema } from '../types.js';
 
 export function registerCompanyInvitationDetailView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CompanyInvitationDetailRepository(supabase);

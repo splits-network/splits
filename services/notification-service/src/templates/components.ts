@@ -4,7 +4,7 @@
  * Editorial hierarchy: kicker → headline → body.
  */
 
-import { renderMarkdownToHTMLSync } from '../utils/markdown-renderer';
+import { renderMarkdownToHTMLSync } from '../utils/markdown-renderer.js';
 
 // ─── Button ──────────────────────────────────────────────────────────────────
 

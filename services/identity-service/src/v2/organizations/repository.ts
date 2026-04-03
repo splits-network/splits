@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { OrganizationFilters } from './types';
+import { OrganizationFilters } from './types.js';
 
 export class OrganizationRepository {
     private supabase: SupabaseClient;

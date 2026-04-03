@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PageTagRepository } from './repository';
-import { PageTagService } from './service';
-import { registerWithDetailsView } from './views/with-details.route';
+import { PageTagRepository } from './repository.js';
+import { PageTagService } from './service.js';
+import { registerWithDetailsView } from './views/with-details.route.js';
 import {
   CreatePageTagInput,
   BulkReplacePageTagsInput,
@@ -18,7 +18,7 @@ import {
   bulkReplaceSchema,
   pageIdParamSchema,
   deleteParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerPageTagRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new PageTagRepository(supabase);

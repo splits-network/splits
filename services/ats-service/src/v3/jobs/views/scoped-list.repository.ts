@@ -7,7 +7,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { JobListParams } from '../types';
+import { JobListParams } from '../types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'title', 'status', 'updated_at', 'salary_min', 'salary_max'];
 

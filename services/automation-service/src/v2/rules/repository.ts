@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { AutomationRule, RuleFilters, RuleUpdate } from './types';
+import { AutomationRule, RuleFilters, RuleUpdate } from './types.js';
 
 export interface CreateRuleInput {
     name: string;

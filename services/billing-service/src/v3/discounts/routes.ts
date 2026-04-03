@@ -4,15 +4,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { DiscountRepository } from './repository';
-import { PlanRepository } from '../plans/repository';
-import { DiscountService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { DiscountRepository } from './repository.js';
+import { PlanRepository } from '../plans/repository.js';
+import { DiscountService } from './service.js';
 import {
   DiscountValidationRequest,
   validateSchema,
   subscriptionIdParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerDiscountRoutes(
   app: FastifyInstance,

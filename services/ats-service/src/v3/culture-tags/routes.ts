@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CultureTagRepository } from './repository';
-import { CultureTagService } from './service';
-import { CreateCultureTagInput, CultureTagListParams, listQuerySchema, createSchema, idParamSchema } from './types';
+import { CultureTagRepository } from './repository.js';
+import { CultureTagService } from './service.js';
+import { CreateCultureTagInput, CultureTagListParams, listQuerySchema, createSchema, idParamSchema } from './types.js';
 
 export function registerCultureTagRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new CultureTagRepository(supabase);

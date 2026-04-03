@@ -5,14 +5,14 @@
  */
 
 import { randomUUID } from 'crypto';
-import { ImageRepository } from './repository';
-import { ContentImageStorage } from './storage';
-import { ImageFilters, ImageUpdate } from './types';
+import { ImageRepository } from './repository.js';
+import { ContentImageStorage } from './storage.js';
+import { ImageFilters, ImageUpdate } from './types.js';
 import {
     validatePaginationParams,
     buildPaginationResponse,
-} from '../shared/pagination';
-import { IEventPublisher } from '../shared/events';
+} from '../shared/pagination.js';
+import { IEventPublisher } from '../shared/events.js';
 
 const ALLOWED_MIME_TYPES = [
     'image/jpeg',

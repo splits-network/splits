@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { XpListParams } from './types';
+import { XpListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'points'];
 

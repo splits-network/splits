@@ -3,27 +3,28 @@
  * Core AI logic for candidate-job fit analysis
  */
 
-import { AIReviewRepository } from './repository';
-import { AIReviewInput, AIReviewResult } from './types';
-import { IEventPublisher } from '../shared/events';
+import { AIReviewRepository } from './repository.js';
+import { AIReviewInput, AIReviewResult, SkillMatch, RequirementMatch } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
+import type { IAiClient } from '@splits-network/shared-ai-client';
+
+function skillMatchToString(s: SkillMatch): string {
+    return typeof s === 'string' ? s : s.name;
+}
+
+function requirementMatchToString(r: RequirementMatch): string {
+    return typeof r === 'string' ? r : r.text;
+}
 
 export class AIReviewServiceV2 {
-    private openaiApiKey: string;
-    private modelVersion: string;
-
     constructor(
         private repository: AIReviewRepository,
         private eventPublisher: IEventPublisher | undefined,
-        private logger: Logger
+        private logger: Logger,
+        private aiClient?: IAiClient,
     ) {
-        this.openaiApiKey = process.env.OPENAI_API_KEY || '';
-        this.modelVersion = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-
-        if (!this.openaiApiKey) {
-            this.logger.warn('OPENAI_API_KEY not set. AI review service will not function.');
-        }
-        this.logger.info(`AI Review Service initialized with model: ${this.modelVersion}`);
+        this.logger.info('AI Review Service initialized');
     }
 
     /**
@@ -69,67 +70,84 @@ export class AIReviewServiceV2 {
         }
         const requiredSkillNames = jobSkills.filter(s => s.is_required).map(s => s.name);
         const preferredSkillNames = jobSkills.filter(s => !s.is_required).map(s => s.name);
-        // Extract data from ALL application documents
+        // Build resume data with clear priority:
+        // 1. application.resume_data (tailored resume from wizard) — source of truth
+        // 2. Smart resume (full career profile, richer than document data)
+        // 3. Document structured_metadata (legacy V2 fallback)
         let resumeText = input.resume_text || '';
         let resumeData = input.resume_data || undefined;
-        if (application.documents && Array.isArray(application.documents)) {
-            const documentsWithText: string[] = [];
-            const documentsWithoutText: any[] = [];
 
-            for (const doc of application.documents) {
-                // Raw text from metadata.extracted_text
-                if (doc.metadata?.extracted_text) {
-                    documentsWithText.push(doc.metadata.extracted_text);
-                }
-
-                // Structured data from structured_metadata (source of truth over application.resume_data)
-                if (!resumeData && doc.document_type === 'resume' && doc.structured_metadata) {
-                    const sm = doc.structured_metadata;
-                    resumeData = {
-                        summary: sm.professional_summary,
-                        experience: sm.experience,
-                        education: sm.education,
-                        skills: sm.skills,
-                        certifications: sm.certifications,
-                        total_years_experience: sm.total_years_experience,
-                        highest_degree: sm.highest_degree,
-                    };
-                }
-
-                if (!doc.metadata?.extracted_text) {
-                    documentsWithoutText.push({
-                        id: doc.id,
-                        filename: doc.filename,
-                        document_type: doc.document_type,
-                        processing_status: doc.processing_status,
-                    });
-                }
-            }
-
-            if (documentsWithText.length > 0 && !resumeText) {
-                resumeText = documentsWithText.join('\n\n=== NEXT DOCUMENT ===\n\n');
-            }
-
-            if (documentsWithoutText.length > 0) {
-                this.logger.warn({
-                    application_id: input.application_id,
-                    documents_without_text: documentsWithoutText.length,
-                    details: documentsWithoutText
-                }, 'Documents found without extracted text');
-            }
-        }
-
-        // Fall back to application.resume_data if no document structured_metadata found
+        // Priority 1: Tailored resume stored on the application
         if (!resumeData && application.resume_data) {
             resumeData = application.resume_data;
         }
 
+        // Priority 2: Smart resume (full career profile)
+        const candidateId = input.candidate_id || application.candidate_id;
+        if (!resumeData && candidateId) {
+            try {
+                const smartResumeData = await this.repository.getSmartResumeData(candidateId);
+                if (smartResumeData) {
+                    resumeData = {
+                        summary: smartResumeData.profile.professional_summary,
+                        headline: smartResumeData.profile.headline,
+                        total_years_experience: smartResumeData.profile.total_years_experience,
+                        highest_degree: smartResumeData.profile.highest_degree,
+                        experience: smartResumeData.experiences.map((exp: any) => ({
+                            title: exp.title,
+                            company: exp.company,
+                            location: exp.location,
+                            duration: [exp.start_date, exp.is_current ? 'Present' : exp.end_date].filter(Boolean).join(' - '),
+                            description: exp.description,
+                            achievements: exp.achievements || [],
+                        })),
+                        projects: smartResumeData.projects.map((proj: any) => ({
+                            name: proj.name,
+                            description: proj.description,
+                            outcomes: proj.outcomes,
+                            skills_used: proj.skills_used || [],
+                        })),
+                        tasks: smartResumeData.tasks.map((task: any) => ({
+                            description: task.description,
+                            impact: task.impact,
+                            skills_used: task.skills_used || [],
+                        })),
+                        skills: smartResumeData.skills.map((s: any) =>
+                            `${s.name}${s.proficiency ? ` (${s.proficiency})` : ''}${s.years_used ? ` - ${s.years_used}yr` : ''}`
+                        ),
+                        education: smartResumeData.education.map((edu: any) => ({
+                            degree: edu.degree,
+                            field_of_study: edu.field_of_study,
+                            institution: edu.institution,
+                        })),
+                        certifications: smartResumeData.certifications.map((c: any) => c.name),
+                        publications: smartResumeData.publications.map((p: any) => p.title),
+                    };
+                }
+            } catch (err) {
+                this.logger.warn({ err, candidate_id: candidateId }, 'Failed to fetch smart resume data for AI review');
+            }
+        }
+
+        // Extract text from supporting documents (cover letters, portfolios) for additional context
+        if (application.documents && Array.isArray(application.documents)) {
+            const supportingText: string[] = [];
+            for (const doc of application.documents) {
+                if (doc.metadata?.extracted_text) {
+                    supportingText.push(doc.metadata.extracted_text);
+                }
+            }
+            if (supportingText.length > 0 && !resumeText) {
+                resumeText = supportingText.join('\n\n=== NEXT DOCUMENT ===\n\n');
+            }
+        }
+
         return {
             application_id: input.application_id!,
-            candidate_id: input.candidate_id || application.candidate_id,
+            candidate_id: candidateId,
             job_id: input.job_id || application.job_id,
             resume_text: resumeText,
-            resume_data: application.resume_data || undefined,
+            resume_data: resumeData,
             cover_letter: application.cover_letter || undefined,
             documents_count: application.documents?.length || 0,
             job_description: input.job_description || application.job?.recruiter_description || application.job?.description || '',
@@ -187,16 +205,16 @@ export class AIReviewServiceV2 {
                 confidence_level: result.confidence_level,
                 strengths: result.strengths,
                 concerns: result.concerns,
-                matched_skills: result.matched_skills,
-                missing_skills: result.missing_skills,
+                matched_skills: result.matched_skills.map(skillMatchToString),
+                missing_skills: result.missing_skills.map(skillMatchToString),
                 skills_match_percentage: result.skills_match_percentage,
-                matched_requirements: result.matched_requirements,
-                missing_requirements: result.missing_requirements,
+                matched_requirements: result.matched_requirements.map(requirementMatchToString),
+                missing_requirements: result.missing_requirements.map(requirementMatchToString),
                 required_years: result.required_years,
                 candidate_years: result.candidate_years,
                 meets_experience_requirement: result.meets_experience_requirement,
                 location_compatibility: result.location_compatibility,
-                model_version: this.modelVersion,
+                model_version: result.model_version,
                 processing_time_ms: processingTimeMs,
             });
 
@@ -279,93 +297,33 @@ export class AIReviewServiceV2 {
     }
 
     /**
-     * Call OpenAI API to analyze candidate-job fit
+     * Analyze candidate-job fit via the shared AI client (provider-agnostic).
      */
-    private async analyzeCandidateJobFit(input: AIReviewInput): Promise<AIReviewResult> {
-        if (!this.openaiApiKey) {
-            throw new Error('OPENAI_API_KEY is not configured');
+    private async analyzeCandidateJobFit(input: AIReviewInput): Promise<AIReviewResult & { model_version: string }> {
+        if (!this.aiClient) {
+            throw new Error('AI client is not configured');
         }
 
         const prompt = this.buildPrompt(input);
-        const body = JSON.stringify({
-            model: this.modelVersion,
-            messages: [
-                {
-                    role: 'system',
-                    content:
-                        'You are an expert recruiter assistant analyzing candidate-job fit. Provide detailed, honest assessments in valid JSON format.',
-                },
-                {
-                    role: 'user',
-                    content: prompt,
-                },
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.3,
-            max_tokens: 2000,
+        const messages = [
+            {
+                role: 'system' as const,
+                content: 'You are an expert recruiter assistant analyzing candidate-job fit. Provide detailed, honest assessments in valid JSON format.',
+            },
+            {
+                role: 'user' as const,
+                content: prompt,
+            },
+        ];
+
+        const response = await this.aiClient.chatCompletion('fit_review', messages, {
+            jsonMode: true,
         });
 
-        // Retry with exponential backoff for transient failures (429, 5xx)
-        const MAX_RETRIES = 2;
-        let lastError: Error | null = null;
+        const result = JSON.parse(response.content) as AIReviewResult;
+        this.validateResult(result);
 
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-            if (attempt > 0) {
-                const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
-                await new Promise(resolve => setTimeout(resolve, delayMs));
-                this.logger.info({ attempt, application_id: input.application_id }, 'Retrying OpenAI request');
-            }
-
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${this.openaiApiKey}`,
-                },
-                body,
-                signal: AbortSignal.timeout(60_000),
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => '');
-                lastError = new Error(`OpenAI API error: ${response.status} ${errorText}`);
-
-                // Retry on 429 (rate limit) or 5xx (server error)
-                if (response.status === 429 || response.status >= 500) {
-                    continue;
-                }
-                // Non-retryable error (400, 401, 403, etc.)
-                throw lastError;
-            }
-
-            // Safe JSON parsing of OpenAI response
-            let data: any;
-            try {
-                data = await response.json();
-            } catch {
-                lastError = new Error('OpenAI returned invalid JSON response');
-                continue;
-            }
-
-            const content = data?.choices?.[0]?.message?.content;
-            if (!content) {
-                lastError = new Error('OpenAI response missing choices[0].message.content');
-                continue;
-            }
-
-            let result: AIReviewResult;
-            try {
-                result = JSON.parse(content) as AIReviewResult;
-            } catch {
-                lastError = new Error('OpenAI returned non-JSON content in message');
-                continue;
-            }
-
-            this.validateResult(result);
-            return result;
-        }
-
-        throw lastError || new Error('OpenAI request failed after retries');
+        return { ...result, model_version: `${response.provider}/${response.model}` };
     }
 
     private buildPrompt(input: AIReviewInput): string {
@@ -405,20 +363,59 @@ export class AIReviewServiceV2 {
             const rd = input.resume_data;
             resumeSection = '- Resume (Structured):\n';
             if (rd.summary) resumeSection += `  Summary: ${rd.summary}\n`;
-            if (rd.skills?.length) resumeSection += `  Skills: ${rd.skills.join(', ')}\n`;
+            if (rd.skills?.length) {
+                const skillNames = rd.skills.map((s: any) =>
+                    typeof s === 'string' ? s : (s.name || String(s))
+                );
+                resumeSection += `  Skills: ${skillNames.join(', ')}\n`;
+            }
             if (rd.experience?.length) {
                 resumeSection += '  Experience:\n';
                 rd.experience.slice(0, 10).forEach((exp: any) => {
-                    resumeSection += `    - ${exp.title || exp.role || ''} at ${exp.company || ''} (${exp.duration || exp.dates || ''})\n`;
+                    const dates = exp.duration || exp.dates
+                        || [exp.start_date, exp.is_current ? 'Present' : exp.end_date].filter(Boolean).join(' - ')
+                        || '';
+                    resumeSection += `    - ${exp.title || exp.role || ''} at ${exp.company || ''} (${dates})\n`;
+                    if (exp.description) resumeSection += `      ${exp.description}\n`;
+                    if (exp.achievements?.length) {
+                        exp.achievements.forEach((a: string) => {
+                            resumeSection += `      • ${a}\n`;
+                        });
+                    }
                 });
             }
             if (rd.education?.length) {
                 resumeSection += '  Education:\n';
                 rd.education.slice(0, 5).forEach((edu: any) => {
-                    resumeSection += `    - ${edu.degree || ''} ${edu.field || ''} from ${edu.institution || edu.school || ''}\n`;
+                    resumeSection += `    - ${edu.degree || ''} ${edu.field_of_study || edu.field || ''} from ${edu.institution || edu.school || ''}\n`;
                 });
             }
-            if (rd.certifications?.length) resumeSection += `  Certifications: ${rd.certifications.join(', ')}\n`;
+            const projects = rd.projects || [];
+            if (projects.length) {
+                resumeSection += '  Key Projects:\n';
+                projects.slice(0, 8).forEach((proj: any) => {
+                    resumeSection += `    - ${proj.name || 'Project'}: ${proj.description || ''}`;
+                    if (proj.outcomes) resumeSection += ` | Outcomes: ${proj.outcomes}`;
+                    if (proj.skills_used?.length) resumeSection += ` | Skills: ${proj.skills_used.join(', ')}`;
+                    resumeSection += '\n';
+                });
+            }
+            if (rd.tasks?.length) {
+                resumeSection += '  Key Responsibilities:\n';
+                rd.tasks.slice(0, 10).forEach((task: any) => {
+                    resumeSection += `    - ${task.description || ''}`;
+                    if (task.impact) resumeSection += ` → ${task.impact}`;
+                    resumeSection += '\n';
+                });
+            }
+            if (rd.certifications?.length) {
+                const certNames = rd.certifications.map((c: any) => typeof c === 'string' ? c : (c.name || String(c)));
+                resumeSection += `  Certifications: ${certNames.join(', ')}\n`;
+            }
+            if (rd.publications?.length) {
+                const pubNames = rd.publications.map((p: any) => typeof p === 'string' ? p : (p.title || String(p)));
+                resumeSection += `  Publications: ${pubNames.join(', ')}\n`;
+            }
             if (rd.total_years_experience) resumeSection += `  Total Years Experience: ${rd.total_years_experience}\n`;
             if (rd.highest_degree) resumeSection += `  Highest Degree: ${rd.highest_degree}\n`;
         }
@@ -464,11 +461,11 @@ Analyze this candidate's fit for the role and provide your assessment in the fol
   "confidence_level": <number 0-100, how confident you are in this analysis>,
   "strengths": ["<strength 1>", "<strength 2>", ...],
   "concerns": ["<concern 1>", "<concern 2>", ...],
-  "matched_skills": ["<skill 1>", "<skill 2>", ...],
-  "missing_skills": ["<skill 1>", "<skill 2>", ...],
+  "matched_skills": [{"name": "<skill>", "is_required": <boolean>}, ...],
+  "missing_skills": [{"name": "<skill>", "is_required": <boolean>}, ...],
   "skills_match_percentage": <number 0-100>,
-  "matched_requirements": ["<requirement that candidate meets>", ...],
-  "missing_requirements": ["<requirement that candidate does not meet>", ...],
+  "matched_requirements": [{"text": "<requirement>", "is_required": <boolean>}, ...],
+  "missing_requirements": [{"text": "<requirement>", "is_required": <boolean>}, ...],
   "required_years": ${input.required_years || null},
   "candidate_years": <estimated years of relevant experience>,
   "meets_experience_requirement": <boolean>,
@@ -479,10 +476,11 @@ Analyze this candidate's fit for the role and provide your assessment in the fol
 - fit_score: 90-100 = strong_fit, 70-89 = good_fit, 50-69 = fair_fit, 0-49 = poor_fit
 - List 3-5 strengths (specific matching qualifications)
 - List 0-5 concerns (specific gaps or mismatches)
-- matched_skills: Skills from required/preferred list that candidate has
-- missing_skills: Skills from required/preferred list that candidate lacks
-- matched_requirements: Requirements from the required/preferred qualifications list that the candidate demonstrably meets based on their resume, cover letter, or pre-screen answers
-- missing_requirements: Requirements from the required/preferred qualifications list that the candidate does not meet or has no evidence for
+- matched_skills: ONLY technology skills from the "Required Skills" and "Preferred Skills" lists (e.g. React, Node.js, GCP). Do NOT include qualifications, soft skills, or requirements here. Set is_required=true if the skill is in the Required Skills list, false if in Preferred Skills.
+- missing_skills: ONLY technology skills from the "Required Skills" and "Preferred Skills" lists that the candidate lacks. Same is_required logic.
+- matched_requirements: ONLY qualifications from the "Required Qualifications" and "Preferred Qualifications" sections (e.g. "5+ years experience", "Bachelor's degree"). Do NOT include technology skills here. Set is_required=true if the qualification is from Required Qualifications, false if from Preferred.
+- missing_requirements: ONLY qualifications from the Required/Preferred Qualifications that the candidate does not meet. Same is_required logic.
+- IMPORTANT: Skills and requirements are SEPARATE concepts. Skills are specific technologies/tools (React, Python, AWS). Requirements are broader qualifications (years of experience, degrees, domain expertise, communication skills). Do not mix them.
 - location_compatibility: perfect (same location/remote), good (nearby/willing to relocate), challenging (different location but possible), mismatch (incompatible)
 
 Be honest and specific in your assessment. Focus on concrete qualifications and experience.`;

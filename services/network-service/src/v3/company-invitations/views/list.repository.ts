@@ -6,7 +6,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanyInvitationListParams } from '../types';
+import { CompanyInvitationListParams } from '../types.js';
 
 interface ScopeFilters {
   recruiter_id?: string;

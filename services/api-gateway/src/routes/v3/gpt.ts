@@ -8,8 +8,8 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { request as httpRequest } from 'node:http';
 import { URL } from 'node:url';
-import { ServiceRegistry } from '../../clients';
-import { registerV3Routes, V3RouteConfig } from './proxy';
+import { ServiceRegistry } from '../../clients.js';
+import { registerV3Routes, V3RouteConfig } from './proxy.js';
 
 const gptV3Routes: V3RouteConfig[] = [
   // ── GPT Action Routes (before parameterized routes) ────────────

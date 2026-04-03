@@ -6,10 +6,10 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { BadgeRepository } from "./repository";
-import { BadgeService } from "./service";
-import { BadgeListParams, idParamSchema, listQuerySchema } from "./types";
-import { registerBadgeProgressView } from "./views/progress/route";
+import { BadgeRepository } from "./repository.js";
+import { BadgeService } from "./service.js";
+import { BadgeListParams, idParamSchema, listQuerySchema } from "./types.js";
+import { registerBadgeProgressView } from "./views/progress/route.js";
 
 export function registerBadgeRoutes(
     app: FastifyInstance,

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { ServiceClient } from '../../clients';
-import { requireAuth, optionalAuth } from '../../middleware/auth';
-import { buildAuthHeaders } from '../../helpers/auth-headers';
+import { ServiceClient } from '../../clients.js';
+import { requireAuth, optionalAuth } from '../../middleware/auth.js';
+import { buildAuthHeaders } from '../../helpers/auth-headers.js';
 
 type AuthLevel = 'required' | 'optional' | 'none';
 

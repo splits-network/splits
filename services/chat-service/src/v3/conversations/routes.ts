@@ -7,28 +7,28 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { IChatEventPublisher } from '../shared/chat-event-publisher';
-import { ConversationRepository } from './repository';
-import { ConversationService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { IChatEventPublisher } from '../shared/chat-event-publisher.js';
+import { ConversationRepository } from './repository.js';
+import { ConversationService } from './service.js';
 import {
   ConversationListParams,
   UpdateConversationInput,
   listQuerySchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 // --- View/Action registrations ---
-import { registerListForUserView } from './views/list-for-user.route';
-import { registerDetailView } from './views/detail.route';
-import { registerStartAction } from './actions/start.route';
-import { registerAcceptAction } from './actions/accept.route';
-import { registerDeclineAction } from './actions/decline.route';
-import { registerMuteAction } from './actions/mute.route';
-import { registerArchiveAction } from './actions/archive.route';
-import { registerReadReceiptAction } from './actions/read-receipt.route';
-import { registerResyncAction } from './actions/resync.route';
+import { registerListForUserView } from './views/list-for-user.route.js';
+import { registerDetailView } from './views/detail.route.js';
+import { registerStartAction } from './actions/start.route.js';
+import { registerAcceptAction } from './actions/accept.route.js';
+import { registerDeclineAction } from './actions/decline.route.js';
+import { registerMuteAction } from './actions/mute.route.js';
+import { registerArchiveAction } from './actions/archive.route.js';
+import { registerReadReceiptAction } from './actions/read-receipt.route.js';
+import { registerResyncAction } from './actions/resync.route.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

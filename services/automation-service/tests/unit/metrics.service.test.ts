@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MarketplaceMetricsServiceV2 } from '../../src/v2/metrics/service';
+import { MarketplaceMetricsServiceV2 } from '../../src/v2/metrics/service.js';
 
 describe('MarketplaceMetricsServiceV2 (unit)', () => {
     const repository = {

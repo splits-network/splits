@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { registerFraudRoutes } from './fraud-signals/routes';
-import { registerRuleRoutes } from './rules/routes';
-import { registerMetricRoutes } from './metrics/routes';
-import { registerExecutionRoutes } from './executions/routes';
-import { IEventPublisher } from './shared/events';
+import { registerFraudRoutes } from './fraud-signals/routes.js';
+import { registerRuleRoutes } from './rules/routes.js';
+import { registerMetricRoutes } from './metrics/routes.js';
+import { registerExecutionRoutes } from './executions/routes.js';
+import { IEventPublisher } from './shared/events.js';
 
 interface RegisterConfig {
     supabaseUrl: string;

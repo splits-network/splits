@@ -4,8 +4,8 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { OAuthService } from './oauth-service';
-import { OAuthError, GPT_SCOPES } from './types';
+import { OAuthService } from './oauth-service.js';
+import { OAuthError, GPT_SCOPES } from './types.js';
 
 interface RegisterOAuthConfig {
     oauthService: OAuthService;

@@ -4,14 +4,14 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PlacementSnapshotRepository } from './repository';
-import { PlacementSnapshotService } from './service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PlacementSnapshotRepository } from './repository.js';
+import { PlacementSnapshotService } from './service.js';
 import {
   PlacementSnapshotListParams,
   listQuerySchema,
   placementIdParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerPlacementSnapshotRoutes(
   app: FastifyInstance,

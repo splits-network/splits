@@ -1,4 +1,4 @@
-import { BadgeCriteria } from '../evaluator';
+import { BadgeCriteria } from '../evaluator.js';
 
 export type BadgeEntityType = 'recruiter' | 'candidate' | 'company' | 'firm';
 export type BadgeStatus = 'active' | 'draft' | 'archived';

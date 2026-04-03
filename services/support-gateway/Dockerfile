@@ -18,6 +18,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/support-gateway ./services/support-gateway
 EXPOSE 3022
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-logging build
 CMD ["pnpm", "--filter", "@splits-network/support-gateway", "dev"]
 
 # Build stage
@@ -47,6 +48,7 @@ COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-lo
 COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
 
 # Copy built service
+COPY --from=build /app/services/support-gateway/package.json ./services/support-gateway/
 COPY --from=build /app/services/support-gateway/dist ./services/support-gateway/dist
 
 EXPOSE 3022

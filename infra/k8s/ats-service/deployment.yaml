@@ -55,6 +55,10 @@ spec:
                             secretKeyRef:
                                 name: internal-service-secrets
                                 key: internal-service-key
+                      - name: REDIS_HOST
+                        value: "redis"
+                      - name: REDIS_PORT
+                        value: "6379"
                   resources:
                       requests:
                           cpu: 100m

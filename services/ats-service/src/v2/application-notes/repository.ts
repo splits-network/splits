@@ -5,7 +5,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate, ApplicationNote } from './types';
+import { ApplicationNoteFilters, ApplicationNoteCreate, ApplicationNoteUpdate, ApplicationNote } from './types.js';
 import { StandardListResponse } from '@splits-network/shared-types';
 
 // Define which creator types are on the candidate side vs company side

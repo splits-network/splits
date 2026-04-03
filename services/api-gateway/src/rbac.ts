@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ForbiddenError, UnauthorizedError } from '@splits-network/shared-fastify';
-import { AuthContext, UserRole } from './auth';
-import { ServiceRegistry } from './clients';
+import { AuthContext, UserRole } from './auth.js';
+import { ServiceRegistry } from './clients.js';
 
 export interface AuthenticatedRequest extends FastifyRequest {
     auth: AuthContext;

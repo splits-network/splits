@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { LeaderboardEntry, LeaderboardFilters } from './types';
-import { BadgeEntityType } from '../badges/definitions/types';
+import { LeaderboardEntry, LeaderboardFilters } from './types.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
 
 export class LeaderboardRepository {
     private supabase: SupabaseClient;

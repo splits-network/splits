@@ -8,10 +8,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { registerPublicListingView } from './views/public-listing.route';
-import { PublicListingRepository } from './views/public-listing.repository';
-import { PublicListingService } from './views/public-listing.service';
-import { LeaderboardListParams, idParamSchema, listQuerySchema } from './types';
+import { registerPublicListingView } from './views/public-listing.route.js';
+import { PublicListingRepository } from './views/public-listing.repository.js';
+import { PublicListingService } from './views/public-listing.service.js';
+import { LeaderboardListParams, idParamSchema, listQuerySchema } from './types.js';
 
 export function registerLeaderboardRoutes(app: FastifyInstance, supabase: SupabaseClient) {
   // Register the proper V3 view routes

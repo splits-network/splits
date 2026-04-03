@@ -824,7 +824,7 @@ export default function PrivacyPolicyBaselPage() {
                                 },
                                 {
                                     scope: "gmail.modify",
-                                    use: "Gmail — send and read recruiting emails on behalf of the recruiter",
+                                    use: "Gmail — read, send, archive, trash, and organize recruiting emails on behalf of the recruiter",
                                 },
                             ].map((item) => (
                                 <div

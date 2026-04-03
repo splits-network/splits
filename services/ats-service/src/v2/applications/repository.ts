@@ -3,8 +3,8 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { ApplicationFilters, ApplicationUpdate } from './types';
-import { resolveAccessContext, AccessContext } from '../shared/access';
+import { ApplicationFilters, ApplicationUpdate } from './types.js';
+import { resolveAccessContext, AccessContext } from '../shared/access.js';
 import { create } from 'domain';
 import { parseFilters, StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
@@ -47,6 +47,15 @@ export class ApplicationRepository {
         }
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+
+        // DEBUG: Log access context to understand the authorization issue
+        console.log('=== DEBUG ACCESS CONTEXT ===');
+        console.log('clerkUserId:', clerkUserId);
+        console.log('accessContext:', JSON.stringify(accessContext, null, 2));
+        console.log('isPlatformAdmin:', accessContext.isPlatformAdmin);
+        console.log('organizationIds:', accessContext.organizationIds);
+        console.log('roles:', accessContext.roles);
+        console.log('===========================');
 
         // Build select clause with optional includes
         const selectClause = this.buildSelectClause(params.include);

@@ -1,6 +1,6 @@
-import { CallRepository } from './repository';
-import { IEventPublisher } from './shared/events';
-import { Call } from './types';
+import { CallRepository } from './repository.js';
+import { IEventPublisher } from './shared/events.js';
+import { Call } from './types.js';
 
 export class CallLifecycleService {
     constructor(

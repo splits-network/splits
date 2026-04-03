@@ -4,11 +4,11 @@
  */
 
 // Base template
-export * from './base';
+export * from './base.js';
 
 // Reusable components
-export * from './components';
+export * from './components.js';
 
 // Domain-specific templates
-export * from './applications';
-export * from './placements';
+export * from './applications/index.js';
+export * from './placements/index.js';

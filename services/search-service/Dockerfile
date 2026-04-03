@@ -21,6 +21,7 @@ COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/search-service ./services/search-service
 EXPOSE 3013
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build
 CMD ["pnpm", "--filter", "@splits-network/search-service", "dev"]
 
 # Build stage
@@ -59,6 +60,7 @@ COPY --from=build /app/packages/shared-access-context/package.json ./packages/sh
 COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 
 # Copy built service
+COPY --from=build /app/services/search-service/package.json ./services/search-service/
 COPY --from=build /app/services/search-service/dist ./services/search-service/dist
 
 EXPOSE 3013

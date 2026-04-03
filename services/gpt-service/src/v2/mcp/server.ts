@@ -5,13 +5,13 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { McpServerDeps, McpAuthContext } from './types';
-import { registerSearchJobsTool } from './tools/search-jobs';
-import { registerGetJobDetailTool } from './tools/get-job-detail';
-import { registerGetApplicationsTool } from './tools/get-applications';
-import { registerSubmitApplicationTool } from './tools/submit-application';
-import { registerAnalyzeResumeTool } from './tools/resume-analyze';
-import { registerWidgets } from './widgets/register';
+import { McpServerDeps, McpAuthContext } from './types.js';
+import { registerSearchJobsTool } from './tools/search-jobs.js';
+import { registerGetJobDetailTool } from './tools/get-job-detail.js';
+import { registerGetApplicationsTool } from './tools/get-applications.js';
+import { registerSubmitApplicationTool } from './tools/submit-application.js';
+import { registerAnalyzeResumeTool } from './tools/resume-analyze.js';
+import { registerWidgets } from './widgets/register.js';
 
 /**
  * Create a configured MCP server instance.

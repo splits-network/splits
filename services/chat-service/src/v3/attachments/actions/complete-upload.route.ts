@@ -7,11 +7,11 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { CompleteUploadRepository } from './complete-upload.repository';
-import { CompleteUploadService, JobQueue } from './complete-upload.service';
-import { completeUploadParamsSchema } from '../types';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { CompleteUploadRepository } from './complete-upload.repository.js';
+import { CompleteUploadService, JobQueue } from './complete-upload.service.js';
+import { completeUploadParamsSchema } from '../types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 const DISABLED_ERROR = { error: { code: 'FEATURE_DISABLED', message: 'Attachments are disabled' } };

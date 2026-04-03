@@ -7,10 +7,10 @@ import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { CryptoService } from '@splits-network/shared-config/src/crypto';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ConnectionAdapter } from '../connections/connection-adapter';
-import { TokenRefreshService } from '../calendar/token-refresh-service';
-import { LinkedInService } from '../../v2/linkedin/service';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ConnectionAdapter } from '../connections/connection-adapter.js';
+import { TokenRefreshService } from '../calendar/token-refresh-service.js';
+import { LinkedInService } from '../../v2/linkedin/service.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

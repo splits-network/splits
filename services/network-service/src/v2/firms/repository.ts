@@ -4,8 +4,8 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmInvitationRequest, PublicFirmFilters, PUBLIC_FIRM_SELECT, RepositoryListResponse } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { FirmFilters, FirmUpdate, FirmMemberFilters, CreateFirmInvitationRequest, PublicFirmFilters, PUBLIC_FIRM_SELECT, RepositoryListResponse } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
 import { randomUUID } from 'crypto';
 
 export class FirmRepository {

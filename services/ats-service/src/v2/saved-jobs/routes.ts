@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { requireUserContext } from '../helpers';
-import { SavedJobRepositoryV2 } from './repository';
-import { SavedJobServiceV2 } from './service';
+import { requireUserContext } from '../helpers.js';
+import { SavedJobRepositoryV2 } from './repository.js';
+import { SavedJobServiceV2 } from './service.js';
 
 export function savedJobRoutes(app: FastifyInstance, config: { service: SavedJobServiceV2, repository: SavedJobRepositoryV2 }) {
     const { repository, service } = config;

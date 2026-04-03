@@ -2,7 +2,7 @@
  * Recruiter-Candidate Domain Types
  */
 
-import { PaginationParams, SortParams } from '../shared/pagination';
+import { PaginationParams, SortParams } from '../shared/pagination.js';
 
 export interface RecruiterCandidateFilters extends PaginationParams, SortParams {
     recruiter_id?: string;

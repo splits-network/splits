@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { stripeConnectRoutes } from '../../src/v2/connect/routes';
+import { stripeConnectRoutes } from '../../src/v2/connect/routes.js';
 
 describe('Stripe connect routes (integration)', () => {
     const service = {

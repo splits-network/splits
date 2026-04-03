@@ -7,7 +7,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
-import { GptResumeDataInput } from './types';
+import { GptResumeDataInput } from './types.js';
 
 export interface RepositoryListResponse<T> {
     data: T[];

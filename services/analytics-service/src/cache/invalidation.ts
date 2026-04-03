@@ -1,5 +1,5 @@
-import { CacheManager } from './cache-manager';
-import { EventType } from '../v2/types';
+import { CacheManager } from './cache-manager.js';
+import { EventType } from '../v2/types.js';
 import { createLogger } from '@splits-network/shared-logging';
 
 const logger = createLogger('CacheInvalidator');

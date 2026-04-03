@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { MembershipRepository } from './repository';
-import { CreateMembershipInput, UpdateMembershipInput, MembershipListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { MembershipRepository } from './repository.js';
+import { CreateMembershipInput, UpdateMembershipInput, MembershipListParams } from './types.js';
 
 export class MembershipService {
   private accessResolver: AccessContextResolver;

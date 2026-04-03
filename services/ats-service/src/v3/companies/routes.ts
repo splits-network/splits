@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { CompanyRepository } from './repository';
-import { CompanyService } from './service';
-import { registerCompanyContactsView } from './views/contacts.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { CompanyRepository } from './repository.js';
+import { CompanyService } from './service.js';
+import { registerCompanyContactsView } from './views/contacts.route.js';
 import {
   CreateCompanyInput,
   UpdateCompanyInput,
@@ -16,7 +16,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerCompanyRoutes(
   app: FastifyInstance,

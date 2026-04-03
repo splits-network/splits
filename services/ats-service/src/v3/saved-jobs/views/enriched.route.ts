@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EnrichedSavedJobRepository } from './enriched.repository';
-import { EnrichedSavedJobService } from './enriched.service';
-import { listQuerySchema, SavedJobListParams } from '../types';
+import { EnrichedSavedJobRepository } from './enriched.repository.js';
+import { EnrichedSavedJobService } from './enriched.service.js';
+import { listQuerySchema, SavedJobListParams } from '../types.js';
 
 export function registerEnrichedView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new EnrichedSavedJobRepository(supabase);

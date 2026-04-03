@@ -7,7 +7,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CallRecordingListParams, CreateCallRecordingInput, UpdateCallRecordingInput } from './types';
+import { CallRecordingListParams, CreateCallRecordingInput, UpdateCallRecordingInput } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'started_at', 'recording_status'];
 

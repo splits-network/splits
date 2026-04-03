@@ -18,7 +18,7 @@
  * - New companies start at 50 (neutral)
  */
 
-import { CompanyReputationMetrics, CompanyCalculationResult } from './company-types';
+import { CompanyReputationMetrics, CompanyCalculationResult } from './company-types.js';
 
 // Weight constants
 const WEIGHT_COMPLETION = 0.25;

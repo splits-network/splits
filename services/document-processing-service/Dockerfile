@@ -22,6 +22,9 @@ COPY packages/ ./packages/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
+# Build shared packages for ESM resolution
+RUN pnpm --filter @splits-network/shared-config build && pnpm --filter @splits-network/shared-types build && pnpm --filter @splits-network/shared-logging build && pnpm --filter @splits-network/shared-fastify build && pnpm --filter @splits-network/shared-access-context build && pnpm --filter @splits-network/shared-job-queue build && pnpm --filter @splits-network/shared-ai-client build
+
 # Expose port
 EXPOSE 3008
 
@@ -58,6 +61,8 @@ RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-access-context build
+RUN pnpm --filter @splits-network/shared-job-queue build
+RUN pnpm --filter @splits-network/shared-ai-client build
 
 # Then build the service
 RUN pnpm --filter @splits-network/document-processing-service build

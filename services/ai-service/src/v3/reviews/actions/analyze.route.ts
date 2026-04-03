@@ -9,8 +9,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { AnalyzeService } from './analyze.service';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { AnalyzeService } from './analyze.service.js';
 
 const analyzeBodySchema = {
   type: 'object',

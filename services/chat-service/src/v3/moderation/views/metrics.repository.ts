@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ModerationMetrics } from '../types';
+import { ModerationMetrics } from '../types.js';
 
 export class MetricsRepository {
   constructor(private supabase: SupabaseClient) {}

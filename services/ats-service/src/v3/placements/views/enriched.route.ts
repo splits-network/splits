@@ -5,9 +5,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EnrichedPlacementRepository } from './enriched.repository';
-import { EnrichedPlacementService } from './enriched.service';
-import { listQuerySchema, PlacementListParams } from '../types';
+import { EnrichedPlacementRepository } from './enriched.repository.js';
+import { EnrichedPlacementService } from './enriched.service.js';
+import { listQuerySchema, PlacementListParams } from '../types.js';
 
 export function registerEnrichedPlacementView(app: FastifyInstance, supabase: SupabaseClient) {
   const repository = new EnrichedPlacementRepository(supabase);

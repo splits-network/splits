@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MarketplaceMetricsServiceV2 } from '../../src/v2/marketplace-metrics/service';
+import { MarketplaceMetricsServiceV2 } from '../../src/v2/marketplace-metrics/service.js';
 
 vi.mock('@splits-network/shared-access-context', () => ({
     resolveAccessContext: vi.fn(),

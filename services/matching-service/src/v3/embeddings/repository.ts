@@ -4,7 +4,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EmbeddingListParams } from './types';
+import { EmbeddingListParams } from './types.js';
 
 const SORTABLE_FIELDS = ['created_at', 'updated_at'];
 

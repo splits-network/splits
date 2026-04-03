@@ -37,5 +37,6 @@
         "ats",
         "marketplace",
         "split-fee"
-    ]
+    ],
+    "pnpm": {}
 }

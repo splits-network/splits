@@ -3,7 +3,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlacementInvoiceListParams } from './types';
+import { PlacementInvoiceListParams } from './types.js';
 
 export class PlacementInvoiceRepository {
   constructor(private supabase: SupabaseClient) {}

@@ -7,8 +7,8 @@
 
 import Stripe from 'stripe';
 import * as Sentry from '@sentry/node';
-import { WebhookHandler, WebhookHandlerDeps } from './types';
-import { BalanceWebhookHandler } from './balance-webhook-handler';
+import { WebhookHandler, WebhookHandlerDeps } from './types.js';
+import { BalanceWebhookHandler } from './balance-webhook-handler.js';
 
 export class TransferWebhookHandler implements WebhookHandler {
   private balanceHandler: BalanceWebhookHandler;

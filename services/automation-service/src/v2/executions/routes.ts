@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { AutomationExecutionServiceV2 } from './service';
-import { AutomationExecutionRepository } from './repository';
-import { ExecutionFilters } from './types';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { resolveAccessContext } from '../shared/access';
+import { AutomationExecutionServiceV2 } from './service.js';
+import { AutomationExecutionRepository } from './repository.js';
+import { ExecutionFilters } from './types.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { resolveAccessContext } from '../shared/access.js';
 import { createLogger } from '@splits-network/shared-logging';
 
 interface RegisterExecutionRoutesConfig {

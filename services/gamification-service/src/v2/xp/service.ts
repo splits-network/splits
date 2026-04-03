@@ -1,8 +1,8 @@
-import { XpRepository } from './repository';
-import { BadgeEntityType } from '../badges/definitions/types';
-import { XpHistoryFilters, XpSourceType, LevelThreshold } from './types';
-import { IEventPublisher } from '../shared/events';
-import { buildPaginationResponse } from '../shared/pagination';
+import { XpRepository } from './repository.js';
+import { BadgeEntityType } from '../badges/definitions/types.js';
+import { XpHistoryFilters, XpSourceType, LevelThreshold } from './types.js';
+import { IEventPublisher } from '../shared/events.js';
+import { buildPaginationResponse } from '../shared/pagination.js';
 
 export class XpService {
     private thresholdsCache: LevelThreshold[] | null = null;

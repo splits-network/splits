@@ -1,8 +1,8 @@
-import { buildPaginationResponse } from '../shared/helpers';
-import { FraudSignalFilters, FraudSignalUpdate } from './types';
-import { CreateFraudSignalInput, FraudSignalRepository } from './repository';
-import { IEventPublisher } from '../shared/events';
-import type { AccessContext } from '../shared/access';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { FraudSignalFilters, FraudSignalUpdate } from './types.js';
+import { CreateFraudSignalInput, FraudSignalRepository } from './repository.js';
+import { IEventPublisher } from '../shared/events.js';
+import type { AccessContext } from '../shared/access.js';
 
 export class FraudSignalServiceV2 {
     constructor(

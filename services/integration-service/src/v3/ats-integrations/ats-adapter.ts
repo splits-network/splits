@@ -12,7 +12,7 @@ import type {
   ExternalEntityMap,
   SyncEntityType,
 } from '@splits-network/shared-types';
-import { ATSSyncAdapter } from './ats-sync-adapter';
+import { ATSSyncAdapter } from './ats-sync-adapter.js';
 
 export class ATSRepositoryAdapter extends ATSSyncAdapter {
   constructor(supabase: SupabaseClient) {

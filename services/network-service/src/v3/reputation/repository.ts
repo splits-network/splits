@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ReputationListParams, ReputationUpdate } from './types';
+import { ReputationListParams, ReputationUpdate } from './types.js';
 
 export class ReputationRepository {
   constructor(private supabase: SupabaseClient) {}

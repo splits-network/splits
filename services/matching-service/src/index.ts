@@ -2,8 +2,11 @@ import {
     loadBaseConfig,
     loadDatabaseConfig,
     loadRabbitMQConfig,
+    loadRedisConfig,
     createSupabaseClient,
 } from "@splits-network/shared-config";
+import { Redis } from "ioredis";
+import { AiClient } from "@splits-network/shared-ai-client";
 import { createLogger } from "@splits-network/shared-logging";
 import {
     buildServer,
@@ -16,17 +19,18 @@ import swaggerUi from "@fastify/swagger-ui";
 import {
     EventPublisher,
     OutboxPublisher,
-} from "./v2/shared/events";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
-import { DomainEventConsumer } from "./domain-consumer";
-import { MatchRepository } from "./v2/matches/repository";
-import { EmbeddingService } from "./v2/embeddings/service";
-import { EmbeddingRepository } from "./v2/embeddings/repository";
-import { MatchingOrchestrator } from "./v2/matches/matching-orchestrator";
-import { MatchRepository as V3MatchRepository } from "./v3/matches/repository";
-import { MatchingOrchestrator as V3MatchingOrchestrator } from "./v3/shared/matching-orchestrator";
-import { DomainEventConsumer as V3DomainEventConsumer } from "./v3/shared/domain-consumer";
+    ResilientPublisher,
+} from "./v2/shared/events.js";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
+import { DomainEventConsumer } from "./domain-consumer.js";
+import { MatchRepository } from "./v2/matches/repository.js";
+import { EmbeddingService } from "./v2/embeddings/service.js";
+import { EmbeddingRepository } from "./v2/embeddings/repository.js";
+import { MatchingOrchestrator } from "./v2/matches/matching-orchestrator.js";
+import { MatchRepository as V3MatchRepository } from "./v3/matches/repository.js";
+import { MatchingOrchestrator as V3MatchingOrchestrator } from "./v3/shared/matching-orchestrator.js";
+import { DomainEventConsumer as V3DomainEventConsumer } from "./v3/shared/domain-consumer.js";
 import * as Sentry from "@sentry/node";
 
 if (process.env.SENTRY_DSN) {
@@ -112,33 +116,58 @@ async function main() {
         uiConfig: { docExpansion: "list", deepLinking: true },
     });
 
-    // Initialize event publisher
-    let eventPublisher: EventPublisher | null = null;
+    // Initialize event publisher (non-fatal — ResilientPublisher falls back to outbox)
+    const eventPublisher = new EventPublisher(
+        rabbitConfig.url,
+        logger,
+        baseConfig.serviceName,
+    );
     try {
-        eventPublisher = new EventPublisher(
-            rabbitConfig.url,
-            logger,
-            baseConfig.serviceName,
-        );
         await eventPublisher.connect();
     } catch (error) {
-        logger.error({ err: error }, "Failed to connect event publisher");
+        logger.warn({ err: error }, "Failed to connect event publisher - ResilientPublisher will use outbox-only mode");
     }
 
     // Create Supabase client
     const supabaseClient = createSupabaseClient({ url: dbConfig.supabaseUrl, key: supabaseKey });
 
+    // Initialize Redis + AI client
+    const redisConfig = loadRedisConfig();
+    const redis = new Redis({
+        host: redisConfig.host,
+        port: redisConfig.port,
+        password: redisConfig.password || undefined,
+        db: redisConfig.db || 0,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+    });
+    try {
+        await redis.connect();
+    } catch (err) {
+        logger.warn({ err }, 'Redis connection failed — AI config will use DB/env fallback');
+    }
+
+    const aiClient = new AiClient({
+        supabase: supabaseClient,
+        redis,
+        serviceName: 'matching-service',
+        logger,
+        openaiApiKey: process.env.OPENAI_API_KEY || '',
+        anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
+    });
+
     // Set up transactional outbox
-    const outboxPublisher = eventPublisher
-        ? new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger)
-        : null;
+    const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
+
+    // Wrap in resilient publisher for durable event delivery
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
 
     // Initialize core services
     const matchRepository = new MatchRepository(
         dbConfig.supabaseUrl,
         supabaseKey,
     );
-    const embeddingService = new EmbeddingService(logger);
+    const embeddingService = new EmbeddingService(logger, supabaseClient, aiClient);
     const embeddingRepository = new EmbeddingRepository(supabaseClient);
 
     const orchestrator = new MatchingOrchestrator(
@@ -146,22 +175,23 @@ async function main() {
         embeddingService,
         embeddingRepository,
         supabaseClient,
-        outboxPublisher || undefined,
+        resilientPublisher,
         logger,
+        aiClient,
     );
 
     // Register V2 routes
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher || undefined,
+        eventPublisher: resilientPublisher,
         logger,
         orchestrator,
     });
 
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher || undefined,
+        eventPublisher: resilientPublisher,
     });
 
     // Initialize V2 domain event consumer
@@ -185,8 +215,9 @@ async function main() {
         embeddingService,
         embeddingRepository,
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher || undefined,
+        eventPublisher: resilientPublisher,
         logger,
+        aiClient,
     });
 
     let v3DomainConsumer: V3DomainEventConsumer | null = null;
@@ -221,6 +252,7 @@ async function main() {
             if (v3DomainConsumer) await v3DomainConsumer.close();
             if (domainConsumer) await domainConsumer.close();
             if (eventPublisher) await eventPublisher.close();
+            await redis.quit().catch(() => {});
         } finally {
             process.exit(0);
         }

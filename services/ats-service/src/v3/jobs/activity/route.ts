@@ -5,9 +5,9 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { JobActivityService } from './service';
-import { idParamSchema } from '../types';
-import { activityListQuerySchema, ActivityListParams } from './types';
+import { JobActivityService } from './service.js';
+import { idParamSchema } from '../types.js';
+import { activityListQuerySchema, ActivityListParams } from './types.js';
 
 export function registerActivityRoute(
   app: FastifyInstance,

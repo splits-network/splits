@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import Redis from 'ioredis';
-import { ActivityService } from '../v2/activity/service';
+import { Redis } from 'ioredis';
+import { ActivityService } from '../v2/activity/service.js';
 
 /**
  * Snapshot current online activity to the analytics.activity_snapshots table.

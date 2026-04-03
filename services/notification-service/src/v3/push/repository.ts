@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PushSubscriptionRecord } from './types';
+import { PushSubscriptionRecord } from './types.js';
 
 export class PushSubscriptionRepository {
   constructor(private supabase: SupabaseClient) {}

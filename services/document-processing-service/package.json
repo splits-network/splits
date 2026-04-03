@@ -12,28 +12,32 @@
     },
     "dependencies": {
         "@splits-network/shared-access-context": "workspace:*",
-        "@splits-network/shared-types": "workspace:*",
+        "@splits-network/shared-ai-client": "workspace:*",
         "@splits-network/shared-config": "workspace:*",
-        "@splits-network/shared-logging": "workspace:*",
         "@splits-network/shared-fastify": "workspace:*",
         "@splits-network/shared-job-queue": "workspace:*",
+        "@splits-network/shared-logging": "workspace:*",
+        "@splits-network/shared-types": "workspace:*",
         "@supabase/supabase-js": "^2.39.0",
-        "fastify": "^4.24.3",
         "amqplib": "^0.10.3",
-        "pdf-parse": "^1.1.1",
+        "clamscan": "^2.4.0",
+        "fastify": "^4.24.3",
+        "ioredis": "^5.10.1",
         "mammoth": "^1.8.0",
-        "clamscan": "^2.4.0"
+        "officeparser": "^6.0.7",
+        "pdf-parse": "^1.1.1"
     },
     "devDependencies": {
-        "@types/node": "^20.10.4",
-        "@types/pdf-parse": "^1.1.1",
         "@types/amqplib": "^0.10.1",
         "@types/clamscan": "^2.0.8",
+        "@types/node": "^20.10.4",
+        "@types/pdf-parse": "^1.1.1",
         "tsx": "^4.6.2",
         "typescript": "^5.3.3",
         "vitest": "^1.0.4"
     },
     "engines": {
         "node": ">=20"
-    }
+    },
+    "type": "module"
 }

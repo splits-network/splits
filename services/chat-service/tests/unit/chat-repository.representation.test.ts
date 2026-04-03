@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ChatRepository } from '../../src/v2/chat/repository';
+import { ChatRepository } from '../../src/v2/chat/repository.js';
 
 function createSupabaseMock(responses: Record<string, any[]>) {
     return {

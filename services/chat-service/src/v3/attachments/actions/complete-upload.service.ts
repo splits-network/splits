@@ -8,10 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { CompleteUploadRepository } from './complete-upload.repository';
-import { IChatEventPublisher } from '../../shared/chat-event-publisher';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { ChatAttachment } from '../types';
+import { CompleteUploadRepository } from './complete-upload.repository.js';
+import { IChatEventPublisher } from '../../shared/chat-event-publisher.js';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { ChatAttachment } from '../types.js';
 
 export interface JobQueue {
   addJob(type: string, data: Record<string, any>): Promise<string | void>;

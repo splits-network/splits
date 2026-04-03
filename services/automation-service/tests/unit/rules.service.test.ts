@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AutomationRuleServiceV2 } from '../../src/v2/rules/service';
+import { AutomationRuleServiceV2 } from '../../src/v2/rules/service.js';
 
 describe('AutomationRuleServiceV2 (unit)', () => {
     const repository = {

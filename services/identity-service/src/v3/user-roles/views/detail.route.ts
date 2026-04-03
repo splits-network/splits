@@ -6,9 +6,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { idParamSchema, listQuerySchema, UserRoleListParams } from '../types';
-import { UserRoleDetailViewRepository } from './detail.repository';
-import { UserRoleDetailViewService } from './detail.service';
+import { idParamSchema, listQuerySchema, UserRoleListParams } from '../types.js';
+import { UserRoleDetailViewRepository } from './detail.repository.js';
+import { UserRoleDetailViewService } from './detail.service.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
 

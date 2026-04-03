@@ -6,14 +6,14 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { resolveAccessContext, AccessContext } from '../shared/access';
+import { resolveAccessContext, AccessContext } from '../shared/access.js';
 import { EntitlementChecker } from '@splits-network/shared-access-context';
-import { IEventPublisher } from '../shared/events';
-import { buildPaginationResponse } from '../shared/helpers';
-import { MatchRepository } from './repository';
-import { MatchListFilters } from './types';
-import { MatchingOrchestrator } from './matching-orchestrator';
-import { findCandidateRecruiter, verifyInvitePermission } from './invite-helpers';
+import { IEventPublisher } from '../shared/events.js';
+import { buildPaginationResponse } from '../shared/helpers.js';
+import { MatchRepository } from './repository.js';
+import { MatchListFilters } from './types.js';
+import { MatchingOrchestrator } from './matching-orchestrator.js';
+import { findCandidateRecruiter, verifyInvitePermission } from './invite-helpers.js';
 
 export class MatchService {
     private entitlementChecker: EntitlementChecker;

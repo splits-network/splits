@@ -2,10 +2,10 @@
  * Reputation Service - Business logic for recruiter reputation
  */
 
-import { EventPublisherV2, IEventPublisher } from '../shared/events';
-import { ReputationRepository } from './repository';
-import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
-import { ReputationFilters, ReputationUpdate } from './types';
+import { EventPublisherV2, IEventPublisher } from '../shared/events.js';
+import { ReputationRepository } from './repository.js';
+import { buildPaginationResponse, PaginationResponse } from '../shared/pagination.js';
+import { ReputationFilters, ReputationUpdate } from './types.js';
 
 export class ReputationServiceV2 {
     constructor(

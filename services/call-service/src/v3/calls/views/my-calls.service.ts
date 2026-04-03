@@ -9,9 +9,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError } from '@splits-network/shared-fastify';
-import { MyCallsViewRepository } from './my-calls.repository';
-import { CallRepository } from '../repository';
-import { CallListParams } from '../types';
+import { MyCallsViewRepository } from './my-calls.repository.js';
+import { CallRepository } from '../repository.js';
+import { CallListParams } from '../types.js';
 
 export class MyCallsViewService {
   private accessResolver: AccessContextResolver;

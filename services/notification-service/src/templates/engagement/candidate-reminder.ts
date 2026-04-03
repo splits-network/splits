@@ -3,8 +3,8 @@
  * Sent to candidates who haven't updated their profile or had activity in 30+ days
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, alert, divider } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, alert, divider } from '../components.js';
 
 export interface CandidateReminderData {
     candidateName: string;

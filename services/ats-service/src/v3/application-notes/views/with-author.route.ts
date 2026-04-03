@@ -5,15 +5,15 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../../v2/shared/events';
-import { WithAuthorNoteRepository } from './with-author.repository';
-import { ApplicationNoteService } from '../service';
-import { ApplicationNoteRepository } from '../repository';
+import { IEventPublisher } from '../../../v2/shared/events.js';
+import { WithAuthorNoteRepository } from './with-author.repository.js';
+import { ApplicationNoteService } from '../service.js';
+import { ApplicationNoteRepository } from '../repository.js';
 import {
   ApplicationNoteListParams,
   listQuerySchema,
   idParamSchema,
-} from '../types';
+} from '../types.js';
 
 export function registerWithAuthorView(
   app: FastifyInstance,

@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateRecentApplicationsRepository } from './recent-applications.repository';
-import { CandidateRecentApplicationsService } from './recent-applications.service';
-import { idParamSchema } from '../types';
+import { CandidateRecentApplicationsRepository } from './recent-applications.repository.js';
+import { CandidateRecentApplicationsService } from './recent-applications.service.js';
+import { idParamSchema } from '../types.js';
 
 const querySchema = {
   type: 'object',

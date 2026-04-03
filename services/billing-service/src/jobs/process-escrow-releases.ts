@@ -11,9 +11,9 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { EventPublisher } from '../v2/shared/events';
-import { EscrowHoldServiceV2 } from '../v2/escrow-holds/service';
-import { PayoutAuditRepository } from '../v2/audit/repository';
+import { EventPublisher } from '../v2/shared/events.js';
+import { EscrowHoldServiceV2 } from '../v2/escrow-holds/service.js';
+import { PayoutAuditRepository } from '../v2/audit/repository.js';
 import { createLogger, Logger } from '@splits-network/shared-logging';
 
 // Load and validate environment variables

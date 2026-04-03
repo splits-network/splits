@@ -1,7 +1,7 @@
-import { SavedJobRepositoryV2 } from './repository';
-import { CreateSavedJobInput } from './types';
-import { EventPublisher } from '../shared/events';
-import { resolveAccessContext } from '../shared/access';
+import { SavedJobRepositoryV2 } from './repository.js';
+import { CreateSavedJobInput } from './types.js';
+import { EventPublisher } from '../shared/events.js';
+import { resolveAccessContext } from '../shared/access.js';
 import { Database } from '@splits-network/shared-types';
 import { SupabaseClient } from '@supabase/supabase-js';
 

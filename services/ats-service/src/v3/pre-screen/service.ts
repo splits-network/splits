@@ -8,14 +8,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PreScreenRepository } from './repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PreScreenRepository } from './repository.js';
 import {
   PreScreenListParams,
   CreatePreScreenInput,
   UpdatePreScreenInput,
   PreScreenQuestion,
-} from './types';
+} from './types.js';
 
 export class PreScreenService {
   private accessResolver: AccessContextResolver;

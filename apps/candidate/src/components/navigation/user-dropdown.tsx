@@ -30,6 +30,12 @@ const MENU_ITEMS = [
         description: "Jobs you saved for later",
     },
     {
+        href: "/portal/smart-resume",
+        icon: "fa-duotone fa-regular fa-file-user",
+        label: "Smart Resume",
+        description: "Your career profile",
+    },
+    {
         href: "/portal/documents",
         icon: "fa-duotone fa-regular fa-folder-open",
         label: "Documents",

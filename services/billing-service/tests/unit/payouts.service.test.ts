@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PayoutServiceV2 } from '../../src/v2/payouts/service';
-import type { AccessContext } from '../../src/v2/shared/access';
+import { PayoutServiceV2 } from '../../src/v2/payouts/service.js';
+import type { AccessContext } from '../../src/v2/shared/access.js';
 
 const mockStripe = vi.hoisted(() => ({
     customers: {

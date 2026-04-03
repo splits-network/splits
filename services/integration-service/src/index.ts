@@ -13,15 +13,16 @@ import {
 import { getCryptoService } from "@splits-network/shared-config/src/crypto";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { registerV3Routes } from "./v3/routes";
+import { registerV3Routes } from "./v3/routes.js";
 // V2 legacy routes — only register resources that still serve /api/v2/ paths
-import { registerProviderRoutes as registerV2ProviderRoutes } from "./v2/providers/routes";
-import { registerConnectionRoutes as registerV2ConnectionRoutes } from "./v2/connections/routes";
-import { registerATSRoutes as registerV2ATSRoutes } from "./v2/ats/routes";
+import { registerProviderRoutes as registerV2ProviderRoutes } from "./v2/providers/routes.js";
+import { registerConnectionRoutes as registerV2ConnectionRoutes } from "./v2/connections/routes.js";
+import { registerATSRoutes as registerV2ATSRoutes } from "./v2/ats/routes.js";
 import {
     EventPublisher,
     OutboxPublisher,
-} from "./v2/shared/events";
+    ResilientPublisher,
+} from "./v2/shared/events.js";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -133,6 +134,9 @@ async function main() {
         logger,
     );
 
+    // Resilient publisher: tries direct RabbitMQ first, falls back to outbox
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
+
     const crypto = await getCryptoService();
     logger.info("Encryption service initialized from Vault");
 
@@ -146,7 +150,7 @@ async function main() {
     await registerV2ConnectionRoutes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         logger,
         crypto,
     });
@@ -154,14 +158,14 @@ async function main() {
     await registerV2ATSRoutes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         logger,
         crypto,
     });
 
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         logger,
         crypto,
     });

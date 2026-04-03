@@ -1,10 +1,10 @@
 import amqp, { Channel, Connection, ConsumeMessage } from 'amqplib';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createLogger } from '@splits-network/shared-logging';
-import { CacheManager } from '../cache/cache-manager';
-import { CacheInvalidator } from '../cache/invalidation';
-import { EventType } from '../v2/types';
-import { DashboardEventPublisher } from '../v2/shared/dashboard-events';
+import { CacheManager } from '../cache/cache-manager.js';
+import { CacheInvalidator } from '../cache/invalidation.js';
+import { EventType } from '../v2/types.js';
+import { DashboardEventPublisher } from '../v2/shared/dashboard-events.js';
 
 const logger = createLogger('DomainEventConsumer');
 

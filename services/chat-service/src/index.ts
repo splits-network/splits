@@ -9,12 +9,12 @@ import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
-import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
-import { ChatEventPublisher } from "./v3/shared/chat-event-publisher";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
+import { ChatEventPublisher } from "./v3/shared/chat-event-publisher.js";
 import { JobQueue } from "@splits-network/shared-job-queue";
-import Redis from "ioredis";
+import { Redis } from 'ioredis';
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -124,12 +124,15 @@ async function main() {
     // Set up transactional outbox for durable event delivery
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
 
+    // Resilient publisher: tries direct RabbitMQ first, falls back to outbox
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
+
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         rabbitMqUrl: rabbitConfig.url,
         redisConfig,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
     });
 
     // Create Redis client for V3 real-time chat events
@@ -151,7 +154,7 @@ async function main() {
     // Register V3 routes (coexist with V2)
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         chatEventPublisher,
         redis: v3Redis,
         attachmentQueue: v3AttachmentQueue,

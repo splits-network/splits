@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { ChatReport } from '../types';
+import { ChatReport } from '../types.js';
 
 export interface ChatModerationAudit {
   id: string;

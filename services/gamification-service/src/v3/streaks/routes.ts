@@ -4,9 +4,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { StreakRepository } from "./repository";
-import { StreakService } from "./service";
-import { StreakListParams, idParamSchema, listQuerySchema } from "./types";
+import { StreakRepository } from "./repository.js";
+import { StreakService } from "./service.js";
+import { StreakListParams, idParamSchema, listQuerySchema } from "./types.js";
 
 export function registerStreakRoutes(
     app: FastifyInstance,

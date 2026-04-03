@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { AdminNetworkService } from './service';
+import { AdminNetworkService } from './service.js';
 
 interface AdminNetworkRoutesConfig {
     adminService: AdminNetworkService;

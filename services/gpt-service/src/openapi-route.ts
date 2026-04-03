@@ -10,10 +10,15 @@
 
 import { FastifyInstance } from "fastify";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { load, dump } from "js-yaml";
 
 const DEFAULT_API_URL = "https://api.applicant.network";
+
+// Get current file directory in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Load and patch schema at startup
 const schemaPath = join(__dirname, "openapi.yaml");

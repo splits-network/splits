@@ -8,7 +8,7 @@ import { GptConfig } from '@splits-network/shared-config';
 import { Logger } from '@splits-network/shared-logging';
 import { SignJWT, jwtVerify, importPKCS8, type KeyLike } from 'jose';
 import { randomBytes, createHash } from 'crypto';
-import { ValidatedToken } from '../../v2/oauth/types';
+import { ValidatedToken } from '../../v2/oauth/types.js';
 
 export class TokenUtils {
   private privateKey: KeyLike | null = null;

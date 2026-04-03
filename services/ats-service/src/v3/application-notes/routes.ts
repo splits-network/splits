@@ -4,10 +4,10 @@
 
 import { FastifyInstance } from 'fastify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IEventPublisher } from '../../v2/shared/events';
-import { ApplicationNoteRepository } from './repository';
-import { ApplicationNoteService } from './service';
-import { registerWithAuthorView } from './views/with-author.route';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { ApplicationNoteRepository } from './repository.js';
+import { ApplicationNoteService } from './service.js';
+import { registerWithAuthorView } from './views/with-author.route.js';
 import {
   CreateApplicationNoteInput,
   UpdateApplicationNoteInput,
@@ -16,7 +16,7 @@ import {
   createSchema,
   updateSchema,
   idParamSchema,
-} from './types';
+} from './types.js';
 
 export function registerApplicationNoteRoutes(
   app: FastifyInstance,

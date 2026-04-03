@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AssignmentListParams } from './types';
+import { AssignmentListParams } from './types.js';
 
 export class AssignmentRepository {
   constructor(private supabase: SupabaseClient) {}

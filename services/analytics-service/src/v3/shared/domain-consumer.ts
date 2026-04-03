@@ -10,9 +10,9 @@
 import amqp, { ConsumeMessage } from 'amqplib';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createLogger } from '@splits-network/shared-logging';
-import { CacheInvalidator } from '../../cache/invalidation';
-import { EventType } from '../../v2/types';
-import { DashboardPublisher } from './dashboard-publisher';
+import { CacheInvalidator } from '../../cache/invalidation.js';
+import { EventType } from '../../v2/types.js';
+import { DashboardPublisher } from './dashboard-publisher.js';
 
 const logger = createLogger('v3:DomainEventConsumer');
 

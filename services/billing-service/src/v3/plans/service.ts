@@ -5,9 +5,9 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PlanRepository } from './repository';
-import { CreatePlanInput, UpdatePlanInput, PlanListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PlanRepository } from './repository.js';
+import { CreatePlanInput, UpdatePlanInput, PlanListParams } from './types.js';
 
 export class PlanService {
   private accessResolver: AccessContextResolver;

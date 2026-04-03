@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PerkListParams } from './types';
+import { PerkListParams } from './types.js';
 
 export class PerkRepository {
   constructor(private supabase: SupabaseClient) {}

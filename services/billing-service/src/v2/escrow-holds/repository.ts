@@ -2,13 +2,13 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
-import { resolveAccessContext, isRecruiter, isCompanyUser, getAccessibleCompanyIds } from '../shared/access-helpers';
+import { resolveAccessContext, isRecruiter, isCompanyUser, getAccessibleCompanyIds } from '../shared/access-helpers.js';
 import {
     EscrowHold,
     EscrowHoldCreate,
     EscrowHoldUpdate,
     EscrowHoldFilters,
-} from './types';
+} from './types.js';
 
 export class EscrowHoldRepository {
     constructor(private supabase: SupabaseClient) { }

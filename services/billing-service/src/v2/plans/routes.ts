@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { PlanServiceV2 } from './service';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
+import { PlanServiceV2 } from './service.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
 
 interface RegisterPlanRoutesConfig {
     planService: PlanServiceV2;

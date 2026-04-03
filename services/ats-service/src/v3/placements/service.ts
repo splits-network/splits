@@ -8,10 +8,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PlacementRepository } from './repository';
-import { ScopedPlacementListRepository, PlacementScopeFilters } from './views/scoped-list.repository';
-import { CreatePlacementInput, UpdatePlacementInput, PlacementListParams } from './types';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PlacementRepository } from './repository.js';
+import { ScopedPlacementListRepository, PlacementScopeFilters } from './views/scoped-list.repository.js';
+import { CreatePlacementInput, UpdatePlacementInput, PlacementListParams } from './types.js';
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   hired: ['active', 'failed'],

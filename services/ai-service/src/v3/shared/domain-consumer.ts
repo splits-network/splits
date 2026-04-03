@@ -18,13 +18,15 @@ import {
   DomainConsumerConfig,
   handleStageChanged,
   handleDocumentProcessed,
+  handleDocumentEnriching,
   handleCallRecordingReady,
   handleResumeAnalyzeRequested,
-} from './event-handlers';
+} from './event-handlers.js';
 
 const SUBSCRIBED_EVENTS = [
   'application.stage_changed',
   'document.processed',
+  'document.enriching',
   'call.recording_ready',
   'resume.analyze.requested',
 ] as const;
@@ -95,6 +97,9 @@ export class DomainEventConsumer {
         break;
       case 'document.processed':
         await handleDocumentProcessed(event, this.config);
+        break;
+      case 'document.enriching':
+        await handleDocumentEnriching(event, this.config);
         break;
       case 'call.recording_ready':
         await handleCallRecordingReady(event, this.config);

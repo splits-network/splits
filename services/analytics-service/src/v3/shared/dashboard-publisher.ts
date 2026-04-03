@@ -10,7 +10,7 @@
  *   dashboard:activity                  — global activity feed
  */
 
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { createLogger } from '@splits-network/shared-logging';
 
 const logger = createLogger('v3:DashboardPublisher');

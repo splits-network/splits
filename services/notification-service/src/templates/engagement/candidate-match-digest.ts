@@ -3,8 +3,8 @@
  * Sent to candidates every Monday with their top job matches from the past week
  */
 
-import { baseEmailTemplate, EmailSource } from '../base';
-import { heading, paragraph, button, infoCard, badge, divider, alert } from '../components';
+import { baseEmailTemplate, EmailSource } from '../base.js';
+import { heading, paragraph, button, infoCard, badge, divider, alert } from '../components.js';
 
 export interface MatchItem {
     jobTitle: string;

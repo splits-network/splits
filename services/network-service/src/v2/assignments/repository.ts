@@ -4,8 +4,8 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { AssignmentFilters, AssignmentUpdate, RepositoryListResponse } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { AssignmentFilters, AssignmentUpdate, RepositoryListResponse } from './types.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 export class AssignmentRepository {
     private supabase: SupabaseClient;

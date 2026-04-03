@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { registerUserRoutes } from '../../src/v2/users/routes';
+import { registerUserRoutes } from '../../src/v2/users/routes.js';
 
 describe('User routes (integration)', () => {
     const userService = {

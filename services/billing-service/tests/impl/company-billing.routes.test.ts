@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import Fastify from 'fastify';
-import { companyBillingProfileRoutes } from '../../src/v2/company-billing/routes';
+import { companyBillingProfileRoutes } from '../../src/v2/company-billing/routes.js';
 
 describe('Company billing routes (integration)', () => {
     const service = {

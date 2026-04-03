@@ -7,9 +7,9 @@
 
 import { FastifyInstance } from "fastify";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { IEventPublisher } from "../../v2/shared/events";
-import { TicketRepository } from "./repository";
-import { TicketService } from "./service";
+import { IEventPublisher } from "../../v2/shared/events.js";
+import { TicketRepository } from "./repository.js";
+import { TicketService } from "./service.js";
 import {
     TicketListParams,
     CreateTicketInput,
@@ -18,9 +18,9 @@ import {
     createSchema,
     updateSchema,
     idParamSchema,
-} from "./types";
-import { registerTicketReplyAction } from "./actions/reply.route";
-import { registerTicketClaimAction } from "./actions/claim.route";
+} from "./types.js";
+import { registerTicketReplyAction } from "./actions/reply.route.js";
+import { registerTicketClaimAction } from "./actions/claim.route.js";
 
 export function registerTicketRoutes(
     app: FastifyInstance,

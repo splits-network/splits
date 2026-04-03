@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
-import { AutomationRuleServiceV2 } from './service';
-import { AutomationRuleRepository, CreateRuleInput } from './repository';
-import { RuleFilters, RuleUpdate } from './types';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { IEventPublisher } from '../shared/events';
-import { resolveAccessContext } from '../shared/access';
+import { AutomationRuleServiceV2 } from './service.js';
+import { AutomationRuleRepository, CreateRuleInput } from './repository.js';
+import { RuleFilters, RuleUpdate } from './types.js';
+import { requireUserContext, validatePaginationParams } from '../shared/helpers.js';
+import { IEventPublisher } from '../shared/events.js';
+import { resolveAccessContext } from '../shared/access.js';
 
 interface RegisterRuleRoutesConfig {
     supabaseUrl: string;

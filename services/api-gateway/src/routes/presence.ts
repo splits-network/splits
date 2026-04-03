@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { ServiceRegistry } from "../clients";
-import { requireAuth, AuthenticatedRequest } from "../rbac";
-import { getCorrelationId } from "./v2/common";
+import { ServiceRegistry } from "../clients.js";
+import { requireAuth, AuthenticatedRequest } from "../rbac.js";
+import { getCorrelationId } from "./v2/common.js";
 
 /**
  * Register presence routes for site-wide activity tracking.

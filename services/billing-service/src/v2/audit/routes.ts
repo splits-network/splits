@@ -2,8 +2,8 @@
 
 import { FastifyInstance } from 'fastify';
 import { StandardListParams } from '@splits-network/shared-types';
-import { PayoutAuditRepository } from './repository';
-import { PlacementPayoutAuditFilters } from './types';
+import { PayoutAuditRepository } from './repository.js';
+import { PlacementPayoutAuditFilters } from './types.js';
 
 export async function placementPayoutAuditRoutes(
     app: FastifyInstance,

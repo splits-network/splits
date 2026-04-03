@@ -1,4 +1,4 @@
-import { AdminNotificationRepository, AdminListParams, AdminListResponse } from './repository';
+import { AdminNotificationRepository, AdminListParams, AdminListResponse } from './repository.js';
 
 export class AdminNotificationService {
     constructor(private repository: AdminNotificationRepository) {}

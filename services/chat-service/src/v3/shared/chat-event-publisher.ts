@@ -9,7 +9,7 @@
  *   user:{userId}         — user-scoped events (requests, updates, blocks)
  */
 
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 export interface ChatEventPayload {
   type: string;

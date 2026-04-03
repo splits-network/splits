@@ -8,11 +8,11 @@ import { createLogger } from "@splits-network/shared-logging";
 import { buildServer, errorHandler, setupProcessErrorHandlers } from "@splits-network/shared-fastify";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import { registerV2Routes } from "./v2/routes";
-import { registerV3Routes } from "./v3/routes";
-import { EventPublisher, OutboxPublisher } from "./v2/shared/events";
-import { CallScheduler } from "./v2/scheduler";
-import { SchedulerRepository } from "./v2/scheduler-repository";
+import { registerV2Routes } from "./v2/routes.js";
+import { registerV3Routes } from "./v3/routes.js";
+import { EventPublisher, OutboxPublisher, ResilientPublisher } from "./v2/shared/events.js";
+import { CallScheduler } from "./v2/scheduler.js";
+import { SchedulerRepository } from "./v2/scheduler-repository.js";
 import * as Sentry from "@sentry/node";
 
 // Initialize Sentry at module level so startup errors are captured before main() runs
@@ -114,6 +114,9 @@ async function main() {
 
     const outboxPublisher = new OutboxPublisher(supabaseClient, baseConfig.serviceName, logger);
 
+    // Resilient publisher: tries RabbitMQ first, falls back to outbox
+    const resilientPublisher = new ResilientPublisher(eventPublisher, outboxPublisher, logger);
+
     const livekitApiKey = process.env.LIVEKIT_API_KEY || '';
     const livekitApiSecret = process.env.LIVEKIT_API_SECRET || '';
     const livekitWsUrl = process.env.LIVEKIT_WS_URL || '';
@@ -126,7 +129,7 @@ async function main() {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey,
         rabbitMqUrl: rabbitConfig.url,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         livekitApiKey,
         livekitApiSecret,
         livekitWsUrl,
@@ -134,14 +137,14 @@ async function main() {
 
     registerV3Routes(app, {
         supabase: supabaseClient,
-        eventPublisher: outboxPublisher,
+        eventPublisher: resilientPublisher,
         livekitApiKey,
         livekitApiSecret,
     });
 
     // ── Scheduler ─────────────────────────────────────────────────────
     const schedulerRepo = new SchedulerRepository(supabaseClient);
-    const scheduler = new CallScheduler(schedulerRepo, outboxPublisher, logger);
+    const scheduler = new CallScheduler(schedulerRepo, resilientPublisher, logger);
     scheduler.start();
     logger.info('Call scheduler started - reminders, timeouts, no-shows');
 

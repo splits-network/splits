@@ -5,12 +5,12 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { JobNoteService } from './service';
-import { idParamSchema } from '../types';
+import { JobNoteService } from './service.js';
+import { idParamSchema } from '../types.js';
 import {
   JobNoteCreate, JobNoteUpdate, JobNoteFilters,
   jobNoteListQuerySchema, jobNoteCreateSchema, jobNoteUpdateSchema,
-} from './types';
+} from './types.js';
 
 const noteIdParamSchema = {
   type: 'object',

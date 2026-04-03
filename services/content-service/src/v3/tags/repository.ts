@@ -5,7 +5,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { TagListParams } from './types';
+import { TagListParams } from './types.js';
 
 export class TagRepository {
   constructor(private supabase: SupabaseClient) {}

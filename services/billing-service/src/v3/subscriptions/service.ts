@@ -7,17 +7,17 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { SubscriptionRepository, SubscriptionScopeFilters } from './repository';
-import { MySubscriptionRepository } from './views/my-subscription.repository';
-import { SubscriptionStripeOperations } from './stripe-operations';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { SubscriptionRepository, SubscriptionScopeFilters } from './repository.js';
+import { MySubscriptionRepository } from './views/my-subscription.repository.js';
+import { SubscriptionStripeOperations } from './stripe-operations.js';
 import {
   CreateSubscriptionInput,
   UpdateSubscriptionInput,
   SubscriptionListParams,
   SetupIntentRequest,
   ActivateSubscriptionRequest,
-} from './types';
+} from './types.js';
 
 export class SubscriptionService {
   private accessResolver: AccessContextResolver;

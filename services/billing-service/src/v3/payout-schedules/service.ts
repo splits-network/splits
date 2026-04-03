@@ -5,13 +5,13 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { BadRequestError, NotFoundError, ForbiddenError } from '@splits-network/shared-fastify';
-import { IEventPublisher } from '../../v2/shared/events';
-import { PayoutScheduleRepository } from './repository';
+import { IEventPublisher } from '../../v2/shared/events.js';
+import { PayoutScheduleRepository } from './repository.js';
 import {
   CreatePayoutScheduleInput,
   UpdatePayoutScheduleInput,
   PayoutScheduleListParams,
-} from './types';
+} from './types.js';
 
 export class PayoutScheduleService {
   private accessResolver: AccessContextResolver;
