@@ -62,7 +62,8 @@ export interface MatchFactors {
   skills_matched: string[];
   skills_missing: string[];
   skills_match_pct: number;
-  skills_source?: 'structured' | 'legacy';
+  skills_source?: 'structured' | 'legacy' | 'smart_resume';
+  data_source?: 'smart_resume' | 'resume_metadata';
   ai_summary?: string;
   cosine_similarity?: number;
 }

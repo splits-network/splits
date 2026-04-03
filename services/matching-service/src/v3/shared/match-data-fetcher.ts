@@ -9,14 +9,20 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger } from '@splits-network/shared-logging';
 import { EmbeddingService } from '../../v2/embeddings/service.js';
 import { EmbeddingRepository } from '../../v2/embeddings/repository.js';
+import { SmartResumeFetcher } from './smart-resume-fetcher.js';
+import type { SmartResumeMatchingData } from './smart-resume-types.js';
 
 export class MatchDataFetcher {
+  private smartResumeFetcher: SmartResumeFetcher;
+
   constructor(
     private supabase: SupabaseClient,
     private embeddingService: EmbeddingService,
     private embeddingRepository: EmbeddingRepository,
     private logger: Logger,
-  ) {}
+  ) {
+    this.smartResumeFetcher = new SmartResumeFetcher(supabase, logger);
+  }
 
   async fetchCandidate(id: string) {
     const { data } = await this.supabase.from('candidates').select('*').eq('id', id).maybeSingle();
@@ -58,6 +64,14 @@ export class MatchDataFetcher {
       .map((row: any) => row.skill);
   }
 
+  async fetchSmartResumeData(candidateId: string): Promise<SmartResumeMatchingData | null> {
+    return this.smartResumeFetcher.fetch(candidateId);
+  }
+
+  clearSmartResumeCache(): void {
+    this.smartResumeFetcher.clearCache();
+  }
+
   async fetchActiveJobIds(limit: number = 500): Promise<string[]> {
     const { data } = await this.supabase
       .from('jobs')
@@ -91,7 +105,8 @@ export class MatchDataFetcher {
 
   async updateCandidateEmbedding(candidate: any): Promise<void> {
     try {
-      const text = this.embeddingService.buildCandidateText(candidate);
+      const smartText = await this.embeddingService.buildCandidateTextFromSmartResume(candidate.id);
+      const text = this.embeddingService.buildCandidateText(candidate, smartText ?? undefined);
       if (!text) return;
       const embedding = await this.embeddingService.generateEmbedding(text);
       await this.embeddingRepository.upsertEmbedding('candidate', candidate.id, embedding);

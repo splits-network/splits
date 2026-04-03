@@ -20,6 +20,7 @@ export interface SkillsScoringInput {
         name: string;
         category?: string;
         proficiency?: string;
+        years_used?: number;
     }>;
     job_requirements: Array<{
         description: string;
@@ -38,8 +39,15 @@ export interface SkillsScoringResult {
     missing_mandatory: string[];
     missing_preferred: string[];
     match_pct: number;
-    skills_source: 'structured' | 'legacy';
+    skills_source: 'structured' | 'legacy' | 'smart_resume';
 }
+
+const PROFICIENCY_WEIGHTS: Record<string, number> = {
+    expert: 1.0,
+    advanced: 0.9,
+    intermediate: 0.7,
+    beginner: 0.5,
+};
 
 const NOISE_WORDS = new Set([
     'a', 'an', 'the', 'and', 'or', 'of', 'in', 'to', 'for', 'with',
@@ -129,12 +137,30 @@ function computeLegacyScore(
     const mandatoryMatched = mandatoryResults.filter(r => r.matched);
     const preferredMatched = preferredResults.filter(r => r.matched);
 
+    // Build proficiency lookup from candidate skills when available
+    const proficiencyMap = new Map(
+        candidate_skills
+            .filter(s => s.proficiency)
+            .map(s => [s.name.toLowerCase().trim(), s.proficiency!]),
+    );
+    const hasProficiency = proficiencyMap.size > 0;
+
+    // Apply proficiency-weighted scoring when smart resume data is available
+    const weightMatch = (matchedKeywords: string[]) => {
+        if (!hasProficiency || !matchedKeywords.length) return 1.0;
+        const weights = matchedKeywords.map(k => PROFICIENCY_WEIGHTS[proficiencyMap.get(k) || ''] || 1.0);
+        return weights.reduce((sum, w) => sum + w, 0) / weights.length;
+    };
+
+    const mandatoryWeight = weightMatch(mandatoryMatched.flatMap(r => r.matchedKeywords));
+    const preferredWeight = weightMatch(preferredMatched.flatMap(r => r.matchedKeywords));
+
     // Score: mandatory = 60 points, preferred = 40 points
     const mandatoryScore = mandatory.length > 0
-        ? (mandatoryMatched.length / mandatory.length) * 60
+        ? (mandatoryMatched.length / mandatory.length) * 60 * mandatoryWeight
         : 30; // No mandatory reqs = neutral
     const preferredScore = preferred.length > 0
-        ? (preferredMatched.length / preferred.length) * 40
+        ? (preferredMatched.length / preferred.length) * 40 * preferredWeight
         : 20; // No preferred reqs = neutral
 
     const allMatched = [
