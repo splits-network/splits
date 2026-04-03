@@ -4,10 +4,18 @@
  */
 
 import { AIReviewRepository } from './repository.js';
-import { AIReviewInput, AIReviewResult } from './types.js';
+import { AIReviewInput, AIReviewResult, SkillMatch, RequirementMatch } from './types.js';
 import { IEventPublisher } from '../shared/events.js';
 import { Logger } from '@splits-network/shared-logging';
 import type { IAiClient } from '@splits-network/shared-ai-client';
+
+function skillMatchToString(s: SkillMatch): string {
+    return typeof s === 'string' ? s : s.name;
+}
+
+function requirementMatchToString(r: RequirementMatch): string {
+    return typeof r === 'string' ? r : r.text;
+}
 
 export class AIReviewServiceV2 {
     constructor(
@@ -197,11 +205,11 @@ export class AIReviewServiceV2 {
                 confidence_level: result.confidence_level,
                 strengths: result.strengths,
                 concerns: result.concerns,
-                matched_skills: result.matched_skills,
-                missing_skills: result.missing_skills,
+                matched_skills: result.matched_skills.map(skillMatchToString),
+                missing_skills: result.missing_skills.map(skillMatchToString),
                 skills_match_percentage: result.skills_match_percentage,
-                matched_requirements: result.matched_requirements,
-                missing_requirements: result.missing_requirements,
+                matched_requirements: result.matched_requirements.map(requirementMatchToString),
+                missing_requirements: result.missing_requirements.map(requirementMatchToString),
                 required_years: result.required_years,
                 candidate_years: result.candidate_years,
                 meets_experience_requirement: result.meets_experience_requirement,
@@ -382,7 +390,7 @@ export class AIReviewServiceV2 {
                     resumeSection += `    - ${edu.degree || ''} ${edu.field_of_study || edu.field || ''} from ${edu.institution || edu.school || ''}\n`;
                 });
             }
-            const projects = rd.projects || rd.relevant_projects || [];
+            const projects = rd.projects || [];
             if (projects.length) {
                 resumeSection += '  Key Projects:\n';
                 projects.slice(0, 8).forEach((proj: any) => {
