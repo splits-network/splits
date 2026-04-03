@@ -141,6 +141,7 @@ export default function ApplicationWizardModal({
     const tailoredResumeStarted = useRef(false);
     const [tailoredResumeReady, setTailoredResumeReady] = useState(false);
     const [tailoredResumeData, setTailoredResumeData] = useState<any>(null);
+    const tailoredResumeRef = useRef<any>(null);
     const [isRerunning, setIsRerunning] = useState(false);
 
     const hasQuestions = questions.length > 0;
@@ -274,7 +275,9 @@ export default function ApplicationWizardModal({
                     job_id: jobId,
                 })
                 .then((response: any) => {
-                    setTailoredResumeData(response.data || response);
+                    const data = response.data || response;
+                    setTailoredResumeData(data);
+                    tailoredResumeRef.current = data;
                     setTailoredResumeReady(true);
                 })
                 .catch((err: any) => {
@@ -320,6 +323,8 @@ export default function ApplicationWizardModal({
                 };
             });
 
+            const currentResumeData = tailoredResumeRef.current;
+
             if (existingApplication) {
                 await authClient.patch(
                     `/applications/${existingApplication.id}`,
@@ -327,7 +332,7 @@ export default function ApplicationWizardModal({
                         document_ids: formData.documents.selected,
                         cover_letter: formData.cover_letter,
                         pre_screen_answers: preScreenAnswers,
-                        ...(tailoredResumeData ? { resume_data: tailoredResumeData } : {}),
+                        ...(currentResumeData ? { resume_data: currentResumeData } : {}),
                     },
                 );
                 appId = existingApplication.id;
@@ -338,8 +343,8 @@ export default function ApplicationWizardModal({
                     cover_letter: formData.cover_letter,
                     pre_screen_answers: preScreenAnswers,
                 };
-                if (tailoredResumeData) {
-                    payload.resume_data = tailoredResumeData;
+                if (currentResumeData) {
+                    payload.resume_data = currentResumeData;
                 }
                 if (formData.candidate_recruiter_id) {
                     payload.candidate_recruiter_id =
@@ -575,16 +580,19 @@ export default function ApplicationWizardModal({
                         "/ai-reviews/actions/generate-resume",
                         { candidate_id: candidateId, job_id: jobId },
                     );
-                    setTailoredResumeData(resumeResponse.data || resumeResponse);
+                    const regenData = resumeResponse.data || resumeResponse;
+                    setTailoredResumeData(regenData);
+                    tailoredResumeRef.current = regenData;
                 } catch (err) {
                     console.warn("Tailored resume regeneration failed:", err);
                 }
             }
 
             // 2. Save updated tailored resume + re-trigger AI review
+            const latestResumeData = tailoredResumeRef.current;
             await authClient.patch(`/applications/${applicationId}`, {
                 stage: "ai_review",
-                ...(tailoredResumeData ? { resume_data: tailoredResumeData } : {}),
+                ...(latestResumeData ? { resume_data: latestResumeData } : {}),
             });
 
             // 3. Poll for new review

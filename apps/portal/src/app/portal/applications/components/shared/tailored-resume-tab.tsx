@@ -1,66 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { createAuthenticatedClient } from "@/lib/api-client";
+import { useRef } from "react";
 
 interface TailoredResumeTabProps {
     candidateId: string;
     jobId: string;
     applicationId: string;
+    resumeData?: any;
 }
 
 /**
- * Displays the tailored resume stored on the application record.
- * Falls back to Smart Resume matching-data if no tailored resume exists.
+ * Displays the tailored resume stored on the application record (resume_data).
+ * Shows what was submitted with the application — no fallbacks, no generation.
  * Used by recruiters in the application detail view.
- * Does NOT generate — that only happens in the candidate's application wizard.
  */
-export function TailoredResumeTab({ candidateId, applicationId }: TailoredResumeTabProps) {
-    const { getToken } = useAuth();
-    const [data, setData] = useState<any>(null);
-    const [isTailored, setIsTailored] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export function TailoredResumeTab({ applicationId, resumeData }: TailoredResumeTabProps) {
     const printRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        loadResume();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [applicationId, candidateId]);
-
-    const loadResume = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const token = await getToken();
-            if (!token) return;
-            const client = createAuthenticatedClient(token);
-
-            // Try to load tailored resume from application record
-            const appResult = await client.get(`/applications/${applicationId}`);
-            const resumeData = appResult.data?.resume_data;
-
-            if (resumeData && typeof resumeData === "object" && resumeData.summary) {
-                setData(resumeData);
-                setIsTailored(true);
-                return;
-            }
-
-            // Fallback: show Smart Resume matching data
-            const profileResult = await client.get(
-                "/smart-resume-profiles/views/matching-data",
-                { params: { candidate_id: candidateId } },
-            );
-            setData(profileResult.data);
-            setIsTailored(false);
-        } catch (err: any) {
-            console.error("Failed to load resume:", err);
-            setError(err.message || "Failed to load resume data");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleDownloadPdf = async () => {
         if (!printRef.current) return;
@@ -77,31 +32,16 @@ export function TailoredResumeTab({ candidateId, applicationId }: TailoredResume
             .save();
     };
 
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[300px] gap-3">
-                <span className="loading loading-spinner loading-lg" />
-                <p className="text-sm text-base-content/50">Loading resume...</p>
-            </div>
-        );
-    }
-
-    if (error || !data) {
+    if (!resumeData || typeof resumeData !== "object" || !resumeData.summary) {
         return (
             <div className="text-center p-8 text-base-content/50">
                 <i className="fa-duotone fa-regular fa-file-user text-4xl mb-2 block" />
-                <p>{error || "No resume available for this candidate."}</p>
+                <p>No tailored resume was generated for this application.</p>
             </div>
         );
     }
 
-    // Tailored resume uses different field names than matching-data
-    const summary = isTailored ? data.summary : data.professional_summary;
-    const experiences = isTailored ? data.experience : data.experiences;
-    const projects = isTailored ? data.relevant_projects : data.projects;
-    const skills = data.skills;
-    const education = data.education;
-    const certifications = isTailored ? data.certifications : data.certifications;
+    const { summary, experience, relevant_projects, skills, education, certifications } = resumeData;
 
     return (
         <div>
@@ -110,13 +50,11 @@ export function TailoredResumeTab({ candidateId, applicationId }: TailoredResume
                 <div className="flex items-center gap-2">
                     <i className="fa-duotone fa-regular fa-file-user text-primary" />
                     <span className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40">
-                        Smart Resume
+                        Tailored Resume
                     </span>
-                    {isTailored && (
-                        <span className="badge badge-sm bg-primary/10 text-primary border-primary/20 font-semibold">
-                            AI-Tailored
-                        </span>
-                    )}
+                    <span className="badge badge-sm bg-primary/10 text-primary border-primary/20 font-semibold">
+                        AI-Tailored
+                    </span>
                 </div>
                 <button
                     type="button"
@@ -139,13 +77,13 @@ export function TailoredResumeTab({ candidateId, applicationId }: TailoredResume
                     </section>
                 )}
 
-                {experiences?.length > 0 && (
+                {experience?.length > 0 && (
                     <section>
                         <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             Experience
                         </h3>
                         <div className="space-y-4">
-                            {experiences.map((exp: any, i: number) => (
+                            {experience.map((exp: any, i: number) => (
                                 <div key={i} className="border-l-2 border-base-300 pl-4">
                                     <div className="font-bold text-sm">{exp.title}</div>
                                     <div className="text-sm text-base-content/60">
@@ -178,13 +116,13 @@ export function TailoredResumeTab({ candidateId, applicationId }: TailoredResume
                     </section>
                 )}
 
-                {projects?.length > 0 && (
+                {relevant_projects?.length > 0 && (
                     <section>
                         <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-base-content/40 mb-3">
                             Projects
                         </h3>
                         <div className="space-y-3">
-                            {projects.map((proj: any, i: number) => (
+                            {relevant_projects.map((proj: any, i: number) => (
                                 <div key={i} className="border-l-2 border-secondary pl-4">
                                     <div className="font-bold text-sm">{proj.name}</div>
                                     {proj.description && (

@@ -89,6 +89,7 @@ export function ApplicationDetailPanel({
                             candidateId={(application as any).candidate_id}
                             jobId={(application as any).job_id}
                             applicationId={application.id}
+                            resumeData={(application as any).resume_data}
                         />
                     ) : (
                         <EmptyState
