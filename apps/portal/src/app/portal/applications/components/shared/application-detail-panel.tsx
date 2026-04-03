@@ -116,6 +116,8 @@ export function ApplicationDetailPanel({
                         jobId={(application as any).job_id || application.job?.id}
                         applicationId={application.id}
                         resumeData={(application as any).resume_data}
+                        candidate={application.candidate}
+                        jobTitle={application.job?.title}
                     />
                 )}
                 {activeTab === "documents" && (
