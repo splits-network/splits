@@ -30,6 +30,7 @@ export function DetailLoader({
                 const client = createAuthenticatedClient(token);
                 const res = await client.get<{ data: Application }>(
                     `/applications/${id}/view/detail`,
+                    { params: { include: 'timeline' } },
                 );
                 if (!signal?.cancelled) setApplication(res.data);
             } catch (err) {
