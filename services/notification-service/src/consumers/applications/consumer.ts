@@ -255,7 +255,7 @@ export class ApplicationsEventConsumer {
                         }
                     }
 
-                    const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                    const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                     for (const admin of companyAdmins) {
                         await this.emailService.sendApplicationCreated(admin.email, {
                             candidateName: candidate.full_name,
@@ -318,7 +318,7 @@ export class ApplicationsEventConsumer {
                     }
 
                     {
-                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                         for (const admin of companyAdmins) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
@@ -370,7 +370,7 @@ export class ApplicationsEventConsumer {
                     }
 
                     {
-                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                         for (const admin of companyAdmins) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
@@ -422,7 +422,7 @@ export class ApplicationsEventConsumer {
                     }
 
                     {
-                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                         for (const admin of companyAdmins) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
@@ -481,7 +481,7 @@ export class ApplicationsEventConsumer {
                     }
 
                     {
-                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                         for (const admin of companyAdmins) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
@@ -545,7 +545,7 @@ export class ApplicationsEventConsumer {
                         }
                     }
 
-                    const companyAdminsHired = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                    const companyAdminsHired = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                     for (const admin of companyAdminsHired) {
                         await this.emailService.sendApplicationStageChanged(admin.email, {
                             candidateName: candidate.full_name,
@@ -595,7 +595,7 @@ export class ApplicationsEventConsumer {
 
                     // Only notify company if the application was previously in a company-visible stage
                     if (old_stage && COMPANY_VISIBLE_STAGES.includes(old_stage)) {
-                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                        const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                         for (const admin of companyAdmins) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
@@ -628,7 +628,7 @@ export class ApplicationsEventConsumer {
                     }
 
                     if (old_stage && COMPANY_VISIBLE_STAGES.includes(old_stage)) {
-                        const companyAdminsWithdrawn = await this.contactLookup.getCompanyAdminContacts(job.company_id);
+                        const companyAdminsWithdrawn = await this.contactLookup.getCompanyAdminContacts(job.company?.identity_organization_id || job.company_id);
                         for (const admin of companyAdminsWithdrawn) {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,

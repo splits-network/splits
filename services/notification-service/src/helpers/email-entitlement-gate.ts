@@ -49,7 +49,7 @@ export class EmailEntitlementGate {
                 return requestedChannel;
             }
 
-            const hasEmail = await this.checker.hasEntitlement(clerkUserId, 'email_notifications');
+            const hasEmail = await this.checker.hasEntitlementByClerkId(clerkUserId, 'email_notifications');
 
             if (hasEmail) return requestedChannel;
 

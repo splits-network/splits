@@ -285,22 +285,22 @@ export class ContactLookupHelper {
         try {
             const { data: memberships, error } = await this.supabase
                 .from('memberships')
-                .select('user_id')
+                .select('user_id, role_name')
                 .eq('organization_id', organizationId)
-                .eq('role_name', 'company_admin')
+                .in('role_name', ['company_admin', 'hiring_manager'])
                 .is('deleted_at', null);
 
             if (error) {
-                this.logger.error({ organizationId, error }, 'Failed to fetch company admin user_roles from database');
+                this.logger.error({ organizationId, error }, 'Failed to fetch company admin memberships from database');
                 return [];
             }
 
             if (!memberships || memberships.length === 0) {
-                this.logger.warn({ organizationId }, 'No company admins found for organization');
+                this.logger.warn({ organizationId }, 'No company admins or hiring managers found for organization');
                 return [];
             }
 
-            // Fetch contacts for all admins
+            // Fetch contacts for all members
             const contacts: Contact[] = [];
             for (const membership of memberships) {
                 if (membership.user_id) {
@@ -317,14 +317,14 @@ export class ContactLookupHelper {
                             name: user.name,
                             email: user.email,
                             phone: null,
-                            type: 'company_admin',
+                            type: membership.role_name,
                             entity_id: membership.user_id,
                         });
                     }
                 }
             }
 
-            this.logger.info({ organizationId, adminCount: contacts.length }, 'Fetched company admin contacts');
+            this.logger.info({ organizationId, contactCount: contacts.length }, 'Fetched company admin/hiring manager contacts');
             return contacts;
         } catch (error) {
             this.logger.error(
