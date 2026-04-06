@@ -540,10 +540,9 @@ export default function ApplicationWizardModal({
             if (!token) throw new Error("Authentication required");
 
             const authClient = createAuthenticatedClient(token);
-            // Transition to submitted stage
-            await authClient.patch(`/applications/${applicationId}`, {
-                stage: "submitted",
-            });
+            // Use the dedicated submit endpoint which routes to
+            // recruiter_review (if candidate has recruiter) or submitted (direct)
+            await authClient.post(`/applications/${applicationId}/submit`, {});
 
             onSuccess?.(applicationId);
             onClose();
