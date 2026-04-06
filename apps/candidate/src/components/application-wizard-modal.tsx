@@ -405,12 +405,21 @@ export default function ApplicationWizardModal({
                 if (!token) throw new Error("Authentication expired");
 
                 const client = createAuthenticatedClient(token);
-                const response = await client.get("/ai-reviews", {
-                    params: { application_id: appId, limit: 1 },
-                });
+                const [reviewResponse, appResponse] = await Promise.all([
+                    client.get("/ai-reviews", {
+                        params: { application_id: appId, limit: 1 },
+                    }),
+                    client.get(`/applications/${appId}`),
+                ]);
 
-                const reviews = response.data || [];
-                if (reviews.length > 0 && reviews[0].fit_score != null) {
+                const reviews = reviewResponse.data || [];
+                const appStage = appResponse.data?.stage;
+                // Wait for both: AI review data exists AND application stage updated to ai_reviewed
+                if (
+                    reviews.length > 0 &&
+                    reviews[0].fit_score != null &&
+                    appStage === "ai_reviewed"
+                ) {
                     setAiReview(reviews[0]);
                     setReviewProcessingStage("complete");
                     return;

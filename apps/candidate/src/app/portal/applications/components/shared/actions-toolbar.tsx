@@ -296,7 +296,7 @@ export default function ActionsToolbar({
                     )}
 
                     {/* Submit */}
-                    {canSubmit && (
+                    {/*canSubmit && (
                         <button
                             className={`btn btn-success ${getSizeClass()} gap-2`}
                             style={{ borderRadius: 0 }}
@@ -318,7 +318,7 @@ export default function ActionsToolbar({
                                     : getSubmitLabel()}
                             </span>
                         </button>
-                    )}
+                    )*/}
 
                     {/* Withdraw */}
                     {canWithdraw && (
