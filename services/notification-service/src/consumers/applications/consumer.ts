@@ -262,6 +262,7 @@ export class ApplicationsEventConsumer {
                             jobTitle: job.title,
                             companyName: job.company?.name || 'Unknown Company',
                             applicationId: application_id,
+                            userId: admin.user_id || undefined,
                         });
                     }
 
@@ -554,6 +555,7 @@ export class ApplicationsEventConsumer {
                             oldStage: old_stage || 'Unknown',
                             newStage: 'hired',
                             applicationId: application_id,
+                            userId: admin.user_id || undefined,
                         });
                     }
                     break;
@@ -637,6 +639,7 @@ export class ApplicationsEventConsumer {
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'withdrawn',
                                 applicationId: application_id,
+                                userId: admin.user_id || undefined,
                             });
                         }
                     }
