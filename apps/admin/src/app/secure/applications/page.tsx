@@ -47,6 +47,7 @@ export default function ApplicationsPage() {
         handleSort,
         page,
         goToPage,
+        refresh,
     } = useStandardList<any, Filters>({
         endpoint: '/ats/admin/applications',
         defaultFilters: { stage: '' },
@@ -110,6 +111,7 @@ export default function ApplicationsPage() {
                     sortField={sortBy}
                     sortDir={sortOrder}
                     onSort={handleSort}
+                    onRefresh={refresh}
                 />
 
                 {totalPages > 1 && (
