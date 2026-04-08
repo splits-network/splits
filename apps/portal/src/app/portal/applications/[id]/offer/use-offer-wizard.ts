@@ -125,7 +125,7 @@ export function useOfferWizard(applicationId: string) {
                     application_id: applicationId,
                     note_type: "stage_transition",
                     message_text: notes.trim(),
-                    visibility: "team",
+                    visibility: "company_only",
                 });
             }
 
