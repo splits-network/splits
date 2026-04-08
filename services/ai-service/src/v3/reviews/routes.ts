@@ -16,6 +16,8 @@ import {
 import { registerJobStatsViewRoute } from './views/job-stats.route.js';
 import { registerAnalyzeActionRoute } from './actions/analyze.route.js';
 import { registerGenerateResumeActionRoute } from './actions/generate-resume.route.js';
+import { registerGenerateAndReviewAdminRoute } from './actions/generate-and-review.route.js';
+import { registerAutoParseAdminRoute } from '../smart-resume/auto-parse.route.js';
 
 export function registerReviewRoutes(
   app: FastifyInstance,
@@ -30,6 +32,8 @@ export function registerReviewRoutes(
   registerJobStatsViewRoute(app, supabase);
   registerAnalyzeActionRoute(app, supabase, eventPublisher);
   registerGenerateResumeActionRoute(app, supabase, aiClient);
+  registerGenerateAndReviewAdminRoute(app, supabase, eventPublisher, aiClient);
+  registerAutoParseAdminRoute(app, supabase, eventPublisher, aiClient);
 
   // GET /api/v3/ai-reviews
   app.get('/api/v3/ai-reviews', {

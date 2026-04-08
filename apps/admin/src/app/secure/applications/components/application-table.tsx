@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminDataTable, type Column } from '@/components/shared';
+import { GenerateTailoredResumeButton } from './generate-tailored-resume-button';
 
 type Application = {
     id: string;
@@ -23,6 +24,7 @@ type ApplicationTableProps = {
     sortField?: string;
     sortDir?: 'asc' | 'desc';
     onSort: (field: string) => void;
+    onRefresh: () => void;
 };
 
 const STAGE_BADGE: Record<string, string> = {
@@ -52,7 +54,7 @@ function formatDate(iso: string) {
     });
 }
 
-export function ApplicationTable({ data, loading, sortField, sortDir, onSort }: ApplicationTableProps) {
+export function ApplicationTable({ data, loading, sortField, sortDir, onSort, onRefresh }: ApplicationTableProps) {
     const columns: Column<Application>[] = [
         {
             key: 'candidate',
@@ -97,6 +99,13 @@ export function ApplicationTable({ data, loading, sortField, sortDir, onSort }: 
             sortable: true,
             render: (item) => (
                 <span className="text-sm text-base-content/60">{formatDate(item.created_at)}</span>
+            ),
+        },
+        {
+            key: 'actions',
+            label: 'Actions',
+            render: (item) => (
+                <GenerateTailoredResumeButton applicationId={item.id} onSuccess={onRefresh} />
             ),
         },
     ];

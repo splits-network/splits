@@ -2,6 +2,7 @@
 
 import { AdminDataTable, AdminPageHeader, type Column } from '@/components/shared';
 import { useStandardList } from '@/hooks/use-standard-list';
+import { BuildSmartResumeButton } from './build-smart-resume-button';
 
 type AdminCandidate = {
     id: string;
@@ -98,11 +99,23 @@ export function CandidateTable() {
         sortBy,
         sortOrder,
         handleSort,
+        refresh,
     } = useStandardList<AdminCandidate>({
         endpoint: '/ats/admin/candidates',
         defaultFilters: { search: '', resume_status: '' },
         defaultLimit: 25,
     });
+
+    const columns: Column<AdminCandidate>[] = [
+        ...COLUMNS,
+        {
+            key: 'actions',
+            label: 'Actions',
+            render: (candidate) => (
+                <BuildSmartResumeButton candidateId={candidate.id} onSuccess={refresh} />
+            ),
+        },
+    ];
 
     return (
         <div>
@@ -135,7 +148,7 @@ export function CandidateTable() {
 
             <div className="card bg-base-100 border border-base-200">
                 <AdminDataTable
-                    columns={COLUMNS}
+                    columns={columns}
                     data={data}
                     loading={loading}
                     sortField={sortBy}
