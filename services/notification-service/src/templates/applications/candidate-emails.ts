@@ -179,6 +179,12 @@ export interface CandidateOfferReceivedData {
     applicationUrl: string;
     hasRecruiter: boolean;
     recruiterName?: string;
+    salary?: number;
+}
+
+function formatSalary(salary?: number): string {
+    if (!salary) return 'Not specified';
+    return `$${salary.toLocaleString()}`;
 }
 
 export function candidateOfferReceivedEmail(data: CandidateOfferReceivedData): string {
@@ -204,6 +210,7 @@ ${infoCard({
         items: [
             { label: 'Position', value: data.jobTitle },
             { label: 'Company', value: data.companyName, highlight: true },
+            { label: 'Salary', value: formatSalary(data.salary) },
         ],
         theme: defaultTheme,
     })}

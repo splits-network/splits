@@ -872,6 +872,7 @@ export class ApplicationsEmailService {
             hasRecruiter: boolean;
             recruiterName?: string;
             userId?: string;
+            salary?: number;
         }
     ): Promise<void> {
         const subject = `🎉 Job Offer Received - ${data.jobTitle}`;
@@ -884,6 +885,7 @@ export class ApplicationsEmailService {
             applicationUrl,
             hasRecruiter: data.hasRecruiter,
             recruiterName: data.recruiterName,
+            salary: data.salary,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
