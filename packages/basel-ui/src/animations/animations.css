@@ -210,6 +210,16 @@
     isolation: isolate;
 }
 
+/* Content areas auto-reveal: never wait for IntersectionObserver.
+   These are always above-fold and must not risk staying at opacity:0. */
+.content-area.scroll-reveal.fade-in {
+    animation: sr-fade-in var(--duration-normal) var(--ease-smooth) forwards;
+}
+
+.content-area.scroll-reveal.fade-up {
+    animation: sr-fade-up var(--duration-normal) var(--ease-smooth) forwards;
+}
+
 
 /* ============================================================
    CSS PARALLAX
