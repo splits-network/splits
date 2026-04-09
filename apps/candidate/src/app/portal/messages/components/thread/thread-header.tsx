@@ -8,6 +8,7 @@ interface ThreadHeaderProps {
     headerTitle: string;
     headerSubtitle: string;
     requestPending: boolean;
+    conversationCreatedAt: string;
     onAccept: () => void;
     onDecline: () => void;
     onArchive: () => void;
@@ -17,12 +18,19 @@ interface ThreadHeaderProps {
     onClose?: () => void;
 }
 
+function formatRoleLabel(role: string | null | undefined): string | null {
+    if (!role) return null;
+    if (role === "company") return "Company";
+    return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
 export function ThreadHeader({
     data,
     otherUser,
     headerTitle,
     headerSubtitle,
     requestPending,
+    conversationCreatedAt,
     onAccept,
     onDecline,
     onArchive,
@@ -31,6 +39,13 @@ export function ThreadHeader({
     onReport,
     onClose,
 }: ThreadHeaderProps) {
+    const roleLabel = formatRoleLabel(otherUser?.user_role);
+    const startedLabel = conversationCreatedAt
+        ? `Started ${new Date(conversationCreatedAt).toLocaleDateString(
+              undefined,
+              { month: "short", day: "numeric", year: "numeric" },
+          )}`
+        : null;
     const initials = otherUser?.name
         ? otherUser.name
               .trim()
@@ -54,8 +69,13 @@ export function ThreadHeader({
                             {headerTitle}
                         </div>
                         <div className="text-sm text-base-content/60">
-                            {headerSubtitle}
+                            {roleLabel || headerSubtitle}
                         </div>
+                        {startedLabel && (
+                            <div className="text-xs text-base-content/40">
+                                {startedLabel}
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -507,7 +507,7 @@ export class ApplicationServiceV2 {
         // Draft is allowed from most active stages (candidate back-to-draft, recruiter request changes)
         if (toStage === 'draft') {
             // Cannot go back to draft from terminal stages
-            if (['hired', 'withdrawn'].includes(fromStage)) {
+            if (['hired', 'rejected', 'withdrawn'].includes(fromStage)) {
                 throw new Error(
                     `Invalid stage transition: ${fromStage} -> ${toStage}`
                 );

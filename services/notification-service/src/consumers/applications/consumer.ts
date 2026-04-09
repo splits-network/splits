@@ -46,7 +46,7 @@ export class ApplicationsEventConsumer {
                 await this.emailService.sendApplicationAccepted(recruiterContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'the company',
+                    companyName: DataLookupHelper.getJobCompanyName(job, 'the company'),
                     applicationId: application_id,
                     userId: recruiterContact.user_id || undefined,
                 });
@@ -117,7 +117,7 @@ export class ApplicationsEventConsumer {
                             candidateName: candidate.full_name,
                             recruiterName,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             applicationId: application_id,
                             recruiterNotes: application.recruiter_notes || undefined,
                             userId: candidateUserId || undefined,
@@ -139,7 +139,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateApplicationWithRecruiter(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             recruiterName: recruiterName,
                             applicationId: application_id,
                             userId: candidateUserId || undefined,
@@ -152,7 +152,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'screen',
                                 applicationId: application_id,
@@ -171,7 +171,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateRecruiterReview(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             recruiterName: recruiterName,
                             applicationId: application_id,
                             userId: candidateUserId || undefined,
@@ -184,7 +184,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'recruiter_review',
                                 applicationId: application_id,
@@ -203,7 +203,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateRecruiterProposed(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             recruiterName: recruiterName,
                             applicationId: application_id,
                             userId: candidateUserId || undefined,
@@ -216,7 +216,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'recruiter_proposed',
                                 applicationId: application_id,
@@ -239,7 +239,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendCandidateApplicationWithRecruiter(candidateEmail, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 recruiterName: recruiterName,
                                 applicationId: application_id,
                                 userId: candidateUserId || undefined,
@@ -248,7 +248,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendCandidateDirectApplication(candidateEmail, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 applicationId: application_id,
                                 userId: candidateUserId || undefined,
                             });
@@ -260,7 +260,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendApplicationCreated(admin.email, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             applicationId: application_id,
                             userId: admin.user_id || undefined,
                         });
@@ -272,7 +272,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'submitted',
                                 applicationId: application_id,
@@ -296,7 +296,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateCompanyReview(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             applicationId: application_id,
@@ -311,7 +311,7 @@ export class ApplicationsEventConsumer {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
                             });
@@ -324,7 +324,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'company_review',
                                 applicationId: application_id,
@@ -348,7 +348,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateCompanyFeedback(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             applicationId: application_id,
@@ -363,7 +363,7 @@ export class ApplicationsEventConsumer {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
                             });
@@ -376,7 +376,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'company_feedback',
                                 applicationId: application_id,
@@ -400,7 +400,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateInterviewInvite(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             applicationId: application_id,
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
@@ -415,7 +415,7 @@ export class ApplicationsEventConsumer {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
                             });
@@ -428,7 +428,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'interview',
                                 applicationId: application_id,
@@ -452,7 +452,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateOfferReceived(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             applicationId: application_id,
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
@@ -472,7 +472,7 @@ export class ApplicationsEventConsumer {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
                                 salary,
@@ -488,7 +488,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'offer',
                                 applicationId: application_id,
@@ -519,7 +519,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateHired(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
@@ -534,7 +534,7 @@ export class ApplicationsEventConsumer {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
                                 salary,
@@ -552,7 +552,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendApplicationStageChanged(admin.email, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             oldStage: old_stage || 'Unknown',
                             newStage: 'hired',
                             applicationId: application_id,
@@ -575,7 +575,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateApplicationRejected(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
@@ -589,7 +589,7 @@ export class ApplicationsEventConsumer {
                                 recruiterName: recruiterContact.name,
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
                             });
@@ -603,7 +603,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'rejected',
                                 applicationId: application_id,
@@ -621,7 +621,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'withdrawn',
                                 applicationId: application_id,
@@ -636,7 +636,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(admin.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'withdrawn',
                                 applicationId: application_id,
@@ -660,7 +660,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateAIReviewed(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             applicationId: application_id,
@@ -674,7 +674,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'ai_reviewed',
                                 applicationId: application_id,
@@ -698,7 +698,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendCandidateApplicationExpired(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             applicationId: application_id,
@@ -712,7 +712,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'expired',
                                 applicationId: application_id,
@@ -729,7 +729,7 @@ export class ApplicationsEventConsumer {
                             await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
                                 candidateName: candidate.full_name,
                                 jobTitle: job.title,
-                                companyName: job.company?.name || 'Unknown Company',
+                                companyName: DataLookupHelper.getJobCompanyName(job),
                                 oldStage: old_stage || 'Unknown',
                                 newStage: new_stage,
                                 applicationId: application_id,
@@ -793,10 +793,25 @@ export class ApplicationsEventConsumer {
                     }
                 }
 
+                // Notify firm admins if job belongs to a firm
+                if (job.source_firm_id) {
+                    const firmAdmins = await this.contactLookup.getFirmAdminContacts(job.source_firm_id);
+                    for (const admin of firmAdmins) {
+                        await this.emailService.sendCompanyApplicationReceived(admin.email, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            applicationId: application_id,
+                            hasRecruiter: true,
+                            recruiterName: recruiterContact.name,
+                            userId: admin.user_id || undefined,
+                        });
+                    }
+                }
+
                 await this.emailService.sendApplicationCreated(recruiterContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     applicationId: application_id,
                     userId: recruiterContact.user_id || undefined,
                 });
@@ -816,7 +831,7 @@ export class ApplicationsEventConsumer {
                     await this.emailService.sendCandidateApplicationWithRecruiter(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
-                        companyName: job.company?.name || 'Unknown Company',
+                        companyName: DataLookupHelper.getJobCompanyName(job),
                         recruiterName,
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
@@ -832,7 +847,7 @@ export class ApplicationsEventConsumer {
                 await this.emailService.sendRecruiterApplicationPending(recruiterContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     applicationId: application_id,
                     userId: recruiterContact.user_id || undefined,
                 });
@@ -849,7 +864,7 @@ export class ApplicationsEventConsumer {
                     await this.emailService.sendCandidateDirectApplication(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
-                        companyName: job.company?.name || 'Unknown Company',
+                        companyName: DataLookupHelper.getJobCompanyName(job),
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
                     });
@@ -859,6 +874,20 @@ export class ApplicationsEventConsumer {
                 if (company?.identity_organization_id) {
                     const adminContacts = await this.contactLookup.getCompanyAdminContacts(company.identity_organization_id);
                     for (const admin of adminContacts) {
+                        await this.emailService.sendCompanyApplicationReceived(admin.email, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            applicationId: application_id,
+                            hasRecruiter: false,
+                            userId: admin.user_id || undefined,
+                        });
+                    }
+                }
+
+                // Notify firm admins if job belongs to a firm
+                if (job.source_firm_id) {
+                    const firmAdmins = await this.contactLookup.getFirmAdminContacts(job.source_firm_id);
+                    for (const admin of firmAdmins) {
                         await this.emailService.sendCompanyApplicationReceived(admin.email, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
@@ -886,7 +915,7 @@ export class ApplicationsEventConsumer {
                         candidateName: candidate.full_name,
                         recruiterName,
                         jobTitle: job.title,
-                        companyName: job.company?.name || 'Unknown Company',
+                        companyName: DataLookupHelper.getJobCompanyName(job),
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
                     });
@@ -906,7 +935,7 @@ export class ApplicationsEventConsumer {
                     await this.emailService.sendCandidateAIReview(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
-                        companyName: job.company?.name || 'Unknown Company',
+                        companyName: DataLookupHelper.getJobCompanyName(job),
                         hasRecruiter: !!recruiter_id,
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
@@ -919,7 +948,7 @@ export class ApplicationsEventConsumer {
                         await this.emailService.sendRecruiterApplicationPending(recruiterContact.email, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
+                            companyName: DataLookupHelper.getJobCompanyName(job),
                             applicationId: application_id,
                             userId: recruiterContact.user_id || undefined,
                         });
@@ -969,7 +998,22 @@ export class ApplicationsEventConsumer {
                         applicationId: application_id,
                         hasRecruiter: true,
                         recruiterName: recruiterContact.name,
-                        userId: undefined,
+                        userId: admin.user_id || undefined,
+                    });
+                }
+            }
+
+            // Notify firm admins if job belongs to a firm
+            if (job.source_firm_id) {
+                const firmAdmins = await this.contactLookup.getFirmAdminContacts(job.source_firm_id);
+                for (const admin of firmAdmins) {
+                    await this.emailService.sendCompanyApplicationReceived(admin.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        applicationId: application_id,
+                        hasRecruiter: true,
+                        recruiterName: recruiterContact.name,
+                        userId: admin.user_id || undefined,
                     });
                 }
             }
@@ -979,7 +1023,7 @@ export class ApplicationsEventConsumer {
                 await this.emailService.sendCandidateApplicationSubmittedByRecruiter(candidateContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     recruiterName: recruiterContact.name,
                     applicationId: application_id,
                     userId: candidate_user_id || undefined,
@@ -1010,14 +1054,13 @@ export class ApplicationsEventConsumer {
                 throw new Error('Job or candidate not found');
             }
 
-            const company = job.company || await this.dataLookup.getCompany(job.company_id);
             const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
 
             if (candidateContact) {
                 await this.emailService.sendApplicationWithdrawn(candidateContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     reason,
                     withdrawnBy: 'Candidate',
                     applicationId: application_id,
@@ -1031,7 +1074,7 @@ export class ApplicationsEventConsumer {
                     await this.emailService.sendApplicationWithdrawn(recruiterContact.email, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
-                        companyName: job.company?.name || company?.name || 'Unknown Company',
+                        companyName: DataLookupHelper.getJobCompanyName(job),
                         reason,
                         withdrawnBy: 'Candidate',
                         applicationId: application_id,
@@ -1268,7 +1311,7 @@ export class ApplicationsEventConsumer {
                 recruiterName: recruiterContact.name,
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
+                companyName: DataLookupHelper.getJobCompanyName(job),
                 applicationId: application_id,
                 userId: recruiterContact.user_id || undefined,
             });
@@ -1318,7 +1361,7 @@ export class ApplicationsEventConsumer {
                 recruiterName: recruiterContact.name,
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
+                companyName: DataLookupHelper.getJobCompanyName(job),
                 reason: reason || undefined,
                 candidateId: candidate_id,
                 userId: recruiterContact.user_id || undefined,
@@ -1393,7 +1436,7 @@ export class ApplicationsEventConsumer {
             const notificationData = {
                 candidateName: candidate.full_name,
                 jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
+                companyName: DataLookupHelper.getJobCompanyName(job),
                 notePreview,
                 addedByName: creatorName,
                 addedByRole: creatorRole,
@@ -1503,7 +1546,7 @@ export class ApplicationsEventConsumer {
             }
 
             const { application, job, candidate } = context;
-            const companyName = job.company?.name || 'Unknown Company';
+            const companyName = DataLookupHelper.getJobCompanyName(job);
             const effectiveRecruiterId = candidate_recruiter_id || application.candidate_recruiter_id;
 
             // Send candidate notification
@@ -1597,7 +1640,7 @@ export class ApplicationsEventConsumer {
             }
 
             const { application, job, candidate } = context;
-            const companyName = job.company?.name || 'Unknown Company';
+            const companyName = DataLookupHelper.getJobCompanyName(job);
             const effectiveRecruiterId = candidate_recruiter_id || application.candidate_recruiter_id;
 
             if (responsible_party === 'candidate') {
@@ -1742,7 +1785,13 @@ export class ApplicationsEventConsumer {
                 throw new Error('Job or candidate not found');
             }
 
-            const companyName = job.company?.name || 'the company';
+            const companyName = DataLookupHelper.getJobCompanyName(job, 'the company');
+            const salary = application?.salary ?? undefined;
+            const feePercentage = job.fee_percentage ?? undefined;
+            const estimatedFee = salary && feePercentage
+                ? Math.round((salary * feePercentage) / 100)
+                : undefined;
+            const location = job.location ?? undefined;
 
             // Notify the recruiter (if one is assigned)
             const recruiterId = application?.candidate_recruiter_id;
@@ -1756,6 +1805,10 @@ export class ApplicationsEventConsumer {
                         companyName,
                         applicationId: application_id,
                         userId: recruiterContact.user_id || undefined,
+                        salary,
+                        feePercentage,
+                        estimatedFee,
+                        location,
                     });
 
                     this.logger.info(
@@ -1782,6 +1835,8 @@ export class ApplicationsEventConsumer {
                         companyName,
                         applicationId: application_id,
                         userId: admin.user_id || undefined,
+                        salary,
+                        location,
                     });
 
                     this.logger.info(
@@ -1794,6 +1849,29 @@ export class ApplicationsEventConsumer {
                     { application_id, job_id },
                     'Cannot send offer accepted email to company - no organization linked'
                 );
+            }
+
+            // Notify firm admins (if job belongs to a firm)
+            const firmId = job.source_firm_id;
+            if (firmId) {
+                const firmAdmins = await this.contactLookup.getFirmAdminContacts(firmId);
+
+                for (const admin of firmAdmins) {
+                    await this.emailService.sendOfferAcceptedToFirm(admin.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName,
+                        applicationId: application_id,
+                        userId: admin.user_id || undefined,
+                        salary,
+                        location,
+                    });
+
+                    this.logger.info(
+                        { application_id, recipient: admin.email },
+                        'Offer accepted notification sent to firm admin'
+                    );
+                }
             }
         } catch (error) {
             this.logger.error(

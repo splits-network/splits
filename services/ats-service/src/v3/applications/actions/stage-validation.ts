@@ -49,7 +49,7 @@ export function validateStageTransition(
 
   // Draft is allowed from most active stages
   if (toStage === 'draft') {
-    if (['hired', 'withdrawn'].includes(fromStage)) {
+    if (['hired', 'rejected', 'withdrawn'].includes(fromStage)) {
       throw new BadRequestError(`Invalid stage transition: ${fromStage} -> ${toStage}`);
     }
     return;

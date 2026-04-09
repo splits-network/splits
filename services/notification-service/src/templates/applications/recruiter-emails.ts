@@ -585,9 +585,36 @@ export interface RecruiterOfferAcceptedData {
     jobTitle: string;
     companyName: string;
     applicationUrl: string;
+    salary?: number;
+    feePercentage?: number;
+    estimatedFee?: number;
+    location?: string;
 }
 
 export function recruiterOfferAcceptedEmail(data: RecruiterOfferAcceptedData): string {
+    const offerItems: Array<{ label: string; value: string; highlight?: boolean }> = [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName },
+    ];
+
+    if (data.location) {
+        offerItems.push({ label: 'Location', value: data.location });
+    }
+
+    offerItems.push({ label: 'Salary', value: formatSalary(data.salary) });
+
+    if (data.feePercentage) {
+        offerItems.push({ label: 'Fee Rate', value: `${data.feePercentage}%` });
+    }
+
+    const estimated = data.estimatedFee || (data.salary && data.feePercentage ? Math.round((data.salary * data.feePercentage) / 100) : undefined);
+    if (estimated) {
+        offerItems.push({ label: 'Estimated Fee', value: formatFee(estimated), highlight: true });
+    }
+
+    offerItems.push({ label: 'Status', value: 'Offer Accepted', highlight: true });
+
     const content = `
 ${heading({ level: 1, text: 'Offer accepted!' })}
 
@@ -600,18 +627,11 @@ ${alert({
     })}
 
 ${infoCard({
-        title: 'Acceptance Details',
-        items: [
-            { label: 'Candidate', value: data.candidateName },
-            { label: 'Position', value: data.jobTitle },
-            { label: 'Company', value: data.companyName },
-            { label: 'Status', value: 'Offer Accepted', highlight: true },
-        ],
+        title: 'Offer Details',
+        items: offerItems,
     })}
 
-${paragraph(
-        'The next step is for the company to confirm the hire and finalize placement details.'
-    )}
+${paragraph(`<strong>What happens next:</strong><br/>\u2022 Coordinate with <strong>${data.companyName}</strong> to confirm the start date<br/>\u2022 The company will confirm the hire to finalize the placement<br/>\u2022 A placement record and your fee will be calculated automatically based on the agreed salary`)}
 
 ${button({
         href: data.applicationUrl,
@@ -621,7 +641,7 @@ ${button({
 
 ${divider()}
 
-${paragraph('Coordinate with the company to complete the hiring process and set up the placement.')}
+${paragraph('Once the company confirms the hire, a placement record will be created and your fee details will be finalized.')}
     `.trim();
 
     return baseEmailTemplate({

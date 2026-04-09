@@ -334,5 +334,74 @@ export class ContactLookupHelper {
             return [];
         }
     }
+
+    /**
+     * Get firm admin contacts (owner + admin roles)
+     *
+     * Flow:
+     * 1. Fetch active firm_members with owner/admin role
+     * 2. For each member, resolve recruiter → user to get email/name
+     *
+     * @param firmId - Firm ID from firms.id
+     * @returns Array of Contacts (empty if none found)
+     */
+    async getFirmAdminContacts(firmId: string): Promise<Contact[]> {
+        try {
+            const { data: members, error } = await this.supabase
+                .from('firm_members')
+                .select('recruiter_id, role')
+                .eq('firm_id', firmId)
+                .in('role', ['owner', 'admin'])
+                .eq('status', 'active');
+
+            if (error) {
+                this.logger.error({ firmId, error }, 'Failed to fetch firm admin members');
+                return [];
+            }
+
+            if (!members || members.length === 0) {
+                this.logger.warn({ firmId }, 'No firm admins found');
+                return [];
+            }
+
+            const contacts: Contact[] = [];
+            for (const member of members) {
+                const { data: recruiter, error: recruiterError } = await this.supabase
+                    .from('recruiters')
+                    .select('id, user_id')
+                    .eq('id', member.recruiter_id)
+                    .single();
+
+                if (recruiterError || !recruiter?.user_id) continue;
+
+                const { data: user, error: userError } = await this.supabase
+                    .from('users')
+                    .select('id, email, name')
+                    .eq('id', recruiter.user_id)
+                    .single();
+
+                if (!userError && user?.email) {
+                    contacts.push({
+                        id: user.id,
+                        user_id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        phone: null,
+                        type: member.role,
+                        entity_id: member.recruiter_id,
+                    });
+                }
+            }
+
+            this.logger.info({ firmId, contactCount: contacts.length }, 'Fetched firm admin contacts');
+            return contacts;
+        } catch (error) {
+            this.logger.error(
+                { firmId, error: error instanceof Error ? error.message : String(error) },
+                'Failed to fetch firm admin contacts'
+            );
+            return [];
+        }
+    }
 }
 

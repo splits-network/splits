@@ -291,6 +291,7 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'application.submitted_to_company');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.withdrawn');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.prescreen_requested');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.offer_accepted');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.created');
 
             // Phase 1.5 events - AI Review
@@ -562,6 +563,9 @@ export class DomainEventConsumer {
                 break;
             case 'application.prescreen_requested':
                 await this.applicationsConsumer.handlePreScreenRequested(event);
+                break;
+            case 'application.offer_accepted':
+                await this.applicationsConsumer.handleOfferAccepted(event);
                 break;
 
             // Phase 1.5 - AI Review events

@@ -31,7 +31,7 @@ export class JobsEventConsumer {
             for (const admin of adminContacts) {
                 await this.emailService.sendJobCreatedConfirmation(admin.email, {
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'your company',
+                    companyName: DataLookupHelper.getJobCompanyName(job, 'your company'),
                     jobUrl: `${this.portalUrl}/portal/jobs/${job.id}`,
                     userId: admin.user_id || undefined,
                 });
@@ -72,7 +72,7 @@ export class JobsEventConsumer {
             for (const admin of adminContacts) {
                 await this.emailService.sendFirstJobPosted(admin.email, {
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'your company',
+                    companyName: DataLookupHelper.getJobCompanyName(job, 'your company'),
                     jobUrl: `${this.portalUrl}/portal/jobs/${job.id}`,
                     userId: admin.user_id || undefined,
                 });
@@ -103,7 +103,7 @@ export class JobsEventConsumer {
                 if (recipient.user_id === updatedBy) continue;
                 await this.emailService.sendJobFieldsUpdated(recipient.email, {
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'your company',
+                    companyName: DataLookupHelper.getJobCompanyName(job, 'your company'),
                     updatedFields: updatedFields.filter((f: string) => significantFields.includes(f)),
                     jobUrl: `${this.portalUrl}/portal/jobs/${job.id}`,
                     userId: recipient.user_id || undefined,
@@ -134,7 +134,7 @@ export class JobsEventConsumer {
                 if (recipient.user_id === deletedBy) continue;
                 await this.emailService.sendJobDeleted(recipient.email, {
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'your company',
+                    companyName: DataLookupHelper.getJobCompanyName(job, 'your company'),
                     userId: recipient.user_id || undefined,
                 });
             }
@@ -201,7 +201,7 @@ export class JobsEventConsumer {
             await this.emailService.sendJobRecommendation(candidateContact.email, {
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
-                companyName: job.company?.name || 'a company',
+                companyName: DataLookupHelper.getJobCompanyName(job, 'a company'),
                 message: message || undefined,
                 jobUrl: `${this.portalUrl}/portal/jobs/${job_id}`,
                 userId: candidateContact.user_id || undefined,
@@ -243,7 +243,7 @@ export class JobsEventConsumer {
                 for (const admin of adminContacts) {
                     await this.emailService.sendJobExpired(admin.email, {
                         jobTitle: job.title,
-                        companyName: job.company?.name || 'your company',
+                        companyName: DataLookupHelper.getJobCompanyName(job, 'your company'),
                         jobUrl: `${this.portalUrl}/portal/jobs/${job.id}`,
                         userId: admin.user_id || undefined,
                     });
@@ -261,7 +261,7 @@ export class JobsEventConsumer {
                 for (const admin of adminContacts) {
                     await this.emailService.sendJobStatusChanged(admin.email, {
                         jobTitle: job.title,
-                        companyName: job.company?.name || 'your company',
+                        companyName: DataLookupHelper.getJobCompanyName(job, 'your company'),
                         previousStatus,
                         newStatus,
                         jobUrl: `${this.portalUrl}/portal/jobs/${job.id}`,

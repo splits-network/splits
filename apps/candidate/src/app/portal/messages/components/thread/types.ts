@@ -3,6 +3,7 @@ export type ParticipantDetails = {
     name: string | null;
     email: string;
     profile_image_url?: string | null;
+    user_role?: string | null;
 };
 
 export type ResyncData = {
@@ -14,6 +15,7 @@ export type ResyncData = {
         job_id: string | null;
         company_id: string | null;
         last_message_at: string | null;
+        created_at: string;
         participant_a: ParticipantDetails;
         participant_b: ParticipantDetails;
     };

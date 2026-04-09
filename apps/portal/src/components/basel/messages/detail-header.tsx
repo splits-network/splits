@@ -74,6 +74,15 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
     const title = otherUser?.name || otherUser?.email || "Conversation";
     const initials = getInitials(otherUser?.name || otherUser?.email);
     const meta = getRoleMeta(otherUser?.user_role);
+    const startedLabel = item?.conversation.created_at
+        ? `Started ${new Date(
+              item.conversation.created_at,
+          ).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+          })}`
+        : null;
 
     /* Derive presence from the presenceMap */
     const otherId = useMemo(() => {
@@ -164,6 +173,11 @@ export default function DetailHeader({ item, onClose }: DetailHeaderProps) {
                             </span>
                         )}
                     </div>
+                    {startedLabel && (
+                        <div className="text-xs text-base-content/40 mt-0.5">
+                            {startedLabel}
+                        </div>
+                    )}
                 </div>
             </div>
 

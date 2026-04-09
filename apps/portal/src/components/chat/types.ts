@@ -57,6 +57,7 @@ export type ResyncData = {
         company_id: string | null;
         candidate_id: string | null;
         last_message_at: string | null;
+        created_at: string;
         participant_a: ParticipantDetails;
         participant_b: ParticipantDetails;
     };

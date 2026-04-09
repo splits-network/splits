@@ -14,6 +14,7 @@ export interface ApplicationData {
     candidate_id: string;
     candidate_recruiter_id: string | null;
     stage: string;
+    salary: number | null;
     notes: string | null;
     recruiter_notes: string | null;
     created_at: string;
@@ -26,11 +27,17 @@ export interface JobData {
     description: string | null;
     recruiter_description: string | null;
     company_id: string;
+    source_firm_id: string | null;
     location: string | null;
+    fee_percentage: number | null;
     company?: {
         id: string;
         name: string;
         identity_organization_id: string | null;
+    };
+    firm?: {
+        id: string;
+        name: string;
     };
 }
 
@@ -124,6 +131,14 @@ export class DataLookupHelper {
     ) { }
 
     /**
+     * Resolve the display name for a job's owning company or firm.
+     * Company jobs use company.name; firm jobs use firm.name.
+     */
+    static getJobCompanyName(job: { company?: { name: string } | null; firm?: { name: string } | null }, fallback = 'Unknown Company'): string {
+        return job.company?.name || job.firm?.name || fallback;
+    }
+
+    /**
      * Get application by ID with optional related data
      */
     async getApplication(applicationId: string): Promise<ApplicationData | null> {
@@ -149,7 +164,8 @@ export class DataLookupHelper {
             .from('jobs')
             .select(`
                 *,
-                company:companies(id, name, identity_organization_id)
+                company:companies(id, name, identity_organization_id),
+                firm:firms(id, name)
             `)
             .eq('id', jobId)
             .single();
