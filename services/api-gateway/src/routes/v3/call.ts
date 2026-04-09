@@ -21,6 +21,7 @@ const callV3Routes: V3RouteConfig[] = [
 
   // ── Calls Views (before CRUD to avoid :id collision) ──────────
   { path: '/calls/views/my-calls', method: 'GET', auth: 'required' },
+  { path: '/calls/views/by-entity', method: 'GET', auth: 'required' },
   { path: '/calls/:id/view/detail', method: 'GET', auth: 'required' },
 
   // ── Calls Core CRUD ────────────────────────────────────────────

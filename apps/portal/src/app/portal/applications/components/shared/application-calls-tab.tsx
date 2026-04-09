@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useStandardList, PaginationControls, SearchInput } from "@/hooks/use-standard-list";
+import { useStandardList, PaginationControls, SearchInput, ErrorState } from "@/hooks/use-standard-list";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { CallTable } from "@/app/portal/calls/components/table/call-table";
 import { CallFilterDropdowns } from "@/app/portal/calls/components/shared/call-filters";
@@ -58,6 +58,7 @@ export function ApplicationCallsTab({ applicationId, applicationTitle }: Applica
     const {
         data: calls,
         loading,
+        error,
         searchInput,
         setSearchInput,
         filters,
@@ -70,7 +71,7 @@ export function ApplicationCallsTab({ applicationId, applicationTitle }: Applica
         totalPages,
         refresh,
     } = useStandardList<CallListItem, CallFilters>({
-        endpoint: "/calls",
+        endpoint: "/calls/views/by-entity",
         defaultFilters: { entity_type: "application", entity_id: applicationId },
         defaultSortBy: "scheduled_at",
         defaultSortOrder: "desc",
@@ -143,6 +144,8 @@ export function ApplicationCallsTab({ applicationId, applicationTitle }: Applica
                         Loading calls...
                     </p>
                 </div>
+            ) : error ? (
+                <ErrorState message={error} onRetry={refresh} />
             ) : calls.length === 0 ? (
                 <div className="py-12 text-center">
                     <i className="fa-duotone fa-regular fa-phone text-4xl text-base-content/15 mb-4 block" />

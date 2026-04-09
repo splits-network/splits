@@ -457,6 +457,7 @@ export class ApplicationsEventConsumer {
                             hasRecruiter: !!effectiveRecruiterId,
                             recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
+                            salary: event.payload.salary,
                         });
                     }
 

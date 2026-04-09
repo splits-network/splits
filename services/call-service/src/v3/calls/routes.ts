@@ -18,6 +18,7 @@ import {
     updateCallSchema,
 } from "./types.js";
 import { registerMyCallsView } from "./views/my-calls.route.js";
+import { registerByEntityView } from "./views/by-entity.route.js";
 
 export function registerCallRoutes(
     app: FastifyInstance,
@@ -29,6 +30,7 @@ export function registerCallRoutes(
 
     // Register views before parameterized CRUD routes
     registerMyCallsView(app, supabase);
+    registerByEntityView(app, supabase);
 
     // Register lifecycle routes (start, end, cancel, reschedule, decline)
     if (eventPublisher) {

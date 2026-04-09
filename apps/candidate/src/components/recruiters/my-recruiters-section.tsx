@@ -51,7 +51,7 @@ export function MyRecruitersSection() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/recruiter-candidates');
+            const response = await client.get('/recruiter-candidates/views/list-for-candidate');
             const allRelationships = response.data || [];
 
             // Group relationships by status

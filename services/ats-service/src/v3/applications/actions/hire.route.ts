@@ -72,14 +72,26 @@ export function registerHireRoutes(
 
     // Create application note if hiring notes provided (V2 parity)
     if (body.notes?.trim()) {
+      // Resolve creator type from user roles (memberships use user_id, not clerk ID)
+      const { data: user } = await supabase
+        .from('users')
+        .select('id, memberships!memberships_user_id_fkey1(role_name)')
+        .eq('clerk_user_id', clerkUserId)
+        .is('memberships.deleted_at', null)
+        .maybeSingle();
+      const roleName = (user?.memberships as any)?.[0]?.role_name;
+      const createdByType = roleName === 'hiring_manager' ? 'hiring_manager'
+        : roleName === 'company_admin' ? 'company_admin'
+        : 'candidate_recruiter';
+
       const { error: noteError } = await supabase
         .from('application_notes')
         .insert({
           application_id: id,
-          note_type: 'hiring',
-          visibility: 'internal',
+          note_type: 'stage_transition',
+          visibility: 'company_only',
           message_text: body.notes.trim(),
-          created_by_type: 'recruiter',
+          created_by_type: createdByType,
           created_by_user_id: clerkUserId,
           created_at: new Date().toISOString(),
         });
@@ -89,8 +101,8 @@ export function registerHireRoutes(
         app.log.warn({ error: noteError, application_id: id }, 'Failed to create hiring note');
       } else {
         await eventPublisher?.publish('application.note.created', {
-          application_id: id, note_type: 'hiring',
-          visibility: 'internal', created_by_user_id: clerkUserId,
+          application_id: id, note_type: 'stage_transition',
+          visibility: 'company_only', created_by_user_id: clerkUserId,
         }, 'ats-service');
       }
     }
