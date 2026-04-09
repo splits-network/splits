@@ -1,7 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { BaselAvatar } from "@splits-network/basel-ui";
+import { useChatSidebarOptional } from "@splits-network/chat-ui";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
 import type { PendingInvitation } from "../hooks/use-candidate-dashboard-data";
 
 /* ── Types (shared with recruiter-card.tsx) ── */
@@ -109,6 +114,41 @@ export function ActiveSection({ recruiters, presence }: {
     recruiters: ActiveRecruiterItem[];
     presence: Record<string, PresenceEntry>;
 }) {
+    const { getToken } = useAuth();
+    const toast = useToast();
+    const chatSidebar = useChatSidebarOptional();
+    const [startingChat, setStartingChat] = useState<string | null>(null);
+
+    const singleRecruiter = recruiters.length === 1 ? recruiters[0] : null;
+    const isStarting = singleRecruiter ? startingChat === singleRecruiter.id : false;
+
+    const handleMessageRecruiter = async (recruiter: ActiveRecruiterItem) => {
+        if (!recruiter.recruiter_user_id) {
+            toast.error("Recruiter is not yet active on the platform");
+            return;
+        }
+        if (!chatSidebar) {
+            toast.error("Chat is unavailable right now. Try again.");
+            return;
+        }
+        try {
+            setStartingChat(recruiter.id);
+            const conversationId = await startChatConversation(
+                getToken,
+                recruiter.recruiter_user_id,
+            );
+            chatSidebar.openToThread(conversationId, {
+                otherUserName: recruiter.recruiter_name,
+                otherUserId: recruiter.recruiter_user_id,
+            });
+        } catch (err: any) {
+            console.error("Failed to start chat:", err);
+            toast.error(err?.message || "Couldn't start conversation. Try again.");
+        } finally {
+            setStartingChat(null);
+        }
+    };
+
     return (
         <>
             {recruiters.map((rel) => {
@@ -165,14 +205,38 @@ export function ActiveSection({ recruiters, presence }: {
 
             {/* Actions */}
             <div className="border-t border-base-content/5 pt-4 mt-1 flex flex-col sm:flex-row gap-2">
-                <Link
-                    href="/portal/messages"
-                    className="btn btn-primary btn-sm flex-1"
-                    style={{ borderRadius: 0 }}
-                >
-                    <i className="fa-duotone fa-regular fa-messages" />
-                    Message {recruiters.length === 1 ? recruiters[0].recruiter_name.split(" ")[0] : "Recruiter"}
-                </Link>
+                {singleRecruiter ? (
+                    <button
+                        type="button"
+                        onClick={() => handleMessageRecruiter(singleRecruiter)}
+                        disabled={isStarting}
+                        className="btn btn-primary btn-sm flex-1"
+                        style={{ borderRadius: 0 }}
+                    >
+                        {isStarting ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs" />
+                                Opening...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-messages" />
+                                Message {singleRecruiter.recruiter_name.split(" ")[0]}
+                            </>
+                        )}
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={() => chatSidebar?.openToList()}
+                        disabled={!chatSidebar}
+                        className="btn btn-primary btn-sm flex-1"
+                        style={{ borderRadius: 0 }}
+                    >
+                        <i className="fa-duotone fa-regular fa-messages" />
+                        Message Recruiter
+                    </button>
+                )}
                 <Link
                     href="/portal/recruiters"
                     className="btn btn-outline btn-sm flex-1"
