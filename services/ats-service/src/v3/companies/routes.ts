@@ -8,6 +8,7 @@ import { IEventPublisher } from '../../v2/shared/events.js';
 import { CompanyRepository } from './repository.js';
 import { CompanyService } from './service.js';
 import { registerCompanyContactsView } from './views/contacts.route.js';
+import { registerCompanySummaryView } from './views/summary.route.js';
 import {
   CreateCompanyInput,
   UpdateCompanyInput,
@@ -28,6 +29,7 @@ export function registerCompanyRoutes(
 
   // --- Views (registered before :id routes to avoid collision) ---
   registerCompanyContactsView(app, supabase);
+  registerCompanySummaryView(app, supabase);
 
   // --- Core 5 CRUD ---
 

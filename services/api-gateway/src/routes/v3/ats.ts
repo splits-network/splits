@@ -97,6 +97,7 @@ const atsV3Routes: V3RouteConfig[] = [
 
   // ── Companies Views ───────────────────────────────────────────
   { path: '/companies/:id/view/contacts', method: 'GET', auth: 'required' },
+  { path: '/companies/:id/view/summary', method: 'GET', auth: 'required' },
 
   // ── Applications Core CRUD ────────────────────────────────────
   { resource: 'applications', auth: 'required' },
