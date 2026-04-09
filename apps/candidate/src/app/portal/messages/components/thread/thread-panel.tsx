@@ -37,6 +37,8 @@ export default function ThreadPanel({
         null,
     );
     const [jobTitle, setJobTitle] = useState<string | null>(null);
+    const [companyName, setCompanyName] = useState<string | null>(null);
+    const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -83,6 +85,7 @@ export default function ThreadPanel({
     const fetchContextDetails = async (
         applicationId?: string | null,
         jobId?: string | null,
+        companyId?: string | null,
     ) => {
         const token = await getToken();
         if (!token) return;
@@ -97,6 +100,12 @@ export default function ThreadPanel({
                     setApplicationTitle(app.job.title);
                     setJobTitle(app.job.title);
                 }
+                if (app?.job?.company?.name) {
+                    setCompanyName(app.job.company.name);
+                }
+                if (app?.job?.company?.logo_url) {
+                    setCompanyLogoUrl(app.job.company.logo_url);
+                }
             } catch {
                 setApplicationTitle(applicationId);
             }
@@ -107,6 +116,18 @@ export default function ThreadPanel({
                 if (response?.data?.title) setJobTitle(response.data.title);
             } catch {
                 if (!jobTitle) setJobTitle(jobId);
+            }
+        }
+        if (companyId) {
+            try {
+                const response: any = await client.get(
+                    `/companies/${companyId}`,
+                );
+                const company = response?.data;
+                if (company?.name) setCompanyName(company.name);
+                if (company?.logo_url) setCompanyLogoUrl(company.logo_url);
+            } catch {
+                // fallback handled in render
             }
         }
     };
@@ -149,9 +170,14 @@ export default function ThreadPanel({
             fetchContextDetails(
                 data.conversation.application_id,
                 data.conversation.job_id,
+                data.conversation.company_id,
             );
         }
-    }, [data?.conversation?.application_id, data?.conversation?.job_id]);
+    }, [
+        data?.conversation?.application_id,
+        data?.conversation?.job_id,
+        data?.conversation?.company_id,
+    ]);
 
     useEffect(() => {
         const unregister = registerChatRefresh(() => fetchResync());
@@ -372,6 +398,7 @@ export default function ThreadPanel({
                     headerTitle={headerTitle}
                     headerSubtitle={headerSubtitle}
                     requestPending={requestPending}
+                    conversationCreatedAt={data.conversation.created_at}
                     onAccept={handleAccept}
                     onDecline={handleDecline}
                     onArchive={handleArchive}
@@ -387,6 +414,8 @@ export default function ThreadPanel({
                 otherUser={otherUser}
                 applicationTitle={applicationTitle}
                 jobTitle={jobTitle}
+                companyName={companyName}
+                companyLogoUrl={companyLogoUrl}
                 isLoadingMore={isLoadingMore}
                 hasMore={hasMore}
                 onLoadMore={loadOlderMessages}

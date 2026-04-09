@@ -10,9 +10,31 @@ interface ThreadMessagesProps {
     otherUser: UserSummary | null;
     applicationTitle: string | null;
     jobTitle: string | null;
+    companyName: string | null;
+    companyLogoUrl: string | null;
     isLoadingMore: boolean;
     hasMore: boolean;
     onLoadMore: () => void;
+}
+
+function formatDateSeparator(date: Date): string {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const target = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+    );
+    const diffDays = Math.round(
+        (today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    return date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
 }
 
 export function ThreadMessages({
@@ -20,6 +42,8 @@ export function ThreadMessages({
     otherUser,
     applicationTitle,
     jobTitle,
+    companyName,
+    companyLogoUrl,
     isLoadingMore,
     hasMore,
     onLoadMore,
@@ -93,8 +117,17 @@ export function ThreadMessages({
                         )}
                         {data.conversation.company_id && (
                             <span className="flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-building text-secondary" />
-                                Company: {data.conversation.company_id}
+                                {companyLogoUrl ? (
+                                    <img
+                                        src={companyLogoUrl}
+                                        alt=""
+                                        className="w-4 h-4 object-contain"
+                                    />
+                                ) : (
+                                    <i className="fa-duotone fa-regular fa-building text-secondary" />
+                                )}
+                                Company:{" "}
+                                {companyName || data.conversation.company_id}
                             </span>
                         )}
                     </div>
@@ -122,17 +155,34 @@ export function ThreadMessages({
                         const isOwn =
                             msg.sender_id === data.participant.user_id;
                         const prevMsg = data.messages[idx - 1];
+                        const msgDate = new Date(msg.created_at);
+                        const prevDate = prevMsg
+                            ? new Date(prevMsg.created_at)
+                            : null;
+                        const showDateSeparator =
+                            !prevDate ||
+                            prevDate.toDateString() !== msgDate.toDateString();
                         const isGrouped =
+                            !showDateSeparator &&
                             prevMsg?.sender_id === msg.sender_id;
                         const senderLabel = isOwn
                             ? "You"
                             : otherUser?.name ||
                               otherUser?.email ||
                               "Unknown user";
+                        const fullTimestamp = msgDate.toLocaleString();
 
                         return (
+                            <div key={msg.id}>
+                                {showDateSeparator && (
+                                    <div className="flex justify-center my-4">
+                                        <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-base-200 text-base-content/60">
+                                            {formatDateSeparator(msgDate)}
+                                        </span>
+                                    </div>
+                                )}
                             <div
-                                key={msg.id}
+                                title={fullTimestamp}
                                 className={`flex gap-3 ${isOwn ? "flex-row-reverse" : ""} ${isGrouped ? "mt-1" : "mt-5"}`}
                             >
                                 {/* Avatar */}
@@ -190,6 +240,7 @@ export function ThreadMessages({
                                         />
                                     </div>
                                 </div>
+                            </div>
                             </div>
                         );
                     })

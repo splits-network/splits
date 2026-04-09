@@ -20,6 +20,26 @@ interface ThreadPanelProps {
     conversationId: string;
 }
 
+function formatDateSeparator(date: Date): string {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const target = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+    );
+    const diffDays = Math.round(
+        (today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    return date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+}
+
 export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
     const { getToken } = useAuth();
     const toast = useToast();
@@ -31,6 +51,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
     );
     const [jobTitle, setJobTitle] = useState<string | null>(null);
     const [companyName, setCompanyName] = useState<string | null>(null);
+    const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
     const [candidateName, setCandidateName] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
@@ -87,6 +108,9 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                     if (application?.job?.company?.name) {
                         setCompanyName(application.job.company.name);
                     }
+                    if (application?.job?.company?.logo_url) {
+                        setCompanyLogoUrl(application.job.company.logo_url);
+                    }
                 } catch {
                     setApplicationTitle(applicationId);
                 }
@@ -100,6 +124,9 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                     const job = response?.data;
                     if (job?.title) setJobTitle(job.title);
                     if (job?.company?.name) setCompanyName(job.company.name);
+                    if (job?.company?.logo_url) {
+                        setCompanyLogoUrl(job.company.logo_url);
+                    }
                 } catch {
                     // fallback handled in render
                 }
@@ -112,6 +139,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                     );
                     const company = response?.data;
                     if (company?.name) setCompanyName(company.name);
+                    if (company?.logo_url) setCompanyLogoUrl(company.logo_url);
                 } catch {
                     // fallback handled in render
                 }
@@ -445,7 +473,15 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                             )}
                             {data.conversation.company_id && (
                                 <span className="flex items-center gap-1.5">
-                                    <i className="fa-duotone fa-regular fa-building text-secondary" />
+                                    {companyLogoUrl ? (
+                                        <img
+                                            src={companyLogoUrl}
+                                            alt=""
+                                            className="w-4 h-4 object-contain"
+                                        />
+                                    ) : (
+                                        <i className="fa-duotone fa-regular fa-building text-secondary" />
+                                    )}
                                     Company:{" "}
                                     {companyName ||
                                         data.conversation.company_id}
@@ -477,16 +513,36 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                             </div>
                         </div>
                     ) : (
-                        data.messages.map((msg) => {
+                        data.messages.map((msg, idx) => {
+                            const msgDate = new Date(msg.created_at);
+                            const prevMsg = data.messages[idx - 1];
+                            const prevDate = prevMsg
+                                ? new Date(prevMsg.created_at)
+                                : null;
+                            const showDateSeparator =
+                                !prevDate ||
+                                prevDate.toDateString() !==
+                                    msgDate.toDateString();
+                            const dateSeparator = showDateSeparator ? (
+                                <div
+                                    key={`sep-${msg.id}`}
+                                    className="flex justify-center my-4"
+                                >
+                                    <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-base-200 text-base-content/60">
+                                        {formatDateSeparator(msgDate)}
+                                    </span>
+                                </div>
+                            ) : null;
+
                             if (msg.kind === "system") {
                                 return (
-                                    <div
-                                        key={msg.id}
-                                        className="flex justify-center my-4"
-                                    >
-                                        <div className="bg-info/5 border border-info/10 rounded-lg px-4 py-2 text-sm text-base-content/70 max-w-md text-center">
-                                            <i className="fa-duotone fa-regular fa-route mr-2 text-info" />
-                                            {msg.body || "System message"}
+                                    <div key={msg.id}>
+                                        {dateSeparator}
+                                        <div className="flex justify-center my-4">
+                                            <div className="bg-info/5 border border-info/10 rounded-lg px-4 py-2 text-sm text-base-content/70 max-w-md text-center">
+                                                <i className="fa-duotone fa-regular fa-route mr-2 text-info" />
+                                                {msg.body || "System message"}
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -504,12 +560,15 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                                 : "chat-bubble";
 
                             return (
-                                <div
-                                    key={msg.id}
-                                    className={`chat ${
-                                        isOwnMessage ? "chat-end" : "chat-start"
-                                    }`}
-                                >
+                                <div key={msg.id}>
+                                    {dateSeparator}
+                                    <div
+                                        className={`chat ${
+                                            isOwnMessage
+                                                ? "chat-end"
+                                                : "chat-start"
+                                        }`}
+                                    >
                                     <div className="chat-image avatar avatar-placeholder rounded-none">
                                         <div className="bg-base-200 text-base-content rounded-none w-10">
                                             <span className="text-sm text-primary font-semibold">
@@ -536,6 +595,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
                                         {new Date(
                                             msg.created_at,
                                         ).toLocaleString()}
+                                    </div>
                                     </div>
                                 </div>
                             );
