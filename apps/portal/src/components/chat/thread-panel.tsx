@@ -135,7 +135,7 @@ export default function ThreadPanel({ conversationId }: ThreadPanelProps) {
             if (companyId) {
                 try {
                     const response: any = await client.get(
-                        `/companies/${companyId}`,
+                        `/companies/${companyId}/view/summary`,
                     );
                     const company = response?.data;
                     if (company?.name) setCompanyName(company.name);
