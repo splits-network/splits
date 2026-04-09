@@ -14,6 +14,7 @@ export interface ApplicationData {
     candidate_id: string;
     candidate_recruiter_id: string | null;
     stage: string;
+    salary: number | null;
     notes: string | null;
     recruiter_notes: string | null;
     created_at: string;
@@ -28,6 +29,7 @@ export interface JobData {
     company_id: string;
     source_firm_id: string | null;
     location: string | null;
+    fee_percentage: number | null;
     company?: {
         id: string;
         name: string;

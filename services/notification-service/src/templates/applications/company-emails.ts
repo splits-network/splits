@@ -133,9 +133,29 @@ export interface CompanyOfferAcceptedData {
     jobTitle: string;
     companyName: string;
     applicationUrl: string;
+    salary?: number;
+    location?: string;
+}
+
+function formatSalary(salary?: number): string {
+    if (!salary) return 'Not specified';
+    return `$${salary.toLocaleString()}`;
 }
 
 export function companyOfferAcceptedEmail(data: CompanyOfferAcceptedData): string {
+    const offerItems: Array<{ label: string; value: string; highlight?: boolean }> = [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName },
+    ];
+
+    if (data.location) {
+        offerItems.push({ label: 'Location', value: data.location });
+    }
+
+    offerItems.push({ label: 'Salary', value: formatSalary(data.salary) });
+    offerItems.push({ label: 'Status', value: 'Offer Accepted', highlight: true });
+
     const content = `
 ${heading({ level: 1, text: 'Offer accepted!' })}
 
@@ -146,18 +166,11 @@ ${alert({
     })}
 
 ${infoCard({
-        title: 'Acceptance Details',
-        items: [
-            { label: 'Candidate', value: data.candidateName },
-            { label: 'Position', value: data.jobTitle },
-            { label: 'Company', value: data.companyName },
-            { label: 'Status', value: 'Offer Accepted', highlight: true },
-        ],
+        title: 'Offer Details',
+        items: offerItems,
     })}
 
-${paragraph(
-        'The candidate has formally accepted the offer. You can now proceed with the hiring process to finalize the placement.'
-    )}
+${paragraph(`<strong>What happens next:</strong><br/>\u2022 Click below to confirm the hire and create the placement record<br/>\u2022 Finalize the start date, onboarding details, and any remaining paperwork<br/>\u2022 The recruiter fee will be calculated automatically based on the agreed salary`)}
 
 ${button({
         href: data.applicationUrl,
@@ -168,7 +181,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Review the application and confirm the hire to create the placement record.'
+        'Confirming the hire will create a placement record and initiate the fee process.'
     )}
     `.trim();
 

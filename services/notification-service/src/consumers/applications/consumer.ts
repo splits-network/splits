@@ -793,6 +793,21 @@ export class ApplicationsEventConsumer {
                     }
                 }
 
+                // Notify firm admins if job belongs to a firm
+                if (job.source_firm_id) {
+                    const firmAdmins = await this.contactLookup.getFirmAdminContacts(job.source_firm_id);
+                    for (const admin of firmAdmins) {
+                        await this.emailService.sendCompanyApplicationReceived(admin.email, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            applicationId: application_id,
+                            hasRecruiter: true,
+                            recruiterName: recruiterContact.name,
+                            userId: admin.user_id || undefined,
+                        });
+                    }
+                }
+
                 await this.emailService.sendApplicationCreated(recruiterContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
@@ -859,6 +874,20 @@ export class ApplicationsEventConsumer {
                 if (company?.identity_organization_id) {
                     const adminContacts = await this.contactLookup.getCompanyAdminContacts(company.identity_organization_id);
                     for (const admin of adminContacts) {
+                        await this.emailService.sendCompanyApplicationReceived(admin.email, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            applicationId: application_id,
+                            hasRecruiter: false,
+                            userId: admin.user_id || undefined,
+                        });
+                    }
+                }
+
+                // Notify firm admins if job belongs to a firm
+                if (job.source_firm_id) {
+                    const firmAdmins = await this.contactLookup.getFirmAdminContacts(job.source_firm_id);
+                    for (const admin of firmAdmins) {
                         await this.emailService.sendCompanyApplicationReceived(admin.email, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
@@ -969,7 +998,22 @@ export class ApplicationsEventConsumer {
                         applicationId: application_id,
                         hasRecruiter: true,
                         recruiterName: recruiterContact.name,
-                        userId: undefined,
+                        userId: admin.user_id || undefined,
+                    });
+                }
+            }
+
+            // Notify firm admins if job belongs to a firm
+            if (job.source_firm_id) {
+                const firmAdmins = await this.contactLookup.getFirmAdminContacts(job.source_firm_id);
+                for (const admin of firmAdmins) {
+                    await this.emailService.sendCompanyApplicationReceived(admin.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        applicationId: application_id,
+                        hasRecruiter: true,
+                        recruiterName: recruiterContact.name,
+                        userId: admin.user_id || undefined,
                     });
                 }
             }
@@ -1742,6 +1786,12 @@ export class ApplicationsEventConsumer {
             }
 
             const companyName = DataLookupHelper.getJobCompanyName(job, 'the company');
+            const salary = application?.salary ?? undefined;
+            const feePercentage = job.fee_percentage ?? undefined;
+            const estimatedFee = salary && feePercentage
+                ? Math.round((salary * feePercentage) / 100)
+                : undefined;
+            const location = job.location ?? undefined;
 
             // Notify the recruiter (if one is assigned)
             const recruiterId = application?.candidate_recruiter_id;
@@ -1755,6 +1805,10 @@ export class ApplicationsEventConsumer {
                         companyName,
                         applicationId: application_id,
                         userId: recruiterContact.user_id || undefined,
+                        salary,
+                        feePercentage,
+                        estimatedFee,
+                        location,
                     });
 
                     this.logger.info(
@@ -1781,6 +1835,8 @@ export class ApplicationsEventConsumer {
                         companyName,
                         applicationId: application_id,
                         userId: admin.user_id || undefined,
+                        salary,
+                        location,
                     });
 
                     this.logger.info(
@@ -1793,6 +1849,29 @@ export class ApplicationsEventConsumer {
                     { application_id, job_id },
                     'Cannot send offer accepted email to company - no organization linked'
                 );
+            }
+
+            // Notify firm admins (if job belongs to a firm)
+            const firmId = job.source_firm_id;
+            if (firmId) {
+                const firmAdmins = await this.contactLookup.getFirmAdminContacts(firmId);
+
+                for (const admin of firmAdmins) {
+                    await this.emailService.sendOfferAcceptedToFirm(admin.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName,
+                        applicationId: application_id,
+                        userId: admin.user_id || undefined,
+                        salary,
+                        location,
+                    });
+
+                    this.logger.info(
+                        { application_id, recipient: admin.email },
+                        'Offer accepted notification sent to firm admin'
+                    );
+                }
             }
         } catch (error) {
             this.logger.error(

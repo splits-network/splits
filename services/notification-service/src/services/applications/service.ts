@@ -1776,6 +1776,10 @@ export class ApplicationsEmailService {
             companyName: string;
             applicationId: string;
             userId?: string;
+            salary?: number;
+            feePercentage?: number;
+            estimatedFee?: number;
+            location?: string;
         }
     ): Promise<void> {
         const subject = `Offer Accepted: ${data.candidateName} for ${data.jobTitle}`;
@@ -1787,6 +1791,10 @@ export class ApplicationsEmailService {
             jobTitle: data.jobTitle,
             companyName: data.companyName,
             applicationUrl,
+            salary: data.salary,
+            feePercentage: data.feePercentage,
+            estimatedFee: data.estimatedFee,
+            location: data.location,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
@@ -1808,6 +1816,8 @@ export class ApplicationsEmailService {
             companyName: string;
             applicationId: string;
             userId?: string;
+            salary?: number;
+            location?: string;
         }
     ): Promise<void> {
         const subject = `Offer Accepted: ${data.candidateName} for ${data.jobTitle}`;
@@ -1818,6 +1828,8 @@ export class ApplicationsEmailService {
             jobTitle: data.jobTitle,
             companyName: data.companyName,
             applicationUrl,
+            salary: data.salary,
+            location: data.location,
         });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
@@ -1826,6 +1838,41 @@ export class ApplicationsEmailService {
             payload: data,
             actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
             actionLabel: 'Complete Hiring Process',
+            priority: 'high',
+            category: 'offer',
+        });
+    }
+
+    async sendOfferAcceptedToFirm(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            applicationId: string;
+            userId?: string;
+            salary?: number;
+            location?: string;
+        }
+    ): Promise<void> {
+        const subject = `Offer Accepted: ${data.candidateName} for ${data.jobTitle}`;
+        const applicationUrl = `${_PORTAL_URL}/portal/applications?applicationId=${data.applicationId}`;
+
+        const html = companyOfferAcceptedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            applicationUrl,
+            salary: data.salary,
+            location: data.location,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.offer_accepted',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications?applicationId=${data.applicationId}`,
+            actionLabel: 'View Application',
             priority: 'high',
             category: 'offer',
         });
