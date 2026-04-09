@@ -41,7 +41,7 @@ export class PlacementsEventConsumer {
             await this.emailService.sendPlacementCreated(recruiterContact.email, {
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
+                companyName: DataLookupHelper.getJobCompanyName(job),
                 salary: placementData.salary || salary,
                 recruiterShare: placementData.recruiter_share_amount || recruiter_share,
                 placementId: placement_id,
@@ -94,7 +94,7 @@ export class PlacementsEventConsumer {
             await this.emailService.sendFirstPlacement(recruiterContact.email, {
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
+                companyName: DataLookupHelper.getJobCompanyName(job),
                 recruiterShare,
                 placementId,
                 userId: recruiterContact.user_id || undefined,
@@ -142,7 +142,7 @@ export class PlacementsEventConsumer {
                 await this.emailService.sendPlacementActivated(recruiterContact.email, {
                     candidateName: candidateContact.name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     guaranteeDays: guarantee_days || 90,
                     startDate: placement.start_date || new Date().toISOString().split('T')[0],
                     placementId: placement_id,
@@ -190,7 +190,7 @@ export class PlacementsEventConsumer {
                 await this.emailService.sendPlacementCompleted(recruiterContact.email, {
                     candidateName: candidateContact.name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     finalPayout: (collaborator as any).amount_earned,
                     placementId: placement_id,
                     userId: recruiterContact.user_id || undefined,
@@ -235,7 +235,7 @@ export class PlacementsEventConsumer {
                 await this.emailService.sendPlacementFailed(recruiterContact.email, {
                     candidateName: candidateContact.name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     failureReason: failure_reason || 'Not specified',
                     placementId: placement_id,
                     userId: recruiterContact.user_id || undefined,
@@ -280,7 +280,7 @@ export class PlacementsEventConsumer {
                 await this.emailService.sendGuaranteeExpiring(recruiterContact.email, {
                     candidateName: candidateContact.name,
                     jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
+                    companyName: DataLookupHelper.getJobCompanyName(job),
                     daysRemaining: days_until_expiry,
                     guaranteeEndDate: event.payload.guarantee_end_date || new Date(Date.now() + days_until_expiry * 86400000).toISOString().split('T')[0],
                     placementId: placement_id,

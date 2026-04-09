@@ -39,7 +39,7 @@ export class CollaborationEventConsumer {
             await this.emailService.sendCollaboratorAdded(recruiterContact.email, {
                 candidateName: candidateContact.name,
                 jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
+                companyName: DataLookupHelper.getJobCompanyName(job),
                 role,
                 splitPercentage: split_percentage,
                 userId: recruiterContact.user_id || undefined,

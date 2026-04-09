@@ -682,8 +682,8 @@ export class CallsEventConsumer {
                 const job = await this.dataLookup.getJob(link.entityId);
                 if (job) {
                     jobTitle = job.title;
-                    if (!companyName && job.company?.name) {
-                        companyName = job.company.name;
+                    if (!companyName) {
+                        companyName = DataLookupHelper.getJobCompanyName(job, '') || undefined;
                     }
                 }
             }

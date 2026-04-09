@@ -24,7 +24,6 @@ const BACK_TO_DRAFT_STAGES = [
     "recruiter_request",
     "recruiter_review",
     "screen",
-    "rejected",
 ];
 
 const SUBMITTABLE_STAGES = ["draft", "ai_reviewed", "ai_failed"];
