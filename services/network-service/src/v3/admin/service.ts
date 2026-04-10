@@ -18,9 +18,19 @@ export class AdminService {
     this.accessResolver = new AccessContextResolver(supabase);
   }
 
+  async getRecruiterById(id: string, clerkUserId: string) {
+    await this.requireAdmin(clerkUserId);
+    return this.repository.getRecruiterById(id);
+  }
+
   async listRecruiters(params: AdminListParams, clerkUserId: string) {
     await this.requireAdmin(clerkUserId);
     return this.repository.listRecruiters(params);
+  }
+
+  async updateRecruiter(id: string, updates: Record<string, unknown>, clerkUserId: string) {
+    await this.requireAdmin(clerkUserId);
+    return this.repository.updateRecruiter(id, updates);
   }
 
   async updateRecruiterStatus(id: string, status: string, clerkUserId: string) {

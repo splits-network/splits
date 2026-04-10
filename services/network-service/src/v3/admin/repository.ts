@@ -18,6 +18,31 @@ function buildPagination(total: number, page: number, limit: number) {
 export class AdminRepository {
   constructor(private supabase: SupabaseClient) {}
 
+  async getRecruiterById(id: string): Promise<any> {
+    const { data: recruiter, error } = await this.supabase
+      .from('recruiters')
+      .select('*, user:users!recruiters_user_id_fkey(id, name, email, avatar_url, created_at)')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+
+    // Fetch related data in parallel
+    const [reputation, firmMembership, companies, candidateCount] = await Promise.all([
+      this.supabase.from('recruiter_reputation').select('*').eq('recruiter_id', id).maybeSingle(),
+      this.supabase.from('firm_members').select('*, firm:firms!firm_members_firm_id_fkey(id, name, slug, status)').eq('recruiter_id', id).eq('status', 'active').maybeSingle(),
+      this.supabase.from('recruiter_companies').select('*, company:companies!recruiter_companies_company_id_fkey(id, name, logo_url)').eq('recruiter_id', id).order('created_at', { ascending: false }).limit(20),
+      this.supabase.from('recruiter_candidates').select('id', { count: 'exact', head: true }).eq('recruiter_id', id),
+    ]);
+
+    return {
+      ...recruiter,
+      reputation: reputation.data ?? null,
+      firm_membership: firmMembership.data ?? null,
+      companies: companies.data ?? [],
+      candidate_count: candidateCount.count ?? 0,
+    };
+  }
+
   async listRecruiters(params: AdminListParams): Promise<{ data: any[]; pagination: any }> {
     const { page, limit, offset } = paginate(params);
     let query = this.supabase
@@ -30,6 +55,13 @@ export class AdminRepository {
     const { data, count, error } = await query;
     if (error) throw error;
     return { data: data || [], pagination: buildPagination(count || 0, page, limit) };
+  }
+
+  async updateRecruiter(id: string, updates: Record<string, unknown>): Promise<any> {
+    const { data, error } = await this.supabase.from('recruiters')
+      .update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
   }
 
   async updateRecruiterStatus(id: string, status: string): Promise<any> {

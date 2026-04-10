@@ -8,8 +8,8 @@ import { AdminRepository } from './repository.js';
 import { AdminService } from './service.js';
 import {
   AdminListParams,
-  adminListQuerySchema, recruiterStatusSchema, firmApprovalSchema,
-  idParamSchema, statsQuerySchema,
+  adminListQuerySchema, recruiterStatusSchema, recruiterUpdateSchema,
+  firmApprovalSchema, idParamSchema, statsQuerySchema,
 } from './types.js';
 
 const AUTH_ERROR = { error: { code: 'AUTH_REQUIRED', message: 'Authentication required' } };
@@ -52,6 +52,29 @@ export function registerAdminRoutes(
     if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
     const result = await service.listRecruiters(request.query as AdminListParams, clerkUserId);
     return reply.send({ data: result.data, pagination: result.pagination });
+  });
+
+  // GET /api/v3/admin/recruiters/:id
+  app.get('/api/v3/admin/recruiters/:id', {
+    schema: { params: idParamSchema },
+  }, async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { id } = request.params as { id: string };
+    const data = await service.getRecruiterById(id, clerkUserId);
+    return reply.send({ data });
+  });
+
+  // PATCH /api/v3/admin/recruiters/:id
+  app.patch('/api/v3/admin/recruiters/:id', {
+    schema: { params: idParamSchema, body: recruiterUpdateSchema },
+  }, async (request, reply) => {
+    const clerkUserId = getClerkUserId(request);
+    if (!clerkUserId) return reply.status(401).send(AUTH_ERROR);
+    const { id } = request.params as { id: string };
+    const updates = request.body as Record<string, unknown>;
+    const data = await service.updateRecruiter(id, updates, clerkUserId);
+    return reply.send({ data });
   });
 
   // PATCH /api/v3/admin/recruiters/:id/status
