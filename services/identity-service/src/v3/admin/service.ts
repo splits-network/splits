@@ -31,6 +31,14 @@ export class AdminService {
     return user;
   }
 
+  async addUserRole(userId: string, roleName: string) {
+    return this.repository.addUserRole(userId, roleName);
+  }
+
+  async removeUserRole(roleId: string) {
+    return this.repository.removeUserRole(roleId);
+  }
+
   async listOrganizations(params: AdminListParams) {
     const { data, total } = await this.repository.listOrganizations(params);
     const page = params.page || 1;

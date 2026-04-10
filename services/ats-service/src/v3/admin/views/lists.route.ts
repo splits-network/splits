@@ -10,6 +10,7 @@ import {
     adminListQuerySchema,
     adminApplicationsQuerySchema,
     adminPlacementsQuerySchema,
+    idParamSchema,
     AdminListParams,
 } from '../types.js';
 
@@ -23,6 +24,26 @@ export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseC
         const params = request.query as AdminListParams;
         const result = await repository.listApplications(params);
         return reply.send(result);
+    });
+
+    // GET /v3/admin/applications/:id — detail with job + candidate + notes
+    app.get('/v3/admin/applications/:id', {
+        schema: { params: idParamSchema },
+    }, async (request, reply) => {
+        const { id } = request.params as { id: string };
+        const data = await repository.getApplicationById(id);
+        return reply.send({ data });
+    });
+
+    // PATCH /v3/admin/applications/:id/stage — admin stage override
+    app.patch('/v3/admin/applications/:id/stage', {
+        schema: { params: idParamSchema },
+    }, async (request, reply) => {
+        const { id } = request.params as { id: string };
+        const { stage } = request.body as { stage: string };
+        if (!stage) return reply.code(400).send({ error: { message: 'stage is required' } });
+        const data = await repository.updateApplicationStage(id, stage);
+        return reply.send({ data });
     });
 
     // GET /v3/admin/candidates — flat list with search

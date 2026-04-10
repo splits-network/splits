@@ -1,3 +1,5 @@
+**COMPLETED**
+
 # Applications Management
 
 ## Current State

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { AdminDataTable, type Column } from '@/components/shared';
 import { GenerateTailoredResumeButton } from './generate-tailored-resume-button';
 
@@ -55,6 +56,7 @@ function formatDate(iso: string) {
 }
 
 export function ApplicationTable({ data, loading, sortField, sortDir, onSort, onRefresh }: ApplicationTableProps) {
+    const router = useRouter();
     const columns: Column<Application>[] = [
         {
             key: 'candidate',
@@ -118,6 +120,7 @@ export function ApplicationTable({ data, loading, sortField, sortDir, onSort, on
             sortField={sortField}
             sortDir={sortDir}
             onSort={onSort}
+            onRowClick={(item) => router.push(`/secure/applications/${item.id}`)}
             emptyTitle="No applications found"
             emptyDescription="No applications match the current filters."
         />
