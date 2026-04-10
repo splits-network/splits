@@ -148,7 +148,7 @@ export function JobEditModal({ job, isOpen, onClose, onSuccess }: Props) {
                         </fieldset>
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">Guarantee Days</legend>
-                            <input type="number" className="input input-sm w-full" min="1" max="365" value={form.guarantee_days} onChange={(e) => setForm(f => ({ ...f, guarantee_days: e.target.value }))} />
+                            <input type="number" className="input input-sm w-full" min="1" max="365" value={form.guarantee_days} onChange={(e) => setForm(f => ({ ...f, guarantee_days: Number(e.target.value) || 0 }))} />
                         </fieldset>
                     </div>
 
