@@ -27,7 +27,7 @@ export function ApplicationOverviewTab({ application }: OverviewTabProps) {
         ? recruiterName.split(" ").map((n: string) => n[0]).join("").toUpperCase()
         : "?";
 
-    const companyRecruiter = (job as any)?.company_recruiter;
+    const companyRecruiter = (application as any)?.company_recruiter;
     const companyRecruiterName = companyRecruiter?.user?.name || null;
     const companyRecruiterEmail = companyRecruiter?.user?.email || null;
     const companyRecruiterInitials = companyRecruiterName

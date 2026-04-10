@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository.js';
-import type { EmailSource } from '../../templates/base.js';
+import { chatMessageEmail } from '../../templates/chat/index.js';
 
 export interface ChatMessageEmailData {
     recipient: string;
@@ -20,24 +20,6 @@ export class ChatEmailService {
         private candidateFromEmail: string,
         private logger: Logger
     ) {}
-
-    private renderChatEmail(data: ChatMessageEmailData): string {
-        const preview = data.preview ? data.preview : 'New message';
-        return `
-            <html>
-                <body style="font-family: Arial, sans-serif; color: #18181b;">
-                    <h2 style="color:#18181b;">You have a new message</h2>
-                    <p><strong>${data.senderName}</strong> sent you a message:</p>
-                    <p style="white-space:pre-line; background:#f4f4f5; padding:12px; border-radius:4px;">${preview}</p>
-                    <p>
-                        <a href="${data.conversationUrl}" style="color:#233876; text-decoration:underline;">
-                            View conversation
-                        </a>
-                    </p>
-                </body>
-            </html>
-        `.trim();
-    }
 
     async sendNewMessageEmail(data: ChatMessageEmailData): Promise<void> {
         const subject = `New message from ${data.senderName}`;
@@ -65,11 +47,18 @@ export class ChatEmailService {
         });
 
         try {
+            const html = chatMessageEmail({
+                senderName: data.senderName,
+                recipientName: data.recipientName,
+                preview: data.preview,
+                conversationUrl: data.conversationUrl,
+            });
+
             const { data: result, error } = await this.resend.emails.send({
                 from: this.fromEmail,
                 to: data.recipient,
                 subject,
-                html: this.renderChatEmail(data),
+                html,
             });
 
             if (error) {
