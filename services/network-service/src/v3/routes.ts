@@ -14,6 +14,7 @@ import { registerCompanyReputationRoutes } from './company-reputation/routes.js'
 import { registerRecruiterCodeRoutes } from './recruiter-codes/routes.js';
 import { registerFirmRoutes } from './firms/routes.js';
 import { registerCompanyInvitationRoutes } from './company-invitations/routes.js';
+import { registerPublicCompanyRoutes } from './public-companies/routes.js';
 import { registerAdminRoutes } from './admin/routes.js';
 
 export function registerV3Routes(
@@ -30,5 +31,6 @@ export function registerV3Routes(
   registerRecruiterCodeRoutes(app, supabase, eventPublisher);
   registerFirmRoutes(app, supabase, eventPublisher);
   registerCompanyInvitationRoutes(app, supabase, eventPublisher);
+  registerPublicCompanyRoutes(app, supabase);
   registerAdminRoutes(app, supabase);
 }

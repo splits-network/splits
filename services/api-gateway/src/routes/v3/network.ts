@@ -96,6 +96,12 @@ const networkV3Routes: V3RouteConfig[] = [
   { path: '/public/firms/:slug/profile', method: 'GET', auth: 'none' },
   { path: '/public/firms/:slug/members', method: 'GET', auth: 'none' },
 
+  // ── Public Companies ──────────────────────────────────────────
+  { path: '/public/companies', method: 'GET', auth: 'none' },
+  { path: '/public/companies/:slug', method: 'GET', auth: 'none' },
+  { path: '/public/companies/:slug/profile', method: 'GET', auth: 'none' },
+  { path: '/public/companies/:slug/jobs', method: 'GET', auth: 'none' },
+
   // ── Firm Invitations ────────────────────────────────────────────
   { path: '/firm-invitations/:token/preview', method: 'GET', auth: 'none' },
   { path: '/firm-invitations/:token/accept', method: 'POST', auth: 'required' },
