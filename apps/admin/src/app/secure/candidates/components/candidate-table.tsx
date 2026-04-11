@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { AdminDataTable, AdminPageHeader, type Column } from '@/components/shared';
 import { useStandardList } from '@/hooks/use-standard-list';
 import { BuildSmartResumeButton } from './build-smart-resume-button';
@@ -87,6 +88,7 @@ const RESUME_OPTIONS = [
 ];
 
 export function CandidateTable() {
+    const router = useRouter();
     const {
         data,
         loading,
@@ -154,6 +156,7 @@ export function CandidateTable() {
                     sortField={sortBy}
                     sortDir={sortOrder}
                     onSort={handleSort}
+                    onRowClick={(c) => router.push(`/secure/candidates/${c.id}`)}
                     emptyTitle="No candidates found"
                     emptyDescription="No candidates match your search."
                 />

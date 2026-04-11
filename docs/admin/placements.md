@@ -1,3 +1,5 @@
+**COMPLETED**
+
 # Placements Management
 
 ## Current State

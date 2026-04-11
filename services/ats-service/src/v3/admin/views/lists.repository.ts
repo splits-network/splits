@@ -67,6 +67,60 @@ export class AdminListsRepository {
     return { data: data || [], pagination: buildPagination(count || 0, page, limit) };
   }
 
+  async getCandidateById(id: string): Promise<any> {
+    const { data: candidate, error } = await this.supabase
+      .from('candidates')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+
+    const [applications, recruiterRels] = await Promise.all([
+      this.supabase
+        .from('applications')
+        .select('id, stage, job_id, job_title, company_name, created_at')
+        .eq('candidate_id', id)
+        .order('created_at', { ascending: false })
+        .limit(20),
+      this.supabase
+        .from('recruiter_candidates')
+        .select('id, recruiter_id, status, candidate_name, created_at')
+        .eq('candidate_id', id)
+        .eq('status', 'active')
+        .limit(10),
+    ]);
+
+    return {
+      ...candidate,
+      applications: applications.data ?? [],
+      recruiter_relationships: recruiterRels.data ?? [],
+    };
+  }
+
+  async getPlacementById(id: string): Promise<any> {
+    const { data: placement, error } = await this.supabase
+      .from('placements')
+      .select('*, job:jobs(id, title, status), candidate:candidates(id, full_name, email, phone, location), company:companies(id, name, logo_url)')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return placement;
+  }
+
+  async updatePlacement(id: string, updates: Record<string, unknown>): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('placements')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   async listCandidates(params: AdminListParams) {
     const { page, limit, offset } = paginate(params);
     const sortBy = params.sort_by || 'created_at';
