@@ -1,0 +1,23 @@
+{
+  "name": "social-videos",
+  "version": "1.0.0",
+  "description": "Remotion-based social media video generator for Employment Networks brands",
+  "scripts": {
+    "studio": "npx remotion studio src/index.ts",
+    "render": "npx remotion render src/index.ts",
+    "render:day1": "npx remotion render src/index.ts Day1CandidateGhosting --output=out/day1-candidate-ghosting.mp4"
+  },
+  "keywords": [],
+  "author": "Brandon Korous",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@remotion/cli": "^4.0.448",
+    "@remotion/player": "^4.0.448",
+    "@types/react": "^19.2.14",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "remotion": "^4.0.448",
+    "typescript": "^6.0.2"
+  }
+}

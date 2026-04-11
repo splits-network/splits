@@ -126,7 +126,7 @@ export class PublicCompanyRepository {
     const limit = Math.min(params.limit || 20, 100);
     const offset = (page - 1) * limit;
 
-    const { data, error, count } = await this.supabase
+    let query = this.supabase
       .from('jobs')
       .select(`
         id, title, candidate_description, description, location,
@@ -137,9 +137,16 @@ export class PublicCompanyRepository {
         firm:firms(id, name, logo_url)
       `, { count: 'exact' })
       .eq('company_id', companyId)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
+      .eq('status', 'active');
+
+    if (params.search) {
+      query = query.ilike('title', `%${params.search}%`);
+    }
+
+    query = query.order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+
+    const { data, error, count } = await query;
 
     if (error) throw error;
 

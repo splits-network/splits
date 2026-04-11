@@ -16,6 +16,7 @@ export interface PublicCompanyListParams {
 export interface PublicCompanyJobsParams {
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 export const PUBLIC_COMPANY_SELECT = [
@@ -44,6 +45,7 @@ export const jobsQuerySchema = {
   properties: {
     page: { type: 'integer', minimum: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 100 },
+    search: { type: 'string' },
   },
 } as const;
 
