@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { AdminDataTable, type Column } from '@/components/shared';
 
 type Placement = {
@@ -47,6 +48,7 @@ function formatFee(fee?: number) {
 }
 
 export function PlacementTable({ data, loading, sortField, sortDir, onSort }: PlacementTableProps) {
+    const router = useRouter();
     const columns: Column<Placement>[] = [
         {
             key: 'candidate_name',
@@ -105,6 +107,7 @@ export function PlacementTable({ data, loading, sortField, sortDir, onSort }: Pl
             sortField={sortField}
             sortDir={sortDir}
             onSort={onSort}
+            onRowClick={(item) => router.push(`/secure/placements/${item.id}`)}
             emptyTitle="No placements found"
             emptyDescription="No placements match the current filters."
         />

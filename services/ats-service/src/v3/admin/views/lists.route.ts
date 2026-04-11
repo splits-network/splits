@@ -46,6 +46,15 @@ export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseC
         return reply.send({ data });
     });
 
+    // GET /v3/admin/candidates/:id — detail with applications
+    app.get('/v3/admin/candidates/:id', {
+        schema: { params: idParamSchema },
+    }, async (request, reply) => {
+        const { id } = request.params as { id: string };
+        const data = await repository.getCandidateById(id);
+        return reply.send({ data });
+    });
+
     // GET /v3/admin/candidates — flat list with search
     app.get('/v3/admin/candidates', {
         schema: { querystring: adminListQuerySchema },
@@ -62,6 +71,25 @@ export function registerAdminListViews(app: FastifyInstance, supabase: SupabaseC
         const params = request.query as AdminListParams;
         const result = await repository.listAssignments(params);
         return reply.send(result);
+    });
+
+    // GET /v3/admin/placements/:id — detail with joins
+    app.get('/v3/admin/placements/:id', {
+        schema: { params: idParamSchema },
+    }, async (request, reply) => {
+        const { id } = request.params as { id: string };
+        const data = await repository.getPlacementById(id);
+        return reply.send({ data });
+    });
+
+    // PATCH /v3/admin/placements/:id — update placement fields
+    app.patch('/v3/admin/placements/:id', {
+        schema: { params: idParamSchema },
+    }, async (request, reply) => {
+        const { id } = request.params as { id: string };
+        const updates = request.body as Record<string, unknown>;
+        const data = await repository.updatePlacement(id, updates);
+        return reply.send({ data });
     });
 
     // GET /v3/admin/placements — flat list with search + state filter

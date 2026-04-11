@@ -27,6 +27,6 @@ export function registerV3Routes(app: FastifyInstance, config: RegisterV3Config)
   registerActivityRoutes(app, config.supabase, config.activityService);
   registerChartRoutes(app, config.supabase, config.chartServiceV2);
   registerMarketplaceMetricRoutes(app, config.supabase);
-  registerStatsRoutes(app, config.statsServiceV2);
+  registerStatsRoutes(app, config.supabase, config.statsServiceV2);
   registerViewRoutes(app, config.supabase);
 }

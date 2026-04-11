@@ -13,6 +13,7 @@ import { buildAuthHeaders } from '../../helpers/auth-headers.js';
 
 const analyticsV3Routes: V3RouteConfig[] = [
   // ── Stats Views ────────────────────────────────────────────────
+  { path: '/stats/views/platform-summary', method: 'GET', auth: 'none' },
   { path: '/stats/views/platform-activity', method: 'GET', auth: 'required' },
   { path: '/stats/views/top-performers', method: 'GET', auth: 'required' },
 

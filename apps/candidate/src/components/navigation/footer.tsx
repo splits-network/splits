@@ -10,6 +10,7 @@ import type {
     FooterTrustStat,
     FooterLinkItem,
 } from "@splits-network/shared-types";
+import type { PlatformStats } from "@/lib/platform-stats";
 
 // ─── Default Footer Data (fallback when CMS is unavailable) ─────────────────
 
@@ -95,26 +96,35 @@ const DEFAULT_LEGAL_LINKS: FooterLinkItem[] = [
     { label: "Cookie Policy", href: "/cookie-policy" },
 ];
 
-const DEFAULT_TRUST_STATS: FooterTrustStat[] = [
-    { value: "2,847", label: "Recruiters" },
-    { value: "518", label: "Companies" },
-    { value: "12,340", label: "Candidates" },
-    { value: "$42M+", label: "In Placements" },
-];
+function formatStatNumber(n: number): string {
+    return n.toLocaleString();
+}
+
+function buildTrustStats(stats: PlatformStats | null | undefined): FooterTrustStat[] {
+    if (!stats) return [];
+    return [
+        { value: formatStatNumber(stats.active_jobs), label: "Open Positions" },
+        { value: formatStatNumber(stats.total_recruiters), label: "Recruiters" },
+        { value: formatStatNumber(stats.active_companies), label: "Companies Hiring" },
+        { value: formatStatNumber(stats.cumulative_placements), label: "Placements Made" },
+    ];
+}
 
 // ─── Footer Component ───────────────────────────────────────────────────────
 
 export default function Footer({
     footerNav,
+    platformStats,
 }: {
     footerNav?: FooterNavConfig | null;
+    platformStats?: PlatformStats | null;
 }) {
     const [email, setEmail] = useState("");
     const [subscribed, setSubscribed] = useState(false);
 
     const sections = footerNav?.sections ?? DEFAULT_FOOTER_SECTIONS;
     const socialLinks = footerNav?.socialLinks ?? DEFAULT_SOCIAL_LINKS;
-    const trustStats = footerNav?.trustStats ?? DEFAULT_TRUST_STATS;
+    const trustStats = buildTrustStats(platformStats);
     const legalLinks = footerNav?.legalLinks ?? DEFAULT_LEGAL_LINKS;
 
     const handleSubscribe = (e: React.FormEvent) => {
@@ -277,18 +287,20 @@ export default function Footer({
                 </>
             }
             stats={
-                <>
-                    {trustStats.map((stat) => (
-                        <div key={stat.label} className="text-center">
-                            <div className="text-2xl font-black text-primary">
-                                {stat.value}
+                trustStats.length > 0 ? (
+                    <>
+                        {trustStats.map((stat) => (
+                            <div key={stat.label} className="text-center">
+                                <div className="text-2xl font-black text-primary">
+                                    {stat.value}
+                                </div>
+                                <div className="text-[10px] uppercase tracking-widest opacity-40 mt-1">
+                                    {stat.label}
+                                </div>
                             </div>
-                            <div className="text-[10px] uppercase tracking-widest opacity-40 mt-1">
-                                {stat.label}
-                            </div>
-                        </div>
-                    ))}
-                </>
+                        ))}
+                    </>
+                ) : undefined
             }
             bottomBar={
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">

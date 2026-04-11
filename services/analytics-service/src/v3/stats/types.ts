@@ -13,6 +13,14 @@ export interface StatsQueryParams {
   range?: StatsRange;
 }
 
+export interface PlatformSummary {
+  active_jobs: number;
+  total_recruiters: number;
+  active_companies: number;
+  cumulative_placements: number;
+  as_of: string | null;
+}
+
 // --- JSON Schemas ---
 
 export const statsQuerySchema = {

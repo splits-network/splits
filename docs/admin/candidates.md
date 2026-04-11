@@ -1,3 +1,5 @@
+**COMPLETED**
+
 # Candidates Management
 
 ## Current State

@@ -1,11 +1,13 @@
 /**
  * Stats V3 Routes
  *
- * GET stats (scope-based), platform-activity view, top-performers view.
+ * GET stats (scope-based), platform-activity view, top-performers view,
+ * platform-summary view (public).
  * Views registered before parameterized routes.
  */
 
 import { FastifyInstance } from 'fastify';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { StatsServiceV2 } from '../../v2/stats/service.js';
 import { StatsV3Repository } from './repository.js';
 import { StatsV3Service } from './service.js';
@@ -13,10 +15,17 @@ import { StatsQueryParams, statsQuerySchema } from './types.js';
 
 export function registerStatsRoutes(
   app: FastifyInstance,
+  supabase: SupabaseClient,
   statsServiceV2: StatsServiceV2,
 ) {
-  const repository = new StatsV3Repository(statsServiceV2);
+  const repository = new StatsV3Repository(statsServiceV2, supabase);
   const service = new StatsV3Service(repository);
+
+  // GET /api/v3/stats/views/platform-summary — public, no auth
+  app.get('/api/v3/stats/views/platform-summary', async (_request, reply) => {
+    const data = await service.getPlatformSummary();
+    return reply.send({ data });
+  });
 
   // GET /api/v3/stats/views/platform-activity — admin only
   app.get('/api/v3/stats/views/platform-activity', async (request, reply) => {

@@ -159,6 +159,7 @@ export interface Company {
     id: string;
     identity_organization_id?: string;
     name: string;
+    slug?: string;
     website?: string;
     industry?: string;
     company_size?: string;
@@ -171,6 +172,8 @@ export interface Company {
     linkedin_url?: string;
     twitter_url?: string;
     glassdoor_url?: string;
+    marketplace_visible?: boolean;
+    marketplace_approved_at?: string;
     created_at: Date;
     updated_at: Date;
 }

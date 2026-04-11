@@ -5,6 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 import { getHeaderNav, getFooterNav } from "@/lib/content";
+import { getPlatformStats } from "@/lib/platform-stats";
 import CookieConsent from "@/components/cookie-consent";
 import { ThemeScript, ThemeProvider } from "@splits-network/basel-ui";
 import { DevDebugPanel } from "@/components/dev-debug-panel";
@@ -139,10 +140,11 @@ export default async function RootLayout({
         },
     };
 
-    // Fetch CMS navigation data (ISR cached, 5 min)
-    const [headerNav, footerNav] = await Promise.all([
+    // Fetch CMS navigation data (ISR cached, 5 min) + platform stats (ISR cached, 1 hr)
+    const [headerNav, footerNav, platformStats] = await Promise.all([
         getHeaderNav(),
         getFooterNav(),
+        getPlatformStats(),
     ]);
 
     if (!publishableKey) {
@@ -198,7 +200,7 @@ export default async function RootLayout({
                                         <main className="flex-1">
                                             {children}
                                         </main>
-                                        <Footer footerNav={footerNav} />
+                                        <Footer footerNav={footerNav} platformStats={platformStats} />
                                     </CandidateChatSidebar>
                                     </SupportWidgetWrapper>
                                     <CookieConsent />
