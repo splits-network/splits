@@ -7,7 +7,7 @@
  */
 
 import { StatsV3Repository } from './repository.js';
-import { StatsQueryParams } from './types.js';
+import { PlatformSummary, StatsQueryParams } from './types.js';
 
 export class StatsV3Service {
   constructor(private repository: StatsV3Repository) {}
@@ -22,5 +22,9 @@ export class StatsV3Service {
 
   async getTopPerformers(clerkUserId: string) {
     return this.repository.getTopPerformers(clerkUserId);
+  }
+
+  async getPlatformSummary(): Promise<PlatformSummary> {
+    return this.repository.getPlatformSummary();
   }
 }

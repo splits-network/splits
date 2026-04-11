@@ -31,6 +31,7 @@ export async function computeMarketplaceHealth(supabase: SupabaseClient): Promis
             jobMetrics,
             fraudMetrics,
             disputeMetrics,
+            cumulativeMetrics,
         ] = await Promise.all([
             getPlacementMetrics(supabase, metricDate),
             getApplicationMetrics(supabase, metricDate),
@@ -38,6 +39,7 @@ export async function computeMarketplaceHealth(supabase: SupabaseClient): Promis
             getJobMetrics(supabase, metricDate),
             getFraudMetrics(supabase, metricDate),
             getDisputeMetrics(supabase, metricDate),
+            getCumulativeMetrics(supabase),
         ]);
 
         // Calculate health metrics
@@ -58,6 +60,9 @@ export async function computeMarketplaceHealth(supabase: SupabaseClient): Promis
             avg_fee_per_placement: placementMetrics.total > 0
                 ? placementMetrics.totalFees / placementMetrics.total
                 : 0,
+            active_companies: cumulativeMetrics.activeCompanies,
+            total_recruiters: cumulativeMetrics.totalRecruiters,
+            cumulative_placements: cumulativeMetrics.cumulativePlacements,
             disputed_placements: disputeMetrics.disputed,
             fraud_signals: fraudMetrics.signals,
             recruiter_retention_rate: recruiterMetrics.retentionRate,
@@ -193,6 +198,30 @@ async function getDisputeMetrics(supabase: SupabaseClient, date: string): Promis
         .lte('created_at', getNextDay(date));
 
     return { disputed: count || 0 };
+}
+
+/**
+ * Get cumulative platform-wide totals (not date-scoped)
+ */
+async function getCumulativeMetrics(supabase: SupabaseClient): Promise<any> {
+    const [recruiters, companies, placements] = await Promise.all([
+        supabase
+            .from('recruiters')
+            .select('*', { count: 'exact', head: true }),
+        supabase
+            .from('companies')
+            .select('id', { count: 'exact', head: true })
+            .gt('id', '00000000-0000-0000-0000-000000000000'), // exclude placeholder rows
+        supabase
+            .from('placements')
+            .select('*', { count: 'exact', head: true }),
+    ]);
+
+    return {
+        totalRecruiters: recruiters.count || 0,
+        activeCompanies: companies.count || 0,
+        cumulativePlacements: placements.count || 0,
+    };
 }
 
 /**
