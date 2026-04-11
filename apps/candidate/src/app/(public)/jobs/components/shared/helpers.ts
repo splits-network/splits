@@ -62,7 +62,7 @@ export function truncateDescription(
 }
 
 /** Match score → semantic color (mirrors portal's getAIScoreBadgeColor) */
-export function matchScoreColor(score: number | null | undefined): string {
+export function matchScoreColor(score: number | null | undefined): "success" | "primary" | "warning" | "error" | "neutral" {
     if (score == null) return "neutral";
     if (score >= 90) return "success";
     if (score >= 70) return "primary";
