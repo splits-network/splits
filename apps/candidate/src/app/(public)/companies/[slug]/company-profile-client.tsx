@@ -70,7 +70,7 @@ export default function CompanyProfileClient({
                 className="bg-base-100 border-b border-base-300 max-w-6xl mx-auto px-8"
             />
 
-            <div className="max-w-6xl mx-auto px-8 py-12">
+            <div className="mx-auto px-8 py-12">
                 <div className="grid lg:grid-cols-5 gap-12 lg:gap-16">
                     <div className="lg:col-span-3">
                         <ContentTabs
