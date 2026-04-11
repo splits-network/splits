@@ -33,14 +33,49 @@ export class AdminRepository {
   }
 
   async getUser(id: string): Promise<any | null> {
-    const { data, error } = await this.supabase
+    const { data: user, error } = await this.supabase
       .from('users')
       .select('*')
       .eq('id', id)
       .maybeSingle();
 
     if (error) throw error;
+    if (!user) return null;
+
+    // Fetch related data in parallel
+    const [roles, recruiter, candidate] = await Promise.all([
+      this.supabase.from('user_roles')
+        .select('id, role_name, organization_id, company_id, role_entity_type, created_at')
+        .eq('user_id', id).is('deleted_at', null),
+      this.supabase.from('recruiters')
+        .select('id, status, tagline, location, years_experience, marketplace_enabled, stripe_connect_onboarded, created_at')
+        .eq('user_id', id).maybeSingle(),
+      this.supabase.from('candidates')
+        .select('id, first_name, last_name, email, phone, location, resume_status, created_at')
+        .eq('user_id', id).maybeSingle(),
+    ]);
+
+    return {
+      ...user,
+      roles: roles.data ?? [],
+      recruiter: recruiter.data ?? null,
+      candidate: candidate.data ?? null,
+    };
+  }
+
+  async addUserRole(userId: string, roleName: string): Promise<any> {
+    const { data, error } = await this.supabase.from('user_roles')
+      .insert({ user_id: userId, role_name: roleName })
+      .select().single();
+    if (error) throw error;
     return data;
+  }
+
+  async removeUserRole(roleId: string): Promise<void> {
+    const { error } = await this.supabase.from('user_roles')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', roleId);
+    if (error) throw error;
   }
 
   async listOrganizations(params: AdminListParams): Promise<{ data: any[]; total: number }> {

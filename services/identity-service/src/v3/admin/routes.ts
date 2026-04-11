@@ -14,6 +14,8 @@ import {
   adminActivityQuerySchema,
   adminPeriodQuerySchema,
   idParamSchema,
+  addRoleSchema,
+  roleIdParamSchema,
 } from './types.js';
 
 export function registerAdminRoutes(
@@ -79,5 +81,24 @@ export function registerAdminRoutes(
     const { id } = request.params as { id: string };
     const data = await service.getUser(id);
     return reply.send({ data });
+  });
+
+  // POST /api/v3/admin/users/:id/roles — add role to user
+  app.post('/api/v3/admin/users/:id/roles', {
+    schema: { params: idParamSchema, body: addRoleSchema },
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { role_name } = request.body as { role_name: string };
+    const data = await service.addUserRole(id, role_name);
+    return reply.send({ data });
+  });
+
+  // DELETE /api/v3/admin/users/:id/roles/:roleId — remove role from user
+  app.delete('/api/v3/admin/users/:id/roles/:roleId', {
+    schema: { params: roleIdParamSchema },
+  }, async (request, reply) => {
+    const { roleId } = request.params as { id: string; roleId: string };
+    await service.removeUserRole(roleId);
+    return reply.send({ data: { success: true } });
   });
 }

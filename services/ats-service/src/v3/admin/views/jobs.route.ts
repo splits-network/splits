@@ -36,6 +36,16 @@ export function registerAdminJobsView(app: FastifyInstance, supabase: SupabaseCl
         return reply.send({ data });
     });
 
+    // PATCH /v3/admin/jobs/:id — update job fields
+    app.patch('/v3/admin/jobs/:id', {
+        schema: { params: idParamSchema },
+    }, async (request, reply) => {
+        const { id } = request.params as { id: string };
+        const updates = request.body as Record<string, unknown>;
+        const data = await repository.updateJob(id, updates);
+        return reply.send({ data });
+    });
+
     // PATCH /v3/admin/jobs/:id/status
     app.patch('/v3/admin/jobs/:id/status', {
         schema: { params: idParamSchema },

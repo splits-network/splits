@@ -39,10 +39,35 @@ export class AdminJobsRepository {
   }
 
   async findByIdForAdmin(id: string): Promise<any> {
-    const { data, error } = await this.supabase
+    const { data: job, error } = await this.supabase
       .from('jobs')
       .select('*, company:companies(id, name, logo_url, industry)')
       .eq('id', id)
+      .single();
+
+    if (error) throw error;
+
+    // Fetch application stage counts for pipeline view
+    const { data: apps } = await this.supabase
+      .from('applications')
+      .select('stage')
+      .eq('job_id', id);
+
+    const stageCounts: Record<string, number> = {};
+    for (const app of apps ?? []) {
+      const stage = app.stage ?? 'unknown';
+      stageCounts[stage] = (stageCounts[stage] || 0) + 1;
+    }
+
+    return { ...job, stage_counts: stageCounts };
+  }
+
+  async updateJob(id: string, updates: Record<string, unknown>): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('jobs')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
       .single();
 
     if (error) throw error;

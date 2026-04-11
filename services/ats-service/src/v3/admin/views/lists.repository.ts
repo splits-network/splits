@@ -19,6 +19,37 @@ function buildPagination(total: number, page: number, limit: number) {
 export class AdminListsRepository {
   constructor(private supabase: SupabaseClient) {}
 
+  async getApplicationById(id: string): Promise<any> {
+    const { data: app, error } = await this.supabase
+      .from('applications')
+      .select('*, job:jobs(id, title, status, company:companies(id, name)), candidate:candidates(id, first_name, last_name, email, phone, location, resume_status)')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+
+    // Fetch notes for this application (stage changes, admin notes, etc.)
+    const { data: notes } = await this.supabase
+      .from('application_notes')
+      .select('id, note_type, visibility, body, author_name, created_at')
+      .eq('application_id', id)
+      .order('created_at', { ascending: true });
+
+    return { ...app, notes: notes ?? [] };
+  }
+
+  async updateApplicationStage(id: string, stage: string): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('applications')
+      .update({ stage, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   async listApplications(params: AdminListParams) {
     const { page, limit, offset } = paginate(params);
     const sortBy = params.sort_by || 'created_at';

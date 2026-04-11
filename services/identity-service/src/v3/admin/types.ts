@@ -40,6 +40,24 @@ export const adminPeriodQuerySchema = {
   },
 };
 
+export const addRoleSchema = {
+  type: 'object',
+  required: ['role_name'],
+  properties: {
+    role_name: { type: 'string' },
+  },
+  additionalProperties: false,
+};
+
+export const roleIdParamSchema = {
+  type: 'object',
+  required: ['id', 'roleId'],
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    roleId: { type: 'string', format: 'uuid' },
+  },
+};
+
 export const idParamSchema = {
   type: 'object',
   required: ['id'],

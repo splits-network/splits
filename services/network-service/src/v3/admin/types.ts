@@ -46,6 +46,24 @@ export const idParamSchema = {
   properties: { id: { type: 'string', format: 'uuid' } },
 };
 
+export const recruiterUpdateSchema = {
+  type: 'object',
+  properties: {
+    bio: { type: 'string' },
+    tagline: { type: 'string' },
+    location: { type: 'string' },
+    phone: { type: 'string' },
+    years_experience: { type: 'integer' },
+    industries: { type: 'array', items: { type: 'string' } },
+    specialties: { type: 'array', items: { type: 'string' } },
+    candidate_recruiter: { type: 'boolean' },
+    company_recruiter: { type: 'boolean' },
+    marketplace_enabled: { type: 'boolean' },
+    marketplace_visibility: { type: 'string', enum: ['public', 'limited', 'hidden'] },
+  },
+  additionalProperties: false,
+};
+
 export const statsQuerySchema = {
   type: 'object',
   properties: {

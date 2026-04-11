@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { AdminDataTable, type Column } from '@/components/shared';
 import { RecruiterActions } from './recruiter-actions';
 
@@ -44,6 +45,7 @@ export function RecruiterTable({
     onSort,
     onRefresh,
 }: RecruiterTableProps) {
+    const router = useRouter();
     const columns: Column<Recruiter>[] = [
         {
             key: 'user',
@@ -100,6 +102,7 @@ export function RecruiterTable({
             sortField={sortField}
             sortDir={sortDir}
             onSort={onSort}
+            onRowClick={(item) => router.push(`/secure/recruiters/${item.id}`)}
             emptyTitle="No recruiters found"
             emptyDescription="No recruiters match the current filters."
             actions={(item) => (
