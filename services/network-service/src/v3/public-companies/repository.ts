@@ -126,24 +126,58 @@ export class PublicCompanyRepository {
     const limit = Math.min(params.limit || 20, 100);
     const offset = (page - 1) * limit;
 
-    const JOB_SELECT = [
-      'id', 'title', 'description', 'candidate_description', 'location',
-      'employment_type', 'job_level', 'salary_min', 'salary_max',
-      'show_salary_range', 'commute_types', 'status', 'created_at',
-      'source_firm_id',
-      'company:companies!inner(id, name, logo_url, headquarters_location, industry, description)',
-      'skills:job_skills(id, skill_id, is_required, skill:skills(id, name))',
-    ].join(', ');
-
     const { data, error, count } = await this.supabase
       .from('jobs')
-      .select(JOB_SELECT, { count: 'exact' })
+      .select(`
+        id, title, candidate_description, description, location,
+        employment_type, commute_types, job_level,
+        salary_min, salary_max, show_salary_range,
+        status, created_at, source_firm_id,
+        company:companies(id, name, logo_url, headquarters_location, industry, description),
+        firm:firms(id, name, logo_url)
+      `, { count: 'exact' })
       .eq('company_id', companyId)
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) throw error;
-    return { data: data || [], total: count || 0 };
+
+    const jobs = data || [];
+    const jobIds = jobs.map((j: any) => j.id);
+
+    // Batch fetch skills (same pattern as ats-service candidate-listing)
+    const skillsMap = await this.batchFetchJobSkills(jobIds);
+
+    // Shape response: enforce salary visibility, attach skills
+    const shaped = jobs.map((job: any) => {
+      const result: any = {
+        ...job,
+        skills: skillsMap[job.id] || [],
+      };
+      if (!job.show_salary_range) {
+        delete result.salary_min;
+        delete result.salary_max;
+      }
+      delete result.show_salary_range;
+      return result;
+    });
+
+    return { data: shaped, total: count || 0 };
+  }
+
+  private async batchFetchJobSkills(jobIds: string[]): Promise<Record<string, any[]>> {
+    if (jobIds.length === 0) return {};
+    const { data } = await this.supabase
+      .from('job_skills')
+      .select('job_id, is_required, skill:skills(id, name)')
+      .in('job_id', jobIds);
+
+    const map: Record<string, any[]> = {};
+    for (const s of data || []) {
+      if (!map[s.job_id]) map[s.job_id] = [];
+      map[s.job_id].push(s);
+    }
+    return map;
   }
 }
