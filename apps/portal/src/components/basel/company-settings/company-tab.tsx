@@ -7,7 +7,10 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { BaselFormField } from "@splits-network/basel-ui";
 import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
 import type { Company } from "@/app/portal/company/settings/types";
-import { CompanyDetailsSection } from "./company-details-section";
+import {
+    CompanyDetailsSection,
+    type SocialLinkEntry,
+} from "./company-details-section";
 
 const COMPANY_SIZES = [
     { value: "1-10", label: "1-10 employees" },
@@ -58,10 +61,14 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
         stage: company?.stage || "",
         founded_year: company?.founded_year?.toString() || "",
         tagline: company?.tagline || "",
-        linkedin_url: company?.linkedin_url || "",
-        twitter_url: company?.twitter_url || "",
-        glassdoor_url: company?.glassdoor_url || "",
     });
+
+    const [socialLinks, setSocialLinks] = useState<SocialLinkEntry[]>(
+        (company?.social_links || []).map((l) => ({
+            url: l.url,
+            label: l.label || "",
+        })),
+    );
 
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -89,6 +96,14 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
 
             const client = createAuthenticatedClient(token);
 
+            // Filter out empty social links and strip empty labels
+            const cleanedLinks = socialLinks
+                .filter((l) => l.url.trim())
+                .map((l) => ({
+                    url: l.url.trim(),
+                    ...(l.label.trim() ? { label: l.label.trim() } : {}),
+                }));
+
             const payload = {
                 ...formData,
                 founded_year: formData.founded_year
@@ -96,9 +111,7 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
                     : null,
                 stage: formData.stage || null,
                 tagline: formData.tagline || null,
-                linkedin_url: formData.linkedin_url || null,
-                twitter_url: formData.twitter_url || null,
-                glassdoor_url: formData.glassdoor_url || null,
+                social_links: cleanedLinks,
             };
 
             if (company) {
@@ -255,10 +268,9 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
                         stage={formData.stage}
                         founded_year={formData.founded_year}
                         tagline={formData.tagline}
-                        linkedin_url={formData.linkedin_url}
-                        twitter_url={formData.twitter_url}
-                        glassdoor_url={formData.glassdoor_url}
+                        socialLinks={socialLinks}
                         onChange={handleChange}
+                        onSocialLinksChange={setSocialLinks}
                     />
                 </div>
 
@@ -282,7 +294,9 @@ export function CompanyTab({ company, organizationId }: CompanyTabProps) {
                         >
                             <ButtonLoading
                                 loading={saving}
-                                text={company ? "Save Company" : "Create Company"}
+                                text={
+                                    company ? "Save Company" : "Create Company"
+                                }
                                 loadingText="Saving..."
                                 icon="fa-duotone fa-regular fa-floppy-disk"
                             />

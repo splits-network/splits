@@ -1,3 +1,8 @@
+export interface SocialLink {
+    url: string;
+    label?: string | null;
+}
+
 export interface PublicCompany {
     id: string;
     name: string;
@@ -5,15 +10,19 @@ export interface PublicCompany {
     tagline?: string | null;
     description?: string | null;
     logo_url?: string | null;
+    banner_url?: string | null;
     website?: string | null;
     industry?: string | null;
     company_size?: string | null;
     headquarters_location?: string | null;
     stage?: string | null;
     founded_year?: number | null;
-    linkedin_url?: string | null;
-    glassdoor_url?: string | null;
-    twitter_url?: string | null;
+    mission_statement?: string | null;
+    benefits_summary?: string | null;
+    employee_count?: number | null;
+    tech_stack?: string | null;
+    hiring_process?: string | null;
+    social_links?: SocialLink[] | null;
     open_roles_count: number;
     created_at: string;
 }

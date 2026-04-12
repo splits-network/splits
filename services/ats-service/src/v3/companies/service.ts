@@ -103,6 +103,20 @@ export class CompanyService {
     if (input.name !== undefined && !input.name.trim()) {
       throw new BadRequestError('Company name cannot be empty');
     }
+    if (input.slug !== undefined && input.slug) {
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.slug)) {
+        throw new BadRequestError('Slug must be lowercase alphanumeric with hyphens only');
+      }
+      const taken = await this.repository.isSlugTaken(input.slug, id);
+      if (taken) throw new BadRequestError('This slug is already taken');
+    }
+    if (input.social_links) {
+      for (const link of input.social_links) {
+        try { new URL(link.url); } catch {
+          throw new BadRequestError(`Invalid URL in social links: ${link.url}`);
+        }
+      }
+    }
 
     const context = await this.accessResolver.resolve(clerkUserId);
     if (!context.isPlatformAdmin) {

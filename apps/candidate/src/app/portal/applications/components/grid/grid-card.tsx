@@ -205,7 +205,7 @@ export function GridCard({
                             <img
                                 src={app.job.company.logo_url}
                                 alt={name}
-                                className="w-7 h-7 object-contain bg-base-100 border border-base-300 p-0.5"
+                                className="w-7 h-7 object-contain bg-base-200 border border-base-300 p-0.5"
                             />
                         ) : (
                             <div className="w-7 h-7 flex items-center justify-center bg-base-200 border border-base-300 text-sm font-bold text-base-content/60">

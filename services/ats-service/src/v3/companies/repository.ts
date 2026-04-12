@@ -127,6 +127,13 @@ export class CompanyRepository {
     return data;
   }
 
+  async isSlugTaken(slug: string, excludeId?: string): Promise<boolean> {
+    let query = this.supabase.from('companies').select('id').eq('slug', slug);
+    if (excludeId) query = query.neq('id', excludeId);
+    const { data } = await query.maybeSingle();
+    return !!data;
+  }
+
   async delete(id: string): Promise<void> {
     const { error } = await this.supabase
       .from('companies')

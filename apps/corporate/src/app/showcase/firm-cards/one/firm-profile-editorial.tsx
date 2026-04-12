@@ -75,7 +75,7 @@ function HeroHeader({ firm }: { firm: FirmProfileData }) {
                             <img
                                 src={firm.logoUrl}
                                 alt={`${firm.name} logo`}
-                                className="shrink-0 w-20 h-20 lg:w-24 lg:h-24 object-contain bg-base-100"
+                                className="shrink-0 w-20 h-20 lg:w-24 lg:h-24 object-contain bg-base-200 border border-base-300"
                             />
                         ) : (
                             <div className="shrink-0 w-20 h-20 lg:w-24 lg:h-24 bg-primary text-primary-content flex items-center justify-center text-2xl lg:text-3xl font-black tracking-tight select-none">

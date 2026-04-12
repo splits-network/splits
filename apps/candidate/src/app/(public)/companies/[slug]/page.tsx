@@ -75,8 +75,8 @@ export default async function CompanyDetailPage({ params }: Props) {
         ...(company.founded_year
             ? { foundingDate: String(company.founded_year) }
             : {}),
-        ...(company.linkedin_url
-            ? { sameAs: [company.linkedin_url] }
+        ...(company.social_links?.length
+            ? { sameAs: company.social_links.map((l) => l.url) }
             : {}),
     };
 

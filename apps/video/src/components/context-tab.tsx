@@ -84,7 +84,7 @@ function EntityCard({ entity }: { entity: EntityData }) {
                     <img
                         src={entity.logo_url}
                         alt={entity.name}
-                        className="w-10 h-10 rounded-none object-contain bg-base-100 p-1"
+                        className="w-10 h-10 rounded-none object-contain bg-base-200 border border-base-300 p-1"
                     />
                 ) : (
                     <div className="w-10 h-10 rounded-none bg-base-300 flex items-center justify-center">

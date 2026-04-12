@@ -44,7 +44,7 @@ export function CompanyCardEditorial({ company }: { company: CompanyCardData }) 
                             <img
                                 src={company.logoUrl}
                                 alt={`${company.name} logo`}
-                                className="w-16 h-16 object-contain bg-base-100"
+                                className="w-16 h-16 object-contain bg-base-200 border border-base-300"
                             />
                         ) : (
                             <div className="w-16 h-16 bg-primary text-primary-content flex items-center justify-center text-xl font-black tracking-tight select-none">

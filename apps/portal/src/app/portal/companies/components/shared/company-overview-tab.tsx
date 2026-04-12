@@ -7,6 +7,7 @@ import { formatStatus, formatSalary } from "./helpers";
 import { BaselBadge } from "@splits-network/basel-ui";
 import { MarkdownRenderer } from "@splits-network/shared-ui";
 import { BadgeGrid, useGamification } from "@splits-network/shared-gamification";
+import { getSocialIcon, getSocialLabel } from "@/lib/social-link-utils";
 
 export function CompanyOverviewTab({
     company,
@@ -125,23 +126,14 @@ export function CompanyOverviewTab({
             {/* Social Links */}
             <div>
                 <p className="text-sm font-bold uppercase tracking-[0.15em] text-base-content/30 mb-3">Social</p>
-                {company.linkedin_url || company.twitter_url || company.glassdoor_url ? (
-                    <div className="flex items-center gap-4">
-                        {company.linkedin_url && (
-                            <a href={company.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold text-primary hover:underline">
-                                <i className="fa-brands fa-linkedin text-lg" /> LinkedIn
+                {company.social_links && company.social_links.length > 0 ? (
+                    <div className="flex flex-wrap items-center gap-4">
+                        {company.social_links.map((link, i) => (
+                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+                                <i className={`${getSocialIcon(link.url)} text-lg`} />
+                                {getSocialLabel(link.url, link.label)}
                             </a>
-                        )}
-                        {company.twitter_url && (
-                            <a href={company.twitter_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold text-primary hover:underline">
-                                <i className="fa-brands fa-x-twitter text-lg" /> X / Twitter
-                            </a>
-                        )}
-                        {company.glassdoor_url && (
-                            <a href={company.glassdoor_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold text-primary hover:underline">
-                                <i className="fa-duotone fa-regular fa-star text-lg" /> Glassdoor
-                            </a>
-                        )}
+                        ))}
                     </div>
                 ) : (
                     <p className="text-sm text-base-content/30 italic">No social links provided</p>

@@ -21,13 +21,21 @@ export default function HeroSection({ company }: HeroSectionProps) {
     const initials = companyInitials(company.name);
 
     return (
-        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary">
-            <div
-                className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
-                style={{
-                    clipPath: "polygon(15% 0,100% 0,100% 100%,0% 100%)",
-                }}
-            />
+        <header className="relative bg-base-300 text-base-content border-l-4 border-l-primary overflow-hidden">
+            {company.banner_url ? (
+                <div
+                    className="absolute inset-0 bg-cover bg-center opacity-15"
+                    style={{ backgroundImage: `url(${company.banner_url})` }}
+                />
+            ) : (
+                <div
+                    className="absolute top-0 right-0 w-2/5 h-full bg-primary/10"
+                    style={{
+                        clipPath:
+                            "polygon(15% 0,100% 0,100% 100%,0% 100%)",
+                    }}
+                />
+            )}
             <div className="relative px-8 pt-10 pb-0">
                 {/* Kicker row */}
                 <div className="flex items-center justify-between mb-8">
@@ -50,7 +58,7 @@ export default function HeroSection({ company }: HeroSectionProps) {
                                 <img
                                     src={company.logo_url}
                                     alt={`${company.name} logo`}
-                                    className="w-20 h-20 lg:w-24 lg:h-24 object-contain bg-base-100"
+                                    className="w-20 h-20 lg:w-24 lg:h-24 object-contain bg-base-200 border border-base-300"
                                 />
                             ) : (
                                 <div className="w-20 h-20 lg:w-24 lg:h-24 bg-primary text-primary-content flex items-center justify-center text-2xl lg:text-3xl font-black tracking-tight select-none">
@@ -111,17 +119,6 @@ export default function HeroSection({ company }: HeroSectionProps) {
                             >
                                 <i className="fa-duotone fa-regular fa-arrow-up-right-from-square" />
                                 Website
-                            </a>
-                        )}
-                        {company.linkedin_url && (
-                            <a
-                                href={company.linkedin_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="scroll-reveal fade-up btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider"
-                            >
-                                <i className="fa-brands fa-linkedin-in" />
-                                LinkedIn
                             </a>
                         )}
                         <button className="scroll-reveal fade-up btn btn-ghost btn-sm border-neutral-content/20 font-bold uppercase tracking-wider">

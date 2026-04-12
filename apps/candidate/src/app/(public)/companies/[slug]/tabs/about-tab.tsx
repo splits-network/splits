@@ -35,6 +35,18 @@ export function AboutTab({ company }: AboutTabProps) {
                 </div>
             )}
 
+            {/* Mission Statement */}
+            {company.mission_statement && (
+                <div className="scroll-reveal fade-up profile-section border-l-4 border-l-secondary pl-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                        Our Mission
+                    </p>
+                    <p className="text-base text-base-content/70 leading-relaxed">
+                        {company.mission_statement}
+                    </p>
+                </div>
+            )}
+
             {/* Company Details */}
             <div className="scroll-reveal fade-up profile-section">
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">
@@ -61,6 +73,16 @@ export function AboutTab({ company }: AboutTabProps) {
                             </p>
                         </div>
                     )}
+                    {company.employee_count && (
+                        <div className="bg-base-200 border border-base-300 px-4 py-3">
+                            <p className="text-xs font-bold uppercase tracking-wider text-base-content/30 mb-1">
+                                Employees
+                            </p>
+                            <p className="text-sm font-semibold text-base-content/70">
+                                {company.employee_count.toLocaleString()}
+                            </p>
+                        </div>
+                    )}
                     {company.stage && (
                         <div className="bg-base-200 border border-base-300 px-4 py-3">
                             <p className="text-xs font-bold uppercase tracking-wider text-base-content/30 mb-1">
@@ -83,6 +105,18 @@ export function AboutTab({ company }: AboutTabProps) {
                     )}
                 </div>
             </div>
+
+            {/* Hiring Process */}
+            {company.hiring_process && (
+                <div className="scroll-reveal fade-up profile-section border-l-4 border-l-accent pl-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                        Hiring Process
+                    </p>
+                    <p className="text-base text-base-content/70 leading-relaxed whitespace-pre-line">
+                        {company.hiring_process}
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

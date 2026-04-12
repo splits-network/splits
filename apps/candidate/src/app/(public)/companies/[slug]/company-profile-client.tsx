@@ -67,7 +67,7 @@ export default function CompanyProfileClient({
                 }))}
                 active={activeTab}
                 onChange={(v) => setActiveTab(v as TabKey)}
-                className="bg-base-100 border-b border-base-300 max-w-6xl mx-auto px-8"
+                className="bg-base-100 border-b border-base-300 mx-auto px-8"
             />
 
             <div className="mx-auto px-8 py-12">
