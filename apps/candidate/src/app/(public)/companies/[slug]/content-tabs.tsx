@@ -25,7 +25,7 @@ export default function ContentTabs({
                 <OpenJobsTab company={company} />
             )}
             {activeTab === "culture" && (
-                <CultureTab profile={profile} />
+                <CultureTab company={company} profile={profile} />
             )}
         </>
     );

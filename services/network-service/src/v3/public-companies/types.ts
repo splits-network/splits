@@ -20,9 +20,10 @@ export interface PublicCompanyJobsParams {
 }
 
 export const PUBLIC_COMPANY_SELECT = [
-  'id', 'name', 'slug', 'tagline', 'description', 'logo_url',
+  'id', 'name', 'slug', 'tagline', 'description', 'logo_url', 'banner_url',
   'website', 'industry', 'company_size', 'headquarters_location',
-  'stage', 'founded_year', 'linkedin_url', 'twitter_url', 'glassdoor_url',
+  'stage', 'founded_year', 'mission_statement', 'benefits_summary',
+  'employee_count', 'tech_stack', 'hiring_process', 'social_links',
   'created_at',
 ].join(', ');
 

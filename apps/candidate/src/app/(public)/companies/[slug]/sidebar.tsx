@@ -1,6 +1,7 @@
 "use client";
 
 import type { PublicCompany, PublicCompanyProfile } from "../types";
+import { getSocialIcon, getSocialLabel } from "./social-link-utils";
 
 interface SidebarProps {
     company: PublicCompany;
@@ -16,52 +17,13 @@ function extractDomain(url: string): string {
 }
 
 export default function Sidebar({ company, profile }: SidebarProps) {
-    const linkItems = [
-        company.website
-            ? {
-                  icon: "fa-duotone fa-regular fa-globe",
-                  label: "Website",
-                  value: extractDomain(company.website),
-                  href: company.website,
-              }
-            : null,
-        company.linkedin_url
-            ? {
-                  icon: "fa-brands fa-linkedin-in",
-                  label: "LinkedIn",
-                  value: "LinkedIn",
-                  href: company.linkedin_url,
-              }
-            : null,
-        company.glassdoor_url
-            ? {
-                  icon: "fa-duotone fa-regular fa-star",
-                  label: "Glassdoor",
-                  value: "Glassdoor",
-                  href: company.glassdoor_url,
-              }
-            : null,
-        company.twitter_url
-            ? {
-                  icon: "fa-brands fa-x-twitter",
-                  label: "Twitter/X",
-                  value: "Twitter/X",
-                  href: company.twitter_url,
-              }
-            : null,
-    ].filter(Boolean) as {
-        icon: string;
-        label: string;
-        value: string;
-        href: string;
-    }[];
-
+    const socialLinks = company.social_links || [];
     const reputation = profile?.reputation;
 
     return (
         <aside className="space-y-6">
             {/* Links card */}
-            {linkItems.length > 0 && (
+            {(company.website || socialLinks.length > 0) && (
                 <div className="scroll-reveal fade-up sidebar-card bg-base-200 border border-base-300 border-l-4 border-l-primary">
                     <div className="px-6 py-4 border-b border-base-300">
                         <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/40">
@@ -69,25 +31,47 @@ export default function Sidebar({ company, profile }: SidebarProps) {
                         </p>
                     </div>
                     <div className="divide-y divide-base-300">
-                        {linkItems.map((item) => (
+                        {company.website && (
                             <a
-                                key={item.label}
-                                href={item.href}
+                                href={company.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-4 px-6 py-4 hover:bg-base-300/50 transition-colors"
+                            >
+                                <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0">
+                                    <i className="fa-duotone fa-regular fa-globe text-primary text-xs" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-0.5">
+                                        Website
+                                    </p>
+                                    <p className="text-sm font-semibold text-base-content truncate">
+                                        {extractDomain(company.website)}
+                                    </p>
+                                </div>
+                                <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs text-base-content/20 ml-auto" />
+                            </a>
+                        )}
+                        {socialLinks.map((link, i) => (
+                            <a
+                                key={i}
+                                href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-4 px-6 py-4 hover:bg-base-300/50 transition-colors"
                             >
                                 <div className="w-8 h-8 bg-primary/10 flex items-center justify-center shrink-0">
                                     <i
-                                        className={`${item.icon} text-primary text-xs`}
+                                        className={`${getSocialIcon(link.url)} text-primary text-xs`}
                                     />
                                 </div>
                                 <div className="min-w-0">
                                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-base-content/30 mb-0.5">
-                                        {item.label}
+                                        {getSocialLabel(link.url, link.label)}
                                     </p>
                                     <p className="text-sm font-semibold text-base-content truncate">
-                                        {item.value}
+                                        {link.label ||
+                                            getSocialLabel(link.url)}
                                     </p>
                                 </div>
                                 <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-xs text-base-content/20 ml-auto" />
@@ -120,6 +104,16 @@ export default function Sidebar({ company, profile }: SidebarProps) {
                             </span>
                             <span className="text-sm font-black text-base-content">
                                 {company.company_size}
+                            </span>
+                        </div>
+                    )}
+                    {company.employee_count && (
+                        <div className="flex items-center justify-between px-6 py-4">
+                            <span className="text-sm text-base-content/50">
+                                Employees
+                            </span>
+                            <span className="text-sm font-black text-base-content">
+                                {company.employee_count.toLocaleString()}
                             </span>
                         </div>
                     )}

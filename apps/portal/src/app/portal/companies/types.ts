@@ -18,9 +18,7 @@ export interface Company {
     stage?: string;
     founded_year?: number;
     tagline?: string;
-    linkedin_url?: string;
-    twitter_url?: string;
-    glassdoor_url?: string;
+    social_links?: { url: string; label?: string }[];
     open_roles_count?: number;
     avg_salary?: number | null;
 }

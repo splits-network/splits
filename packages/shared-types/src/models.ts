@@ -155,6 +155,11 @@ export interface Membership {
 // ATS domain types
 export type CompanyStage = 'Seed' | 'Series A' | 'Series B' | 'Series C' | 'Growth' | 'Public' | 'Bootstrapped' | 'Non-Profit';
 
+export interface CompanySocialLink {
+    url: string;
+    label?: string;
+}
+
 export interface Company {
     id: string;
     identity_organization_id?: string;
@@ -166,12 +171,18 @@ export interface Company {
     headquarters_location?: string;
     description?: string;
     logo_url?: string;
+    logo_path?: string;
+    banner_url?: string;
+    banner_path?: string;
     stage?: CompanyStage;
     founded_year?: number;
     tagline?: string;
-    linkedin_url?: string;
-    twitter_url?: string;
-    glassdoor_url?: string;
+    mission_statement?: string;
+    benefits_summary?: string;
+    employee_count?: number;
+    tech_stack?: string;
+    hiring_process?: string;
+    social_links?: CompanySocialLink[];
     marketplace_visible?: boolean;
     marketplace_approved_at?: string;
     created_at: Date;

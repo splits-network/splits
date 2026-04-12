@@ -1,18 +1,24 @@
 "use client";
 
-import type { PublicCompanyProfile } from "../../types";
+import type { PublicCompany, PublicCompanyProfile } from "../../types";
 import { BaselBadge } from "@splits-network/basel-ui";
 
 interface CultureTabProps {
+    company: PublicCompany;
     profile: PublicCompanyProfile | null;
 }
 
-export function CultureTab({ profile }: CultureTabProps) {
+export function CultureTab({ company, profile }: CultureTabProps) {
     const perks = profile?.perks || [];
     const cultureTags = profile?.culture_tags || [];
     const skills = profile?.skills || [];
 
-    const hasData = perks.length > 0 || cultureTags.length > 0 || skills.length > 0;
+    const hasData =
+        perks.length > 0 ||
+        cultureTags.length > 0 ||
+        skills.length > 0 ||
+        !!company.benefits_summary ||
+        !!company.tech_stack;
 
     if (!hasData) {
         return (
@@ -53,6 +59,18 @@ export function CultureTab({ profile }: CultureTabProps) {
 
     return (
         <div className="space-y-10">
+            {/* Benefits Summary */}
+            {company.benefits_summary && (
+                <div className="scroll-reveal fade-up profile-section border-l-4 border-l-secondary pl-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                        Benefits Overview
+                    </p>
+                    <p className="text-base text-base-content/70 leading-relaxed whitespace-pre-line">
+                        {company.benefits_summary}
+                    </p>
+                </div>
+            )}
+
             {/* Culture Tags */}
             {cultureTags.length > 0 && (
                 <div className="scroll-reveal fade-up profile-section">
@@ -117,7 +135,19 @@ export function CultureTab({ profile }: CultureTabProps) {
                 </div>
             )}
 
-            {/* Tech Skills */}
+            {/* Tech Stack (free text) */}
+            {company.tech_stack && (
+                <div className="scroll-reveal fade-up profile-section border-l-4 border-l-accent pl-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-3">
+                        Tech Stack
+                    </p>
+                    <p className="text-base text-base-content/70 leading-relaxed whitespace-pre-line">
+                        {company.tech_stack}
+                    </p>
+                </div>
+            )}
+
+            {/* Tech Skills (structured) */}
             {skills.length > 0 && (
                 <div className="scroll-reveal fade-up profile-section">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-base-content/30 mb-4">

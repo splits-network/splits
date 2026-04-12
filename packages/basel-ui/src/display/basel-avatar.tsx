@@ -100,7 +100,7 @@ export function BaselAvatar({
                 <img
                     src={src}
                     alt={alt || initials}
-                    className={`${cfg.box} object-contain border border-base-300`}
+                    className={`${cfg.box} object-contain bg-base-200 border border-base-300`}
                 />
             ) : (
                 <div

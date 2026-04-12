@@ -68,7 +68,7 @@ export default function HeroSection({
                                 <img
                                     src={firm.logo_url}
                                     alt={`${firm.name} logo`}
-                                    className="w-20 h-20 lg:w-24 lg:h-24 object-contain bg-base-100"
+                                    className="w-20 h-20 lg:w-24 lg:h-24 object-contain bg-base-200 border border-base-300"
                                 />
                             ) : (
                                 <div className="w-20 h-20 lg:w-24 lg:h-24 bg-primary text-primary-content flex items-center justify-center text-2xl lg:text-3xl font-black tracking-tight select-none">

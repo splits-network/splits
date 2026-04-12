@@ -22,6 +22,13 @@ export function HeroStats({ company }: HeroStatsProps) {
                   icon: "fa-duotone fa-regular fa-users",
               }
             : null,
+        company.employee_count
+            ? {
+                  label: "Employees",
+                  value: company.employee_count.toLocaleString(),
+                  icon: "fa-duotone fa-regular fa-people-group",
+              }
+            : null,
         company.open_roles_count > 0
             ? {
                   label: "Open Roles",
@@ -43,7 +50,7 @@ export function HeroStats({ company }: HeroStatsProps) {
                   icon: "fa-duotone fa-regular fa-chart-line",
               }
             : null,
-    ].filter(Boolean) as { label: string; value: string; icon: string }[];
+    ].filter(Boolean).slice(0, 4) as { label: string; value: string; icon: string }[];
 
     if (stats.length === 0) return null;
 

@@ -46,7 +46,7 @@ export function GridCard({ firm }: GridCardProps) {
                             <img
                                 src={firm.logo_url}
                                 alt={`${firm.name} logo`}
-                                className="w-12 h-12 object-contain bg-base-100"
+                                className="w-12 h-12 object-contain bg-base-200 border border-base-300"
                             />
                         ) : (
                             <div className="w-12 h-12 bg-primary text-primary-content flex items-center justify-center text-sm font-black tracking-tight select-none">
