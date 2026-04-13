@@ -76,6 +76,11 @@ export function ControlsBar({
                     <BaselViewModeSelector
                         viewMode={viewMode}
                         onViewModeChange={onViewModeChange}
+                        modes={[
+                            { mode: "table", icon: "fa-table-list", label: "Table" },
+                            { mode: "grid", icon: "fa-grid-2", label: "Grid" },
+                            { mode: "split", icon: "fa-columns-3", label: "Split" },
+                        ]}
                     />
                 </>
             }
