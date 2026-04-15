@@ -52,7 +52,21 @@ export class ConnectService {
     if (!context.recruiterId) throw new ForbiddenError('Recruiter access required');
 
     const recruiter = await this.repository.getRecruiterById(context.recruiterId);
-    if (!recruiter?.stripe_connect_account_id) throw new NotFoundError('StripeConnect', context.recruiterId);
+    if (!recruiter?.stripe_connect_account_id) {
+      return {
+        account_id: null,
+        account_type: null,
+        charges_enabled: false,
+        payouts_enabled: false,
+        details_submitted: false,
+        requirements: null,
+        onboarded: false,
+        recruiter_id: context.recruiterId,
+        bank_account: null,
+        payout_schedule: null,
+        pending_balance: 0,
+      };
+    }
 
     const account = await this.safeRetrieveAccount(recruiter.stripe_connect_account_id);
     const onboarded = !!account.charges_enabled && !!account.payouts_enabled && !!account.details_submitted;

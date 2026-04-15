@@ -100,7 +100,7 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
             if (data) {
                 const requirements = data.requirements || {};
                 setAccountData({
-                    hasAccount: true,
+                    hasAccount: !!data.account_id,
                     accountId: data.account_id,
                     onboarded: !!data.onboarded,
                     detailsSubmitted: !!data.details_submitted,
@@ -113,18 +113,7 @@ export function useStripeConnectStatus(): StripeConnectStatusState {
                 });
             }
         } catch (err: any) {
-            if (
-                err?.message?.includes("not found") ||
-                err?.status === 404
-            ) {
-                setAccountData((prev) => ({
-                    ...prev,
-                    hasAccount: false,
-                    accountId: null,
-                }));
-            } else {
-                setError(err?.message || "Failed to load payout status");
-            }
+            setError(err?.message || "Failed to load payout status");
         } finally {
             setLoading(false);
         }

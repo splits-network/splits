@@ -42,9 +42,7 @@ export class FirmBillingService {
 
   async getProfile(firmId: string, clerkUserId: string) {
     await this.requireFirmAccess(clerkUserId, firmId);
-    const profile = await this.repository.findByFirmId(firmId);
-    if (!profile) throw new NotFoundError('FirmBillingProfile', firmId);
-    return profile;
+    return (await this.repository.findByFirmId(firmId)) ?? null;
   }
 
   async createProfile(firmId: string, input: any, clerkUserId: string) {

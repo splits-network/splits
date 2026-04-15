@@ -64,7 +64,20 @@ export class FirmConnectService {
   async getAccountStatus(clerkUserId: string, firmId: string) {
     await this.requireFirmAdmin(clerkUserId, firmId);
     const firmAccount = await this.repository.getByFirmId(firmId);
-    if (!firmAccount?.stripe_connect_account_id) throw new NotFoundError('FirmConnect', firmId);
+    if (!firmAccount?.stripe_connect_account_id) {
+      return {
+        account_id: null,
+        firm_id: firmId,
+        charges_enabled: false,
+        payouts_enabled: false,
+        details_submitted: false,
+        requirements: null,
+        onboarded: false,
+        bank_account: null,
+        payout_schedule: null,
+        pending_balance: 0,
+      };
+    }
 
     const account = await this.safeRetrieveAccount(firmAccount.stripe_connect_account_id);
     const onboarded = !!account.charges_enabled && !!account.payouts_enabled && !!account.details_submitted;
