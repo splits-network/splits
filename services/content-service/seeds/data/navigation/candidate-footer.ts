@@ -82,10 +82,10 @@ export const candidateFooterNav = {
             },
         ],
         trustStats: [
-            { value: "2,847", label: "Recruiters" },
-            { value: "518", label: "Companies" },
-            { value: "12,340", label: "Candidates" },
-            { value: "$42M+", label: "In Placements" },
+            { value: "One Click", label: "Apply to Any Role" },
+            { value: "$0", label: "Cost to Candidates" },
+            { value: "Specialist", label: "Recruiters by Field" },
+            { value: "Private", label: "Profile by Default" },
         ],
         legalLinks: [
             { label: "Privacy Policy", href: "/privacy-policy" },

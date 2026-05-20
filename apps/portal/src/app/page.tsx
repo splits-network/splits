@@ -19,7 +19,7 @@ const img = {
 
 const stats = [
     { value: "100%", label: "Recruiter Split" },
-    { value: "48hrs", label: "Avg. Response" },
+    { value: "No Exclusivity", label: "Work Any Role" },
     { value: "100%", label: "Fee Transparency" },
     { value: "$0", label: "Upfront Cost" },
 ];

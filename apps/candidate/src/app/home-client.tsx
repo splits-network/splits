@@ -18,10 +18,10 @@ const img = {
 /* ─── Data ────────────────────────────────────────────────────────────────── */
 
 const stats = [
-    { value: "10,000+", label: "Active Roles" },
-    { value: "500+", label: "Companies Hiring" },
-    { value: "2,000+", label: "Expert Recruiters" },
-    { value: "95%", label: "48hr Response" },
+    { value: "One Click", label: "Apply to Any Role" },
+    { value: "$0", label: "Cost to Candidates" },
+    { value: "Specialist", label: "Recruiters by Field" },
+    { value: "Private", label: "Profile by Default" },
 ];
 
 const steps = [

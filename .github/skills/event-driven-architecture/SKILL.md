@@ -3,9 +3,9 @@ name: event-driven-architecture
 description: Event-driven architecture patterns for RabbitMQ-based service coordination
 alwaysApply: false
 applyTo:
-  - "services/**/consumers/**"
-  - "services/**/v2/shared/events.ts"
-  - "packages/shared-job-queue/**"
+    - "services/**/consumers/**"
+    - "services/**/v2/shared/events.ts"
+    - "packages/shared-job-queue/**"
 ---
 
 # Event-Driven Architecture Skill
@@ -15,6 +15,7 @@ This skill provides guidance for event-driven patterns using RabbitMQ in Splits 
 ## Purpose
 
 Help developers implement reliable, decoupled service coordination:
+
 - **Event Publishing**: How services emit domain events
 - **Event Consumers**: How services react to events
 - **Event Schemas**: Standardized event structure
@@ -24,6 +25,7 @@ Help developers implement reliable, decoupled service coordination:
 ## When to Use This Skill
 
 Use this skill when:
+
 - Publishing domain events from services
 - Creating event consumers to react to domain changes
 - Designing event payloads
@@ -38,30 +40,34 @@ All V2 services use `EventPublisher` class for consistent event emission:
 
 ```typescript
 // services/ats-service/src/v2/shared/events.ts
-import { JobQueueClient } from '@splits-network/shared-job-queue';
+import { JobQueueClient } from "@splits-network/shared-job-queue";
 
 export class EventPublisher {
-  constructor(private queue: JobQueueClient) {}
+    constructor(private queue: JobQueueClient) {}
 
-  async publish(eventType: string, payload: Record<string, any>): Promise<void> {
-    try {
-      await this.queue.publish('domain.events', {
-        type: eventType,
-        payload,
-        timestamp: new Date().toISOString(),
-        service: 'ats-service',
-        version: '1.0'
-      });
-    } catch (error) {
-      console.error(`Failed to publish ${eventType}:`, error);
-      // Event publishing failures should not break the main operation
-      // Log and monitor, but don't throw
+    async publish(
+        eventType: string,
+        payload: Record<string, any>,
+    ): Promise<void> {
+        try {
+            await this.queue.publish("domain.events", {
+                type: eventType,
+                payload,
+                timestamp: new Date().toISOString(),
+                service: "ats-service",
+                version: "1.0",
+            });
+        } catch (error) {
+            console.error(`Failed to publish ${eventType}:`, error);
+            // Event publishing failures should not break the main operation
+            // Log and monitor, but don't throw
+        }
     }
-  }
 }
 ```
 
 **Key Rules**:
+
 - ✅ Always use `EventPublisher` class (don't publish directly)
 - ✅ Never throw errors from event publishing (log only)
 - ✅ Include service name and version in event metadata
@@ -75,29 +81,30 @@ Events follow `domain.action` pattern in past tense:
 
 ```typescript
 // Domain: jobs
-'job.created'
-'job.updated'
-'job.closed'
-'job.reopened'
+"job.created";
+"job.updated";
+"job.closed";
+"job.reopened";
 
 // Domain: applications
-'application.created'
-'application.stage_changed'
-'application.withdrawn'
-'application.accepted'
+"application.created";
+"application.stage_changed";
+"application.withdrawn";
+"application.accepted";
 
 // Domain: placements
-'placement.created'
-'placement.activated'
-'placement.completed'
+"placement.created";
+"placement.activated";
+"placement.completed";
 
 // Domain: recruiters
-'recruiter.created'
-'recruiter.status_changed'
-'recruiter.profile_updated'
+"recruiter.created";
+"recruiter.status_changed";
+"recruiter.profile_updated";
 ```
 
 **Pattern Rules**:
+
 - Use lowercase with underscores
 - Use past tense (what happened, not what will happen)
 - Be specific but concise
@@ -111,25 +118,26 @@ Events contain minimal, essential data:
 
 ```typescript
 // ✅ CORRECT - Minimal payload with IDs
-await this.eventPublisher.publish('application.stage_changed', {
-  applicationId: application.id,
-  candidateId: application.candidate_id,
-  jobId: application.job_id,
-  oldStage: previousStage,
-  newStage: application.stage,
-  changedBy: userContext.identityUserId,
-  changedAt: new Date().toISOString()
+await this.eventPublisher.publish("application.stage_changed", {
+    applicationId: application.id,
+    candidateId: application.candidate_id,
+    jobId: application.job_id,
+    oldStage: previousStage,
+    newStage: application.stage,
+    changedBy: userContext.identityUserId,
+    changedAt: new Date().toISOString(),
 });
 
 // ❌ WRONG - Including full objects
-await this.eventPublisher.publish('application.stage_changed', {
-  application: entireApplicationObject, // Too much data
-  candidate: entireCandidateObject,
-  job: entireJobObject
+await this.eventPublisher.publish("application.stage_changed", {
+    application: entireApplicationObject, // Too much data
+    candidate: entireCandidateObject,
+    job: entireJobObject,
 });
 ```
 
 **Payload Rules**:
+
 - ✅ Include primary resource ID
 - ✅ Include foreign key IDs for related entities
 - ✅ Include changed fields (old/new values)
@@ -146,57 +154,62 @@ Consumers use `DomainConsumer` class to process events:
 
 ```typescript
 // services/notification-service/src/consumers/applications.ts
-import { JobQueueClient } from '@splits-network/shared-job-queue';
+import { JobQueueClient } from "@splits-network/shared-job-queue";
 
 export class ApplicationEventsConsumer {
-  constructor(
-    private queue: JobQueueClient,
-    private notificationService: NotificationService
-  ) {}
+    constructor(
+        private queue: JobQueueClient,
+        private notificationService: NotificationService,
+    ) {}
 
-  async start(): Promise<void> {
-    // Subscribe to application events
-    await this.queue.subscribe('domain.events', 'notification-service', async (message) => {
-      const { type, payload } = message;
-      
-      try {
-        switch (type) {
-          case 'application.created':
-            await this.handleApplicationCreated(payload);
-            break;
-            
-          case 'application.stage_changed':
-            await this.handleApplicationStageChanged(payload);
-            break;
-            
-          case 'application.accepted':
-            await this.handleApplicationAccepted(payload);
-            break;
-            
-          default:
-            // Unknown event type - ignore silently
-            break;
-        }
-      } catch (error) {
-        console.error(`Error processing ${type}:`, error);
-        throw error; // Trigger retry
-      }
-    });
-  }
+    async start(): Promise<void> {
+        // Subscribe to application events
+        await this.queue.subscribe(
+            "domain.events",
+            "notification-service",
+            async (message) => {
+                const { type, payload } = message;
 
-  private async handleApplicationCreated(payload: any): Promise<void> {
-    const { applicationId, candidateId, jobId } = payload;
-    
-    // Fetch additional data if needed
-    const application = await this.fetchApplicationData(applicationId);
-    
-    // Send notification
-    await this.notificationService.sendApplicationCreatedEmail(application);
-  }
+                try {
+                    switch (type) {
+                        case "application.created":
+                            await this.handleApplicationCreated(payload);
+                            break;
+
+                        case "application.stage_changed":
+                            await this.handleApplicationStageChanged(payload);
+                            break;
+
+                        case "application.accepted":
+                            await this.handleApplicationAccepted(payload);
+                            break;
+
+                        default:
+                            // Unknown event type - ignore silently
+                            break;
+                    }
+                } catch (error) {
+                    console.error(`Error processing ${type}:`, error);
+                    throw error; // Trigger retry
+                }
+            },
+        );
+    }
+
+    private async handleApplicationCreated(payload: any): Promise<void> {
+        const { applicationId, candidateId, jobId } = payload;
+
+        // Fetch additional data if needed
+        const application = await this.fetchApplicationData(applicationId);
+
+        // Send notification
+        await this.notificationService.sendApplicationCreatedEmail(application);
+    }
 }
 ```
 
 **Consumer Rules**:
+
 - ✅ Handle only events you care about
 - ✅ Ignore unknown events silently
 - ✅ Fetch additional data as needed (don't rely on payload having everything)
@@ -233,15 +246,16 @@ private shouldRetry(error: any): boolean {
   // Retry on network errors, 5xx responses
   if (error.code === 'ECONNREFUSED') return true;
   if (error.statusCode >= 500) return true;
-  
+
   // Don't retry on validation errors, 4xx responses
   if (error.statusCode >= 400 && error.statusCode < 500) return false;
-  
+
   return false;
 }
 ```
 
 **Retry Configuration**:
+
 - Max retries: 3
 - Retry delay: Exponential backoff (1s, 2s, 4s)
 - Dead-letter queue: After max retries
@@ -296,46 +310,47 @@ Test event publishing and consumption:
 
 ```typescript
 // Test event publishing
-describe('JobServiceV2', () => {
-  it('should publish job.created event', async () => {
-    const mockEventPublisher = {
-      publish: vi.fn()
-    };
-    
-    const service = new JobServiceV2(mockRepository, mockEventPublisher);
-    await service.create('clerk_123', jobData);
-    
-    expect(mockEventPublisher.publish).toHaveBeenCalledWith(
-      'job.created',
-      expect.objectContaining({
-        jobId: expect.any(String),
-        companyId: '123'
-      })
-    );
-  });
+describe("JobServiceV2", () => {
+    it("should publish job.created event", async () => {
+        const mockEventPublisher = {
+            publish: vi.fn(),
+        };
+
+        const service = new JobServiceV2(mockRepository, mockEventPublisher);
+        await service.create("clerk_123", jobData);
+
+        expect(mockEventPublisher.publish).toHaveBeenCalledWith(
+            "job.created",
+            expect.objectContaining({
+                jobId: expect.any(String),
+                companyId: "123",
+            }),
+        );
+    });
 });
 
 // Test event consumption
-describe('ApplicationEventsConsumer', () => {
-  it('should send email on application.created', async () => {
-    const mockNotificationService = {
-      sendApplicationCreatedEmail: vi.fn()
-    };
-    
-    const consumer = new ApplicationEventsConsumer(
-      mockQueue,
-      mockNotificationService
-    );
-    
-    await consumer.handleApplicationCreated({
-      applicationId: '123',
-      candidateId: '456',
-      jobId: '789'
+describe("ApplicationEventsConsumer", () => {
+    it("should send email on application.created", async () => {
+        const mockNotificationService = {
+            sendApplicationCreatedEmail: vi.fn(),
+        };
+
+        const consumer = new ApplicationEventsConsumer(
+            mockQueue,
+            mockNotificationService,
+        );
+
+        await consumer.handleApplicationCreated({
+            applicationId: "123",
+            candidateId: "456",
+            jobId: "789",
+        });
+
+        expect(
+            mockNotificationService.sendApplicationCreatedEmail,
+        ).toHaveBeenCalled();
     });
-    
-    expect(mockNotificationService.sendApplicationCreatedEmail)
-      .toHaveBeenCalled();
-  });
 });
 ```
 
@@ -390,63 +405,72 @@ See [references/events-catalog.md](./references/events-catalog.md).
 
 ```typescript
 // packages/shared-job-queue/src/index.ts
-import amqp from 'amqplib';
+import amqp from "amqplib";
 
 export class JobQueueClient {
-  private connection?: amqp.Connection;
-  private channel?: amqp.Channel;
+    private connection?: amqp.Connection;
+    private channel?: amqp.Channel;
 
-  async connect(url: string): Promise<void> {
-    this.connection = await amqp.connect(url);
-    this.channel = await this.connection.createChannel();
-    
-    // Setup exchange
-    await this.channel.assertExchange('domain.events', 'topic', {
-      durable: true
-    });
-    
-    // Setup dead-letter exchange
-    await this.channel.assertExchange('domain.events.dlx', 'topic', {
-      durable: true
-    });
-  }
+    async connect(url: string): Promise<void> {
+        this.connection = await amqp.connect(url);
+        this.channel = await this.connection.createChannel();
 
-  async publish(exchange: string, message: any): Promise<void> {
-    await this.channel?.publish(
-      exchange,
-      '', // routing key
-      Buffer.from(JSON.stringify(message)),
-      { persistent: true }
-    );
-  }
+        // Setup exchange
+        await this.channel.assertExchange("domain.events", "topic", {
+            durable: true,
+        });
 
-  async subscribe(
-    exchange: string,
-    serviceName: string,
-    handler: (message: any) => Promise<void>
-  ): Promise<void> {
-    const queue = `${serviceName}.${exchange}`;
-    
-    await this.channel?.assertQueue(queue, {
-      durable: true,
-      deadLetterExchange: 'domain.events.dlx'
-    });
-    
-    await this.channel?.bindQueue(queue, exchange, '#');
-    
-    await this.channel?.consume(queue, async (msg) => {
-      if (!msg) return;
-      
-      try {
-        const message = JSON.parse(msg.content.toString());
-        await handler(message);
-        this.channel?.ack(msg);
-      } catch (error) {
-        console.error('Consumer error:', error);
-        this.channel?.nack(msg, false, true); // Requeue for retry
-      }
-    });
-  }
+        // Setup dead-letter exchange
+        await this.channel.assertExchange("domain.events.dlx", "topic", {
+            durable: true,
+        });
+    }
+
+    async publish(exchange: string, message: any): Promise<void> {
+        await this.channel?.publish(
+            exchange,
+            "", // routing key
+            Buffer.from(JSON.stringify(message)),
+            { persistent: true },
+        );
+    }
+
+    async subscribe(
+        exchange: string,
+        serviceName: string,
+        handler: (message: any) => Promise<void>,
+    ): Promise<void> {
+        const queue = `${serviceName}.${exchange}`;
+
+        await this.channel?.assertQueue(queue, {
+            durable: true,
+            deadLetterExchange: "domain.events.dlx",
+        });
+
+        await this.channel?.bindQueue(queue, exchange, "#");
+
+        await this.channel?.consume(queue, async (msg) => {
+            if (!msg) return;
+
+            try {
+                const message = JSON.parse(msg.content.toString());
+                await handler(message);
+                this.channel?.ack(msg);
+            } catch (error) {
+                console.error("Consumer error:", error);
+                // ⚠️ NEVER use nack(msg, false, true) here — that requeuees immediately and
+                // causes a tight retry loop (thousands of DB calls/sec on persistent errors).
+                // Always delay before requeueing to prevent storms.
+                setTimeout(() => {
+                    try {
+                        this.channel?.nack(msg, false, true);
+                    } catch {
+                        /* channel may have closed; RabbitMQ will requeue on reconnect */
+                    }
+                }, 5000);
+            }
+        });
+    }
 }
 ```
 
@@ -458,14 +482,14 @@ See [examples/queue-setup.ts](./examples/queue-setup.ts).
 
 ```typescript
 // WRONG - Tight coupling
-await fetch('http://notification-service/api/send-email', {
-  method: 'POST',
-  body: JSON.stringify({ email: '...' })
+await fetch("http://notification-service/api/send-email", {
+    method: "POST",
+    body: JSON.stringify({ email: "..." }),
 });
 
 // CORRECT - Event-driven
-await this.eventPublisher.publish('application.created', {
-  applicationId: '123'
+await this.eventPublisher.publish("application.created", {
+    applicationId: "123",
 });
 // Notification service consumes event and sends email
 ```
@@ -474,18 +498,18 @@ await this.eventPublisher.publish('application.created', {
 
 ```typescript
 // WRONG - Too much data
-await this.eventPublisher.publish('job.created', {
-  job: entireJobObject,
-  company: entireCompanyObject,
-  recruiter: entireRecruiterObject,
-  requirements: allRequirementsArray
+await this.eventPublisher.publish("job.created", {
+    job: entireJobObject,
+    company: entireCompanyObject,
+    recruiter: entireRecruiterObject,
+    requirements: allRequirementsArray,
 });
 
 // CORRECT - Minimal payload
-await this.eventPublisher.publish('job.created', {
-  jobId: job.id,
-  companyId: job.company_id,
-  createdBy: userContext.identityUserId
+await this.eventPublisher.publish("job.created", {
+    jobId: job.id,
+    companyId: job.company_id,
+    createdBy: userContext.identityUserId,
 });
 ```
 
@@ -527,17 +551,17 @@ await this.eventPublisher.publish('job.created', {
 ```typescript
 // Log event publishing
 console.log(`Published ${eventType}`, {
-  service: 'ats-service',
-  eventType,
-  payloadKeys: Object.keys(payload),
-  timestamp: new Date().toISOString()
+    service: "ats-service",
+    eventType,
+    payloadKeys: Object.keys(payload),
+    timestamp: new Date().toISOString(),
 });
 
 // Log event consumption
 console.log(`Processing ${eventType}`, {
-  service: 'notification-service',
-  eventType,
-  processingTime: Date.now() - startTime
+    service: "notification-service",
+    eventType,
+    processingTime: Date.now() - startTime,
 });
 ```
 

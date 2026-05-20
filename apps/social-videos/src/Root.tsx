@@ -5,6 +5,9 @@ import { Day1CompanyGhosting } from "./day1-company-ghosting/Composition";
 import { Day2CandidateGhostJobs } from "./day2-candidate-ghost-jobs/Composition";
 import { Day2RecruiterGhostJobs } from "./day2-recruiter-ghost-jobs/Composition";
 import { Day2CompanyGhostJobs } from "./day2-company-ghost-jobs/Composition";
+import { Day3CandidateAbandonment } from "./day3-candidate-abandonment/Composition";
+import { Day3RecruiterAbandonment } from "./day3-recruiter-abandonment/Composition";
+import { Day3CompanyAbandonment } from "./day3-company-abandonment/Composition";
 
 const DURATION = 1260;
 const FPS = 30;
@@ -23,6 +26,11 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="Day2CandidateGhostJobs" component={Day2CandidateGhostJobs} durationInFrames={DURATION} fps={FPS} width={WIDTH} height={HEIGHT} />
       <Composition id="Day2RecruiterGhostJobs" component={Day2RecruiterGhostJobs} durationInFrames={DURATION} fps={FPS} width={WIDTH} height={HEIGHT} />
       <Composition id="Day2CompanyGhostJobs" component={Day2CompanyGhostJobs} durationInFrames={DURATION} fps={FPS} width={WIDTH} height={HEIGHT} />
+
+      {/* Day 3 — Application Abandonment */}
+      <Composition id="Day3CandidateAbandonment" component={Day3CandidateAbandonment} durationInFrames={DURATION} fps={FPS} width={WIDTH} height={HEIGHT} />
+      <Composition id="Day3RecruiterAbandonment" component={Day3RecruiterAbandonment} durationInFrames={DURATION} fps={FPS} width={WIDTH} height={HEIGHT} />
+      <Composition id="Day3CompanyAbandonment" component={Day3CompanyAbandonment} durationInFrames={DURATION} fps={FPS} width={WIDTH} height={HEIGHT} />
     </>
   );
 };

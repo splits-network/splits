@@ -80,10 +80,10 @@ export const portalFooterNav = {
             },
         ],
         trustStats: [
-            { value: "2,847", label: "Recruiters" },
-            { value: "518", label: "Companies" },
-            { value: "12,340", label: "Candidates" },
-            { value: "$42M+", label: "In Placements" },
+            { value: "100%", label: "Transparent Fees" },
+            { value: "5 sides", label: "Every Deal, Connected" },
+            { value: "1 platform", label: "For the Entire Workflow" },
+            { value: "$0", label: "To Get Started" },
         ],
         legalLinks: [
             { label: "Privacy", href: "/privacy-policy" },
