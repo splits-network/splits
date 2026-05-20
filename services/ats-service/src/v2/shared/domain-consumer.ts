@@ -229,8 +229,34 @@ export class DomainEventConsumer {
             this.channel.ack(msg);
         } catch (error) {
             this.logger.error({ err: error }, 'Error handling domain event');
-            // Reject and requeue
-            this.channel?.nack(msg, false, true);
+            const retryCount = (msg.properties.headers?.['x-retry-count'] as number) ?? 0;
+            const maxRetries = 5;
+            if (retryCount >= maxRetries) {
+                this.logger.error(
+                    { err: error, retry_count: retryCount, event_content: msg.content.toString() },
+                    'Message permanently failed after max retries — discarding'
+                );
+                this.channel?.ack(msg);
+            } else {
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 30000); // 1s, 2s, 4s, 8s, 16s → max 30s
+                this.logger.warn(
+                    { err: error, retry_count: retryCount + 1, max_retries: maxRetries, delay_ms: delay },
+                    'Event processing failed, scheduling retry'
+                );
+                setTimeout(() => {
+                    if (!this.channel) return;
+                    this.channel.sendToQueue(this.queue, msg.content, {
+                        persistent: msg.properties.deliveryMode === 2,
+                        headers: {
+                            ...msg.properties.headers,
+                            'x-retry-count': retryCount + 1,
+                            'x-first-failed-at': msg.properties.headers?.['x-first-failed-at'] ?? new Date().toISOString(),
+                            'x-last-error': (error as Error).message?.substring(0, 200),
+                        }
+                    });
+                    this.channel.ack(msg);
+                }, delay);
+            }
         }
     }
 
