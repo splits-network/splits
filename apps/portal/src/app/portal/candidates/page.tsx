@@ -42,7 +42,7 @@ export default function CandidatesPage() {
     const [showAddModal, setShowAddModal] = useState(false);
 
     // Scope management (persisted to localStorage)
-    const [scope, setScopeState] = useState<CandidateScope>("mine");
+    const [scope, setScopeState] = useState<CandidateScope>("all");
     const [scopeLoaded, setScopeLoaded] = useState(false);
 
     useEffect(() => {
@@ -119,7 +119,7 @@ export default function CandidatesPage() {
         updateItem,
     } = useStandardList<Candidate, CandidateFilters>({
         endpoint: "/candidates/views/enriched",
-        defaultFilters: { scope: scopeLoaded ? scope : "mine" },
+        defaultFilters: { scope: scopeLoaded ? scope : "all" },
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",
         defaultLimit: 25,
