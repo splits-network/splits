@@ -128,7 +128,7 @@ export function ControlsBar({
             statusLeft={
                 <>
                     <BaselScopeToggle
-                        value={filters.job_owner_filter || "assigned"}
+                        value={filters.job_owner_filter || "all"}
                         onChange={(v) => onFilterChange("job_owner_filter", v as "all" | "assigned" | "saved")}
                         options={[
                             { value: "assigned", label: "Mine" },
